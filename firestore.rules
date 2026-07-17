@@ -1,0 +1,24 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /tiles/{tileId} {
+      allow read: if true;
+      allow write: if false;
+    }
+    match /maps/{mapId} {
+      allow read: if true;
+      allow create: if request.resource.data.keys().hasAll([
+        'id', 'name', 'routeCoords', 'routePoints', 'pois', 'createdAt'
+      ]);
+      allow update: if true;
+      allow delete: if false;
+    }
+    match /meta/{doc} {
+      allow read: if true;
+      allow write: if false;
+    }
+    match /importProgress/{doc} {
+      allow read, write: if false;
+    }
+  }
+}

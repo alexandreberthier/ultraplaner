@@ -1,0 +1,41 @@
+{
+  "name": "onroute-firebase",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc -b && vite build",
+    "preview": "vite preview",
+    "import-dach-pois": "tsx scripts/import-dach-pois.ts",
+    "import-dach-pois-pbf": "tsx scripts/import-dach-pois-pbf.ts",
+    "import-status": "tsx scripts/import-status.ts",
+    "verify-austria": "tsx scripts/verify-austria.ts",
+    "setup-credentials": "tsx scripts/setup-credentials.ts",
+    "deploy": "npm run build && firebase deploy --only hosting,firestore:rules --project ultracycling-8bd56"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.110.7",
+    "@tmcw/togeojson": "^7.1.2",
+    "@xmldom/xmldom": "^0.9.10",
+    "firebase": "^12.16.0",
+    "maplibre-gl": "^5.24.0",
+    "ngeohash": "^0.6.3",
+    "pinia": "^3.0.4",
+    "vue": "^3.5.39",
+    "vue-router": "^5.1.0"
+  },
+  "devDependencies": {
+    "@types/ngeohash": "^0.6.8",
+    "@types/node": "^24.13.2",
+    "@vitejs/plugin-vue": "^6.0.7",
+    "@vue/tsconfig": "^0.9.1",
+    "firebase-admin": "^14.1.0",
+    "firebase-tools": "^15.23.0",
+    "osm-pbf-parser": "^2.3.0",
+    "tsx": "^4.23.1",
+    "typescript": "~6.0.2",
+    "vite": "^8.1.1",
+    "vue-tsc": "^3.3.5"
+  }
+}
