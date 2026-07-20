@@ -1,4 +1,12 @@
 import type { PoiCategory } from '../../shared/types'
+import { IMPORT_REGIONS } from '../../shared/regions'
+
+export {
+  IMPORT_REGIONS,
+  IMPORT_REGION_CODES as SUPPORTED_REGION_CODES,
+  SUPPORTED_REGIONS_LABEL,
+  GEOCODE_BBOX,
+} from '../../shared/regions'
 
 export interface PoiCategoryDef {
   id: PoiCategory
@@ -11,15 +19,10 @@ export const POI_CATEGORY_DEFS: PoiCategoryDef[] = [
   { id: 'fuel', label: 'Tankstellen', icon: '⛽', defaultOn: true },
   { id: 'food', label: 'Essen', icon: '🛒', defaultOn: true },
   { id: 'water', label: 'Wasser', icon: '💧', defaultOn: true },
-  { id: 'kiosk', label: 'Kiosk', icon: '🏪', defaultOn: false },
-  { id: 'vending', label: 'Automat', icon: '🥤', defaultOn: false },
-  { id: 'toilets', label: 'Toilette', icon: '🚻', defaultOn: false },
   { id: 'restaurant', label: 'Restaurant', icon: '🍽️', defaultOn: false },
-  { id: 'alpine_hut', label: 'Berghütte', icon: '🏔️', defaultOn: false },
   { id: 'bike', label: 'Rad', icon: '🔧', defaultOn: false },
   { id: 'hotel', label: 'Hotel', icon: '🏨', defaultOn: false },
   { id: 'campsite', label: 'Camping', icon: '⛺', defaultOn: false },
-  { id: 'shelter', label: 'Unterstand', icon: '🛖', defaultOn: false },
 ]
 
 export const DEFAULT_POI_CATEGORIES = POI_CATEGORY_DEFS.filter((c) => c.defaultOn).map(
@@ -32,11 +35,24 @@ export const MAX_POI_RADIUS_M = 2000
 export const MAX_GPX_SIZE_BYTES = 25 * 1024 * 1024
 export const MAX_ROUTE_KM = 2000
 
+/** Union der importierten Geofabrik-Regionen. */
+export const SUPPORTED_REGION_BBOXES = IMPORT_REGIONS.map((r) => ({
+  code: r.code,
+  south: r.south,
+  west: r.west,
+  north: r.north,
+  east: r.east,
+}))
+
+export const SUPPORTED_REGION_MIN_POINTS_RATIO = 0.8
+
+/** @deprecated use SUPPORTED_REGION_BBOXES */
 export const DACH_BBOX = {
-  south: 45.8,
-  north: 55.2,
-  west: 5.8,
-  east: 17.2,
+  south: 35.9,
+  north: 57.8,
+  west: -9.5,
+  east: 22.9,
 }
 
-export const DACH_MIN_POINTS_RATIO = 0.8
+/** @deprecated use SUPPORTED_REGION_MIN_POINTS_RATIO */
+export const DACH_MIN_POINTS_RATIO = SUPPORTED_REGION_MIN_POINTS_RATIO

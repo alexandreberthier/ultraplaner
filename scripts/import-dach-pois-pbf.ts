@@ -1,9 +1,9 @@
 /**
- * DACH POI-Import aus Geofabrik-PBF → Supabase
+ * POI-Import aus Geofabrik-PBF → Supabase
  *
  * Usage:
  *   npm run import-dach-pois-pbf
- *   npm run import-dach-pois-pbf -- --region AT
+ *   npm run import-dach-pois-pbf -- --region LU
  *   npm run import-dach-pois-pbf -- --skip-download
  */
 import { createReadStream, createWriteStream, existsSync, mkdirSync, statSync } from 'node:fs'
@@ -12,6 +12,7 @@ import { join, resolve } from 'node:path'
 import { pipeline } from 'node:stream/promises'
 import { Readable, Transform } from 'node:stream'
 import type { Poi } from '../shared/types.ts'
+import { IMPORT_REGION_CODES, IMPORT_REGIONS } from '../shared/regions.ts'
 import { OSM_FILTERS, elementToPoi, type OsmElement } from '../src/services/osmFilters.ts'
 import { dachImportTiles } from './dachTiles.ts'
 import { initSupabaseAdmin } from './supabaseAdmin.ts'
@@ -28,25 +29,14 @@ const require = createRequire(import.meta.url)
 const parseOSM = require('osm-pbf-parser') as () => NodeJS.ReadWriteStream
 
 const DATA_DIR = resolve('data/geofabrik')
+const GEOFABRIK_BASE = 'https://download.geofabrik.de'
 
-const EXTRACTS: Record<string, { url: string; file: string }> = {
-  AT: {
-    url: 'https://download.geofabrik.de/europe/austria-latest.osm.pbf',
-    file: 'austria-latest.osm.pbf',
-  },
-  CH: {
-    url: 'https://download.geofabrik.de/europe/switzerland-latest.osm.pbf',
-    file: 'switzerland-latest.osm.pbf',
-  },
-  LI: {
-    url: 'https://download.geofabrik.de/europe/liechtenstein-latest.osm.pbf',
-    file: 'liechtenstein-latest.osm.pbf',
-  },
-  DE: {
-    url: 'https://download.geofabrik.de/europe/germany-latest.osm.pbf',
-    file: 'germany-latest.osm.pbf',
-  },
-}
+const EXTRACTS = Object.fromEntries(
+  IMPORT_REGIONS.map((r) => [
+    r.code,
+    { url: `${GEOFABRIK_BASE}/${r.geofabrikPath}`, file: r.file },
+  ])
+) as Record<string, { url: string; file: string }>
 
 function parseArgs() {
   const args = process.argv.slice(2)
@@ -80,7 +70,7 @@ async function downloadExtract(region: string, skipDownload: boolean): Promise<s
 
   console.log(`[pbf] ${region}: Download ${extract.url}`)
   const res = await fetch(extract.url, {
-    headers: { 'User-Agent': 'OnRouteFirebase/1.0 (Geofabrik PBF → Supabase)' },
+    headers: { 'User-Agent': 'OnRouteFirebase/1.0 (Geofabrik PBF to Supabase)' },
     redirect: 'follow',
   })
   if (!res.ok || !res.body) {
@@ -172,9 +162,9 @@ async function extractPoisFromPbf(filePath: string): Promise<Poi[]> {
 async function main() {
   const { region, skipDownload } = parseArgs()
   const sb = initSupabaseAdmin()
-  const regions = region ? [region] : ['AT', 'CH', 'LI', 'DE']
+  const regions = region ? [region] : [...IMPORT_REGION_CODES]
 
-  console.log('[pbf] OnRoute DACH ← Geofabrik PBF → Supabase')
+  console.log('[pbf] OnRoute ← Geofabrik PBF → Supabase')
   console.log(`[pbf] Regionen: ${regions.join(', ')}`)
   console.log('')
 
@@ -215,12 +205,12 @@ async function main() {
     .select('*', { count: 'exact', head: true })
 
   await setImportMeta(sb, {
-    version: 3,
+    version: 4,
     source: 'geofabrik-pbf-supabase',
     importedAt: new Date().toISOString(),
     tileCount,
     poiCount: sessionPois,
-    regions: ['AT', 'DE', 'CH', 'LI'],
+    regions: [...IMPORT_REGION_CODES],
     importRegionsDone: importedRegions,
     importRegionsSkipped: skippedRegions,
     importTilesDoneTotal: progressCount ?? 0,

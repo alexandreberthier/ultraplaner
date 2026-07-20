@@ -11,7 +11,7 @@ if (progressErr) throw new Error(progressErr.message)
 const doneIds = new Set((progressRows ?? []).map((d) => d.id as string))
 const done = allTiles.filter((t) => doneIds.has(t.id))
 const pending = allTiles.filter((t) => !doneIds.has(t.id))
-const pbfRegions = ['AT', 'CH', 'LI', 'DE'].filter((r) => doneIds.has(`pbf_${r}`))
+const pbfRegions = ['AT', 'CH', 'LI', 'DE', 'IT', 'SK', 'SI', 'CZ', 'HU'].filter((r) => doneIds.has(`pbf_${r}`))
 
 const tileCount = await countTiles(sb)
 const { data: meta } = await sb.from('import_meta').select('payload').eq('id', 'poiImport').maybeSingle()

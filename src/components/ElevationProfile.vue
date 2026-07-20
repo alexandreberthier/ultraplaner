@@ -50,7 +50,7 @@ const bounds = computed(() => {
   const rawMin = Math.min(...elevations)
   const rawMax = Math.max(...elevations)
   const range = Math.max(rawMax - rawMin, 20)
-  const pad = range * 0.12
+  const pad = range * 0.06
 
   return {
     minElev: Math.floor((rawMin - pad) / 10) * 10,
@@ -97,17 +97,21 @@ const linePath = computed(() => {
 
 const yTicks = computed(() => {
   const { minElev, maxElev } = bounds.value
-  const range = maxElev - minElev
-  let step = 50
+  const range = Math.max(maxElev - minElev, 1)
+
+  // Wenige lesbare Linien (~4–5), damit Labels nicht überlappen
+  let step = 100
   if (range <= 80) step = 20
-  else if (range <= 200) step = 25
-  else if (range <= 400) step = 50
-  else step = 100
+  else if (range <= 150) step = 25
+  else if (range <= 300) step = 50
+  else if (range <= 600) step = 100
+  else if (range <= 1200) step = 200
+  else step = 250
 
   const ticks: number[] = []
   const start = Math.ceil(minElev / step) * step
-  for (let v = start; v <= maxElev; v += step) ticks.push(v)
-  if (!ticks.length) ticks.push(minElev, maxElev)
+  for (let v = start; v <= maxElev + 0.001; v += step) ticks.push(Math.round(v))
+  if (!ticks.length) ticks.push(Math.round(minElev), Math.round(maxElev))
   return ticks
 })
 
@@ -135,9 +139,11 @@ const hoverLabel = computed(() => {
   if (!hoverPoint.value) return null
   const km = hoverPoint.value.distanceFromStart ?? hoverKm.value ?? 0
   const elev = hoverPoint.value.elevation
+  const eta = store.etaAtRouteKm(km)
   return {
     km: km.toFixed(1),
     elev: elev != null ? `${Math.round(elev)} m` : '–',
+    eta: eta.clockLabel ? `ETA ${eta.clockLabel}` : eta.durationLabel,
   }
 })
 
@@ -224,7 +230,7 @@ onUnmounted(() => {
             <span class="stat-value accent">{{ Math.round(stats.max.elevation) }} m</span>
           </div>
           <div v-if="hoverLabel" class="hover-chip">
-            km {{ hoverLabel.km }} · {{ hoverLabel.elev }}
+            km {{ hoverLabel.km }} · {{ hoverLabel.elev }} · {{ hoverLabel.eta }}
           </div>
         </div>
       </header>
@@ -347,7 +353,7 @@ onUnmounted(() => {
       </div>
     </template>
 
-    <p v-else class="no-data">Keine Höhendaten in der GPX-Datei</p>
+    <p v-else class="no-data">Keine Höhendaten für diese Route</p>
   </div>
 </template>
 
@@ -440,7 +446,7 @@ onUnmounted(() => {
 }
 
 .plot-area {
-  height: clamp(150px, 22vh, 220px);
+  height: clamp(180px, 26vh, 280px);
   padding: 0.35rem 0.75rem 0.5rem;
   cursor: crosshair;
   touch-action: none;
@@ -530,7 +536,7 @@ onUnmounted(() => {
   }
 
   .plot-area {
-    height: clamp(130px, 20vh, 180px);
+    height: clamp(160px, 24vh, 220px);
     padding-inline: 0.5rem;
   }
 }

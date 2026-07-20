@@ -5,14 +5,9 @@ const MAP_SPACING_KM: Partial<Record<PoiCategory, number>> = {
   food: 2,
   water: 2,
   restaurant: 5,
-  kiosk: 5,
-  vending: 5,
-  toilets: 6,
   hotel: 10,
-  alpine_hut: 15,
   bike: 10,
   campsite: 15,
-  shelter: 15,
 }
 
 const DEFAULT_SPACING_KM = 1.5

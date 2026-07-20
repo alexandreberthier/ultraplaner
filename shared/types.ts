@@ -3,13 +3,8 @@ export type PoiCategory =
   | 'food'
   | 'restaurant'
   | 'water'
-  | 'kiosk'
-  | 'vending'
-  | 'toilets'
   | 'hotel'
-  | 'alpine_hut'
   | 'campsite'
-  | 'shelter'
   | 'bike'
 
 export interface LatLng {

@@ -1,10 +1,3 @@
-import {
-  doc,
-  getDoc,
-  setDoc,
-  Timestamp,
-  type Firestore,
-} from 'firebase/firestore'
 import type { Poi, PoiCategory, SavedMapRecord, RoutePoint } from '../../shared/types'
 import { getSupabase } from '../supabase'
 import { tileIdsAlongRoute } from './poiQuery'
@@ -23,6 +16,7 @@ export interface PoiFetchResult {
 }
 
 const FETCH_CHUNK = 100
+const MAP_TTL_MS = 180 * 24 * 60 * 60 * 1000
 
 export async function fetchTilesByIds(tileIds: string[]): Promise<Poi[]> {
   const sb = getSupabase()
@@ -89,27 +83,67 @@ function generateMapId(): string {
   return id
 }
 
+interface MapRow {
+  id: string
+  name: string
+  created_at: string
+  expires_at: string
+  payload: {
+    routeCoords: [number, number][]
+    routePoints: RoutePoint[]
+    poiRadiusM: number
+    categories: PoiCategory[]
+    pois: Poi[]
+    favorites: string[]
+  }
+}
+
 export async function saveMap(
-  db: Firestore,
   data: Omit<SavedMapRecord, 'id' | 'createdAt' | 'expiresAt'>
 ): Promise<string> {
+  const sb = getSupabase()
   const id = generateMapId()
-  const now = Timestamp.now()
-  const expiresAt = Timestamp.fromMillis(now.toMillis() + 180 * 24 * 60 * 60 * 1000)
+  const now = new Date()
+  const expiresAt = new Date(now.getTime() + MAP_TTL_MS)
 
-  const record: SavedMapRecord = {
-    ...data,
+  const { error } = await sb.from('maps').insert({
     id,
-    createdAt: now,
-    expiresAt,
-  }
+    name: data.name,
+    created_at: now.toISOString(),
+    expires_at: expiresAt.toISOString(),
+    payload: {
+      routeCoords: data.routeCoords,
+      routePoints: data.routePoints,
+      poiRadiusM: data.poiRadiusM,
+      categories: data.categories,
+      pois: data.pois,
+      favorites: data.favorites,
+    },
+  })
 
-  await setDoc(doc(db, 'maps', id), record)
+  if (error) throw new Error(`Karte speichern: ${error.message}`)
   return id
 }
 
-export async function loadMap(db: Firestore, mapId: string): Promise<SavedMapRecord | null> {
-  const snap = await getDoc(doc(db, 'maps', mapId))
-  if (!snap.exists()) return null
-  return snap.data() as SavedMapRecord
+export async function loadMap(mapId: string): Promise<SavedMapRecord | null> {
+  const sb = getSupabase()
+  const { data, error } = await sb.from('maps').select('*').eq('id', mapId).maybeSingle()
+  if (error) throw new Error(`Karte laden: ${error.message}`)
+  if (!data) return null
+
+  const row = data as MapRow
+  if (new Date(row.expires_at).getTime() < Date.now()) return null
+
+  return {
+    id: row.id,
+    name: row.name,
+    createdAt: row.created_at,
+    expiresAt: row.expires_at,
+    routeCoords: row.payload.routeCoords,
+    routePoints: row.payload.routePoints,
+    poiRadiusM: row.payload.poiRadiusM,
+    categories: row.payload.categories,
+    pois: row.payload.pois,
+    favorites: row.payload.favorites ?? [],
+  }
 }

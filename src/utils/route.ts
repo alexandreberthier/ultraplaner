@@ -1,5 +1,6 @@
 import type { RoutePoint } from '../../shared/types'
 import { haversineM } from '../services/geo'
+import { gradeToColor } from '../config/mapStyle'
 
 export function buildRoutePoints(
   coordinates: [number, number][],
@@ -68,8 +69,11 @@ export function totalRouteKm(points: RoutePoint[]): number {
 
 export function buildGradeSegments(
   points: RoutePoint[]
-): { coordinates: [number, number][]; grade: number }[] {
-  const segments: { coordinates: [number, number][]; grade: number }[] = []
+): { coordinates: [number, number][]; grade: number; color: string }[] {
+  if (!hasElevationData(points)) return []
+
+  type Seg = { coordinates: [number, number][]; grade: number; color: string }
+  const raw: Seg[] = []
 
   for (let i = 1; i < points.length; i++) {
     const prev = points[i - 1]!
@@ -80,23 +84,137 @@ export function buildGradeSegments(
     if (distM < 1) continue
 
     const grade = ((curr.elevation - prev.elevation) / distM) * 100
-    segments.push({
+    raw.push({
       coordinates: [
         [prev.lng, prev.lat],
         [curr.lng, curr.lat],
       ],
       grade,
+      color: gradeToColor(grade),
     })
   }
 
-  return segments
+  // Merge consecutive segments with same color bucket → fewer map features
+  const merged: Seg[] = []
+  for (const seg of raw) {
+    const last = merged.at(-1)
+    if (last && last.color === seg.color) {
+      last.coordinates.push(seg.coordinates[1]!)
+      // keep max |grade| for tooltip-ish accuracy
+      if (Math.abs(seg.grade) > Math.abs(last.grade)) last.grade = seg.grade
+    } else {
+      merged.push({
+        coordinates: [...seg.coordinates],
+        grade: seg.grade,
+        color: seg.color,
+      })
+    }
+  }
+
+  return merged
 }
 
 export function gradeColor(grade: number): string {
-  if (grade < 3) return '#22c55e'
-  if (grade < 6) return '#eab308'
-  if (grade < 10) return '#f97316'
-  return '#ef4444'
+  return gradeToColor(grade)
+}
+
+export interface Climb {
+  startKm: number
+  endKm: number
+  gainM: number
+  lengthKm: number
+  avgGrade: number
+  /** Summit position */
+  lat: number
+  lng: number
+  elevM: number
+}
+
+/**
+ * Detect meaningful climbs from elevation profile.
+ * Uses hysteresis so small dips don't split one long climb.
+ */
+export function detectClimbs(points: RoutePoint[]): Climb[] {
+  if (!hasElevationData(points) || points.length < 3) return []
+
+  const MIN_GAIN_M = 70
+  const MIN_LENGTH_KM = 0.6
+  const END_DESCENT_M = 30
+  const MAX_CLIMBS = 14
+  const MIN_SPACING_KM = 2.5
+
+  type Active = {
+    startIdx: number
+    peakIdx: number
+    peakElev: number
+  }
+
+  const climbs: Climb[] = []
+  let active: Active | null = null
+
+  for (let i = 1; i < points.length; i++) {
+    const prev = points[i - 1]!
+    const curr = points[i]!
+    if (prev.elevation == null || curr.elevation == null) continue
+
+    const elev = curr.elevation
+    const dElev = elev - prev.elevation
+
+    if (!active) {
+      if (dElev > 0.5) {
+        active = { startIdx: i - 1, peakIdx: i, peakElev: elev }
+      }
+      continue
+    }
+
+    if (elev >= active.peakElev) {
+      active.peakIdx = i
+      active.peakElev = elev
+    }
+
+    const dropFromPeak = active.peakElev - elev
+    const atEnd = i === points.length - 1
+
+    if (dropFromPeak >= END_DESCENT_M || atEnd) {
+      const start = points[active.startIdx]!
+      const peak = points[active.peakIdx]!
+      if (start.elevation != null && peak.elevation != null) {
+        const gainM = peak.elevation - start.elevation
+        const lengthKm =
+          (peak.distanceFromStart ?? 0) - (start.distanceFromStart ?? 0)
+        if (gainM >= MIN_GAIN_M && lengthKm >= MIN_LENGTH_KM) {
+          climbs.push({
+            startKm: start.distanceFromStart ?? 0,
+            endKm: peak.distanceFromStart ?? 0,
+            gainM,
+            lengthKm,
+            avgGrade: lengthKm > 0 ? (gainM / (lengthKm * 1000)) * 100 : 0,
+            lat: peak.lat,
+            lng: peak.lng,
+            elevM: peak.elevation,
+          })
+        }
+      }
+      active = null
+      // If still climbing after a dip, new climb may start on next rising segment
+      if (!atEnd && dElev > 0.5) {
+        active = { startIdx: i - 1, peakIdx: i, peakElev: elev }
+      }
+    }
+  }
+
+  // Prefer biggest climbs; avoid markers stacked too close
+  climbs.sort((a, b) => b.gainM - a.gainM)
+  const spaced: Climb[] = []
+  for (const c of climbs) {
+    if (spaced.length >= MAX_CLIMBS) break
+    const tooClose = spaced.some(
+      (s) => Math.abs(s.endKm - c.endKm) < MIN_SPACING_KM
+    )
+    if (!tooClose) spaced.push(c)
+  }
+
+  return spaced.sort((a, b) => a.startKm - b.startKm)
 }
 
 export function buildElevationSamples(

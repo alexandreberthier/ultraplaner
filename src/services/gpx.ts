@@ -2,10 +2,11 @@ import { gpx } from '@tmcw/togeojson'
 import { DOMParser } from '@xmldom/xmldom'
 import type { RoutePoint } from '../../shared/types'
 import {
-  DACH_BBOX,
-  DACH_MIN_POINTS_RATIO,
   MAX_GPX_SIZE_BYTES,
   MAX_ROUTE_KM,
+  SUPPORTED_REGION_BBOXES,
+  SUPPORTED_REGION_MIN_POINTS_RATIO,
+  SUPPORTED_REGIONS_LABEL,
 } from '../config/poiCategories'
 import { isInBbox } from './geo'
 import { buildRoutePoints, totalRouteKm } from '../utils/route'
@@ -62,24 +63,35 @@ export function validateGpxFile(file: File, text: string): void {
   }
 }
 
-export function validateDachRoute(coordinates: [number, number][]): void {
-  const inBbox = coordinates.filter(([lng, lat]) => isInBbox(lat, lng, DACH_BBOX))
-  const ratio = inBbox.length / coordinates.length
+function isInSupportedRegion(lat: number, lng: number): boolean {
+  return SUPPORTED_REGION_BBOXES.some((bbox) => isInBbox(lat, lng, bbox))
+}
 
-  if (ratio < DACH_MIN_POINTS_RATIO) {
-    throw new Error('Nur DACH-Routen in v1 unterstützt (Österreich, Deutschland, Schweiz, Liechtenstein)')
+export function validateSupportedRoute(coordinates: [number, number][]): void {
+  const inRegion = coordinates.filter(([lng, lat]) => isInSupportedRegion(lat, lng))
+  const ratio = inRegion.length / coordinates.length
+
+  if (ratio < SUPPORTED_REGION_MIN_POINTS_RATIO) {
+    throw new Error(
+      `Route liegt außerhalb der unterstützten Regionen (${SUPPORTED_REGIONS_LABEL})`
+    )
   }
 }
+
+/** @deprecated use validateSupportedRoute */
+export const validateDachRoute = validateSupportedRoute
 
 export function routePointsFromGpx(text: string): {
   points: RoutePoint[]
   coordinates: [number, number][]
+  elevations: number[]
   name: string
 } {
   const { coordinates, elevations, name } = parseGpxFile(text)
   return {
     points: buildRoutePoints(coordinates, elevations),
     coordinates,
+    elevations,
     name,
   }
 }

@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://ultracycling-8bd56.web.app/sitemap.xml

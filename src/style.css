@@ -21,6 +21,7 @@ body,
 #app {
   margin: 0;
   min-height: 100%;
+  height: 100%;
   font-family:
     'Segoe UI',
     system-ui,
@@ -43,4 +44,21 @@ a {
 
 .maplibregl-ctrl-attrib {
   font-size: 10px !important;
+}
+
+/* Map pan cursor — grab by default, pointer only on POI hover */
+.maplibregl-canvas {
+  cursor: grab;
+}
+
+.maplibregl-canvas:active {
+  cursor: grabbing !important;
+}
+
+.maplibregl-canvas.poi-hover:not(:active) {
+  cursor: pointer;
+}
+
+.maplibregl-canvas-container {
+  touch-action: none;
 }
