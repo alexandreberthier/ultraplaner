@@ -185,10 +185,26 @@ export async function isRegionDone(sb: SupabaseClient, region: string): Promise<
   return !!data
 }
 
-export async function countTiles(sb: SupabaseClient): Promise<number> {
-  const { count, error } = await sb.from('tiles').select('*', { count: 'exact', head: true })
-  if (error) throw new Error(`tiles count: ${error.message}`)
-  return count ?? 0
+/** Clears the region-done marker so a PBF import can re-run (e.g. after schema/field changes). */
+export async function clearRegionDone(sb: SupabaseClient, region: string): Promise<void> {
+  const { error } = await sb.from('import_progress').delete().eq('id', `pbf_${region}`)
+  if (error) throw new Error(`import_progress delete: ${error.message}`)
+}
+
+/**
+ * Tile count for import status/meta. Exact counts on large tables often
+ * time out or fail on PostgREST — prefer estimated, never abort the import.
+ */
+export async function countTiles(sb: SupabaseClient): Promise<number | null> {
+  const estimated = await sb.from('tiles').select('geohash', { count: 'estimated', head: true })
+  if (!estimated.error && estimated.count != null) return estimated.count
+
+  const exact = await sb.from('tiles').select('geohash', { count: 'exact', head: true })
+  if (!exact.error && exact.count != null) return exact.count
+
+  const msg = estimated.error?.message || exact.error?.message || 'unknown'
+  console.warn(`[supabase] tiles count übersprungen (${msg})`)
+  return null
 }
 
 export async function setImportMeta(

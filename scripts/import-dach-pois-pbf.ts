@@ -5,6 +5,7 @@
  *   npm run import-dach-pois-pbf
  *   npm run import-dach-pois-pbf -- --region LU
  *   npm run import-dach-pois-pbf -- --skip-download
+ *   npm run import-dach-pois-pbf -- --force --skip-download
  */
 import { createReadStream, createWriteStream, existsSync, mkdirSync, statSync } from 'node:fs'
 import { createRequire } from 'node:module'
@@ -18,6 +19,7 @@ import { dachImportTiles } from './dachTiles.ts'
 import { initSupabaseAdmin } from './supabaseAdmin.ts'
 import {
   countTiles,
+  clearRegionDone,
   dedupePois,
   isRegionDone,
   markRegionDone,
@@ -42,13 +44,15 @@ function parseArgs() {
   const args = process.argv.slice(2)
   let region: string | undefined
   let skipDownload = false
+  let force = false
 
   for (let i = 0; i < args.length; i++) {
     if (args[i] === '--region' && args[i + 1]) region = args[++i]!.toUpperCase()
     if (args[i] === '--skip-download') skipDownload = true
+    if (args[i] === '--force') force = true
   }
 
-  return { region, skipDownload }
+  return { region, skipDownload, force }
 }
 
 async function downloadExtract(region: string, skipDownload: boolean): Promise<string> {
@@ -103,18 +107,29 @@ async function downloadExtract(region: string, skipDownload: boolean): Promise<s
   return dest
 }
 
+const WAY_OSM_FILTERS = OSM_FILTERS.filter((f) => f.includeWays)
+
 function matchFilterTags(tags: Record<string, string> | undefined): boolean {
   if (!tags) return false
   return OSM_FILTERS.some((f) => tags[f.key] === f.value)
 }
 
-async function extractPoisFromPbf(filePath: string): Promise<Poi[]> {
-  const pois: Poi[] = []
+function matchWayFilterTags(tags: Record<string, string> | undefined): boolean {
+  if (!tags || WAY_OSM_FILTERS.length === 0) return false
+  return WAY_OSM_FILTERS.some((f) => tags[f.key] === f.value)
+}
+
+type PendingWay = { id: number; tags: Record<string, string>; refs: number[] }
+
+function forEachPbfItem(
+  filePath: string,
+  onItem: (item: OsmElement) => void,
+  onProgress?: (nodes: number) => void
+): Promise<void> {
   let nodes = 0
-  let matched = 0
   let lastLog = Date.now()
 
-  await new Promise<void>((resolvePromise, reject) => {
+  return new Promise<void>((resolvePromise, reject) => {
     const osm = parseOSM()
 
     createReadStream(filePath)
@@ -124,28 +139,15 @@ async function extractPoisFromPbf(filePath: string): Promise<Poi[]> {
           objectMode: true,
           transform(items: OsmElement[], _enc, cb) {
             for (const item of items) {
-              if (item.type !== 'node') continue
-              nodes++
-              if (!matchFilterTags(item.tags)) continue
-              const poi = elementToPoi(item)
-              if (!poi) continue
-              matched++
-              pois.push(poi)
+              if (item.type === 'node') {
+                nodes++
+                if (onProgress && Date.now() - lastLog > 3_000) {
+                  lastLog = Date.now()
+                  onProgress(nodes)
+                }
+              }
+              onItem(item)
             }
-
-            const now = Date.now()
-            if (now - lastLog > 3_000) {
-              lastLog = now
-              process.stdout.write(
-                `\r[pbf] Parse… ${nodes.toLocaleString('de-DE')} Nodes, ${matched.toLocaleString('de-DE')} POIs`
-              )
-            }
-            cb()
-          },
-          flush(cb) {
-            process.stdout.write(
-              `\r[pbf] Parse fertig: ${nodes.toLocaleString('de-DE')} Nodes, ${matched.toLocaleString('de-DE')} POIs\n`
-            )
             cb()
           },
         })
@@ -155,22 +157,110 @@ async function extractPoisFromPbf(filePath: string): Promise<Poi[]> {
 
     osm.on('error', reject)
   })
+}
 
+/**
+ * Nodes for all OSM_FILTERS + centroids for includeWays filters (e.g. cemeteries).
+ * Ways need a second pass so only referenced node coords stay in memory.
+ */
+async function extractPoisFromPbf(filePath: string): Promise<Poi[]> {
+  const pois: Poi[] = []
+  const pendingWays: PendingWay[] = []
+  const neededNodeIds = new Set<number>()
+  let matchedNodes = 0
+
+  await forEachPbfItem(
+    filePath,
+    (item) => {
+      if (item.type === 'node') {
+        if (!matchFilterTags(item.tags)) return
+        const poi = elementToPoi(item)
+        if (!poi) return
+        matchedNodes++
+        pois.push(poi)
+        return
+      }
+
+      if (item.type !== 'way' || !matchWayFilterTags(item.tags)) return
+      const refs = item.refs ?? []
+      if (refs.length === 0) return
+      pendingWays.push({ id: item.id, tags: item.tags!, refs })
+      for (const ref of refs) neededNodeIds.add(ref)
+    },
+    (nodes) => {
+      process.stdout.write(
+        `\r[pbf] Pass 1… ${nodes.toLocaleString('de-DE')} Nodes, ${matchedNodes.toLocaleString('de-DE')} POIs, ${pendingWays.length.toLocaleString('de-DE')} Ways`
+      )
+    }
+  )
+
+  process.stdout.write(
+    `\r[pbf] Pass 1 fertig: ${matchedNodes.toLocaleString('de-DE')} Node-POIs, ${pendingWays.length.toLocaleString('de-DE')} Ways\n`
+  )
+
+  if (pendingWays.length === 0) return dedupePois(pois)
+
+  const coords = new Map<number, { lat: number; lon: number }>()
+  await forEachPbfItem(
+    filePath,
+    (item) => {
+      if (item.type !== 'node') return
+      if (!neededNodeIds.has(item.id)) return
+      if (item.lat == null || item.lon == null) return
+      coords.set(item.id, { lat: item.lat, lon: item.lon })
+    },
+    (nodes) => {
+      process.stdout.write(
+        `\r[pbf] Pass 2… ${nodes.toLocaleString('de-DE')} Nodes, ${coords.size.toLocaleString('de-DE')}/${neededNodeIds.size.toLocaleString('de-DE')} Way-Refs`
+      )
+    }
+  )
+  process.stdout.write(
+    `\r[pbf] Pass 2 fertig: ${coords.size.toLocaleString('de-DE')} Way-Node-Koordinaten\n`
+  )
+
+  let matchedWays = 0
+  for (const way of pendingWays) {
+    let latSum = 0
+    let lonSum = 0
+    let n = 0
+    for (const ref of way.refs) {
+      const c = coords.get(ref)
+      if (!c) continue
+      latSum += c.lat
+      lonSum += c.lon
+      n++
+    }
+    if (n === 0) continue
+    const poi = elementToPoi({
+      type: 'way',
+      id: way.id,
+      tags: way.tags,
+      center: { lat: latSum / n, lon: lonSum / n },
+    })
+    if (!poi) continue
+    matchedWays++
+    pois.push(poi)
+  }
+
+  console.log(`[pbf] Way-POIs (Centroids): ${matchedWays.toLocaleString('de-DE')}`)
   return dedupePois(pois)
 }
 
 async function main() {
-  const { region, skipDownload } = parseArgs()
+  const { region, skipDownload, force } = parseArgs()
   const sb = initSupabaseAdmin()
   const regions = region ? [region] : [...IMPORT_REGION_CODES]
 
   console.log('[pbf] OnRoute ← Geofabrik PBF → Supabase')
   console.log(`[pbf] Regionen: ${regions.join(', ')}`)
+  if (force) console.log('[pbf] --force: bereits importierte Regionen werden neu geschrieben')
   console.log('')
 
   let sessionPois = 0
   let importedRegions = 0
   let skippedRegions = 0
+  let hoursTagged = 0
 
   for (const r of regions) {
     if (!(r in EXTRACTS)) {
@@ -178,14 +268,40 @@ async function main() {
       continue
     }
 
-    if (await isRegionDone(sb, r)) {
+    if (!force && (await isRegionDone(sb, r))) {
       console.log(`[pbf] ${r}: bereits importiert (pbf_${r}) — überspringe`)
       skippedRegions++
       continue
     }
 
+    if (force && (await isRegionDone(sb, r))) {
+      await clearRegionDone(sb, r)
+      console.log(`[pbf] ${r}: Done-Marker gelöscht (--force)`)
+    }
+
     const filePath = await downloadExtract(r, skipDownload)
-    const pois = await extractPoisFromPbf(filePath)
+    const extracted = await extractPoisFromPbf(filePath)
+    const def = IMPORT_REGIONS.find((x) => x.code === r)
+    // Shared extracts (z. B. IE/NI) auf Region-BBox begrenzen, sonst Doppelzählung.
+    const sharesFile =
+      !!def && IMPORT_REGIONS.filter((x) => x.file === def.file).length > 1
+    const pois =
+      sharesFile && def
+        ? extracted.filter(
+            (p) =>
+              p.lat >= def.south &&
+              p.lat <= def.north &&
+              p.lng >= def.west &&
+              p.lng <= def.east
+          )
+        : extracted
+    if (sharesFile && extracted.length !== pois.length) {
+      console.log(
+        `[pbf] ${r}: BBox-Filter ${extracted.length} → ${pois.length} POIs (geteilter Extract)`
+      )
+    }
+    const withHours = pois.filter((p) => p.openingHours).length
+    hoursTagged += withHours
     await writePoisToSupabase(sb, pois)
     await markRegionDone(
       sb,
@@ -196,31 +312,45 @@ async function main() {
 
     sessionPois += pois.length
     importedRegions++
-    console.log(`[pbf] ${r}: ok (${pois.length} POIs)\n`)
+    console.log(`[pbf] ${r}: ok (${pois.length} POIs, davon ${withHours} mit opening_hours)\n`)
   }
 
-  const tileCount = await countTiles(sb)
-  const { count: progressCount } = await sb
-    .from('import_progress')
-    .select('*', { count: 'exact', head: true })
+  // Meta/Summary darf den Import nicht killen — POIs + Done-Marker sind schon geschrieben.
+  let tileCount: number | null = null
+  let progressCount: number | null = null
+  try {
+    tileCount = await countTiles(sb)
+    const progress = await sb
+      .from('import_progress')
+      .select('id', { count: 'estimated', head: true })
+    if (progress.error) {
+      console.warn(`[pbf] import_progress count: ${progress.error.message}`)
+    } else {
+      progressCount = progress.count ?? 0
+    }
 
-  await setImportMeta(sb, {
-    version: 4,
-    source: 'geofabrik-pbf-supabase',
-    importedAt: new Date().toISOString(),
-    tileCount,
-    poiCount: sessionPois,
-    regions: [...IMPORT_REGION_CODES],
-    importRegionsDone: importedRegions,
-    importRegionsSkipped: skippedRegions,
-    importTilesDoneTotal: progressCount ?? 0,
-  })
+    await setImportMeta(sb, {
+      version: 5,
+      source: 'geofabrik-pbf-supabase',
+      importedAt: new Date().toISOString(),
+      tileCount,
+      poiCount: sessionPois,
+      regions: [...IMPORT_REGION_CODES],
+      importRegionsDone: importedRegions,
+      importRegionsSkipped: skippedRegions,
+      importTilesDoneTotal: progressCount ?? 0,
+      openingHoursTagged: hoursTagged,
+    })
+  } catch (err) {
+    console.warn('[pbf] Session-Meta übersprungen:', err instanceof Error ? err.message : err)
+  }
 
   console.log('[pbf] ─────────────────────────────────────')
   console.log(`[pbf] Session: ${importedRegions} Regionen, ${skippedRegions} übersprungen`)
   console.log(`[pbf] POIs diese Session: ${sessionPois}`)
-  console.log(`[pbf] Supabase tiles: ${tileCount}`)
-  console.log(`[pbf] import_progress rows: ${progressCount ?? 0}`)
+  console.log(`[pbf] davon mit opening_hours: ${hoursTagged}`)
+  console.log(`[pbf] Supabase tiles: ${tileCount ?? 'n/a'}`)
+  console.log(`[pbf] import_progress rows: ${progressCount ?? 'n/a'}`)
 }
 
 main().catch((err) => {

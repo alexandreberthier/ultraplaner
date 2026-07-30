@@ -2,9 +2,56 @@
   "hosting": {
     "public": "dist",
     "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+    "redirects": [
+      {
+        "source": "/pois-entlang-der-route",
+        "destination": "/versorgung-ultracycling/",
+        "type": 301
+      },
+      {
+        "source": "/en/pois-along-route",
+        "destination": "/en/ultracycling-supply/",
+        "type": 301
+      },
+      {
+        "source": "/es/pois-en-la-ruta",
+        "destination": "/es/avituallamiento-ultracycling/",
+        "type": 301
+      },
+      {
+        "source": "/fr/pois-sur-la-route",
+        "destination": "/fr/ravitaillement-ultracycling/",
+        "type": 301
+      }
+    ],
     "headers": [
       {
-        "source": "/index.html",
+        "source": "**",
+        "headers": [
+          {
+            "key": "Permissions-Policy",
+            "value": "geolocation=(self)"
+          }
+        ]
+      },
+      {
+        "source": "/oauth/**",
+        "headers": [{ "key": "Cache-Control", "value": "no-cache" }]
+      },
+      {
+        "source": "**/*.html",
+        "headers": [{ "key": "Cache-Control", "value": "no-cache" }]
+      },
+      {
+        "source": "/sw.js",
+        "headers": [{ "key": "Cache-Control", "value": "no-cache" }]
+      },
+      {
+        "source": "/registerSW.js",
+        "headers": [{ "key": "Cache-Control", "value": "no-cache" }]
+      },
+      {
+        "source": "/manifest.webmanifest",
         "headers": [{ "key": "Cache-Control", "value": "no-cache" }]
       },
       {
@@ -20,11 +67,53 @@
         "headers": [{ "key": "Cache-Control", "value": "public,max-age=3600" }]
       },
       {
-        "source": "/og-image.png",
+        "source": "/llms.txt",
+        "headers": [{ "key": "Cache-Control", "value": "public,max-age=3600" }]
+      },
+      {
+        "source": "/favicon.ico",
         "headers": [{ "key": "Cache-Control", "value": "public,max-age=86400" }]
+      },
+      {
+        "source": "/favicon.svg",
+        "headers": [{ "key": "Cache-Control", "value": "public,max-age=86400" }]
+      },
+      {
+        "source": "/favicon-*.png",
+        "headers": [{ "key": "Cache-Control", "value": "public,max-age=86400" }]
+      },
+      {
+        "source": "/apple-touch-icon.png",
+        "headers": [{ "key": "Cache-Control", "value": "public,max-age=86400" }]
+      },
+      {
+        "source": "/og-image.jpg",
+        "headers": [{ "key": "Cache-Control", "value": "public,max-age=604800" }]
+      },
+      {
+        "source": "/logo-ultraplaner.png",
+        "headers": [{ "key": "Cache-Control", "value": "public,max-age=2592000" }]
+      },
+      {
+        "source": "/logo-ultraplaner.webp",
+        "headers": [{ "key": "Cache-Control", "value": "public,max-age=2592000" }]
+      },
+      {
+        "source": "/hero-mountains.webp",
+        "headers": [{ "key": "Cache-Control", "value": "public,max-age=2592000" }]
+      },
+      {
+        "source": "/hero-mountains-1100.webp",
+        "headers": [{ "key": "Cache-Control", "value": "public,max-age=2592000" }]
       }
     ],
-    "rewrites": [{ "source": "**", "destination": "/index.html" }]
+    "rewrites": [
+      {
+        "source": "/oauth/wahoo/callback",
+        "destination": "/oauth/wahoo/callback.html"
+      },
+      { "source": "**", "destination": "/index.html" }
+    ]
   },
   "firestore": {
     "rules": "firestore.rules",

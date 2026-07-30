@@ -283,11 +283,17 @@ function interpolateAtKm(
         prevElev != null && currElev != null
           ? prevElev + t * (currElev - prevElev)
           : prevElev ?? currElev
+      let gradient: number | undefined = curr.gradient
+      if (gradient == null && prevElev != null && currElev != null) {
+        const distM = haversineM(prev, curr)
+        if (distM > 1) gradient = ((currElev - prevElev) / distM) * 100
+      }
       return {
         lat: prev.lat + t * (curr.lat - prev.lat),
         lng: prev.lng + t * (curr.lng - prev.lng),
         elevation,
         distanceFromStart: targetKm,
+        gradient,
       }
     }
   }
@@ -302,4 +308,79 @@ export function pointAtRouteKm(
   const total = totalRouteKm(points)
   const km = Math.max(0, Math.min(targetKm, total))
   return interpolateAtKm(points, km)
+}
+
+export interface ElevationSegmentStats {
+  startKm: number
+  endKm: number
+  lengthKm: number
+  startElev: number
+  endElev: number
+  ascentM: number
+  descentM: number
+  netGainM: number
+  avgGradePct: number
+}
+
+/** Stats for a km range on the elevation profile (drag selection). */
+export function analyzeElevationSegment(
+  points: RoutePoint[],
+  startKm: number,
+  endKm: number
+): ElevationSegmentStats | null {
+  if (!hasElevationData(points)) return null
+
+  const lo = Math.min(startKm, endKm)
+  const hi = Math.max(startKm, endKm)
+  if (hi - lo < 0.05) return null
+
+  const start = pointAtRouteKm(points, lo)
+  const end = pointAtRouteKm(points, hi)
+  if (start?.elevation == null || end?.elevation == null) return null
+
+  const lengthKm = hi - lo
+  let ascentM = 0
+  let descentM = 0
+  let prevElev: number | null = null
+
+  for (const p of points) {
+    const km = p.distanceFromStart ?? 0
+    if (km < lo) {
+      if (p.elevation != null) prevElev = p.elevation
+      continue
+    }
+    if (km > hi) break
+    if (p.elevation == null) continue
+    if (prevElev != null) {
+      const diff = p.elevation - prevElev
+      if (diff > 0) ascentM += diff
+      else descentM -= diff
+    }
+    prevElev = p.elevation
+  }
+
+  const netGainM = end.elevation - start.elevation
+  const lengthM = lengthKm * 1000
+  let avgGradePct = 0
+  if (lengthM > 0) {
+    if (descentM > ascentM * 1.2) {
+      avgGradePct = -(descentM / lengthM) * 100
+    } else if (ascentM > descentM * 1.2) {
+      avgGradePct = (ascentM / lengthM) * 100
+    } else {
+      avgGradePct = (netGainM / lengthM) * 100
+    }
+  }
+
+  return {
+    startKm: lo,
+    endKm: hi,
+    lengthKm,
+    startElev: start.elevation,
+    endElev: end.elevation,
+    ascentM,
+    descentM,
+    netGainM,
+    avgGradePct,
+  }
 }

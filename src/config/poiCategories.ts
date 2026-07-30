@@ -17,9 +17,10 @@ export interface PoiCategoryDef {
 
 export const POI_CATEGORY_DEFS: PoiCategoryDef[] = [
   { id: 'fuel', label: 'Tankstellen', icon: '⛽', defaultOn: true },
-  { id: 'food', label: 'Essen', icon: '🛒', defaultOn: true },
-  { id: 'water', label: 'Wasser', icon: '💧', defaultOn: true },
-  { id: 'restaurant', label: 'Restaurant', icon: '🍽️', defaultOn: false },
+  { id: 'supermarket', label: 'Supermärkte', icon: '🛒', defaultOn: true },
+  { id: 'water', label: 'Trinkwasser', icon: '💧', defaultOn: true },
+  { id: 'gastronomy', label: 'Gastronomie', icon: '🍴', defaultOn: false },
+  { id: 'beverages', label: 'Getränke', icon: '🍾', defaultOn: false },
   { id: 'bike', label: 'Rad', icon: '🔧', defaultOn: false },
   { id: 'hotel', label: 'Hotel', icon: '🏨', defaultOn: false },
   { id: 'campsite', label: 'Camping', icon: '⛺', defaultOn: false },
@@ -32,6 +33,9 @@ export const DEFAULT_POI_CATEGORIES = POI_CATEGORY_DEFS.filter((c) => c.defaultO
 export const DEFAULT_POI_RADIUS_M = 500
 export const MIN_POI_RADIUS_M = 300
 export const MAX_POI_RADIUS_M = 2000
+/** Nearby search can look farther than corridor-along-route. */
+export const NEARBY_DEFAULT_POI_RADIUS_M = 3000
+export const NEARBY_MAX_POI_RADIUS_M = 5000
 export const MAX_GPX_SIZE_BYTES = 25 * 1024 * 1024
 export const MAX_ROUTE_KM = 2000
 

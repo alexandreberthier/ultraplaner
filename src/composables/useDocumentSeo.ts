@@ -1,0 +1,142 @@
+import type { AppLocale } from '../i18n'
+import { localeHomePath, poisAlongRoutePath, tGlobal } from '../i18n'
+
+const SITE = 'https://ultraplaner.com'
+const OG_LOCALES: Record<AppLocale, string> = {
+  de: 'de_DE',
+  en: 'en_US',
+  es: 'es_ES',
+  fr: 'fr_FR',
+}
+
+const LANDING_HREFLANG: { lang: string; href: string }[] = [
+  { lang: 'de', href: `${SITE}/` },
+  { lang: 'en', href: `${SITE}/en/` },
+  { lang: 'es', href: `${SITE}/es/` },
+  { lang: 'fr', href: `${SITE}/fr/` },
+  { lang: 'x-default', href: `${SITE}/` },
+]
+
+function ensureMeta(attr: 'name' | 'property', key: string): HTMLMetaElement {
+  const selector = attr === 'name' ? `meta[name="${key}"]` : `meta[property="${key}"]`
+  let el = document.head.querySelector<HTMLMetaElement>(selector)
+  if (!el) {
+    el = document.createElement('meta')
+    el.setAttribute(attr, key)
+    document.head.appendChild(el)
+  }
+  return el
+}
+
+export function setCanonical(href: string) {
+  let link = document.head.querySelector<HTMLLinkElement>('link[rel="canonical"]')
+  if (!link) {
+    link = document.createElement('link')
+    link.rel = 'canonical'
+    document.head.appendChild(link)
+  }
+  link.href = href
+}
+
+/** Keep Firebase default hosts out of Google Search (canonical alone is not always enough). */
+export function enforcePreferredHostSeo() {
+  if (typeof window === 'undefined') return
+  const h = window.location.hostname
+  if (
+    h === 'ultraplaner.com' ||
+    h === 'www.ultraplaner.com' ||
+    h === 'localhost' ||
+    h === '127.0.0.1'
+  ) {
+    return
+  }
+  if (!/\.web\.app$/.test(h) && !/\.firebaseapp\.com$/.test(h)) return
+
+  ensureMeta('name', 'robots').content = 'noindex, nofollow'
+
+  const path = window.location.pathname
+  if (path.startsWith('/__/') || path.startsWith('/oauth/')) return
+  const target = `${SITE}${path}${window.location.search}${window.location.hash}`
+  if (window.location.href !== target) {
+    window.location.replace(target)
+  }
+}
+
+function clearHreflang() {
+  document.head
+    .querySelectorAll<HTMLLinkElement>('link[rel="alternate"][hreflang]')
+    .forEach((el) => el.remove())
+}
+
+function setHreflang(links: { lang: string; href: string }[]) {
+  clearHreflang()
+  for (const { lang, href } of links) {
+    const link = document.createElement('link')
+    link.rel = 'alternate'
+    link.hreflang = lang
+    link.href = href
+    document.head.appendChild(link)
+  }
+}
+
+/** Landing locale URL used as canonical (map views point back to the locale home). */
+export function applyDocumentSeo(locale: AppLocale) {
+  const title = String(tGlobal('seo.title'))
+  const description = String(tGlobal('seo.description'))
+  const ogDescription = String(tGlobal('seo.ogDescription'))
+  const canonicalUrl = `${SITE}${localeHomePath(locale)}`
+
+  document.title = title
+  document.documentElement.lang = locale
+
+  ensureMeta('name', 'description').content = description
+  ensureMeta('property', 'og:title').content = title
+  ensureMeta('property', 'og:description').content = ogDescription
+  ensureMeta('property', 'og:url').content = canonicalUrl
+  ensureMeta('property', 'og:locale').content = OG_LOCALES[locale]
+  ensureMeta('name', 'twitter:title').content = String(tGlobal('seo.twitterTitle'))
+  ensureMeta('name', 'twitter:description').content = String(tGlobal('seo.twitterDescription'))
+
+  setCanonical(canonicalUrl)
+  setHreflang(LANDING_HREFLANG)
+}
+
+/** Supply-guide page SEO (self-canonical + guide hreflang). */
+export function applyGuideSeo(locale: AppLocale) {
+  const title = String(tGlobal('landing.poiGuide.seoTitle'))
+  const description = String(tGlobal('landing.poiGuide.seoDescription'))
+  const path = poisAlongRoutePath(locale)
+  const canonicalUrl = `${SITE}${path}`
+
+  document.title = title
+  document.documentElement.lang = locale
+
+  ensureMeta('name', 'description').content = description
+  ensureMeta('property', 'og:title').content = title
+  ensureMeta('property', 'og:description').content = description
+  ensureMeta('property', 'og:url').content = canonicalUrl
+  ensureMeta('property', 'og:locale').content = OG_LOCALES[locale]
+
+  setCanonical(canonicalUrl)
+  setHreflang([
+    { lang: 'de', href: `${SITE}${poisAlongRoutePath('de')}` },
+    { lang: 'en', href: `${SITE}${poisAlongRoutePath('en')}` },
+    { lang: 'es', href: `${SITE}${poisAlongRoutePath('es')}` },
+    { lang: 'fr', href: `${SITE}${poisAlongRoutePath('fr')}` },
+    { lang: 'x-default', href: `${SITE}${poisAlongRoutePath('de')}` },
+  ])
+}
+
+/** Legal pages (DE only): self-canonical, no landing hreflang/FAQ schema responsibility. */
+export function applyLegalSeo(opts: { title: string; description: string; path: string }) {
+  const canonicalUrl = `${SITE}${opts.path}`
+  document.title = opts.title
+  document.documentElement.lang = 'de'
+  ensureMeta('name', 'description').content = opts.description
+  ensureMeta('property', 'og:title').content = opts.title
+  ensureMeta('property', 'og:description').content = opts.description
+  ensureMeta('property', 'og:url').content = canonicalUrl
+  ensureMeta('property', 'og:locale').content = 'de_DE'
+  setCanonical(canonicalUrl)
+  clearHreflang()
+}

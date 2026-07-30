@@ -2,9 +2,9 @@
 
 Ultracycling-Routenplanung mit Versorgungspunkten, Höhenprofil, ETA und Spickzettel.
 
-**Live:** https://ultracycling-8bd56.web.app
+**Live:** https://ultraplaner.com
 
-**Regionen:** AT, CH, LI, DE, DK, IT, SK, SI, CZ, HU, LU, BE, NL, HR, ES, FR (Metropole)
+**Regionen:** AT, CH, LI, DE, DK, IT, SK, SI, CZ, HU, LU, BE, NL, HR, ES (inkl. Balearen/Kanaren), PT, PL, GB, NO, SE, FI, EE, LV, LT, RO, IE, NI, IS, GR, CY, MT, AD, BG, RS, BA, ME, AL, MK, XK, FR (Metropole)
 
 ## Schnellstart
 
@@ -20,6 +20,12 @@ npm run dev
 ```bash
 npm run deploy
 ```
+
+Deploy = `build` → **Prerender** (Landing DE/EN/ES/FR) → Firebase Hosting.  
+Prerender ist soft: schlägt es fehl, wird nur gewarnt und trotzdem deployed. Strikt: `PRERENDER_STRICT=1 npm run prerender`.  
+Einmalig Browser: `npx playwright install chromium`
+
+Nach Schema-Änderungen an Share-Maps einmal `supabase/maps.sql` im Supabase SQL Editor ausführen (Write-Token / Rate-Limits).
 
 ## POI-Import
 

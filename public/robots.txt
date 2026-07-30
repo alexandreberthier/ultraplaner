@@ -1,4 +1,6 @@
+# Canonical host: https://ultraplaner.com
+# Firebase default hosts (*.web.app / *.firebaseapp.com) are duplicates — do not treat as primary.
 User-agent: *
 Allow: /
 
-Sitemap: https://ultracycling-8bd56.web.app/sitemap.xml
+Sitemap: https://ultraplaner.com/sitemap.xml

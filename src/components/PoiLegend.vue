@@ -1,7 +1,9 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
-import { POI_CATEGORY_DEFS } from '../config/poiCategories'
-import { GRADE_LEGEND, POI_COLORS } from '../config/mapStyle'
+import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { climbMarkerColor, gradeLegend } from '../config/mapStyle'
+import { useColorblindMode } from '../composables/useColorblindMode'
+import { useSidebarSection } from '../composables/useSidebarSection'
 import { useMapStore } from '../stores/mapStore'
 import { hasElevationData } from '../utils/route'
 
@@ -13,43 +15,54 @@ const props = defineProps<{
 }>()
 
 const store = useMapStore()
-const expanded = ref(false)
+const { colorblindMode, setColorblindMode } = useColorblindMode()
+const { open, toggle } = useSidebarSection('legend', false)
+const { t } = useI18n()
 
-const showList = () => props.embedded || !props.compact || expanded.value
+const showBody = computed(() => props.embedded || !props.compact || open.value)
 const showGrades = computed(() => hasElevationData(store.routePoints))
+const legendGrades = computed(() => {
+  const colors = gradeLegend()
+  const labels = [
+    t('legend.downhill'),
+    t('legend.gradeLt2'),
+    t('legend.grade2to5'),
+    t('legend.grade5to8'),
+    t('legend.grade8to12'),
+    t('legend.gradeGt12'),
+  ]
+  return colors.map((g, i) => ({ label: labels[i] ?? g.label, color: g.color }))
+})
+
+const summary = computed(() => {
+  if (colorblindMode.value) return t('legend.colorblindOn')
+  if (showGrades.value) return t('legend.gradeColors')
+  return t('legend.colors')
+})
+const climbColor = computed(() => climbMarkerColor())
 </script>
 
 <template>
-  <div class="legend" :class="{ compact, expanded, embedded }">
+  <div class="legend" :class="{ compact, open, embedded }">
     <button
       v-if="compact && !embedded"
       type="button"
-      class="legend-toggle"
-      @click="expanded = !expanded"
+      class="section-toggle"
+      :aria-expanded="open"
+      @click="toggle"
     >
-      <span>Legende</span>
-      <span class="chevron">{{ expanded ? '▾' : '▸' }}</span>
+      <span class="toggle-title">{{ t('legend.title') }}</span>
+      <span class="toggle-summary">{{ summary }}</span>
+      <span class="chevron" aria-hidden="true">{{ open ? '▾' : '▸' }}</span>
     </button>
-    <h3 v-else-if="!embedded">Legende</h3>
+    <h3 v-else-if="!embedded">{{ t('legend.title') }}</h3>
 
-    <div v-show="showList()" class="legend-body">
-      <ul>
-        <li v-for="cat in POI_CATEGORY_DEFS" :key="cat.id">
-          <span class="swatch" :style="{ background: POI_COLORS[cat.id] }" />
-          <span class="icon">{{ cat.icon }}</span>
-          <span class="label">{{ cat.label }}</span>
-        </li>
-        <li class="km-hint">
-          <span class="swatch km-swatch" />
-          <span class="label">km-Markierung alle 25 km</span>
-        </li>
-      </ul>
-
+    <div v-show="showBody" class="legend-body">
       <div v-if="showGrades" class="grade-block">
-        <p class="grade-title">Steigung (Route)</p>
+        <p class="grade-title">{{ t('legend.gradeTitle') }}</p>
         <div class="grade-row">
           <span
-            v-for="g in GRADE_LEGEND"
+            v-for="g in legendGrades"
             :key="g.label"
             class="grade-chip"
             :title="g.label"
@@ -59,20 +72,42 @@ const showGrades = computed(() => hasElevationData(store.routePoints))
           </span>
         </div>
         <p class="climb-hint">
-          <span class="swatch climb-swatch" />
-          Anstieg ≥ 70 m (Markierung am Gipfel)
+          <span
+            class="swatch climb-swatch"
+            :style="{ background: climbColor, boxShadow: `0 0 0 1px ${climbColor}` }"
+          />
+          {{ t('legend.climb') }}
+        </p>
+        <p class="km-hint">
+          <span class="swatch km-swatch" />
+          {{ t('legend.kmMarkers') }}
         </p>
       </div>
+
+      <label class="colorblind-toggle">
+        <input
+          type="checkbox"
+          :checked="colorblindMode"
+          @change="setColorblindMode(($event.target as HTMLInputElement).checked)"
+        />
+        <span class="colorblind-copy">
+          <strong>{{ t('legend.colorblind') }}</strong>
+          <span>{{ t('legend.colorblindHint') }}</span>
+        </span>
+      </label>
     </div>
   </div>
 </template>
 
 <style scoped>
 .legend {
-  padding: 0.75rem 1rem 1rem;
   border-top: 1px solid var(--border);
   flex-shrink: 0;
   background: var(--surface);
+}
+
+.legend:not(.compact):not(.embedded) {
+  padding: 0.75rem 1rem 1rem;
 }
 
 .legend.embedded {
@@ -89,53 +124,56 @@ const showGrades = computed(() => hasElevationData(store.routePoints))
   color: var(--text-muted);
 }
 
-.legend-toggle {
+.section-toggle {
   width: 100%;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 0;
+  gap: 0.5rem;
+  padding: 0.55rem 1rem;
   border: none;
   background: none;
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--text);
   cursor: pointer;
+  text-align: left;
+  color: var(--text);
+}
+
+.section-toggle:hover {
+  background: var(--surface-2);
+}
+
+.toggle-title {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.toggle-summary {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .chevron {
   color: var(--text-muted);
   font-size: 0.75rem;
+  flex-shrink: 0;
 }
 
-.legend.compact .legend-body {
-  margin-top: 0.6rem;
+.legend-body {
+  padding: 0 1rem 0.85rem;
 }
 
-ul {
-  list-style: none;
+.legend:not(.compact):not(.embedded) .legend-body,
+.legend.embedded .legend-body {
   padding: 0;
-  margin: 0;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.35rem 0.75rem;
-}
-
-.legend.embedded ul {
-  grid-template-columns: 1fr;
-  gap: 0.5rem;
-}
-
-li {
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
-  font-size: 0.78rem;
-  line-height: 1.3;
-}
-
-.legend.embedded li {
-  font-size: 0.9rem;
 }
 
 .swatch {
@@ -146,34 +184,8 @@ li {
   border: 1px solid rgba(0, 0, 0, 0.08);
 }
 
-.icon {
-  flex-shrink: 0;
-  font-size: 0.9rem;
-}
-
-.label {
-  color: var(--text);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.km-hint {
-  grid-column: 1 / -1;
-  margin-top: 0.25rem;
-  padding-top: 0.35rem;
-  border-top: 1px dashed var(--border);
-}
-
-.km-swatch {
-  background: #fff;
-  border: 2px solid #374151;
-}
-
 .grade-block {
-  margin-top: 0.75rem;
-  padding-top: 0.65rem;
-  border-top: 1px dashed var(--border);
+  margin: 0;
 }
 
 .grade-title {
@@ -206,35 +218,66 @@ li {
   flex-shrink: 0;
 }
 
-.climb-hint {
+.climb-hint,
+.km-hint {
   display: flex;
   align-items: center;
   gap: 0.35rem;
-  margin: 0.55rem 0 0;
+  margin: 0.5rem 0 0;
   font-size: 0.78rem;
   color: var(--text);
   line-height: 1.3;
 }
 
 .climb-swatch {
-  background: #7c2d12;
   border-color: #fff;
-  box-shadow: 0 0 0 1px #7c2d12;
+}
+
+.km-swatch {
+  background: #fff;
+  border: 2px solid #374151;
+}
+
+.colorblind-toggle {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  margin-top: 0.75rem;
+  padding: 0.5rem 0.6rem;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  cursor: pointer;
+  font-size: 0.78rem;
+  line-height: 1.35;
+}
+
+.colorblind-toggle input {
+  margin-top: 0.15rem;
+  flex-shrink: 0;
+  accent-color: var(--primary);
+}
+
+.colorblind-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  color: var(--text);
+}
+
+.colorblind-copy strong {
+  font-size: 0.8rem;
+}
+
+.colorblind-copy span:last-child {
+  color: var(--text-muted);
+  font-size: 0.72rem;
 }
 
 @media (max-width: 768px) {
   .legend:not(.embedded) {
     border-top: none;
     padding: 0 1rem 1rem;
-  }
-
-  ul {
-    grid-template-columns: 1fr;
-    gap: 0.5rem;
-  }
-
-  li {
-    font-size: 0.9rem;
   }
 }
 </style>

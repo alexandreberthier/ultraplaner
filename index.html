@@ -2,89 +2,251 @@
 <html lang="de">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 
     <title>UltraPlaner – Ultracycling Routenplanung mit Versorgungspunkten</title>
     <meta
       name="description"
-      content="UltraPlaner: GPX laden oder Radroute planen, Versorgungspunkte (Tankstellen, Essen, Wasser), Höhenprofil, Anstiege, ETA und Spickzettel für Ultracycling in Mitteleuropa &amp; Alpen."
-    />
-    <meta
-      name="keywords"
-      content="UltraPlaner, Ultracycling, Ultra Radfahren, Radroute planen, GPX Route, Versorgungspunkte Rad, Tankstellen Radtour, Höhenprofil Fahrrad, Anstiege Karte, Spickzettel Rad, ETA Radfahren, Alpen Radroute, Mitteleuropa Radtour, Ultracycling Planung, Radnavigation POI"
+      content="Ultracycling-Routen mit Versorgungspunkten, Kontrollpunkten und Spickzettel planen. GPX oder Route zeichnen — 61 Regionen, 1,9 Mio. POIs."
     />
     <meta name="author" content="UltraPlaner" />
-    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />
     <meta name="theme-color" content="#2d6a4f" />
     <meta name="application-name" content="UltraPlaner" />
     <meta name="apple-mobile-web-app-title" content="UltraPlaner" />
+    <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 
-    <link rel="canonical" href="https://ultracycling-8bd56.web.app/" />
+    <!-- Prefer custom domain over Firebase default hosts (web.app / firebaseapp.com). -->
+    <script>
+      (function () {
+        var h = location.hostname
+        if (
+          h === 'ultraplaner.com' ||
+          h === 'www.ultraplaner.com' ||
+          h === 'localhost' ||
+          h === '127.0.0.1'
+        ) {
+          return
+        }
+        if (!/\.web\.app$/.test(h) && !/\.firebaseapp\.com$/.test(h)) return
+        var robots = document.querySelector('meta[name="robots"]')
+        if (!robots) {
+          robots = document.createElement('meta')
+          robots.setAttribute('name', 'robots')
+          document.head.appendChild(robots)
+        }
+        robots.setAttribute('content', 'noindex, nofollow')
+        // Keep Firebase reserved URLs and OAuth callbacks on their host.
+        if (location.pathname.indexOf('/__/') === 0) return
+        if (location.pathname.indexOf('/oauth/') === 0) return
+        location.replace('https://ultraplaner.com' + location.pathname + location.search + location.hash)
+      })()
+    </script>
+
+    <link rel="canonical" href="https://ultraplaner.com/" />
+    <!-- Google Search: square PNG ≥48px recommended; ICO + PNG primary, SVG for modern browsers -->
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="alternate" hreflang="de" href="https://ultracycling-8bd56.web.app/" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+
+    <link rel="alternate" hreflang="de" href="https://ultraplaner.com/" />
+    <link rel="alternate" hreflang="en" href="https://ultraplaner.com/en/" />
+    <link rel="alternate" hreflang="es" href="https://ultraplaner.com/es/" />
+    <link rel="alternate" hreflang="fr" href="https://ultraplaner.com/fr/" />
+    <link rel="alternate" hreflang="x-default" href="https://ultraplaner.com/" />
 
     <!-- Open Graph -->
     <meta property="og:type" content="website" />
     <meta property="og:locale" content="de_DE" />
+    <meta property="og:locale:alternate" content="en_US" />
+    <meta property="og:locale:alternate" content="es_ES" />
+    <meta property="og:locale:alternate" content="fr_FR" />
     <meta property="og:site_name" content="UltraPlaner" />
-    <meta property="og:url" content="https://ultracycling-8bd56.web.app/" />
+    <meta property="og:url" content="https://ultraplaner.com/" />
     <meta
       property="og:title"
       content="UltraPlaner – Ultracycling Routenplanung mit Versorgungspunkten"
     />
     <meta
       property="og:description"
-      content="GPX laden oder Route planen. Tankstellen, Essen, Wasser, Höhenprofil, Anstiege, ETA und druckbaren Spickzettel – für Ultracycling in Mitteleuropa."
+      content="GPX laden oder Route planen. Versorgung, Kontrollpunkte, Höhenprofil, ETA und Spickzettel — Europa (61 Regionen). Wahoo-Cloud, GPX/FIT."
     />
-    <meta property="og:image" content="https://ultracycling-8bd56.web.app/og-image.png" />
+    <meta property="og:image" content="https://ultraplaner.com/og-image.jpg" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta property="og:image:alt" content="UltraPlaner – Ultracycling Routenplanung" />
 
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta
-      name="twitter:title"
-      content="UltraPlaner – Ultracycling Routenplanung"
-    />
+    <meta name="twitter:title" content="UltraPlaner – Ultracycling Routenplanung" />
     <meta
       name="twitter:description"
-      content="Radroute planen, Versorgungspunkte finden, Höhenprofil &amp; Spickzettel für Ultracycling."
+      content="Radroute planen, Versorgungspunkte finden, Höhenprofil &amp; Spickzettel für Ultracycling in Europa."
     />
-    <meta name="twitter:image" content="https://ultracycling-8bd56.web.app/og-image.png" />
+    <meta name="twitter:image" content="https://ultraplaner.com/og-image.jpg" />
 
-    <script type="application/ld+json">
+    <script type="application/ld+json" id="ld-landing">
       {
         "@context": "https://schema.org",
-        "@type": "WebApplication",
-        "name": "UltraPlaner",
-        "url": "https://ultracycling-8bd56.web.app/",
-        "applicationCategory": "SportsApplication",
-        "operatingSystem": "Web",
-        "inLanguage": "de",
-        "description": "Ultracycling-Routenplanung mit Versorgungspunkten, Höhenprofil, ETA und Spickzettel für Mitteleuropa und die Alpen.",
-        "offers": {
-          "@type": "Offer",
-          "price": "0",
-          "priceCurrency": "EUR"
-        },
-        "featureList": [
-          "GPX Import",
-          "Radroute planen",
-          "Versorgungspunkte entlang der Route",
-          "Höhenprofil und Anstiege",
-          "ETA Zeitplanung",
-          "Spickzettel drucken"
-        ],
-        "areaServed": [
-          "AT", "DE", "CH", "IT", "CZ", "SK", "SI", "HU", "LU", "FR"
+        "@graph": [
+          {
+            "@type": "WebApplication",
+            "@id": "https://ultraplaner.com/#app",
+            "name": "UltraPlaner",
+            "url": "https://ultraplaner.com/",
+            "applicationCategory": "TravelApplication",
+            "operatingSystem": "Any",
+            "browserRequirements": "Requires JavaScript. HTML5.",
+            "inLanguage": ["de", "en", "es", "fr"],
+            "description": "Kostenlose Ultracycling-Routenplanung mit Versorgungspunkten, Kontrollpunkten, Höhenprofil, ETA, Spickzettel und Export (Wahoo-Cloud, GPX/FIT) für 61 Regionen in Europa.",
+            "image": "https://ultraplaner.com/og-image.jpg",
+            "offers": {
+              "@type": "Offer",
+              "price": 0,
+              "priceCurrency": "EUR"
+            },
+            "featureList": [
+              "GPX Import",
+              "Radroute planen",
+              "Versorgungspunkte entlang der Route",
+              "Kontrollpunkte CP/Sleep",
+              "Höhenprofil und Anstiege",
+              "ETA und Öffnungszeiten",
+              "Wahoo Cloud Export",
+              "GPX und FIT Export",
+              "Spickzettel drucken"
+            ],
+            "areaServed": {
+              "@type": "Place",
+              "name": "Europe"
+            },
+            "isAccessibleForFree": true
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://ultraplaner.com/#website",
+            "url": "https://ultraplaner.com/",
+            "name": "UltraPlaner",
+            "description": "Ultracycling-Routenplanung mit Versorgungspunkten für Europa",
+            "inLanguage": ["de", "en", "es", "fr"],
+            "publisher": {
+              "@type": "Organization",
+              "@id": "https://ultraplaner.com/#organization",
+              "name": "UltraPlaner",
+              "url": "https://ultraplaner.com/",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "https://ultraplaner.com/logo-ultraplaner.png",
+                "width": 1024,
+                "height": 1024
+              }
+            }
+          },
+          {
+            "@type": "FAQPage",
+            "@id": "https://ultraplaner.com/#faq",
+            "mainEntity": [
+              {
+                "@type": "Question",
+                "name": "Was ist UltraPlaner?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "UltraPlaner ist eine kostenlose Web-App für Ultracycling: GPX laden, Route planen oder Umgebung scannen — Versorgungspunkte, Kontrollpunkte (CP/Sleep), Höhenprofil, ETA, Filter, Favoriten, Spickzettel und Export (Wahoo-Cloud, GPX/FIT). POI-Daten aus OpenStreetMap/Geofabrik."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Wie plane ich die Versorgung?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "GPX hochladen, Route zeichnen oder unter Umgebung den Standort scannen. POIs filtern, ETA/Öffnungszeiten prüfen, Favoriten und Kontrollpunkte setzen, dann exportieren. Rote Höhenprofil-Bereiche = Versorgungslücken ab ca. 25 km ohne POI."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Welche Länder und POIs gibt es?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "61 Geofabrik-Regionen in Europa. Kategorien u. a. Tankstellen, Supermärkte, Gastro, Trinkwasser, Getränke, Rad, Hotel, Camping — mit Radius, Kategoriefilter und offen bei ETA."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Öffnungszeiten und Höhenprofil?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Öffnungszeiten in UltraPlaner kommen aus OpenStreetMap (wenn eingetragen) und fließen in ETA/Filter ein. Google Maps Navigation öffnet den Ort in Google Maps — dort siehst du oft aktuelle Öffnungszeiten. Höhenprofil mit Anstiegen; Rot markiert Versorgungslücken."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Handy und App?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Im Browser nutzbar; als PWA zum Homescreen (Android: Installieren; iPhone: Teilen → Mehr anzeigen → Zum Home-Bildschirm). Offline: Route/POIs aus dem Cache, Basemap braucht Netz."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Export zu Wahoo, Garmin oder Strava?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Wahoo: Mit Wahoo verbinden (kein UltraPlaner-Login, Sitzung nur in diesem Browser) → An Wahoo senden. Garmin Edge: FIT per USB nach NewFiles (nicht Connect). Strava/Komoot: GPX."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Speichern und teilen?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Zuletzt auf diesem Gerät nur lokal in diesem Browser (IndexedDB). Teilen-Link etwa 180 Tage online."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Feedback und Roadmap?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Ideen über das Formular auf der Startseite. Geplant u. a. bessere Öffnungszeiten; Wahoo-Cloud-Push ist live. Garmin bleibt über FIT/USB."
+                }
+              }
+            ]
+          }
         ]
       }
     </script>
   </head>
   <body>
     <div id="app"></div>
+    <noscript>
+      <main style="max-width:720px;margin:2rem auto;padding:0 1rem;font-family:system-ui,sans-serif;line-height:1.5;color:#1a1a1a">
+        <p style="font-size:1.5rem;font-weight:700;margin:0 0 1rem">
+          UltraPlaner – Ultracycling Routenplanung mit Versorgungspunkten
+        </p>
+        <p>
+          Plane deine Ultracycling-Route: GPX laden oder Route zeichnen. UltraPlaner zeigt Versorgungspunkte,
+          Kontrollpunkte, Höhenprofil, ETA und Spickzettel — für 61 Regionen in Europa mit über 1,9 Millionen POIs.
+          Export zu Wahoo-Cloud, GPX und FIT.
+        </p>
+        <h2>So funktioniert’s</h2>
+        <ol>
+          <li>GPX hochladen, Route planen oder Umgebung scannen</li>
+          <li>POIs prüfen, Favoriten und Kontrollpunkte setzen</li>
+          <li>An Wahoo senden oder GPX/FIT/Spickzettel exportieren</li>
+        </ol>
+        <h2>Häufige Fragen</h2>
+        <h3>Was ist UltraPlaner?</h3>
+        <p>Kostenlose Web-App für Ultracycling mit Versorgung, Export und Spickzettel.</p>
+        <h3>Export zu Wahoo?</h3>
+        <p>Mit Wahoo verbinden (Sitzung nur in diesem Browser) → An Wahoo senden. Kein UltraPlaner-Login.</p>
+        <p><strong>JavaScript ist erforderlich</strong>, um UltraPlaner vollständig zu nutzen.</p>
+      </main>
+    </noscript>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

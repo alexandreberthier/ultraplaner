@@ -1,7 +1,8 @@
-import { initializeApp } from 'firebase/app'
+import { initializeApp, type FirebaseApp } from 'firebase/app'
 import {
-  getFirestore,
-  enableIndexedDbPersistence,
+  initializeFirestore,
+  persistentLocalCache,
+  persistentMultipleTabManager,
   type Firestore,
 } from 'firebase/firestore'
 
@@ -14,26 +15,25 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
 }
 
+let app: FirebaseApp | null = null
 let db: Firestore | null = null
-let persistenceEnabled = false
+
+function getFirebaseApp(): FirebaseApp {
+  if (!app) {
+    app = initializeApp(firebaseConfig)
+  }
+  return app
+}
 
 export function getDb(): Firestore {
   if (!db) {
-    const app = initializeApp(firebaseConfig)
-    db = getFirestore(app)
+    db = initializeFirestore(getFirebaseApp(), {
+      localCache: persistentLocalCache({
+        tabManager: persistentMultipleTabManager(),
+      }),
+    })
   }
   return db
-}
-
-export async function initFirestorePersistence(): Promise<void> {
-  if (persistenceEnabled) return
-  try {
-    await enableIndexedDbPersistence(getDb())
-    persistenceEnabled = true
-    console.info('[firebase] IndexedDB-Persistenz aktiviert')
-  } catch (err) {
-    console.warn('[firebase] Persistenz nicht verfügbar:', err)
-  }
 }
 
 export function isFirebaseConfigured(): boolean {

@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import maplibregl from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
-import type { LatLng, PoiCategory } from '../../shared/types'
+import type { LatLng, PoiCategory, RouteSurfaceSummary } from '../../shared/types'
 import { useMapStore } from '../stores/mapStore'
 import {
   DEFAULT_POI_CATEGORIES,
@@ -12,7 +13,7 @@ import {
   MIN_POI_RADIUS_M,
   POI_CATEGORY_DEFS,
 } from '../config/poiCategories'
-import { ROUTE_COLOR, ROUTE_CASING, basemapStyle, loadBasemapPreference, saveBasemapPreference, type BasemapId } from '../config/mapStyle'
+import { ROUTE_COLOR, ROUTE_CASING, MAP_LABEL_FONT, basemapStyle, loadBasemapPreference, saveBasemapPreference, KM_MARKER_INTERVAL_KM, isBasemapStyleError, whenStyleReady, remapOpenFreeMapGlyphRequest, type BasemapId } from '../config/mapStyle'
 import {
   fetchCyclingRoute,
   isOrsConfigured,
@@ -20,7 +21,15 @@ import {
   CYCLING_PROFILE,
   type GeocodeResult,
 } from '../services/routing'
-import { totalRouteKm, buildRoutePoints } from '../utils/route'
+import { totalRouteKm, buildRoutePoints, buildKmMarkers } from '../utils/route'
+import { poiCategoryLabel } from '../utils/poiLabels'
+import { isSecureGeoContext } from '../utils/geoDevice'
+
+/** Vienna city center — default planner view before/without geolocation. */
+const VIENNA_CENTER: [number, number] = [16.3738, 48.2082]
+const VIENNA_ZOOM = 11
+const GEO_TIMEOUT_MS = 4000
+const USER_LOCATION_ZOOM = 12
 
 interface Waypoint {
   id: string
@@ -31,6 +40,7 @@ interface Waypoint {
 
 const store = useMapStore()
 const router = useRouter()
+const { t } = useI18n()
 
 const mapEl = ref<HTMLDivElement | null>(null)
 let map: maplibregl.Map | null = null
@@ -43,13 +53,19 @@ let routeGeneration = 0
 const waypoints = ref<Waypoint[]>([])
 const routeCoords = ref<[number, number][]>([])
 const routeElevations = ref<number[]>([])
-const routeName = ref('Geplante Route')
+const routeSurfaceSummary = ref<RouteSurfaceSummary | null>(null)
+const routeName = ref('')
 const radiusM = ref(DEFAULT_POI_RADIUS_M)
 const selected = ref<PoiCategory[]>([...DEFAULT_POI_CATEGORIES])
 const formError = ref('')
 const routing = ref(false)
 const creating = ref(false)
 const basemap = ref<BasemapId>(loadBasemapPreference())
+const basemapFallbackHint = ref('')
+let cancelStyleReady: (() => void) | null = null
+let basemapRecovering = false
+/** Ignore late geolocation results after unmount or after user started drawing. */
+let geoLocateAlive = false
 
 const addressQuery = ref('')
 const addressResults = ref<GeocodeResult[]>([])
@@ -65,9 +81,26 @@ const canCreate = computed(
   () => waypoints.value.length >= 2 && routeCoords.value.length >= 2 && !routing.value && !creating.value
 )
 
+const showPoiOptions = computed(() => waypoints.value.length >= 2)
+
+function hasDraft() {
+  return waypoints.value.length > 0
+}
+
+defineExpose({ hasDraft })
+
+const canCloseLoop = computed(() => {
+  if (waypoints.value.length < 2) return false
+  const start = waypoints.value[0]!
+  const last = waypoints.value[waypoints.value.length - 1]!
+  const same =
+    Math.abs(start.lat - last.lat) < 1e-5 && Math.abs(start.lng - last.lng) < 1e-5
+  return !same
+})
+
 function waypointLabel(index: number, total: number): string {
-  if (index === 0) return 'Start'
-  if (index === total - 1) return 'Ziel'
+  if (index === 0) return t('planner.start')
+  if (index === total - 1) return t('planner.end')
   return `${index}`
 }
 
@@ -93,6 +126,7 @@ function clearAll() {
   waypoints.value = []
   routeCoords.value = []
   routeElevations.value = []
+  routeSurfaceSummary.value = null
   updateMapSources()
 }
 
@@ -101,6 +135,12 @@ function undoWaypoint() {
   updateMapSources()
   fitToContent()
   scheduleAutoRoute()
+}
+
+function closeLoop() {
+  const start = waypoints.value[0]
+  if (!start || !canCloseLoop.value) return
+  addWaypoint(start.lat, start.lng, start.label ?? t('planner.start'))
 }
 
 function pickAddress(result: GeocodeResult) {
@@ -130,11 +170,11 @@ async function runAddressSearch(query: string) {
   try {
     addressResults.value = await searchAddresses(query)
     if (!addressResults.value.length) {
-      addressError.value = 'Keine Treffer in der Region'
+      addressError.value = t('planner.noResults')
     }
   } catch (err) {
     addressResults.value = []
-    addressError.value = err instanceof Error ? err.message : 'Suche fehlgeschlagen'
+    addressError.value = err instanceof Error ? err.message : t('planner.searchFailed')
   } finally {
     addressSearching.value = false
   }
@@ -149,7 +189,7 @@ function toggleCategory(id: PoiCategory) {
   const idx = selected.value.indexOf(id)
   if (idx >= 0) {
     if (selected.value.length <= 1) {
-      formError.value = 'Mindestens eine Kategorie muss aktiv sein'
+      formError.value = t('planner.minCategory')
       return
     }
     selected.value.splice(idx, 1)
@@ -164,13 +204,28 @@ function emptyGeoJson() {
 }
 
 function waypointsGeoJson() {
+  const pts = waypoints.value
+  const n = pts.length
+  const loopClosed =
+    n >= 2 &&
+    Math.abs(pts[0]!.lat - pts[n - 1]!.lat) < 1e-4 &&
+    Math.abs(pts[0]!.lng - pts[n - 1]!.lng) < 1e-4
+
   return {
     type: 'FeatureCollection' as const,
-    features: waypoints.value.map((w, i) => ({
-      type: 'Feature' as const,
-      geometry: { type: 'Point' as const, coordinates: [w.lng, w.lat] },
-      properties: { label: waypointLabel(i, waypoints.value.length) },
-    })),
+    features: pts.flatMap((w, i) => {
+      // Skip duplicate end marker when start == finish
+      if (loopClosed && i === n - 1) return []
+      const label =
+        loopClosed && i === 0 ? t('planner.startEnd') : waypointLabel(i, n)
+      return [
+        {
+          type: 'Feature' as const,
+          geometry: { type: 'Point' as const, coordinates: [w.lng, w.lat] },
+          properties: { label },
+        },
+      ]
+    }),
   }
 }
 
@@ -205,11 +260,30 @@ function previewGeoJson() {
   }
 }
 
+function kmMarkerGeoJson() {
+  if (routeCoords.value.length < 2) return emptyGeoJson()
+  const points = buildRoutePoints(routeCoords.value, routeElevations.value)
+  const markers = buildKmMarkers(points, KM_MARKER_INTERVAL_KM)
+  return {
+    type: 'FeatureCollection' as const,
+    features: markers.map((m) => ({
+      type: 'Feature' as const,
+      geometry: { type: 'Point' as const, coordinates: [m.lng, m.lat] },
+      properties: { label: `${m.km}` },
+    })),
+  }
+}
+
 function updateMapSources() {
-  if (!map?.isStyleLoaded()) return
+  if (!map) return
+  if (!map.isStyleLoaded()) {
+    map.once('idle', () => updateMapSources())
+    return
+  }
   ;(map.getSource('planner-waypoints') as maplibregl.GeoJSONSource)?.setData(waypointsGeoJson())
   ;(map.getSource('planner-route') as maplibregl.GeoJSONSource)?.setData(routeGeoJson())
   ;(map.getSource('planner-preview') as maplibregl.GeoJSONSource)?.setData(previewGeoJson())
+  ;(map.getSource('planner-km-markers') as maplibregl.GeoJSONSource)?.setData(kmMarkerGeoJson())
 }
 
 function fitToContent() {
@@ -235,6 +309,7 @@ function addPlannerLayers() {
   map.addSource('planner-waypoints', { type: 'geojson', data: waypointsGeoJson() })
   map.addSource('planner-route', { type: 'geojson', data: routeGeoJson() })
   map.addSource('planner-preview', { type: 'geojson', data: previewGeoJson() })
+  map.addSource('planner-km-markers', { type: 'geojson', data: kmMarkerGeoJson() })
 
   map.addLayer({
     id: 'planner-preview-line',
@@ -271,6 +346,37 @@ function addPlannerLayers() {
   })
 
   map.addLayer({
+    id: 'planner-km-markers-dot',
+    type: 'circle',
+    source: 'planner-km-markers',
+    paint: {
+      'circle-radius': ['interpolate', ['linear'], ['zoom'], 8, 4, 14, 7],
+      'circle-color': '#fff',
+      'circle-stroke-width': 2,
+      'circle-stroke-color': '#374151',
+    },
+  })
+
+  map.addLayer({
+    id: 'planner-km-markers',
+    type: 'symbol',
+    source: 'planner-km-markers',
+    layout: {
+      'text-field': ['concat', ['get', 'label'], ' km'],
+      'text-size': 11,
+      'text-font': [...MAP_LABEL_FONT],
+      'text-offset': [0, -1.8],
+      'text-allow-overlap': true,
+      'text-ignore-placement': true,
+    },
+    paint: {
+      'text-color': '#111827',
+      'text-halo-color': '#fff',
+      'text-halo-width': 2,
+    },
+  })
+
+  map.addLayer({
     id: 'planner-waypoint-dot',
     type: 'circle',
     source: 'planner-waypoints',
@@ -289,6 +395,7 @@ function addPlannerLayers() {
     layout: {
       'text-field': ['get', 'label'],
       'text-size': 11,
+      'text-font': [...MAP_LABEL_FONT],
       'text-offset': [0, -1.6],
       'text-allow-overlap': true,
     },
@@ -299,11 +406,20 @@ function addPlannerLayers() {
     },
   })
 
-  map.on('click', (e) => {
-    addWaypoint(e.lngLat.lat, e.lngLat.lng)
-  })
-
   map.getCanvas().style.cursor = 'crosshair'
+}
+
+function onPlannerMapClick(e: maplibregl.MapMouseEvent) {
+  if (!map) return
+  const hits = map.queryRenderedFeatures(e.point, { layers: ['planner-waypoint-dot'] })
+  if (hits.length) {
+    const label = String(hits[0]?.properties?.label ?? '')
+    if (label === t('planner.start') && canCloseLoop.value) {
+      closeLoop()
+    }
+    return
+  }
+  addWaypoint(e.lngLat.lat, e.lngLat.lng)
 }
 
 function initMap() {
@@ -312,21 +428,54 @@ function initMap() {
   map = new maplibregl.Map({
     container: mapEl.value,
     style: basemapStyle(basemap.value),
-    center: [10.5, 47.3],
-    zoom: 6,
+    center: VIENNA_CENTER,
+    zoom: VIENNA_ZOOM,
+    transformRequest: (url) => ({ url: remapOpenFreeMapGlyphRequest(url) }),
   })
 
   map.addControl(new maplibregl.NavigationControl(), 'top-right')
+  map.on('click', onPlannerMapClick)
+  map.on('error', onBasemapError)
   map.on('load', () => {
     addPlannerLayers()
     updateMapSources()
+    centerOnUserLocation()
   })
 }
 
-function setBasemap(id: BasemapId) {
+/** Show Vienna immediately; fly to GPS if permission granted (non-blocking). */
+function centerOnUserLocation() {
+  if (!map || !navigator.geolocation || !isSecureGeoContext()) return
+  geoLocateAlive = true
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      if (!geoLocateAlive || !map) return
+      // Don't yank the camera once the user has started placing waypoints
+      if (waypoints.value.length > 0) return
+      map.flyTo({
+        center: [pos.coords.longitude, pos.coords.latitude],
+        zoom: Math.max(map.getZoom(), USER_LOCATION_ZOOM),
+        duration: 900,
+      })
+    },
+    () => {
+      /* keep Vienna fallback */
+    },
+    { enableHighAccuracy: false, timeout: GEO_TIMEOUT_MS, maximumAge: 120_000 }
+  )
+}
+
+function clearBasemapFallbackHint() {
+  basemapFallbackHint.value = ''
+}
+
+function setBasemap(id: BasemapId, opts: { auto?: boolean } = {}) {
   if (!map || basemap.value === id) return
   basemap.value = id
-  saveBasemapPreference(id)
+  if (!opts.auto) {
+    saveBasemapPreference(id)
+    clearBasemapFallbackHint()
+  }
 
   const center = map.getCenter()
   const zoom = map.getZoom()
@@ -352,10 +501,23 @@ function setBasemap(id: BasemapId) {
     }
   }
 
+  cancelStyleReady?.()
   map.setStyle(basemapStyle(id), { diff: false })
-  map.once('style.load', restoreOverlays)
-  window.setTimeout(restoreOverlays, 400)
-  window.setTimeout(restoreOverlays, 1200)
+  cancelStyleReady = whenStyleReady(map, restoreOverlays)
+}
+
+function onBasemapError(e: { error?: Error | string }) {
+  if (!map || basemapRecovering) return
+  if (!isBasemapStyleError(e.error)) return
+  if (basemap.value !== 'standard') return
+
+  basemapRecovering = true
+  console.warn('[planner] Basiskarte fehlgeschlagen, Fallback auf Radkarte:', e.error)
+  basemapFallbackHint.value = t('mapCanvas.basemapFallback')
+  setBasemap('cycling', { auto: true })
+  window.setTimeout(() => {
+    basemapRecovering = false
+  }, 2500)
 }
 
 function scheduleAutoRoute() {
@@ -378,6 +540,7 @@ async function calculateRoute() {
   if (waypoints.value.length < 2) {
     routeCoords.value = []
     routeElevations.value = []
+    routeSurfaceSummary.value = null
     updateMapSources()
     return
   }
@@ -393,13 +556,15 @@ async function calculateRoute() {
     if (gen !== routeGeneration) return
     routeCoords.value = result.coordinates
     routeElevations.value = result.elevations
+    routeSurfaceSummary.value = result.surfaceSummary
     updateMapSources()
   } catch (err) {
     if (gen !== routeGeneration) return
     routeCoords.value = []
     routeElevations.value = []
+    routeSurfaceSummary.value = null
     updateMapSources()
-    formError.value = err instanceof Error ? err.message : 'Radroute fehlgeschlagen'
+    formError.value = err instanceof Error ? err.message : t('planner.routeFailed')
   } finally {
     if (gen === routeGeneration) routing.value = false
   }
@@ -410,7 +575,7 @@ async function createMap() {
   store.clearError()
 
   if (waypoints.value.length < 2) {
-    formError.value = 'Mindestens 2 Wegpunkte setzen'
+    formError.value = t('planner.minWaypoints')
     return
   }
 
@@ -421,13 +586,14 @@ async function createMap() {
       if (!routeCoords.value.length) return
     }
 
-    const name = routeName.value.trim() || 'Geplante Route'
+    const name = routeName.value.trim() || t('planner.defaultName')
     await store.createMapFromRoute(
       name,
       routeCoords.value,
       radiusM.value,
       [...selected.value],
-      routeElevations.value.length ? routeElevations.value : undefined
+      routeElevations.value.length ? routeElevations.value : undefined,
+      routeSurfaceSummary.value
     )
 
     if (store.mapReady) {
@@ -436,7 +602,7 @@ async function createMap() {
       formError.value = store.error
     }
   } catch (err) {
-    formError.value = err instanceof Error ? err.message : 'Karte konnte nicht erstellt werden'
+    formError.value = err instanceof Error ? err.message : t('planner.createFailed')
   } finally {
     creating.value = false
   }
@@ -453,10 +619,14 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
+  geoLocateAlive = false
   if (autoRouteTimer) clearTimeout(autoRouteTimer)
   if (addressTimer) clearTimeout(addressTimer)
+  cancelStyleReady?.()
+  cancelStyleReady = null
   resizeObserver?.disconnect()
   resizeObserver = null
+  map?.off('error', onBasemapError)
   map?.remove()
   map = null
 })
@@ -466,39 +636,53 @@ onUnmounted(() => {
   <div class="route-planner">
     <div class="planner-map-wrap">
       <div ref="mapEl" class="planner-map" />
-      <div class="basemap-toggle" role="group" aria-label="Kartenstil">
+      <div v-if="routeKm > 0 || routing" class="route-km-badge" aria-live="polite">
+        <template v-if="routeKm > 0">
+          <strong>{{ routeKm.toFixed(1) }}</strong>
+          <span>km</span>
+        </template>
+        <template v-else>{{ t('planner.routeDrawing') }}</template>
+      </div>
+      <p v-if="basemapFallbackHint" class="basemap-fallback" role="status">
+        {{ basemapFallbackHint }}
+        <button type="button" @click="clearBasemapFallbackHint(); setBasemap('standard')">
+          {{ t('mapCanvas.basemapRetry') }}
+        </button>
+      </p>
+      <div class="basemap-toggle" role="group" :aria-label="t('mapCanvas.basemap')">
         <button
           type="button"
           :class="{ active: basemap === 'standard' }"
           @click="setBasemap('standard')"
         >
-          Karte
+          {{ t('mapCanvas.map') }}
         </button>
         <button
           type="button"
           :class="{ active: basemap === 'cycling' }"
-          title="Radwege hervorgehoben (CyclOSM)"
+          :title="t('mapCanvas.cycling')"
           @click="setBasemap('cycling')"
         >
-          Radwege
+          {{ t('mapCanvas.cycling') }}
         </button>
       </div>
       <p class="map-hint">
-        <template v-if="routing">Radroute wird berechnet…</template>
-        <template v-else>Karte anklicken oder Adresse suchen → Wegpunkt setzen</template>
+        <template v-if="routing">{{ t('planner.mapHintRouting') }}</template>
+        <template v-else-if="canCloseLoop">{{ t('planner.mapHintLoop') }}</template>
+        <template v-else>{{ t('planner.mapHintClick') }}</template>
       </p>
     </div>
 
     <div class="planner-controls">
       <div class="address-search">
-        <label class="field-label" for="address-input">Adresse suchen</label>
+        <label class="field-label" for="address-input">{{ t('planner.searchAddress') }}</label>
         <div class="search-wrap">
           <input
             id="address-input"
             v-model="addressQuery"
             type="search"
             class="text-input"
-            placeholder="z. B. Salzburg, Wien Hbf, Innsbruck"
+            :placeholder="t('planner.searchPlaceholder')"
             autocomplete="off"
             :disabled="!isOrsConfigured()"
             @input="onAddressInput"
@@ -510,87 +694,106 @@ onUnmounted(() => {
             </li>
           </ul>
         </div>
-        <p v-if="addressSearching" class="search-status">Suche…</p>
+        <p v-if="addressSearching" class="search-status">{{ t('planner.searching') }}</p>
         <p v-else-if="addressError" class="search-error">{{ addressError }}</p>
-        <p v-else class="search-hint">Treffer antippen → wird als Wegpunkt gesetzt</p>
+        <p v-else class="search-hint">{{ t('planner.searchHint') }}</p>
       </div>
 
       <div class="waypoint-panel">
         <div class="panel-head">
-          <h3>Wegpunkte ({{ waypoints.length }})</h3>
+          <h3>{{ t('planner.waypoints') }} ({{ waypoints.length }})</h3>
           <div class="panel-actions">
+            <button type="button" class="btn-ghost" :disabled="!canCloseLoop" @click="closeLoop">
+              {{ t('planner.closeLoop') }}
+            </button>
             <button type="button" class="btn-ghost" :disabled="!waypoints.length" @click="undoWaypoint">
-              Rückgängig
+              {{ t('planner.undo') }}
             </button>
             <button type="button" class="btn-ghost" :disabled="!waypoints.length" @click="clearAll">
-              Alle löschen
+              {{ t('planner.clearAll') }}
             </button>
           </div>
         </div>
+
+        <div v-if="routeKm > 0" class="route-km-card">
+          <span class="route-km-label">{{ t('planner.distance') }}</span>
+          <span class="route-km-value">{{ routeKm.toFixed(1) }} <small>km</small></span>
+        </div>
+        <p v-else-if="waypoints.length >= 2 && routing" class="route-km muted">{{ t('planner.routeDrawing') }}</p>
 
         <ul v-if="waypoints.length" class="waypoint-list">
           <li v-for="(wp, i) in waypoints" :key="wp.id">
             <span class="wp-label">{{ waypointLabel(i, waypoints.length) }}</span>
             <span class="wp-coords">{{ waypointDisplay(wp) }}</span>
-            <button type="button" class="wp-remove" title="Entfernen" @click="removeWaypoint(wp.id)">×</button>
+            <button
+              v-if="i === 0 && canCloseLoop"
+              type="button"
+              class="wp-loop"
+              :title="t('planner.setAsEnd')"
+              @click="closeLoop"
+            >
+              ↺
+            </button>
+            <button type="button" class="wp-remove" :title="t('planner.remove')" @click="removeWaypoint(wp.id)">×</button>
           </li>
         </ul>
-        <p v-else class="empty-hint">Klicke auf die Karte oder suche eine Adresse.</p>
-
-        <p v-if="routeKm > 0" class="route-km">Radroute: ca. {{ routeKm.toFixed(1) }} km</p>
-        <p v-else-if="waypoints.length >= 2 && routing" class="route-km muted">Route wird gezeichnet…</p>
+        <p v-else class="empty-hint">{{ t('planner.emptyWaypoints') }}</p>
       </div>
 
-      <label class="field">
-        <span class="field-label">Routenname</span>
-        <input v-model="routeName" type="text" class="text-input" placeholder="z. B. Alpenüberquerung Tag 1" />
+      <label v-if="showPoiOptions" class="field">
+        <span class="field-label">{{ t('planner.routeName') }}</span>
+        <input v-model="routeName" type="text" class="text-input" :placeholder="t('planner.routeNamePlaceholder')" />
       </label>
 
       <div v-if="!isOrsConfigured()" class="ors-warning">
-        <strong>OpenRouteService API-Key fehlt</strong>
-        <p>
-          Kostenlos auf
-          <a href="https://openrouteservice.org/dev/#/signup" target="_blank" rel="noopener noreferrer">openrouteservice.org</a>
-          registrieren und <code>VITE_ORS_API_KEY</code> in <code>.env</code> eintragen.
-        </p>
+        <strong>{{ t('planner.orsMissing') }}</strong>
+        <p>{{ t('planner.orsHint') }}</p>
       </div>
 
-      <label class="field">
-        <span class="field-label">Max. Entfernung zur Route</span>
-        <div class="radius-row">
-          <input
-            v-model.number="radiusM"
-            type="range"
-            :min="MIN_POI_RADIUS_M"
-            :max="MAX_POI_RADIUS_M"
-            step="10"
-          />
-          <span>{{ radiusM }} m</span>
-        </div>
-      </label>
+      <template v-if="showPoiOptions">
+        <label class="field">
+          <span class="field-label">{{ t('gpx.maxDist') }}</span>
+          <div class="radius-row">
+            <input
+              v-model.number="radiusM"
+              type="range"
+              :min="MIN_POI_RADIUS_M"
+              :max="MAX_POI_RADIUS_M"
+              step="10"
+            />
+            <span>{{ radiusM }} m</span>
+          </div>
+        </label>
 
-      <fieldset class="categories">
-        <legend>POI-Kategorien</legend>
-        <div class="category-grid">
-          <button
-            v-for="cat in POI_CATEGORY_DEFS"
-            :key="cat.id"
-            type="button"
-            class="cat-chip"
-            :class="{ active: selected.includes(cat.id) }"
-            @click="toggleCategory(cat.id)"
-          >
-            <span>{{ cat.icon }}</span>
-            {{ cat.label }}
-          </button>
-        </div>
-      </fieldset>
+        <fieldset class="categories">
+          <legend>{{ t('planner.poiCategories') }}</legend>
+          <div class="category-grid">
+            <button
+              v-for="cat in POI_CATEGORY_DEFS"
+              :key="cat.id"
+              type="button"
+              class="cat-chip"
+              :class="{ active: selected.includes(cat.id) }"
+              @click="toggleCategory(cat.id)"
+            >
+              <span>{{ cat.icon }}</span>
+              {{ poiCategoryLabel(cat.id) }}
+            </button>
+          </div>
+        </fieldset>
 
-      <p v-if="formError || store.error" class="error">{{ formError || store.error }}</p>
+        <p v-if="formError || store.error" class="error">{{ formError || store.error }}</p>
 
-      <button type="button" class="btn-primary btn-full" :disabled="!canCreate" @click="createMap">
-        {{ creating ? 'Lädt POIs…' : routing ? 'Route wird berechnet…' : 'Karte mit POIs erstellen' }}
-      </button>
+        <button type="button" class="btn-primary btn-full" :disabled="!canCreate" @click="createMap">
+          {{
+            creating
+              ? t('planner.loadingPois')
+              : routing
+                ? t('planner.calculatingRoute')
+                : t('planner.createMap')
+          }}
+        </button>
+      </template>
     </div>
   </div>
 </template>
@@ -633,6 +836,35 @@ onUnmounted(() => {
   z-index: 2;
 }
 
+.route-km-badge {
+  position: absolute;
+  top: 10px;
+  right: 52px;
+  z-index: 3;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.3rem;
+  padding: 0.45rem 0.7rem;
+  border-radius: 10px;
+  background: rgba(17, 24, 39, 0.92);
+  color: #fff;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.22);
+  pointer-events: none;
+}
+
+.route-km-badge strong {
+  font-size: 1.45rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+.route-km-badge span {
+  font-size: 0.85rem;
+  font-weight: 700;
+  opacity: 0.9;
+}
+
 .basemap-toggle {
   position: absolute;
   top: 10px;
@@ -643,6 +875,38 @@ onUnmounted(() => {
   border-radius: 6px;
   box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
   overflow: hidden;
+}
+
+.basemap-fallback {
+  position: absolute;
+  top: 52px;
+  left: 10px;
+  right: 10px;
+  z-index: 4;
+  margin: 0;
+  padding: 0.55rem 0.7rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  border-radius: 8px;
+  background: rgba(17, 24, 39, 0.92);
+  color: #fff;
+  font-size: 0.8rem;
+  line-height: 1.35;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
+}
+
+.basemap-fallback button {
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  background: transparent;
+  color: #fff;
+  border-radius: 6px;
+  padding: 0.25rem 0.55rem;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
 }
 
 .basemap-toggle button {
@@ -750,7 +1014,9 @@ onUnmounted(() => {
 
 .panel-actions {
   display: flex;
+  flex-wrap: wrap;
   gap: 0.35rem;
+  justify-content: flex-end;
 }
 
 .btn-ghost {
@@ -760,6 +1026,11 @@ onUnmounted(() => {
   background: var(--surface);
   font-size: 0.75rem;
   cursor: pointer;
+}
+
+.btn-ghost:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
 }
 
 .btn-ghost:disabled {
@@ -818,6 +1089,38 @@ onUnmounted(() => {
   color: var(--text-muted);
 }
 
+.route-km-card {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin: 0.15rem 0 0.65rem;
+  padding: 0.7rem 0.85rem;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--primary) 10%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--primary) 28%, var(--border));
+}
+
+.route-km-label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.route-km-value {
+  font-size: 1.55rem;
+  font-weight: 800;
+  color: var(--primary-dark);
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+
+.route-km-value small {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--primary);
+}
+
 .route-km {
   font-weight: 600;
   color: var(--primary);
@@ -826,6 +1129,23 @@ onUnmounted(() => {
 .route-km.muted {
   font-weight: 500;
   color: var(--text-muted);
+}
+
+.wp-loop {
+  width: 24px;
+  height: 24px;
+  border: none;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--primary) 16%, var(--surface));
+  color: var(--primary-dark);
+  cursor: pointer;
+  font-size: 0.95rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.wp-loop:hover {
+  background: color-mix(in srgb, var(--primary) 28%, var(--surface));
 }
 
 .field-label {

@@ -1,5 +1,7 @@
-import type { LatLng } from '../../shared/types'
+import type { LatLng, RouteSurfaceSummary } from '../../shared/types'
 import { GEOCODE_BBOX } from '../config/poiCategories'
+import { tGlobal } from '../i18n'
+import { bucketOrsSurfaceSummary, type OrsSurfaceSummaryRow } from '../utils/surface'
 
 export type CyclingProfile = 'cycling-regular'
 
@@ -11,12 +13,16 @@ export interface GeocodeResult {
   label: string
 }
 
+export interface CyclingRouteResult {
+  coordinates: [number, number][]
+  elevations: number[]
+  surfaceSummary: RouteSurfaceSummary | null
+}
+
 function orsKey(): string {
   const key = import.meta.env.VITE_ORS_API_KEY
   if (!key) {
-    throw new Error(
-      'OpenRouteService API-Key fehlt — bitte VITE_ORS_API_KEY in .env eintragen (kostenlos auf openrouteservice.org)'
-    )
+    throw new Error(tGlobal('routing.orsKeyMissing'))
   }
   return key
 }
@@ -44,7 +50,7 @@ export async function searchAddresses(query: string, limit = 6): Promise<Geocode
   })
 
   if (!res.ok) {
-    if (res.status === 429) throw new Error('Zu viele Suchanfragen — bitte kurz warten')
+    if (res.status === 429) throw new Error(tGlobal('routing.rateLimited'))
     return []
   }
 
@@ -69,14 +75,16 @@ export async function searchAddresses(query: string, limit = 6): Promise<Geocode
 export async function fetchCyclingRoute(
   waypoints: LatLng[],
   profile: CyclingProfile = CYCLING_PROFILE
-): Promise<{ coordinates: [number, number][]; elevations: number[] }> {
+): Promise<CyclingRouteResult> {
   const key = orsKey()
 
   if (waypoints.length < 2) {
-    throw new Error('Mindestens 2 Wegpunkte setzen (Start und Ziel)')
+    throw new Error(tGlobal('routing.minWaypoints'))
   }
 
   const coordinates = waypoints.map((w) => [w.lng, w.lat])
+  // Default ORS snap radius is only 350 m — mountain/parking clicks often fail (code 2010).
+  const radiuses = waypoints.map(() => 2000)
 
   const res = await fetch(
     `https://api.openrouteservice.org/v2/directions/${profile}/geojson`,
@@ -86,7 +94,12 @@ export async function fetchCyclingRoute(
         Authorization: key,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ coordinates, elevation: true }),
+      body: JSON.stringify({
+        coordinates,
+        elevation: true,
+        radiuses,
+        extra_info: ['surface'],
+      }),
     }
   )
 
@@ -99,23 +112,31 @@ export async function fetchCyclingRoute(
       /* ignore */
     }
     if (res.status === 401 || res.status === 403) {
-      throw new Error('OpenRouteService: ungültiger API-Key')
+      throw new Error(tGlobal('routing.invalidKey'))
     }
     if (res.status === 429) {
-      throw new Error('OpenRouteService: Tageslimit erreicht — bitte später erneut versuchen')
+      throw new Error(tGlobal('routing.dailyLimit'))
     }
-    throw new Error(`Radroute konnte nicht berechnet werden: ${detail}`)
+    throw new Error(tGlobal('routing.routeCalcFailed', { detail }))
   }
 
   const data = (await res.json()) as {
     features?: {
       geometry?: { type?: string; coordinates?: ([number, number] | [number, number, number])[] }
+      properties?: {
+        extras?: {
+          surface?: {
+            summary?: OrsSurfaceSummaryRow[]
+          }
+        }
+      }
     }[]
   }
 
-  const line = data.features?.[0]?.geometry
+  const feature = data.features?.[0]
+  const line = feature?.geometry
   if (line?.type !== 'LineString' || !line.coordinates?.length) {
-    throw new Error('Keine Radroute zwischen den Wegpunkten gefunden')
+    throw new Error(tGlobal('routing.noRouteFound'))
   }
 
   const coords: [number, number][] = []
@@ -125,8 +146,13 @@ export async function fetchCyclingRoute(
     if (c.length >= 3 && typeof c[2] === 'number') elevations.push(c[2])
   }
 
+  const surfaceSummary = bucketOrsSurfaceSummary(
+    feature?.properties?.extras?.surface?.summary
+  )
+
   return {
     coordinates: coords,
     elevations: elevations.length === coords.length ? elevations : [],
+    surfaceSummary,
   }
 }

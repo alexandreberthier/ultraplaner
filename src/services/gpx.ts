@@ -11,10 +11,83 @@ import {
 import { isInBbox } from './geo'
 import { buildRoutePoints, totalRouteKm } from '../utils/route'
 
+export interface GpxWaypointImport {
+  lat: number
+  lng: number
+  name: string
+  favorite: boolean
+  distanceFromStartM?: number
+  category?: string
+  osmId?: string
+}
+
+function extensionValue(
+  wpt: {
+    getElementsByTagName: (name: string) => ArrayLike<{
+      localName?: string | null
+      nodeName: string
+      textContent: string | null
+    }>
+  },
+  localName: string
+): string | null {
+  const nodes = wpt.getElementsByTagName('*')
+  for (let i = 0; i < nodes.length; i++) {
+    const n = nodes[i]!
+    const name = n.localName || n.nodeName
+    if (name === localName || name === `up:${localName}` || name.endsWith(`:${localName}`)) {
+      const text = n.textContent?.trim()
+      return text || null
+    }
+  }
+  return null
+}
+
+/** Parse UltraPlaner / generic waypoints from a GPX document. */
+export function parseGpxWaypoints(text: string): GpxWaypointImport[] {
+  const doc = new DOMParser().parseFromString(text, 'text/xml')
+  const wpts = doc.getElementsByTagName('wpt')
+  const out: GpxWaypointImport[] = []
+
+  for (let i = 0; i < wpts.length; i++) {
+    const wpt = wpts[i]!
+    const lat = Number(wpt.getAttribute('lat'))
+    const lng = Number(wpt.getAttribute('lon'))
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) continue
+
+    const nameEl = wpt.getElementsByTagName('name')[0]
+    const name = nameEl?.textContent?.trim() || 'Waypoint'
+    const favRaw = extensionValue(wpt, 'favorite')
+    const distRaw = extensionValue(wpt, 'distanceFromStart')
+    const category = extensionValue(wpt, 'category') ?? undefined
+    const osmId = extensionValue(wpt, 'osmId') ?? undefined
+    const favorite =
+      favRaw == null
+        ? Boolean(osmId || category || distRaw)
+        : /^(1|true|yes)$/i.test(favRaw)
+
+    const distanceFromStartM =
+      distRaw != null && Number.isFinite(Number(distRaw)) ? Number(distRaw) : undefined
+
+    out.push({
+      lat,
+      lng,
+      name,
+      favorite,
+      distanceFromStartM,
+      category,
+      osmId,
+    })
+  }
+
+  return out
+}
+
 export function parseGpxFile(text: string): {
   coordinates: [number, number][]
   elevations: number[]
   name: string
+  waypoints: GpxWaypointImport[]
 } {
   const doc = new DOMParser().parseFromString(text, 'text/xml')
   const geojson = gpx(doc)
@@ -46,7 +119,12 @@ export function parseGpxFile(text: string): {
     throw new Error('GPX enthält keine gültige Strecke')
   }
 
-  return { coordinates, elevations, name }
+  return {
+    coordinates,
+    elevations,
+    name,
+    waypoints: parseGpxWaypoints(text),
+  }
 }
 
 export function validateGpxFile(file: File, text: string): void {
@@ -86,13 +164,15 @@ export function routePointsFromGpx(text: string): {
   coordinates: [number, number][]
   elevations: number[]
   name: string
+  waypoints: GpxWaypointImport[]
 } {
-  const { coordinates, elevations, name } = parseGpxFile(text)
+  const { coordinates, elevations, name, waypoints } = parseGpxFile(text)
   return {
     points: buildRoutePoints(coordinates, elevations),
     coordinates,
     elevations,
     name,
+    waypoints,
   }
 }
 

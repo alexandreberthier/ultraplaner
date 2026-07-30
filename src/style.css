@@ -16,6 +16,15 @@
   --danger: #bc4749;
 }
 
+:root[data-colorblind] {
+  --primary: #0072b2;
+  --primary-dark: #004c7f;
+  --bg: #f7f9fc;
+  --surface-2: #eef3f8;
+  --border: #c8d6e5;
+  --danger: #d55e00;
+}
+
 html,
 body,
 #app {
@@ -36,6 +45,18 @@ button,
 input,
 select {
   font: inherit;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 a {

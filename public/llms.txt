@@ -1,0 +1,26 @@
+# UltraPlaner
+
+> Free ultracycling route planning with supply points, elevation gaps, ETA and printable cheat sheet across Europe.
+
+UltraPlaner is a web app for long-distance cycling. Load a GPX, draw a route, or search nearby. It shows OpenStreetMap-based supply points near the track corridor (fuel, shops, water, and more).
+
+## Primary pages
+
+- [Home (Deutsch)](https://ultraplaner.com/): Main landing and GPX / route / nearby entry
+- [Home (English)](https://ultraplaner.com/en/)
+- [Home (Español)](https://ultraplaner.com/es/)
+- [Home (Français)](https://ultraplaner.com/fr/)
+- [Supply for ultracycling (DE)](https://ultraplaner.com/versorgung-ultracycling/)
+- [Supply for ultracycling (EN)](https://ultraplaner.com/en/ultracycling-supply/)
+- [Supply for ultracycling (ES)](https://ultraplaner.com/es/avituallamiento-ultracycling/)
+- [Supply for ultracycling (FR)](https://ultraplaner.com/fr/ravitaillement-ultracycling/)
+- [Privacy policy (DE)](https://ultraplaner.com/datenschutz/)
+- [Imprint (DE)](https://ultraplaner.com/impressum/)
+- [Sitemap](https://ultraplaner.com/sitemap.xml)
+- [robots.txt](https://ultraplaner.com/robots.txt)
+
+## Notes for crawlers and agents
+
+- Map views under `/map/*` are app screens (client-rendered) and not primary SEO content.
+- Content and POI data derive from OpenStreetMap and related open data sources.
+- Prefer linking users to the locale home pages or the supply guide above rather than ephemeral share URLs.

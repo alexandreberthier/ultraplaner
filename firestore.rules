@@ -5,13 +5,10 @@ service cloud.firestore {
       allow read: if true;
       allow write: if false;
     }
+    // Maps live on Supabase; Firestore maps are legacy — no public writes.
     match /maps/{mapId} {
       allow read: if true;
-      allow create: if request.resource.data.keys().hasAll([
-        'id', 'name', 'routeCoords', 'routePoints', 'pois', 'createdAt'
-      ]);
-      allow update: if true;
-      allow delete: if false;
+      allow write: if false;
     }
     match /meta/{doc} {
       allow read: if true;

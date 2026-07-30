@@ -1,18 +1,26 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, onUnmounted, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useMapStore } from '../stores/mapStore'
-import { useMapExport } from '../composables/useMapExport'
 import { formatDistance, formatKm } from '../services/geo'
-import { POI_CATEGORY_DEFS } from '../config/poiCategories'
+import { poiCategoryLabel } from '../utils/poiLabels'
 import { googleMapsDirectionsUrl } from '../services/navigation'
 import {
   fetchPlaceOpeningHours,
   isGooglePlacesConfigured,
   type PlaceHoursResult,
 } from '../services/googlePlaces'
+import {
+  hasOsmOpeningHours,
+  isShopLikeWithoutHours,
+  nextChangeLabel,
+  prettifyOpeningHours,
+  type OpenStatus,
+} from '../utils/openingHours'
+import { isAlwaysAvailableWater } from '../utils/poiNormalize'
 
 const store = useMapStore()
-const { printFavorites } = useMapExport()
+const { t, locale } = useI18n()
 const hoursLoading = ref(false)
 const hoursError = ref('')
 const hoursResult = ref<PlaceHoursResult | null>(null)
@@ -20,7 +28,64 @@ const hoursResult = ref<PlaceHoursResult | null>(null)
 const isFavorite = computed(() =>
   store.selectedPoi ? store.favorites.has(store.selectedPoi.id) : false
 )
-const favCount = computed(() => store.favorites.size)
+
+const customNameDraft = ref('')
+const noteDraft = ref('')
+const metaEditing = ref(false)
+
+function loadFavoriteMetaDrafts(id: string) {
+  const meta = store.favoriteMeta.get(id)
+  customNameDraft.value = meta?.customName ?? ''
+  noteDraft.value = meta?.note ?? ''
+}
+
+watch(
+  () => store.selectedPoi?.id,
+  (id) => {
+    hoursResult.value = null
+    hoursError.value = ''
+    metaEditing.value = false
+    if (!id || !store.selectedPoi) {
+      customNameDraft.value = ''
+      noteDraft.value = ''
+      return
+    }
+    loadFavoriteMetaDrafts(id)
+  }
+)
+
+function saveFavoriteMeta() {
+  if (!store.selectedPoi || !isFavorite.value) return
+  store.updateFavoriteMeta(store.selectedPoi.id, {
+    customName: customNameDraft.value,
+    note: noteDraft.value,
+  })
+}
+
+function startEditMeta() {
+  if (!store.selectedPoi || !isFavorite.value) return
+  loadFavoriteMetaDrafts(store.selectedPoi.id)
+  metaEditing.value = true
+}
+
+function cancelEditMeta() {
+  if (store.selectedPoi) loadFavoriteMetaDrafts(store.selectedPoi.id)
+  metaEditing.value = false
+}
+
+function applyEditMeta() {
+  saveFavoriteMeta()
+  metaEditing.value = false
+}
+
+function onToggleFavorite() {
+  if (!store.selectedPoi) return
+  store.toggleFavorite(store.selectedPoi.id)
+  metaEditing.value = false
+  customNameDraft.value = ''
+  noteDraft.value = ''
+  // Keep sheet open so the user can re-star or leave intentionally.
+}
 
 const selectedEta = computed(() => {
   const poi = store.selectedPoi
@@ -28,9 +93,62 @@ const selectedEta = computed(() => {
   return store.etaAtRouteKm(poi.distanceAlongRouteKm ?? 0)
 })
 
-function categoryLabel(id: string) {
-  return POI_CATEGORY_DEFS.find((c) => c.id === id)?.label ?? id
-}
+const osmHours = computed(() => store.selectedPoi?.openingHours)
+const hasOsm = computed(() => (store.selectedPoi ? hasOsmOpeningHours(store.selectedPoi) : false))
+
+const etaOpenStatus = computed((): OpenStatus => {
+  const poi = store.selectedPoi
+  if (!poi) return 'unknown'
+  return store.poiOpenStatusAtEta(poi)
+})
+
+const etaOpenLabel = computed(() => {
+  const poi = store.selectedPoi
+  if (!poi) return t('detail.hoursMissing')
+  if (isAlwaysAvailableWater(poi)) return t('detail.hoursAlways')
+  if (!hasOsm.value) {
+    if (isShopLikeWithoutHours(poi)) return t('detail.hoursShopUnknown')
+    return t('detail.hoursMissing')
+  }
+  if (store.isNearbyMap) {
+    if (etaOpenStatus.value === 'open') return t('detail.openNow')
+    if (etaOpenStatus.value === 'closed') return t('detail.closedNow')
+    return t('detail.hoursAtEtaUnknown')
+  }
+  if (!selectedEta.value?.arrival) return t('detail.hoursNoEta')
+  if (etaOpenStatus.value === 'open') return t('detail.hoursAtEtaOpen')
+  if (etaOpenStatus.value === 'closed') return t('detail.hoursAtEtaClosed')
+  return t('detail.hoursAtEtaUnknown')
+})
+
+const showHoursUnknownHint = computed(() => {
+  const poi = store.selectedPoi
+  if (!poi || isAlwaysAvailableWater(poi)) return false
+  if (!hasOsm.value) return true
+  return etaOpenStatus.value === 'unknown'
+})
+
+const hoursStatusClass = computed(() => {
+  const poi = store.selectedPoi
+  if (!poi) return 'unknown'
+  if (isAlwaysAvailableWater(poi)) return 'open'
+  // No OSM data → unknown (never style as closed)
+  if (!hasOsm.value) return 'unknown'
+  return etaOpenStatus.value
+})
+
+const osmPretty = computed(() =>
+  prettifyOpeningHours(osmHours.value, locale.value.slice(0, 2))
+)
+
+const osmNextChange = computed(() => {
+  const poi = store.selectedPoi
+  if (!poi?.openingHours) return null
+  const at = store.isNearbyMap ? new Date() : selectedEta.value?.arrival
+  if (!at) return null
+  const next = nextChangeLabel(poi.openingHours, at, poi.lat, poi.lng)
+  return next ? t('detail.hoursNext', { time: next }) : null
+})
 
 async function loadOpeningHours() {
   const poi = store.selectedPoi
@@ -43,12 +161,12 @@ async function loadOpeningHours() {
   try {
     const result = await fetchPlaceOpeningHours(poi)
     if (!result) {
-      hoursError.value = 'Kein Google-Eintrag in der Nähe gefunden.'
+      hoursError.value = t('detail.hoursNone')
       return
     }
     hoursResult.value = result
   } catch (err) {
-    hoursError.value = err instanceof Error ? err.message : 'Öffnungszeiten nicht verfügbar'
+    hoursError.value = err instanceof Error ? err.message : t('detail.hoursError')
   } finally {
     hoursLoading.value = false
   }
@@ -60,16 +178,21 @@ function onClose() {
   store.closePoiDetail()
 }
 
-function onToggleFavorite() {
-  if (!store.selectedPoi) return
-  store.toggleFavorite(store.selectedPoi.id)
-  onClose()
+function onSheetKeydown(e: KeyboardEvent) {
+  if (e.key === 'Escape') onClose()
 }
 
-function onPrint() {
-  printFavorites()
-  onClose()
-}
+watch(
+  () => store.selectedPoi,
+  (poi) => {
+    if (poi) document.addEventListener('keydown', onSheetKeydown)
+    else document.removeEventListener('keydown', onSheetKeydown)
+  }
+)
+
+onUnmounted(() => {
+  document.removeEventListener('keydown', onSheetKeydown)
+})
 
 function onNavigate() {
   onClose()
@@ -78,27 +201,93 @@ function onNavigate() {
 
 <template>
   <div v-if="store.selectedPoi" class="sheet-backdrop" @click.self="onClose()">
-    <div class="sheet">
-      <button type="button" class="close" @click="onClose()">×</button>
-      <h3>{{ store.selectedPoi.name }}</h3>
+    <div class="sheet" role="dialog" aria-modal="true">
+      <header class="sheet-top">
+        <h3>{{ store.selectedPoi.name }}</h3>
+        <button type="button" class="close" :aria-label="t('detail.close')" @click="onClose()">
+          ×
+        </button>
+      </header>
+
+      <div class="sheet-scroll">
       <dl>
-        <dt>Kategorie</dt>
-        <dd>{{ categoryLabel(store.selectedPoi.category) }}</dd>
-        <dt>Routen-km</dt>
+        <dt>{{ t('detail.category') }}</dt>
+        <dd>{{ poiCategoryLabel(store.selectedPoi.category) }}</dd>
+        <dt>{{ store.isNearbyMap ? t('detail.distanceAway') : t('detail.routeKm') }}</dt>
         <dd>{{ formatKm(store.selectedPoi.distanceAlongRouteKm ?? 0) }}</dd>
-        <dt>ETA</dt>
-        <dd v-if="selectedEta">
-          <template v-if="selectedEta.clockLabel">
-            {{ selectedEta.clockLabel }}
-            <span class="eta-sub">({{ selectedEta.durationLabel }} ab Start)</span>
-          </template>
-          <template v-else>{{ selectedEta.durationLabel }} ab Start</template>
-        </dd>
-        <dt>Entfernung zur Route</dt>
+        <template v-if="!store.isNearbyMap">
+          <dt>{{ t('eta.time') }}</dt>
+          <dd v-if="selectedEta">
+            <template v-if="selectedEta.clockLabel">
+              {{ selectedEta.clockLabel }}
+              <span class="eta-sub">{{ t('detail.etaFromStart', { duration: selectedEta.durationLabel }) }}</span>
+            </template>
+            <template v-else>{{ t('detail.etaFromStartShort', { duration: selectedEta.durationLabel }) }}</template>
+          </dd>
+        </template>
+        <dt>{{ store.isNearbyMap ? t('detail.distCenter') : t('detail.distRoute') }}</dt>
         <dd>{{ formatDistance(store.selectedPoi.distanceToRouteM ?? 0) }}</dd>
-        <dt v-if="store.selectedPoi.subType">Typ</dt>
+        <dt v-if="store.selectedPoi.subType">{{ t('detail.type') }}</dt>
         <dd v-if="store.selectedPoi.subType">{{ store.selectedPoi.subType }}</dd>
       </dl>
+
+      <div v-if="isFavorite" class="fav-edit">
+        <template v-if="!metaEditing">
+          <div class="fav-view-row">
+            <span class="fav-view-label">{{ t('detail.favCustomName') }}</span>
+            <span class="fav-view-value" :class="{ muted: !customNameDraft }">
+              {{ customNameDraft || store.selectedPoi.name }}
+            </span>
+          </div>
+          <div class="fav-view-row">
+            <span class="fav-view-label">{{ t('detail.favNote') }}</span>
+            <span class="fav-view-value" :class="{ muted: !noteDraft }">
+              {{ noteDraft || t('detail.favNoteEmpty') }}
+            </span>
+          </div>
+          <button type="button" class="fav-edit-btn" @click="startEditMeta">
+            {{ t('detail.favEdit') }}
+          </button>
+        </template>
+        <template v-else>
+          <label class="fav-field">
+            <span>{{ t('detail.favCustomName') }}</span>
+            <input
+              v-model="customNameDraft"
+              type="text"
+              maxlength="40"
+              :placeholder="store.selectedPoi.name"
+            />
+          </label>
+          <label class="fav-field">
+            <span>{{ t('detail.favNote') }}</span>
+            <textarea
+              v-model="noteDraft"
+              rows="2"
+              maxlength="80"
+              :placeholder="t('detail.favNoteHint')"
+            />
+          </label>
+          <div class="fav-edit-actions">
+            <button type="button" class="fav-apply-btn" @click="applyEditMeta">
+              {{ t('detail.favApply') }}
+            </button>
+            <button type="button" class="fav-cancel-btn" @click="cancelEditMeta">
+              {{ t('common.cancel') }}
+            </button>
+          </div>
+        </template>
+      </div>
+
+      <div class="hours-box osm-hours" :class="`status-${hoursStatusClass}`">
+        <p class="open-now">
+          <span class="hours-source">{{ t('detail.hoursOsm') }}</span>
+          {{ etaOpenLabel }}
+        </p>
+        <p v-if="osmNextChange && hasOsm && etaOpenStatus !== 'unknown'" class="hours-next">{{ osmNextChange }}</p>
+        <p v-if="osmPretty" class="hours-raw">{{ osmPretty }}</p>
+        <p v-if="showHoursUnknownHint" class="hours-hint">{{ t('detail.hoursUnknownHint') }}</p>
+      </div>
 
       <div class="actions">
         <button
@@ -107,18 +296,8 @@ function onNavigate() {
           :class="{ active: isFavorite }"
           @click="onToggleFavorite"
         >
-          {{ isFavorite ? '★ Favorit entfernen' : '☆ Als Favorit markieren' }}
+          {{ isFavorite ? t('detail.removeFavorite') : t('detail.addFavorite') }}
         </button>
-
-        <div v-if="isFavorite && favCount > 0" class="fav-hint">
-          <p>
-            {{ favCount === 1 ? '1 Favorit gespeichert.' : `${favCount} Favoriten gespeichert.` }}
-            Spickzettel mit km-Positionen drucken:
-          </p>
-          <button type="button" class="print-btn" @click="onPrint">
-            🖨️ Spickzettel drucken
-          </button>
-        </div>
         <a
           class="nav-btn"
           :href="googleMapsDirectionsUrl(store.selectedPoi.lat, store.selectedPoi.lng)"
@@ -126,32 +305,30 @@ function onNavigate() {
           rel="noopener noreferrer"
           @click="onNavigate"
         >
-          Google Maps Navigation
+          {{ t('detail.navGoogle') }}
         </a>
         <button
-          v-if="isGooglePlacesConfigured()"
+          v-if="isGooglePlacesConfigured() && !hasOsm"
           type="button"
           class="hours-btn"
           :disabled="hoursLoading"
           @click="loadOpeningHours"
         >
-          {{ hoursLoading ? 'Lade Öffnungszeiten…' : 'Öffnungszeiten laden' }}
+          {{ hoursLoading ? t('detail.hoursLoading') : t('detail.hoursLoad') }}
         </button>
       </div>
 
       <p v-if="hoursError" class="hours-error">{{ hoursError }}</p>
       <div v-if="hoursResult" class="hours-box">
         <p v-if="hoursResult.openNow != null" class="open-now">
-          {{ hoursResult.openNow ? 'Jetzt geöffnet' : 'Jetzt geschlossen' }}
+          {{ hoursResult.openNow ? t('detail.openNow') : t('detail.closedNow') }}
         </p>
         <ul v-if="hoursResult.weekdayText.length">
           <li v-for="line in hoursResult.weekdayText" :key="line">{{ line }}</li>
         </ul>
-        <p v-else class="hours-muted">Keine Öffnungszeiten hinterlegt.</p>
+        <p v-else class="hours-muted">{{ t('detail.hoursEmpty') }}</p>
       </div>
-      <p v-else-if="!isGooglePlacesConfigured()" class="hours-muted">
-        Öffnungszeiten: optional mit <code>VITE_GOOGLE_MAPS_API_KEY</code> (Google Places API).
-      </p>
+      </div>
     </div>
   </div>
 </template>
@@ -171,24 +348,146 @@ function onNavigate() {
   background: var(--surface);
   width: 100%;
   max-width: 480px;
-  padding: 1.25rem 1.5rem 2rem;
+  max-height: min(92dvh, 92vh);
+  display: flex;
+  flex-direction: column;
   border-radius: 16px 16px 0 0;
   position: relative;
+  overflow: hidden;
+}
+
+.sheet-top {
+  flex-shrink: 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 0.85rem 1rem 0.65rem 1.25rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  z-index: 2;
+}
+
+.sheet-top h3 {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  font-size: 1.05rem;
+  line-height: 1.3;
+  padding-right: 0.25rem;
 }
 
 .close {
-  position: absolute;
-  top: 0.75rem;
-  right: 1rem;
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  margin: -0.35rem -0.25rem 0 0;
   border: none;
-  background: none;
-  font-size: 1.5rem;
+  border-radius: 10px;
+  background: var(--surface-2);
+  font-size: 1.6rem;
+  line-height: 1;
   cursor: pointer;
+  color: var(--text);
+}
+
+.sheet-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 0.75rem 1.25rem calc(1.25rem + env(safe-area-inset-bottom, 0px));
+}
+
+.fav-edit {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  margin: 0 0 1rem;
+  padding: 0.75rem;
+  background: #fffbeb;
+  border: 1px solid #fcd34d;
+  border-radius: 8px;
+}
+
+.fav-view-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.fav-view-label {
+  font-size: 0.75rem;
   color: var(--text-muted);
 }
 
-h3 {
-  margin: 0 2rem 1rem 0;
+.fav-view-value {
+  font-size: 0.9rem;
+  color: var(--text);
+  line-height: 1.35;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.fav-view-value.muted {
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.fav-edit-btn,
+.fav-apply-btn,
+.fav-cancel-btn {
+  width: 100%;
+  padding: 0.5rem 0.65rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.fav-edit-btn {
+  border-color: #f59e0b;
+  color: #b45309;
+  background: #fff;
+}
+
+.fav-edit-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.fav-apply-btn {
+  flex: 1;
+  border-color: #f59e0b;
+  background: #f59e0b;
+  color: #fff;
+}
+
+.fav-cancel-btn {
+  flex: 1;
+}
+
+.fav-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.fav-field input,
+.fav-field textarea {
+  font: inherit;
+  font-size: 0.9rem;
+  color: var(--text);
+  padding: 0.45rem 0.55rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+  resize: vertical;
 }
 
 dl {
@@ -283,11 +582,29 @@ dd {
 }
 
 .hours-box {
-  margin-top: 0.75rem;
+  margin: 0 0 1rem;
   padding: 0.75rem;
   background: var(--surface-2);
   border-radius: 8px;
   font-size: 0.85rem;
+  border: 1px solid var(--border);
+}
+
+.osm-hours.status-open {
+  background: #ecfdf5;
+  border-color: #6ee7b7;
+}
+
+.osm-hours.status-closed {
+  background: #fef2f2;
+  border-color: #fca5a5;
+}
+
+.osm-hours.status-unknown,
+.osm-hours.status-missing {
+  background: var(--surface-2);
+  border-style: dashed;
+  color: var(--text-muted);
 }
 
 .hours-box ul {
@@ -300,9 +617,42 @@ dd {
   font-weight: 600;
 }
 
+.hours-source {
+  display: inline-block;
+  margin-right: 0.35rem;
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.06);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  vertical-align: middle;
+}
+
+.hours-next,
+.hours-raw,
+.hours-hint {
+  margin: 0.35rem 0 0;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  line-height: 1.35;
+  white-space: pre-wrap;
+}
+
 .hours-muted {
   margin: 0.75rem 0 0;
   font-size: 0.8rem;
   color: var(--text-muted);
+}
+
+@media (max-width: 768px) {
+  .print-hint-desktop {
+    display: none;
+  }
+
+  .fav-hint:has(.print-hint-desktop) p {
+    margin-bottom: 0;
+  }
 }
 </style>

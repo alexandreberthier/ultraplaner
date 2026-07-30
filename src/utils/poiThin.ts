@@ -2,9 +2,10 @@ import type { Poi, PoiCategory } from '../../shared/types'
 
 const MAP_SPACING_KM: Partial<Record<PoiCategory, number>> = {
   fuel: 5,
-  food: 2,
+  supermarket: 2,
+  gastronomy: 4,
   water: 2,
-  restaurant: 5,
+  beverages: 3,
   hotel: 10,
   bike: 10,
   campsite: 15,

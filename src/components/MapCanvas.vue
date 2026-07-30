@@ -1,50 +1,123 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref, watch, computed } from 'vue'
+import { onMounted, onUnmounted, ref, watch, computed, nextTick } from 'vue'
+import { useI18n } from 'vue-i18n'
 import maplibregl from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { useMapStore } from '../stores/mapStore'
 import {
-  POI_COLORS,
-  POI_ICONS,
+  MAP_LABEL_FONT,
   ROUTE_CASING,
   ROUTE_COLOR,
-  ROUTE_END_COLOR,
-  ROUTE_START_COLOR,
-  kmMarkerInterval,
   basemapStyle,
+  climbMarkerColor,
+  isBasemapStyleError,
+  kmMarkerInterval,
   loadBasemapPreference,
+  poiColors,
+  remapOpenFreeMapGlyphRequest,
+  routeEndColor,
+  routeStartColor,
   saveBasemapPreference,
+  whenStyleReady,
   type BasemapId,
 } from '../config/mapStyle'
+import { useColorblindMode } from '../composables/useColorblindMode'
+import { useRidePosition } from '../composables/useRidePosition'
+import { distanceAlongRouteKm } from '../services/poiFilter'
 import { buildKmMarkers, buildGradeSegments, detectClimbs, hasElevationData } from '../utils/route'
+import {
+  controlPointIconId,
+  ensureControlPointImages,
+} from '../utils/controlPointIcons'
+import { ensurePoiCategoryImages, poiCategoryIconId } from '../utils/poiMapIcons'
+import { isAppleMobile, isStandalonePwa } from '../utils/geoDevice'
 
 const store = useMapStore()
+const { t } = useI18n()
+const { colorblindMode, toggleColorblindMode } = useColorblindMode()
+const { setRideKmAlong } = useRidePosition()
+
+const props = defineProps<{
+  /** Mobile cockpit: larger location, less map chrome */
+  rideMode?: boolean
+}>()
+
 const mapContainer = ref<HTMLDivElement | null>(null)
 const mapCanvasWrap = ref<HTMLDivElement | null>(null)
 let map: maplibregl.Map | null = null
 let resizeObserver: ResizeObserver | null = null
 
-// ── Location Tracking ──
+// ── Location Tracking (Follow + Heading) ──
 const locationWatchId = ref<number | null>(null)
-const userLocation = ref<{ lat: number; lng: number; accuracy: number } | null>(null)
+const userLocation = ref<{
+  lat: number
+  lng: number
+  accuracy: number
+  heading: number | null
+  speed: number | null
+} | null>(null)
 const locationError = ref('')
+const locationDeniedHelp = ref(false)
+const locationPending = ref(false)
+/** Keep map centered on GPS */
+const followActive = ref(false)
+/** Rotate map to movement direction */
+const headingUp = ref(false)
+
 let locationMarker: maplibregl.Marker | null = null
 let accuracyEl: HTMLDivElement | null = null
 let bikeCursorMarker: maplibregl.Marker | null = null
 let bikeCursorEl: HTMLDivElement | null = null
+let lastFollowPos: { lat: number; lng: number } | null = null
+const userPanning = ref(false)
+/** Resume GPS after tab/app returns from background */
+let resumeLocationAfterVisible = false
+let locatingTimer: ReturnType<typeof setTimeout> | null = null
+/** Skip click toggle when GPS was already started on touch pointerdown */
+let startedFromPointerDown = false
+
+function bearingBetween(
+  lat1: number,
+  lng1: number,
+  lat2: number,
+  lng2: number
+): number {
+  const toRad = (d: number) => (d * Math.PI) / 180
+  const toDeg = (r: number) => (r * 180) / Math.PI
+  const φ1 = toRad(lat1)
+  const φ2 = toRad(lat2)
+  const Δλ = toRad(lng2 - lng1)
+  const y = Math.sin(Δλ) * Math.cos(φ2)
+  const x = Math.cos(φ1) * Math.sin(φ2) - Math.sin(φ1) * Math.cos(φ2) * Math.cos(Δλ)
+  return (toDeg(Math.atan2(y, x)) + 360) % 360
+}
+
+function createLocationElement(): HTMLDivElement {
+  const el = document.createElement('div')
+  el.className = 'user-location-marker'
+  el.innerHTML = `
+    <div class="user-location-pulse"></div>
+    <div class="user-location-arrow" aria-hidden="true">
+      <svg viewBox="0 0 40 40">
+        <path d="M20 4 L32 30 L20 24 L8 30 Z" fill="#2563eb" stroke="#fff" stroke-width="2.5" stroke-linejoin="round"/>
+      </svg>
+    </div>
+  `
+  return el
+}
 
 function createBikeCursorElement(): HTMLDivElement {
   const el = document.createElement('div')
   el.className = 'route-bike-cursor'
   el.innerHTML = `
     <svg class="route-bike-icon" viewBox="0 0 64 40" aria-hidden="true">
-      <g fill="none" stroke="#111" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+      <g fill="none" stroke="#2d6a4f" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
         <circle cx="14" cy="28" r="9"/>
         <circle cx="50" cy="28" r="9"/>
         <path d="M14 28 L26 28 L36 12 H48"/>
         <path d="M26 28 L36 12 L42 28"/>
         <path d="M36 12 L30 6 H38"/>
-        <circle cx="26" cy="28" r="2.2" fill="#111" stroke="none"/>
+        <circle cx="26" cy="28" r="2.4" fill="#2d6a4f" stroke="none"/>
       </g>
     </svg>
   `
@@ -75,64 +148,292 @@ function updateBikeCursorMarker() {
   }
 }
 
-function startLocation() {
-  if (!navigator.geolocation) {
-    locationError.value = 'Geolocation nicht unterstützt'
+function applyGeoPosition(pos: GeolocationPosition) {
+  const lat = pos.coords.latitude
+  const lng = pos.coords.longitude
+  let heading =
+    pos.coords.heading != null && !Number.isNaN(pos.coords.heading)
+      ? pos.coords.heading
+      : null
+
+  if (heading == null && lastFollowPos) {
+    const moved =
+      Math.abs(lat - lastFollowPos.lat) + Math.abs(lng - lastFollowPos.lng)
+    if (moved > 0.00002) {
+      heading = bearingBetween(lastFollowPos.lat, lastFollowPos.lng, lat, lng)
+    }
+  }
+
+  lastFollowPos = { lat, lng }
+  userLocation.value = {
+    lat,
+    lng,
+    accuracy: pos.coords.accuracy,
+    heading,
+    speed: pos.coords.speed,
+  }
+  locationPending.value = false
+  locationError.value = ''
+  if (locatingTimer) {
+    clearTimeout(locatingTimer)
+    locatingTimer = null
+  }
+  if (props.rideMode && store.routePoints.length >= 2) {
+    setRideKmAlong(distanceAlongRouteKm({ lat, lng }, store.routePoints))
+  }
+  updateLocationMarker()
+  applyFollowCamera(false)
+}
+
+function onGeoError(err: GeolocationPositionError) {
+  locationPending.value = false
+  if (locatingTimer) {
+    clearTimeout(locatingTimer)
+    locatingTimer = null
+  }
+  const denied = err.code === 1
+  locationDeniedHelp.value = denied && isAppleMobile()
+  const msg = denied
+    ? t(
+        isAppleMobile()
+          ? isStandalonePwa()
+            ? 'mapCanvas.geoDeniedIosApp'
+            : 'mapCanvas.geoDeniedIos'
+          : 'mapCanvas.geoDenied'
+      )
+    : err.code === 3
+      ? t('mapCanvas.geoTimeout')
+      : t('mapCanvas.geoUnavailable')
+  stopLocation({ keepError: true })
+  locationError.value = msg
+}
+
+/**
+ * Start GPS. Best practice (esp. iOS Safari):
+ * - Call watchPosition synchronously inside the tap handler (user gesture).
+ * - Do NOT chain getCurrentPosition → watchPosition in async callbacks —
+ *   Safari then returns PERMISSION_DENIED even when Settings say Allow.
+ * - Ignore Permissions API on Safari (unreliable / always "prompt").
+ */
+function startLocation(opts?: { follow?: boolean; heading?: boolean }) {
+  if (typeof window !== 'undefined' && !window.isSecureContext) {
+    locationError.value = t('mapCanvas.geoInsecure')
+    locationDeniedHelp.value = false
     return
   }
+  if (!navigator.geolocation) {
+    locationError.value = t('mapCanvas.geoUnsupported')
+    locationDeniedHelp.value = false
+    return
+  }
+
+  followActive.value = opts?.follow ?? true
+  headingUp.value = opts?.heading ?? Boolean(props.rideMode)
+  userPanning.value = false
   locationError.value = ''
+  locationDeniedHelp.value = false
+
+  if (locationWatchId.value != null) {
+    if (userLocation.value) applyFollowCamera(true)
+    locationPending.value = false
+    return
+  }
+
+  locationPending.value = true
+  if (locatingTimer) clearTimeout(locatingTimer)
+  locatingTimer = setTimeout(() => {
+    if (locationPending.value && !userLocation.value) {
+      locationError.value = t('mapCanvas.geoTimeout')
+      locationPending.value = false
+    }
+  }, 25000)
+
+  const apple = isAppleMobile()
+  // Sync call in this turn — required for iOS user-activation / permission prompt
   locationWatchId.value = navigator.geolocation.watchPosition(
-    (pos) => {
-      userLocation.value = {
-        lat: pos.coords.latitude,
-        lng: pos.coords.longitude,
-        accuracy: pos.coords.accuracy,
-      }
-      updateLocationMarker()
-    },
+    applyGeoPosition,
     (err) => {
-      locationError.value =
-        err.code === 1 ? 'Standort-Zugriff verweigert' : 'Standort nicht verfügbar'
+      // Ignore transient watch errors if we already have a fix
+      if (userLocation.value && err.code !== 1) return
+      onGeoError(err)
     },
-    { enableHighAccuracy: true, maximumAge: 5000 }
+    {
+      enableHighAccuracy: true,
+      maximumAge: apple ? 30000 : 10000,
+      timeout: apple ? 30000 : 20000,
+    }
   )
 }
 
-function stopLocation() {
+function stopLocation(opts?: { keepError?: boolean }) {
   if (locationWatchId.value != null) {
     navigator.geolocation.clearWatch(locationWatchId.value)
     locationWatchId.value = null
   }
   userLocation.value = null
-  locationError.value = ''
+  locationPending.value = false
+  if (!opts?.keepError) {
+    locationError.value = ''
+    locationDeniedHelp.value = false
+  }
+  followActive.value = false
+  headingUp.value = false
+  lastFollowPos = null
+  setRideKmAlong(null)
+  if (locatingTimer) {
+    clearTimeout(locatingTimer)
+    locatingTimer = null
+  }
   locationMarker?.remove()
   locationMarker = null
   accuracyEl?.remove()
   accuracyEl = null
+  if (map && props.rideMode) {
+    map.easeTo({ bearing: 0, pitch: 0, duration: 400 })
+  }
+}
+
+/** Pause high-accuracy GPS when app is backgrounded (battery). */
+function onVisibilityChange() {
+  if (document.hidden) {
+    if (locationWatchId.value != null || userLocation.value) {
+      resumeLocationAfterVisible = true
+      if (locationWatchId.value != null) {
+        navigator.geolocation.clearWatch(locationWatchId.value)
+        locationWatchId.value = null
+      }
+      followActive.value = false
+      locationPending.value = false
+    }
+    return
+  }
+  // Do not auto-restart on iOS without a fresh tap — causes false "denied"
+  if (resumeLocationAfterVisible) {
+    resumeLocationAfterVisible = false
+  }
+}
+
+function clearLocationError() {
+  locationError.value = ''
+  locationDeniedHelp.value = false
+}
+
+function applyFollowCamera(force: boolean) {
+  if (!map || !userLocation.value || !followActive.value || userPanning.value) return
+  const { lat, lng, heading } = userLocation.value
+  const cam: maplibregl.EaseToOptions = {
+    center: [lng, lat],
+    duration: force ? 0 : 700,
+    essential: true,
+  }
+  if (headingUp.value && heading != null) {
+    cam.bearing = heading
+    cam.pitch = props.rideMode ? 45 : 0
+  }
+  if (!props.rideMode) {
+    cam.zoom = Math.max(map.getZoom(), 15)
+  } else if (map.getZoom() < 14) {
+    cam.zoom = 15.5
+  }
+  map.easeTo(cam)
 }
 
 function updateLocationMarker() {
   if (!map || !userLocation.value) return
-  const { lat, lng } = userLocation.value
+  const { lat, lng, heading } = userLocation.value
 
   if (!locationMarker) {
-    const dot = document.createElement('div')
-    dot.className = 'user-location-dot'
-    locationMarker = new maplibregl.Marker({ element: dot, anchor: 'center' })
+    const el = createLocationElement()
+    locationMarker = new maplibregl.Marker({
+      element: el,
+      anchor: 'center',
+      rotationAlignment: 'map',
+      pitchAlignment: 'map',
+    })
       .setLngLat([lng, lat])
       .addTo(map)
   } else {
     locationMarker.setLngLat([lng, lat])
   }
+
+  const arrow = locationMarker
+    .getElement()
+    .querySelector('.user-location-arrow') as HTMLElement | null
+  if (arrow) {
+    const rot = heading == null ? 0 : headingUp.value ? 0 : heading
+    arrow.style.transform = `rotate(${rot}deg)`
+    arrow.classList.toggle('has-heading', heading != null)
+  }
 }
 
-const locationActive = computed(() => locationWatchId.value != null)
-const basemap = ref<BasemapId>(loadBasemapPreference())
+/**
+ * Start on pointerdown for touch — iOS user-activation is more reliable
+ * than waiting for the delayed click event.
+ */
+function onLocationPointerDown(e: PointerEvent) {
+  e.stopPropagation()
+  if (e.button !== 0) return
+  if (e.pointerType !== 'touch' && e.pointerType !== 'pen') return
+  if (locationPending.value || locationActive.value) return
+  startedFromPointerDown = true
+  startLocation({ follow: true, heading: Boolean(props.rideMode) })
+}
 
-function setBasemap(id: BasemapId) {
+function onLocationButtonClick(e?: Event) {
+  e?.preventDefault()
+  e?.stopPropagation()
+  // Touch already started GPS in pointerdown — don't toggle off on the same gesture
+  if (startedFromPointerDown) {
+    startedFromPointerDown = false
+    return
+  }
+  if (locationPending.value) return
+  if (!locationActive.value) {
+    startLocation({ follow: true, heading: Boolean(props.rideMode) })
+    return
+  }
+  if (!followActive.value || userPanning.value) {
+    userPanning.value = false
+    followActive.value = true
+    headingUp.value = Boolean(props.rideMode) || headingUp.value
+    applyFollowCamera(true)
+    return
+  }
+  if (props.rideMode && !headingUp.value) {
+    headingUp.value = true
+    applyFollowCamera(true)
+    return
+  }
+  stopLocation()
+}
+
+const locationActive = computed(
+  () => locationWatchId.value != null || userLocation.value != null || locationPending.value
+)
+const locationBtnTitle = computed(() => {
+  if (locationPending.value) return t('mapCanvas.locating')
+  if (!locationActive.value) return t('mapCanvas.followOn')
+  if (userPanning.value || !followActive.value) return t('mapCanvas.followResume')
+  if (props.rideMode && !headingUp.value) return t('mapCanvas.headingOn')
+  return t('mapCanvas.locationOff')
+})
+
+const basemap = ref<BasemapId>(loadBasemapPreference())
+const basemapFallbackHint = ref('')
+let cancelStyleReady: (() => void) | null = null
+let basemapRecovering = false
+
+function clearBasemapFallbackHint() {
+  basemapFallbackHint.value = ''
+}
+
+function setBasemap(id: BasemapId, opts: { auto?: boolean } = {}) {
   if (!map || basemap.value === id) return
   basemap.value = id
-  saveBasemapPreference(id)
+  if (!opts.auto) {
+    saveBasemapPreference(id)
+    clearBasemapFallbackHint()
+  }
 
   const center = map.getCenter()
   const zoom = map.getZoom()
@@ -143,7 +444,6 @@ function setBasemap(id: BasemapId) {
   const restoreOverlays = () => {
     if (!map || restored) return
     if (!map.isStyleLoaded()) return
-    // Already restored (e.g. style.load + timeout)
     if (map.getSource('route')) {
       restored = true
       updateSources()
@@ -161,25 +461,39 @@ function setBasemap(id: BasemapId) {
     }
   }
 
+  cancelStyleReady?.()
   map.setStyle(basemapStyle(id), { diff: false })
-  map.once('style.load', restoreOverlays)
-  // Fallback falls style.load in manchen Fällen ausbleibt
-  window.setTimeout(restoreOverlays, 400)
-  window.setTimeout(restoreOverlays, 1200)
+  cancelStyleReady = whenStyleReady(map, restoreOverlays)
+}
+
+function onBasemapError(e: { error?: Error | string }) {
+  if (!map || basemapRecovering) return
+  if (!isBasemapStyleError(e.error)) return
+  if (basemap.value !== 'standard') return
+
+  basemapRecovering = true
+  console.warn('[map] Basiskarte fehlgeschlagen, Fallback auf Radkarte:', e.error)
+  basemapFallbackHint.value = t('mapCanvas.basemapFallback')
+  setBasemap('cycling', { auto: true })
+  window.setTimeout(() => {
+    basemapRecovering = false
+  }, 2500)
 }
 
 function poiGeoJson() {
+  // Ride: only favorites on the map (route stays); quieter cockpit
+  const pois = props.rideMode ? store.favoritePois : store.mapPois
   return {
     type: 'FeatureCollection' as const,
-    features: store.mapPois.map((p) => ({
+    features: pois.map((p) => ({
       type: 'Feature' as const,
       geometry: { type: 'Point' as const, coordinates: [p.lng, p.lat] },
       properties: {
         id: p.id,
         category: p.category,
         name: p.name,
-        icon: POI_ICONS[p.category] ?? '📍',
-        color: POI_COLORS[p.category] ?? '#3388ff',
+        icon: poiCategoryIconId(p.category),
+        color: poiColors()[p.category] ?? '#3388ff',
       },
     })),
   }
@@ -196,8 +510,26 @@ function favoritesGeoJson() {
   }
 }
 
+function controlPointsGeoJson() {
+  return {
+    type: 'FeatureCollection' as const,
+    features: store.controlPoints.map((cp) => ({
+      type: 'Feature' as const,
+      geometry: { type: 'Point' as const, coordinates: [cp.lng, cp.lat] },
+      properties: {
+        id: cp.id,
+        label: cp.name,
+        kind: cp.kind,
+        icon: controlPointIconId(cp.kind),
+        color: cp.kind === 'sleep' ? '#7c3aed' : cp.kind === 'border' ? '#0f766e' : '#dc2626',
+      },
+    })),
+  }
+}
+
 function routeGeoJson() {
-  if (!store.routeCoords.length) {
+  // Single-point / nearby maps have no route line
+  if (store.isNearbyMap || store.routeCoords.length < 2) {
     return { type: 'FeatureCollection' as const, features: [] }
   }
   return {
@@ -212,7 +544,54 @@ function routeGeoJson() {
   }
 }
 
+function nearbyCenterGeoJson() {
+  if (!store.isNearbyMap || !store.routeCoords.length) {
+    return { type: 'FeatureCollection' as const, features: [] }
+  }
+  const [lng, lat] = store.routeCoords[0]!
+  return {
+    type: 'FeatureCollection' as const,
+    features: [
+      {
+        type: 'Feature' as const,
+        geometry: { type: 'Point' as const, coordinates: [lng, lat] },
+        properties: { label: t('mapCanvas.youAreHere') },
+      },
+    ],
+  }
+}
+
+function nearbyRadiusGeoJson() {
+  if (!store.isNearbyMap || !store.routeCoords.length) {
+    return { type: 'FeatureCollection' as const, features: [] }
+  }
+  const [lng, lat] = store.routeCoords[0]!
+  const radiusM = store.poiRadiusM
+  const steps = 64
+  const ring: [number, number][] = []
+  const latRad = (lat * Math.PI) / 180
+  const metersPerDegLat = 111_320
+  const metersPerDegLng = 111_320 * Math.cos(latRad)
+  for (let i = 0; i <= steps; i++) {
+    const bearing = (i / steps) * 2 * Math.PI
+    const dLat = (radiusM / metersPerDegLat) * Math.cos(bearing)
+    const dLng = (radiusM / Math.max(metersPerDegLng, 1e-6)) * Math.sin(bearing)
+    ring.push([lng + dLng, lat + dLat])
+  }
+  return {
+    type: 'FeatureCollection' as const,
+    features: [
+      {
+        type: 'Feature' as const,
+        geometry: { type: 'Polygon' as const, coordinates: [ring] },
+        properties: {},
+      },
+    ],
+  }
+}
+
 function kmMarkerGeoJson() {
+  if (store.isNearbyMap) return { type: 'FeatureCollection' as const, features: [] }
   const interval = kmMarkerInterval(store.totalKm)
   const markers = buildKmMarkers(store.routePoints, interval)
   return {
@@ -257,18 +636,33 @@ function endPointsGeoJson() {
   if (store.routeCoords.length < 2) return { type: 'FeatureCollection' as const, features: [] }
   const start = store.routeCoords[0]!
   const end = store.routeCoords[store.routeCoords.length - 1]!
+  // Round trip: same start/end → one marker, avoid overlapping "Start"+"Ziel"
+  const samePoint =
+    Math.abs(start[0] - end[0]) < 1e-4 && Math.abs(start[1] - end[1]) < 1e-4
+  if (samePoint) {
+    return {
+      type: 'FeatureCollection' as const,
+      features: [
+        {
+          type: 'Feature' as const,
+          geometry: { type: 'Point' as const, coordinates: start },
+          properties: { role: 'start', label: t('mapCanvas.startEnd') },
+        },
+      ],
+    }
+  }
   return {
     type: 'FeatureCollection' as const,
     features: [
       {
         type: 'Feature' as const,
         geometry: { type: 'Point' as const, coordinates: start },
-        properties: { role: 'start', label: 'Start' },
+        properties: { role: 'start', label: t('mapCanvas.start') },
       },
       {
         type: 'Feature' as const,
         geometry: { type: 'Point' as const, coordinates: end },
-        properties: { role: 'end', label: 'Ziel' },
+        properties: { role: 'end', label: t('mapCanvas.end') },
       },
     ],
   }
@@ -299,14 +693,29 @@ function focusOnPoi(lng: number, lat: number) {
 function fitBounds() {
   if (!map || !store.routeCoords.length) return
   const bounds = new maplibregl.LngLatBounds()
-  for (const [lng, lat] of store.routeCoords) {
-    bounds.extend([lng, lat])
+
+  if (store.isNearbyMap) {
+    const [lng, lat] = store.routeCoords[0]!
+    const radiusM = store.poiRadiusM
+    const latRad = (lat * Math.PI) / 180
+    const dLat = radiusM / 111_320
+    const dLng = radiusM / Math.max(111_320 * Math.cos(latRad), 1e-6)
+    bounds.extend([lng - dLng, lat - dLat])
+    bounds.extend([lng + dLng, lat + dLat])
+  } else {
+    for (const [lng, lat] of store.routeCoords) {
+      bounds.extend([lng, lat])
+    }
   }
   map.fitBounds(bounds, { padding: 48, duration: 0 })
 }
 
 function updateSources() {
-  if (!map?.isStyleLoaded()) return
+  if (!map) return
+  if (!map.isStyleLoaded()) {
+    map.once('idle', () => updateSources())
+    return
+  }
   ;(map.getSource('route') as maplibregl.GeoJSONSource)?.setData(routeGeoJson())
   ;(map.getSource('route-grades') as maplibregl.GeoJSONSource)?.setData(gradeGeoJson())
   ;(map.getSource('climbs') as maplibregl.GeoJSONSource)?.setData(climbsGeoJson())
@@ -315,8 +724,14 @@ function updateSources() {
   ;(map.getSource('pois') as maplibregl.GeoJSONSource)?.setData(poiGeoJson())
   ;(map.getSource('route-cursor') as maplibregl.GeoJSONSource)?.setData(routeCursorGeoJson())
   ;(map.getSource('favorites') as maplibregl.GeoJSONSource)?.setData(favoritesGeoJson())
+  ;(map.getSource('control-points') as maplibregl.GeoJSONSource)?.setData(controlPointsGeoJson())
+  ;(map.getSource('nearby-radius') as maplibregl.GeoJSONSource)?.setData(nearbyRadiusGeoJson())
+  ;(map.getSource('nearby-center') as maplibregl.GeoJSONSource)?.setData(nearbyCenterGeoJson())
 
-  const hasGrades = hasElevationData(store.routePoints)
+  const canvas = map.getCanvas()
+  canvas.style.cursor = store.controlPointPlaceKind ? 'crosshair' : ''
+
+  const hasGrades = !store.isNearbyMap && hasElevationData(store.routePoints)
   if (map.getLayer('route-line')) {
     map.setPaintProperty('route-line', 'line-opacity', hasGrades ? 0.15 : 1)
   }
@@ -329,8 +744,35 @@ function updateSources() {
   if (map.getLayer('climbs-label')) {
     map.setLayoutProperty('climbs-label', 'visibility', hasGrades ? 'visible' : 'none')
   }
+  const nearbyVis = store.isNearbyMap ? 'visible' : 'none'
+  if (map.getLayer('nearby-radius-fill')) {
+    map.setLayoutProperty('nearby-radius-fill', 'visibility', nearbyVis)
+  }
+  if (map.getLayer('nearby-radius-line')) {
+    map.setLayoutProperty('nearby-radius-line', 'visibility', nearbyVis)
+  }
+  if (map.getLayer('nearby-center')) {
+    map.setLayoutProperty('nearby-center', 'visibility', nearbyVis)
+  }
 
   updateBikeCursorMarker()
+}
+
+function updateThemePaint() {
+  if (!map?.isStyleLoaded()) return
+  if (map.getLayer('route-start')) {
+    map.setPaintProperty('route-start', 'circle-color', routeStartColor())
+  }
+  if (map.getLayer('route-end')) {
+    map.setPaintProperty('route-end', 'circle-color', routeEndColor())
+  }
+  const climbColor = climbMarkerColor()
+  if (map.getLayer('climbs-dot')) {
+    map.setPaintProperty('climbs-dot', 'circle-color', climbColor)
+  }
+  if (map.getLayer('climbs-label')) {
+    map.setPaintProperty('climbs-label', 'text-color', climbColor)
+  }
 }
 
 function addLayers() {
@@ -351,6 +793,51 @@ function addLayers() {
   })
   map.addSource('route-cursor', { type: 'geojson', data: routeCursorGeoJson() })
   map.addSource('favorites', { type: 'geojson', data: favoritesGeoJson() })
+  map.addSource('control-points', { type: 'geojson', data: controlPointsGeoJson() })
+  map.addSource('nearby-radius', { type: 'geojson', data: nearbyRadiusGeoJson() })
+  map.addSource('nearby-center', { type: 'geojson', data: nearbyCenterGeoJson() })
+
+  ensureControlPointImages(map)
+  ensurePoiCategoryImages(map)
+
+  const nearbyVis = store.isNearbyMap ? 'visible' : 'none'
+
+  map.addLayer({
+    id: 'nearby-radius-fill',
+    type: 'fill',
+    source: 'nearby-radius',
+    layout: { visibility: nearbyVis },
+    paint: {
+      'fill-color': '#2d6a4f',
+      'fill-opacity': 0.08,
+    },
+  })
+
+  map.addLayer({
+    id: 'nearby-radius-line',
+    type: 'line',
+    source: 'nearby-radius',
+    layout: { visibility: nearbyVis },
+    paint: {
+      'line-color': '#2d6a4f',
+      'line-width': 2,
+      'line-opacity': 0.55,
+      'line-dasharray': [2, 1.5],
+    },
+  })
+
+  map.addLayer({
+    id: 'nearby-center',
+    type: 'circle',
+    source: 'nearby-center',
+    layout: { visibility: nearbyVis },
+    paint: {
+      'circle-radius': 7,
+      'circle-color': '#2d6a4f',
+      'circle-stroke-width': 2.5,
+      'circle-stroke-color': '#fff',
+    },
+  })
 
   map.addLayer({
     id: 'route-casing',
@@ -385,8 +872,8 @@ function addLayers() {
       visibility: hasElevationData(store.routePoints) ? 'visible' : 'none',
     },
     paint: {
-      'line-color': ['get', 'color'],
-      'line-width': ['interpolate', ['linear'], ['zoom'], 8, 4, 14, 7],
+      'line-color': ['coalesce', ['get', 'color'], ROUTE_COLOR],
+      'line-width': ['interpolate', ['linear'], ['zoom'], 8, 5, 14, 9],
     },
   })
 
@@ -397,7 +884,7 @@ function addLayers() {
     filter: ['==', ['get', 'role'], 'start'],
     paint: {
       'circle-radius': 12,
-      'circle-color': ROUTE_START_COLOR,
+      'circle-color': routeStartColor(),
       'circle-stroke-width': 3,
       'circle-stroke-color': '#fff',
     },
@@ -410,7 +897,7 @@ function addLayers() {
     filter: ['==', ['get', 'role'], 'end'],
     paint: {
       'circle-radius': 12,
-      'circle-color': ROUTE_END_COLOR,
+      'circle-color': routeEndColor(),
       'circle-stroke-width': 3,
       'circle-stroke-color': '#fff',
     },
@@ -424,7 +911,7 @@ function addLayers() {
       'text-field': ['get', 'label'],
       'text-size': 12,
       'text-offset': [0, -2],
-      'text-font': ['Open Sans Bold'],
+      'text-font': [...MAP_LABEL_FONT],
       'text-allow-overlap': true,
     },
     paint: {
@@ -454,7 +941,7 @@ function addLayers() {
       'text-field': ['concat', ['get', 'label'], ' km'],
       'text-size': 11,
       'text-offset': [0, -2.2],
-      'text-font': ['Open Sans Bold'],
+      'text-font': [...MAP_LABEL_FONT],
       'text-allow-overlap': true,
       'text-ignore-placement': true,
     },
@@ -474,7 +961,7 @@ function addLayers() {
     layout: { visibility: climbVis },
     paint: {
       'circle-radius': ['interpolate', ['linear'], ['zoom'], 8, 5, 14, 8],
-      'circle-color': '#7c2d12',
+      'circle-color': climbMarkerColor(),
       'circle-stroke-width': 2,
       'circle-stroke-color': '#fff',
     },
@@ -486,17 +973,20 @@ function addLayers() {
     source: 'climbs',
     layout: {
       visibility: climbVis,
-      'text-field': ['concat', ['get', 'label'], '\n', ['get', 'detail']],
+      'text-field': ['format',
+        ['coalesce', ['get', 'label'], ''], { 'font-scale': 1 },
+        '\n', {},
+        ['coalesce', ['get', 'detail'], ''], { 'font-scale': 0.85 },
+      ],
       'text-size': 11,
-      'text-offset': [0, -2.4],
-      'text-font': ['Open Sans Bold'],
+      'text-offset': [0, -2.0],
+      'text-font': [...MAP_LABEL_FONT],
       'text-anchor': 'bottom',
-      'text-line-height': 1.15,
       'text-allow-overlap': false,
       'text-optional': true,
     },
     paint: {
-      'text-color': '#7c2d12',
+      'text-color': climbMarkerColor(),
       'text-halo-color': '#fff',
       'text-halo-width': 2,
     },
@@ -520,7 +1010,11 @@ function addLayers() {
     type: 'symbol',
     source: 'pois',
     filter: ['has', 'point_count'],
-    layout: { 'text-field': '{point_count_abbreviated}', 'text-size': 12 },
+    layout: {
+      'text-field': '{point_count_abbreviated}',
+      'text-size': 12,
+      'text-font': [...MAP_LABEL_FONT],
+    },
     paint: { 'text-color': '#fff' },
   })
 
@@ -531,7 +1025,7 @@ function addLayers() {
     filter: ['!', ['has', 'point_count']],
     paint: {
       'circle-radius': 18,
-      'circle-color': ['get', 'color'],
+      'circle-color': ['coalesce', ['get', 'color'], '#6b7280'],
       'circle-opacity': 0.3,
     },
   })
@@ -543,7 +1037,7 @@ function addLayers() {
     filter: ['!', ['has', 'point_count']],
     paint: {
       'circle-radius': 14,
-      'circle-color': ['get', 'color'],
+      'circle-color': ['coalesce', ['get', 'color'], '#6b7280'],
       'circle-stroke-width': 2.5,
       'circle-stroke-color': '#fff',
     },
@@ -555,15 +1049,15 @@ function addLayers() {
     source: 'pois',
     filter: ['!', ['has', 'point_count']],
     layout: {
-      'text-field': ['get', 'icon'],
-      'text-size': 16,
-      'text-allow-overlap': true,
-      'text-ignore-placement': true,
+      'icon-image': ['get', 'icon'],
+      // 48px @ pixelRatio 3 → 16 CSS px at size 1 (no fractional rescale / blur)
+      'icon-size': 1,
+      'icon-allow-overlap': true,
+      'icon-ignore-placement': true,
+      'icon-anchor': 'center',
+      'icon-padding': 0,
     },
-    paint: {
-      'text-halo-color': '#fff',
-      'text-halo-width': 1.5,
-    },
+    // Color is baked into non-SDF rasters in poiMapIcons — icon-color would be ignored
   })
 
   map.addLayer({
@@ -596,6 +1090,7 @@ function addLayers() {
     layout: {
       'text-field': '★',
       'text-size': 14,
+      'text-font': [...MAP_LABEL_FONT],
       'text-offset': [0.9, -0.9],
       'text-allow-overlap': true,
       'text-ignore-placement': true,
@@ -608,16 +1103,68 @@ function addLayers() {
   })
 
   map.addLayer({
+    id: 'control-points-halo',
+    type: 'circle',
+    source: 'control-points',
+    paint: {
+      'circle-radius': 14,
+      'circle-color': ['get', 'color'],
+      'circle-opacity': 0.22,
+    },
+  })
+
+  map.addLayer({
+    id: 'control-points-icon',
+    type: 'symbol',
+    source: 'control-points',
+    layout: {
+      'icon-image': ['get', 'icon'],
+      'icon-size': 0.55,
+      'icon-allow-overlap': true,
+      'icon-ignore-placement': true,
+      'text-field': ['get', 'label'],
+      'text-size': 11,
+      'text-offset': [0, 1.55],
+      'text-anchor': 'top',
+      'text-optional': true,
+      'text-font': [...MAP_LABEL_FONT],
+    },
+    paint: {
+      'text-color': '#111827',
+      'text-halo-color': '#fff',
+      'text-halo-width': 1.5,
+    },
+  })
+
+  map.addLayer({
+    id: 'route-cursor-pulse',
+    type: 'circle',
+    source: 'route-cursor',
+    paint: {
+      'circle-radius': 14,
+      'circle-color': '#2d6a4f',
+      'circle-opacity': 0.12,
+    },
+  })
+
+  map.addLayer({
     id: 'route-cursor-halo',
     type: 'circle',
     source: 'route-cursor',
     paint: {
-      'circle-radius': 18,
-      'circle-color': '#fff',
-      'circle-stroke-width': 2.5,
-      'circle-stroke-color': '#111',
-      'circle-opacity': 0.92,
+      'circle-radius': 7,
+      'circle-color': '#2d6a4f',
+      'circle-stroke-width': 1.5,
+      'circle-stroke-color': '#fff',
+      'circle-opacity': 0.75,
     },
+  })
+
+  map.on('click', (e) => {
+    if (!store.controlPointPlaceKind) return
+    // Don't place when clicking a POI marker (those fire their own handlers too —
+    // placing on empty map / route is the intent).
+    store.addControlPointAt(e.lngLat.lat, e.lngLat.lng)
   })
 
   map.on('click', 'poi-clusters', (e) => {
@@ -670,6 +1217,10 @@ function setupMapDragBehavior() {
 
   map.on('dragstart', () => {
     canvas.classList.remove('poi-hover')
+    if (locationActive.value && followActive.value) {
+      userPanning.value = true
+      followActive.value = false
+    }
   })
 }
 
@@ -679,9 +1230,11 @@ function initMap() {
   map = new maplibregl.Map({
     container: mapContainer.value,
     style: basemapStyle(basemap.value),
+    transformRequest: (url) => ({ url: remapOpenFreeMapGlyphRequest(url) }),
   })
 
   map.addControl(new maplibregl.NavigationControl(), 'top-right')
+  map.on('error', onBasemapError)
   map.on('load', () => {
     addLayers()
     fitBounds()
@@ -696,14 +1249,20 @@ function initMap() {
 }
 
 watch(
-  () => [store.mapPois, store.routeCoords, store.routePoints],
+  () => [store.mapPois, store.routeCoords, store.routePoints, store.isNearbyMap, store.poiRadiusM],
   () => updateSources(),
   { deep: true }
 )
 
 watch(() => store.routeCursor, () => updateSources())
 watch(() => store.favorites, () => updateSources(), { deep: true })
+watch(() => store.controlPoints, () => updateSources(), { deep: true })
+watch(() => store.controlPointPlaceKind, () => updateSources())
 watch(() => store.visibleCategories, () => updateSources(), { deep: true })
+watch(colorblindMode, () => {
+  updateThemePaint()
+  updateSources()
+})
 
 watch(() => store.poiFocusTick, () => {
   const coords = store.poiFocusCoords
@@ -711,8 +1270,34 @@ watch(() => store.poiFocusTick, () => {
   focusOnPoi(coords[0], coords[1])
 })
 
+watch(
+  () => props.rideMode,
+  (on) => {
+    // Do NOT auto-start GPS here — iOS returns false "denied" without a tap.
+    // enterRideMode / location button start GPS in the user-gesture turn.
+    if (!on) {
+      setRideKmAlong(null)
+      if (locationActive.value) {
+        headingUp.value = false
+        if (map) map.easeTo({ bearing: 0, pitch: 0, duration: 400 })
+      }
+    }
+    void nextTick(() => {
+      map?.resize()
+      updateSources()
+    })
+  }
+)
+
+defineExpose({
+  startLocation,
+  stopLocation,
+})
+
 onMounted(() => {
+  document.addEventListener('visibilitychange', onVisibilityChange)
   if (store.mapReady) initMap()
+  // Never auto-start GPS on mount (iOS permission quirk)
 })
 
 watch(
@@ -723,8 +1308,11 @@ watch(
 )
 
 onUnmounted(() => {
+  document.removeEventListener('visibilitychange', onVisibilityChange)
   resizeObserver?.disconnect()
   resizeObserver = null
+  cancelStyleReady?.()
+  cancelStyleReady = null
   stopLocation()
   bikeCursorMarker?.remove()
   bikeCursorMarker = null
@@ -735,44 +1323,91 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div ref="mapCanvasWrap" class="map-canvas-wrap">
+  <div ref="mapCanvasWrap" class="map-canvas-wrap" :class="{ 'ride-mode': rideMode }">
     <div ref="mapContainer" class="map-canvas" />
 
-    <div class="basemap-toggle" role="group" aria-label="Kartenstil">
+    <p v-if="basemapFallbackHint" class="basemap-fallback" role="status">
+      {{ basemapFallbackHint }}
+      <button type="button" @click="clearBasemapFallbackHint(); setBasemap('standard')">
+        {{ t('mapCanvas.basemapRetry') }}
+      </button>
+    </p>
+
+    <div v-show="!rideMode" class="basemap-toggle" role="group" :aria-label="t('mapCanvas.basemap')">
       <button
         type="button"
         :class="{ active: basemap === 'standard' }"
-        title="Standardkarte"
         @click="setBasemap('standard')"
       >
-        Karte
+        {{ t('mapCanvas.map') }}
       </button>
       <button
         type="button"
         :class="{ active: basemap === 'cycling' }"
-        title="Radwege hervorgehoben (CyclOSM)"
+        :title="t('mapCanvas.cycling')"
         @click="setBasemap('cycling')"
       >
-        Radwege
+        {{ t('mapCanvas.cycling') }}
+      </button>
+      <button
+        type="button"
+        class="colorblind-btn"
+        :class="{ active: colorblindMode }"
+        :aria-pressed="colorblindMode"
+        :title="t('mapCanvas.colorblind')"
+        @click="toggleColorblindMode()"
+      >
+        {{ t('mapCanvas.colorblind') }}
       </button>
     </div>
 
-    <!-- Standort-Button -->
+    <!-- Standort / Follow / Heading -->
     <button
       type="button"
       class="location-btn"
-      :class="{ active: locationActive }"
-      :title="locationActive ? 'Standort deaktivieren' : 'Standort anzeigen'"
-      @click="locationActive ? stopLocation() : startLocation()"
+      :class="{
+        active: locationActive,
+        following: locationActive && followActive && !userPanning,
+        pending: locationPending,
+      }"
+      :title="locationBtnTitle"
+      :aria-label="locationBtnTitle"
+      @pointerdown="onLocationPointerDown"
+      @click.stop.prevent="onLocationButtonClick"
     >
       <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
         <circle cx="12" cy="12" r="4" :fill="locationActive ? '#3b82f6' : 'currentColor'" />
         <path d="M12 2v3M12 19v3M2 12h3M19 12h3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
         <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.5" fill="none" />
+        <path
+          v-if="headingUp"
+          d="M12 5 L15 11 H9 Z"
+          fill="#3b82f6"
+          stroke="none"
+        />
       </svg>
     </button>
 
-    <p v-if="locationError" class="location-error">{{ locationError }}</p>
+    <div v-if="locationError" class="location-error" role="alert">
+      <div class="location-error-body">
+        <span>{{ locationError }}</span>
+        <ol v-if="locationDeniedHelp" class="location-help">
+          <template v-if="isStandalonePwa()">
+            <li>{{ t('mapCanvas.geoHelpStandalone1') }}</li>
+            <li>{{ t('mapCanvas.geoHelpStandalone2') }}</li>
+            <li>{{ t('mapCanvas.geoHelpStandalone3') }}</li>
+          </template>
+          <template v-else>
+            <li>{{ t('mapCanvas.geoHelp1') }}</li>
+            <li>{{ t('mapCanvas.geoHelp2') }}</li>
+            <li>{{ t('mapCanvas.geoHelp3') }}</li>
+          </template>
+        </ol>
+      </div>
+      <button type="button" class="location-error-dismiss" :aria-label="t('common.close')" @click.stop="clearLocationError">
+        ×
+      </button>
+    </div>
   </div>
 </template>
 
@@ -794,22 +1429,24 @@ onUnmounted(() => {
 /* ── Standort-Button ── */
 .location-btn {
   position: absolute;
-  bottom: 104px;
+  bottom: 28px;
   right: 10px;
-  z-index: 10;
-  width: 36px;
-  height: 36px;
+  z-index: 40;
+  width: 40px;
+  height: 40px;
   border: none;
-  border-radius: 4px;
+  border-radius: 6px;
   background: #fff;
   box-shadow: 0 0 0 2px rgba(0,0,0,.1);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 6px;
+  padding: 7px;
   color: #333;
   transition: background 0.15s;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .basemap-toggle {
@@ -843,13 +1480,57 @@ onUnmounted(() => {
   color: #fff;
 }
 
+.basemap-toggle .colorblind-btn.active {
+  background: var(--primary);
+  color: #fff;
+}
+
+.basemap-fallback {
+  position: absolute;
+  top: 52px;
+  left: 10px;
+  right: 10px;
+  z-index: 11;
+  margin: 0;
+  padding: 0.55rem 0.7rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  border-radius: 8px;
+  background: rgba(17, 24, 39, 0.92);
+  color: #fff;
+  font-size: 0.8rem;
+  line-height: 1.35;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
+}
+
+.basemap-fallback button {
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  background: transparent;
+  color: #fff;
+  border-radius: 6px;
+  padding: 0.25rem 0.55rem;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
 .location-btn:hover {
   background: #f0f0f0;
 }
 
-.location-btn.active {
+.location-btn.following {
   background: #eff6ff;
-  color: #3b82f6;
+  color: #2563eb;
+  box-shadow: 0 0 0 2px #93c5fd;
+}
+
+.location-btn.pending {
+  background: #fef9c3;
+  color: #a16207;
+  box-shadow: 0 0 0 2px #fde047;
 }
 
 .location-btn svg {
@@ -859,20 +1540,145 @@ onUnmounted(() => {
 
 .location-error {
   position: absolute;
-  bottom: 148px;
-  right: 50px;
+  bottom: 76px;
+  right: 10px;
   background: #fee2e2;
   color: #991b1b;
-  padding: 0.35rem 0.6rem;
-  border-radius: 6px;
+  padding: 0.55rem 0.65rem;
+  border-radius: 8px;
   font-size: 0.78rem;
-  max-width: 200px;
-  z-index: 10;
+  max-width: 280px;
+  z-index: 40;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  display: flex;
+  align-items: flex-start;
+  gap: 0.35rem;
+  line-height: 1.35;
+}
+
+.location-error-body {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.location-help {
+  margin: 0.4rem 0 0;
+  padding-left: 1.05rem;
+}
+
+.location-help li {
+  margin: 0.12rem 0;
+}
+
+.location-error-dismiss {
+  flex-shrink: 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 0.1rem;
+}
+
+@media (max-width: 768px) {
+  .location-btn {
+    /* Always top-right on mobile — never under bottom nav */
+    top: calc(12px + env(safe-area-inset-top, 0px));
+    bottom: auto;
+    right: 12px;
+    z-index: 120;
+    width: 48px;
+    height: 48px;
+    padding: 9px;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
+  }
+
+  .map-canvas-wrap.ride-mode .location-btn {
+    top: calc(12px + env(safe-area-inset-top, 0px));
+    bottom: auto;
+    right: 12px;
+    z-index: 120;
+    width: 52px;
+    height: 52px;
+    padding: 10px;
+    border-radius: 14px;
+  }
+
+  .map-canvas-wrap.ride-mode :deep(.maplibregl-ctrl-top-right) {
+    display: none;
+  }
+
+  .location-error {
+    top: calc(68px + env(safe-area-inset-top, 0px));
+    bottom: auto;
+    right: 12px;
+    left: 12px;
+    z-index: 120;
+    max-width: none;
+  }
+
+  .map-canvas-wrap.ride-mode .location-error {
+    top: calc(72px + env(safe-area-inset-top, 0px));
+    bottom: auto;
+    right: 12px;
+  }
+
+  .basemap-toggle {
+    top: calc(12px + env(safe-area-inset-top, 0px));
+    right: 68px;
+    left: auto;
+  }
+
+  .map-canvas-wrap.ride-mode .basemap-toggle {
+    display: none;
+  }
+
+  .basemap-toggle button {
+    padding: 0.4rem 0.55rem;
+    font-size: 0.72rem;
+  }
 }
 </style>
 
 <style>
 /* Standort-Punkt (global, da in dynamisch erstelltem Element) */
+.user-location-marker {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  pointer-events: none;
+}
+
+.user-location-pulse {
+  position: absolute;
+  inset: 6px;
+  border-radius: 50%;
+  background: rgba(37, 99, 235, 0.2);
+  border: 2px solid rgba(37, 99, 235, 0.45);
+}
+
+.user-location-arrow {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform-origin: 50% 50%;
+  transition: transform 0.25s ease-out;
+}
+
+.user-location-arrow svg {
+  width: 28px;
+  height: 28px;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.35));
+}
+
+.user-location-arrow:not(.has-heading) svg path {
+  fill: #3b82f6;
+}
+
 .user-location-dot {
   width: 16px;
   height: 16px;
@@ -882,20 +1688,21 @@ onUnmounted(() => {
   box-shadow: 0 0 0 2px #3b82f6, 0 2px 8px rgba(59,130,246,0.4);
 }
 
-/* Cursor-Fahrrad auf der Route (HTML-Marker) */
+/* Cursor-Fahrrad auf der Route (HTML-Marker) — klein, nicht dominant */
 .route-bike-cursor {
   position: relative;
-  width: 36px;
-  height: 36px;
+  width: 26px;
+  height: 26px;
   pointer-events: none;
+  filter: drop-shadow(0 1px 2px rgba(45, 106, 79, 0.35));
 }
 
 .route-bike-icon {
   position: absolute;
-  inset: 4px;
-  width: 28px;
-  height: 28px;
-  filter: drop-shadow(0 1px 1px rgba(255, 255, 255, 0.9))
-    drop-shadow(0 0 2px rgba(255, 255, 255, 0.8));
+  inset: 1px;
+  width: 24px;
+  height: 24px;
+  opacity: 0.9;
+  filter: drop-shadow(0 0 1.5px rgba(255, 255, 255, 0.9));
 }
 </style>
