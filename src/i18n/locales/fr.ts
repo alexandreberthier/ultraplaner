@@ -25,7 +25,7 @@
   },
   cookie: {
     aria: 'Paramètres cookies et analytique',
-    text: 'UltraPlaner vient d’être mis en ligne. Avec l’analytique (anonyme), je peux mieux améliorer le site pour les utilisateurs de différents pays.',
+    text: 'UltraPlaner vient d’être mis en ligne. Avec l’analytique optionnelle après consentement, je peux mieux améliorer le site pour les utilisateurs de différents pays.',
     privacy: 'Confidentialité',
     accept: 'Accepter',
     decline: 'Refuser',

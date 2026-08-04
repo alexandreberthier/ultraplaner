@@ -138,8 +138,9 @@ onMounted(() => {
       </p>
 
       <p>
-        Firebase Analytics wird nur nach Einwilligung im Cookie-Dialog geladen. Die anonymisierten
-        Nutzungsdaten helfen, die Seite für Nutzer in verschiedenen Ländern zu verbessern.
+        Firebase Analytics wird nur nach Einwilligung im Cookie-Dialog geladen. Die ggf.
+        pseudonymisierten Nutzungsdaten helfen, die Seite für Nutzer in verschiedenen Ländern zu
+        verbessern.
       </p>
 
       <p>Bei Einwilligung können insbesondere folgende Daten verarbeitet werden:</p>

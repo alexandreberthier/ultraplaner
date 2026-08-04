@@ -25,7 +25,7 @@ export default {
   },
   cookie: {
     aria: 'Cookie- und Analyse-Einstellungen',
-    text: 'UltraPlaner ist neu online. Mit Analytics (anonym) kann ich die Seite für Nutzer in verschiedenen Ländern besser machen.',
+    text: 'UltraPlaner ist neu online. Mit optionaler Analytics nach Einwilligung kann ich die Seite für Nutzer in verschiedenen Ländern besser machen.',
     privacy: 'Datenschutz',
     accept: 'Akzeptieren',
     decline: 'Ablehnen',

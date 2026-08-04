@@ -25,7 +25,7 @@ export default {
   },
   cookie: {
     aria: 'Cookie and analytics settings',
-    text: 'UltraPlaner is newly online. With analytics (anonymous) I can better improve the site for users in different countries.',
+    text: 'UltraPlaner is newly online. With optional analytics after consent, I can better improve the site for users in different countries.',
     privacy: 'Privacy',
     accept: 'Accept',
     decline: 'Decline',
