@@ -23,6 +23,13 @@ export default {
     poisGuide: 'Avituallamiento en la ruta',
     portfolio: 'codedbyalex.dev',
   },
+  cookie: {
+    aria: 'Ajustes de cookies y analítica',
+    text: 'UltraPlaner está recién online. Con analytics (anónimo) puedo mejorar el sitio para usuarios de distintos países.',
+    privacy: 'Privacidad',
+    accept: 'Aceptar',
+    decline: 'Rechazar',
+  },
   landing: {
     tagline: 'Planificación de rutas ultracycling con avituallamiento — Europa (DACH, Iberia, Balcanes, Bálticos, FI, FR, …)',
     hero: 'Planifica tu ruta de ultracycling.',
@@ -46,7 +53,7 @@ export default {
     backGpx: '← GPX',
     plan: 'Planificar',
     privacy:
-      'Ubicación solo en «Alrededor» y modo marcha (en el dispositivo). Sin cookies de seguimiento — los ajustes permanecen en el navegador.',
+      'Ubicación solo en «Alrededor» y modo marcha (en el dispositivo). Firebase Analytics solo con consentimiento — los ajustes permanecen en el navegador.',
     features: {
       title: 'Qué hace UltraPlaner',
       pois: 'Avituallamiento cerca del track',
@@ -122,7 +129,7 @@ export default {
       a19:
         'Usable en el navegador del móvil. Como PWA en la pantalla de inicio: Android menú del navegador → Instalar; iPhone Compartir → Mostrar más → Añadir a pantalla de inicio — arranca sin barra del navegador, sigue en ultraplaner.com. Ubicación (Alrededor / modo marcha): en iPhone toca a la izquierda de la barra de dirección de Safari → Ajustes del sitio → Ubicación → Permitir (los Servicios de ubicación del sistema no bastan). Offline: ruta/POIs del caché, mapa base necesita red.',
       q10: 'Privacidad y ubicación',
-      a10: 'Ubicación solo en «Alrededor» y modo marcha. Sin cookies de seguimiento. Ajustes y caché offline locales. Ver política de privacidad.',
+      a10: 'Ubicación solo en «Alrededor» y modo marcha. Firebase Analytics solo tras consentimiento. Ajustes y caché offline locales. Ver política de privacidad.',
       q11: '¿Feedback y roadmap?',
       a11: 'Ideas bienvenidas vía el formulario abajo — van directo a mí (Alex). El envío a la nube Wahoo ya está; Garmin sigue por FIT/USB de momento (API Connect solo con acceso de partner). La API cloud de COROS está solicitada y prevista cuando haya acceso de partner — hasta entonces QR/GPX. Mejoramos horarios OSM de forma continua.',
       q12: '¿Qué viene después (roadmap)?',

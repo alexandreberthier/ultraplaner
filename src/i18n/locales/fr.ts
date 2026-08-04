@@ -23,6 +23,13 @@
     poisGuide: 'Ravitaillement sur la route',
     portfolio: 'codedbyalex.dev',
   },
+  cookie: {
+    aria: 'Paramètres cookies et analytique',
+    text: 'UltraPlaner vient d’être mis en ligne. Avec l’analytique (anonyme), je peux mieux améliorer le site pour les utilisateurs de différents pays.',
+    privacy: 'Confidentialité',
+    accept: 'Accepter',
+    decline: 'Refuser',
+  },
   landing: {
     tagline: 'Planification ultracycling avec ravitaillement — Europe (DACH, Ibérie, Balkans, Pays baltes, FI, FR, …)',
     hero: 'Planifiez votre route ultracycling.',
@@ -45,7 +52,7 @@
     backGpx: '← GPX',
     plan: 'Planifier',
     privacy:
-      "Position uniquement pour « Alentours » et le mode route (sur l'appareil). Pas de cookies d'analyse/suivi — les réglages restent dans le navigateur.",
+      "Position uniquement pour « Alentours » et le mode route (sur l'appareil). Firebase Analytics uniquement avec consentement — les réglages restent dans le navigateur.",
     features: {
       title: 'Ce que fait UltraPlaner',
       pois: 'Ravitaillement près du tracé',
@@ -121,7 +128,7 @@
       a19:
         "Utilisable dans le navigateur mobile. En PWA sur l'écran d'accueil : Android menu navigateur → Installer ; iPhone Partager → Afficher plus → Sur l'écran d'accueil — démarre sans barre du navigateur, toujours ultraplaner.com. Position (Alentours / mode route) : sur iPhone toucher à gauche dans la barre d’adresse Safari → Réglages du site → Position → Autoriser (les services de localisation système ne suffisent pas). Hors ligne : route/POIs du cache, fond de carte nécessite le réseau.",
       q10: 'Confidentialité et position',
-      a10: "Position pour « Alentours » et mode route. Pas de cookies de suivi. Réglages et cache hors ligne locaux. Voir politique de confidentialité.",
+      a10: "Position pour « Alentours » et mode route. Firebase Analytics uniquement après consentement. Réglages et cache hors ligne locaux. Voir politique de confidentialité.",
       q11: 'Feedback & roadmap ?',
       a11: "Idées bienvenues via le formulaire ci-dessous — m'atteignent directement (Alex). L'envoi cloud Wahoo est en ligne ; Garmin reste FIT/USB pour l'instant (API Connect seulement après accès partenaire). L’API cloud COROS est demandée et prévue dès qu’un accès partenaire existe — d’ici là QR/GPX. Nous améliorons en continu les indices d'horaires OSM.",
       q12: 'Et ensuite (roadmap) ?',

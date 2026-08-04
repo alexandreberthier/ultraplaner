@@ -23,6 +23,13 @@ export default {
     poisGuide: 'Versorgung auf der Route',
     portfolio: 'codedbyalex.dev',
   },
+  cookie: {
+    aria: 'Cookie- und Analyse-Einstellungen',
+    text: 'UltraPlaner ist neu online. Mit Analytics (anonym) kann ich die Seite für Nutzer in verschiedenen Ländern besser machen.',
+    privacy: 'Datenschutz',
+    accept: 'Akzeptieren',
+    decline: 'Ablehnen',
+  },
   landing: {
     tagline: 'Ultracycling-Routenplanung mit Versorgungspunkten — Europa (u. a. DACH, Iberia, Balkan, Baltikum, FI, FR)',
     hero: 'Plane deine Ultracycling-Route.',
@@ -46,7 +53,7 @@ export default {
     backGpx: '← GPX',
     plan: 'Planen',
     privacy:
-      'Standort nur bei „Umgebung“ und im Fahrtmodus (auf dem Gerät). Keine Tracking-Cookies — Einstellungen bleiben im Browser.',
+      'Standort nur bei „Umgebung“ und im Fahrtmodus (auf dem Gerät). Firebase Analytics nur mit Einwilligung — Einstellungen bleiben im Browser.',
     features: {
       title: 'Was UltraPlaner kann',
       pois: 'Versorgungspunkte entlang der Strecke',

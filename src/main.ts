@@ -5,14 +5,15 @@ import router from './router'
 import { getDb, isFirebaseConfigured } from './firebase'
 import { initColorblindMode } from './composables/useColorblindMode'
 import { initPwaInstallListener } from './composables/usePwaInstall'
+import { initAnalyticsConsent } from './composables/useAnalyticsConsent'
 import { applyDocumentSeo, enforcePreferredHostSeo } from './composables/useDocumentSeo'
 import { i18n, localeFromPath, setAppLocale, isLocaleHomePath, type AppLocale } from './i18n'
-import { recordSessionPageView } from './services/pageStats'
 import './style.css'
 
 enforcePreferredHostSeo()
 initColorblindMode()
 initPwaInstallListener()
+initAnalyticsConsent()
 
 const app = createApp(App)
 app.use(createPinia())
@@ -29,7 +30,6 @@ if (isLocaleHomePath(window.location.pathname)) {
 }
 
 router.afterEach((to) => {
-  recordSessionPageView(to.path)
   const fromPath = localeFromPath(to.path)
   if (fromPath && fromPath !== i18n.global.locale.value) {
     setAppLocale(fromPath)

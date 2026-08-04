@@ -23,6 +23,13 @@ export default {
     poisGuide: 'Supply along the route',
     portfolio: 'codedbyalex.dev',
   },
+  cookie: {
+    aria: 'Cookie and analytics settings',
+    text: 'UltraPlaner is newly online. With analytics (anonymous) I can better improve the site for users in different countries.',
+    privacy: 'Privacy',
+    accept: 'Accept',
+    decline: 'Decline',
+  },
   landing: {
     tagline: 'Ultracycling route planning with supply points — Europe (DACH, Iberia, Balkans, Baltics, FI, FR, …)',
     hero: 'Plan your ultracycling route.',
@@ -46,7 +53,7 @@ export default {
     backGpx: '← GPX',
     plan: 'Plan',
     privacy:
-      'Location only for Nearby and ride mode (on-device). No tracking cookies — settings stay in the browser.',
+      'Location only for Nearby and ride mode (on-device). Firebase Analytics only with consent — settings stay in the browser.',
     features: {
       title: 'What UltraPlaner does',
       pois: 'Supply points along the track',
@@ -122,7 +129,7 @@ export default {
       a19:
         'Usable in the mobile browser. As a PWA on the home screen: Android browser menu → Install; iPhone Share → Show More → Add to Home Screen — launches without browser chrome, still ultraplaner.com. Location (Nearby / ride mode): on iPhone tap left in the Safari address bar → Website Settings → Location → Allow (device Location Services alone are not enough). Offline: route/POIs from cache, basemap needs network.',
       q10: 'Privacy & location',
-      a10: 'Location only for Nearby and ride mode. No tracking cookies. Settings and offline cache stay local. Map tiles may see your IP technically — see privacy policy.',
+      a10: 'Location only for Nearby and ride mode. Firebase Analytics only after consent. Settings and offline cache stay local. Map tiles may see your IP technically — see privacy policy.',
       q11: 'Feedback & roadmap?',
       a11: 'Share ideas via the form below — goes straight to me (Alex). Wahoo cloud push is live; Garmin stays FIT/USB for now (Connect API only after partner access). COROS Cloud API is requested and planned once partner access is available — until then QR/GPX. We keep improving opening-hours hints via OSM.',
       q12: 'What’s next (roadmap)?',

@@ -12,7 +12,7 @@ onMounted(() => {
   applyLegalSeo({
     title: 'Datenschutzerklärung – UltraPlaner',
     description:
-      'Datenschutzerklärung von UltraPlaner: Verarbeitung personenbezogener Daten, Firebase-Hosting, Standortnutzung, anonyme Sitzungszählung und Ihre Rechte nach DSGVO.',
+      'Datenschutzerklärung von UltraPlaner: Verarbeitung personenbezogener Daten, Firebase Hosting, Firebase Analytics (nur mit Einwilligung), Standortnutzung und Ihre Rechte nach DSGVO.',
     path: '/datenschutz/',
   })
 })
@@ -39,7 +39,7 @@ onMounted(() => {
     <article class="privacy-policy">
       <h1>Datenschutzerklärung</h1>
 
-      <p class="stand">Stand: 27. Juli 2026</p>
+      <p class="stand">Stand: 4. August 2026</p>
 
       <h2>1. Verantwortlicher</h2>
 
@@ -73,18 +73,11 @@ onMounted(() => {
       </p>
 
       <p>
-        Auf dieser Website werden keine Drittanbieter-Analyse- oder Marketingdienste wie Google
-        Analytics oder Firebase Analytics eingesetzt. Es findet keine Erstellung personenbezogener
-        Nutzerprofile und kein verhaltensbasiertes Tracking über mehrere Websites hinweg statt.
-      </p>
-
-      <p>
-        Zur groben Messung der Nutzung (z. B. wie viele Besuche pro Tag) zählen wir anonym, wie oft
-        die Anwendung in einer Browsersitzung geöffnet wird. Dabei wird nur ein grober Seitentyp
-        erfasst (z. B. Startseite oder Kartenansicht), keine vollständigen URLs mit Karten-IDs,
-        keine Cookies für Statistik und keine Weitergabe an Werbenetzwerke. Rechtsgrundlage ist
-        Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse an der technischen Verbesserung des
-        Angebots). Details siehe Abschnitt „Cookies“ und „Supabase“.
+        Auf dieser Website werden keine Marketing- oder Werbenetzwerke eingesetzt. Soweit
+        Analysewerkzeuge verwendet werden, erfolgt dies nur nach Ihrer Einwilligung (siehe Abschnitt
+        „Firebase Analytics“ und „Cookies“). Es findet keine Erstellung personenbezogener
+        Nutzerprofile zu Werbezwecken und kein verhaltensbasiertes Tracking über mehrere Websites
+        hinweg statt.
       </p>
 
       <h2>3. Hosting der Website</h2>
@@ -137,7 +130,56 @@ onMounted(() => {
         </a>
       </p>
 
-      <h2>4. Technische App-Infrastruktur</h2>
+      <h2>4. Firebase Analytics</h2>
+
+      <p>
+        Zur Auswertung der Nutzung dieser Website kann Firebase Analytics (Google Analytics für
+        Firebase) eingesetzt werden. Anbieter ist Google Ireland Limited (Kontaktdaten siehe oben).
+      </p>
+
+      <p>
+        Firebase Analytics wird nur nach Einwilligung im Cookie-Dialog geladen. Die anonymisierten
+        Nutzungsdaten helfen, die Seite für Nutzer in verschiedenen Ländern zu verbessern.
+      </p>
+
+      <p>Bei Einwilligung können insbesondere folgende Daten verarbeitet werden:</p>
+
+      <ul>
+        <li>IP-Adresse (ggf. gekürzt),</li>
+        <li>Geräte- und Browserinformationen,</li>
+        <li>ungefährer Standort (abgeleitet aus der IP-Adresse),</li>
+        <li>aufgerufene Seiten und Nutzungsereignisse,</li>
+        <li>technische Kennungen bzw. Cookies oder vergleichbare Speicherungen.</li>
+      </ul>
+
+      <p>
+        Die Verarbeitung erfolgt auf Grundlage Ihrer Einwilligung gemäß Art. 6 Abs. 1 lit. a DSGVO
+        sowie § 165 Abs. 3 TKG 2021. Sie können Ihre Einwilligung jederzeit mit Wirkung für die Zukunft
+        widerrufen, indem Sie die gespeicherte Auswahl in Ihrem Browser löschen (lokaler Speicher /
+        Cookies dieser Website) und die Seite neu laden; der Dialog erscheint dann erneut.
+      </p>
+
+      <p>
+        Es kann zu einer Übermittlung von Daten in die USA oder andere Drittländer kommen. Google
+        stützt solche Übermittlungen nach eigenen Angaben auf geeignete Garantien.
+      </p>
+
+      <p>
+        Weitere Informationen:
+        <a
+          href="https://firebase.google.com/support/privacy"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Datenschutz und Sicherheit bei Firebase
+        </a>
+        und
+        <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">
+          Datenschutzerklärung von Google
+        </a>
+      </p>
+
+      <h2>5. Technische App-Infrastruktur</h2>
 
       <h3>Supabase</h3>
 
@@ -162,8 +204,7 @@ onMounted(() => {
 
       <p>
         Supabase wird nicht zur verhaltensbasierten Analyse, zur Erstellung von Nutzerprofilen oder
-        für personalisierte Werbung eingesetzt. Für eine anonyme Besucherzählung (siehe Abschnitt 2)
-        werden ausschließlich aggregierte Tageszähler ohne personenbezogene Profile gespeichert.
+        für personalisierte Werbung eingesetzt.
       </p>
 
       <p>
@@ -196,7 +237,7 @@ onMounted(() => {
         </a>
       </p>
 
-      <h2>5. Kontaktaufnahme</h2>
+      <h2>6. Kontaktaufnahme</h2>
 
       <h3>Kontaktformular und Web3Forms</h3>
 
@@ -273,7 +314,7 @@ onMounted(() => {
         </a>
       </p>
 
-      <h2>6. Karten und Routendarstellung</h2>
+      <h2>7. Karten und Routendarstellung</h2>
 
       <h3>OpenStreetMap und externe Kartenserver</h3>
 
@@ -392,7 +433,7 @@ onMounted(() => {
         Datenschutzbestimmungen von Wahoo.
       </p>
 
-      <h2>7. Wetterdaten</h2>
+      <h2>8. Wetterdaten</h2>
 
       <h3>Open-Meteo</h3>
 
@@ -441,7 +482,7 @@ onMounted(() => {
         </a>
       </p>
 
-      <h2>8. Standortdaten</h2>
+      <h2>9. Standortdaten</h2>
 
       <h3>Gerätstandort (Umgebung und Fahrtmodus)</h3>
 
@@ -489,47 +530,51 @@ onMounted(() => {
         widerrufen oder einschränken.
       </p>
 
-      <h2>9. Cookies und vergleichbare Technologien</h2>
+      <h2>10. Cookies und vergleichbare Technologien</h2>
 
       <p>
-        Wir verwenden keine Analyse-, Marketing- oder Tracking-Cookies. Insbesondere werden weder
-        Firebase Analytics noch Google Analytics eingesetzt.
+        Analyse-Cookies bzw. vergleichbare Technologien von Firebase Analytics werden nur nach Ihrer
+        Einwilligung gesetzt (siehe Abschnitt 4).
       </p>
 
       <p>
-        Zur anonymen Besucherstatistik setzen wir <strong>keine Cookies</strong> ein, sondern
-        speichern in <code>sessionStorage</code> des Browsers nur, ob in dieser Sitzung bereits
-        gezählt wurde (einmal pro Tab-Sitzung). Beim ersten Aufruf sendet die App einen aggregierten
-        Zählimpuls an unseren eigenen Supabase-Server (grober Seitentyp, kein Karten-Link). Es
-        entstehen keine Nutzerprofile und kein websiteübergreifendes Tracking.
+        Zusätzlich speichert die Website lokal im Browser (localStorage / vergleichbare Speicherungen)
+        technisch nützliche Einstellungen, insbesondere:
+      </p>
+
+      <ul>
+        <li>Ihre Sprachauswahl,</li>
+        <li>Ihre Darstellungseinstellungen (z. B. Farbenfehlsicht-Modus),</li>
+        <li>Ihre Entscheidung zum Analytics-Einsatz (Einwilligung oder Ablehnung),</li>
+        <li>lokale App-Einstellungen und Offline-Cache für Routen und POIs.</li>
+      </ul>
+
+      <p>
+        Diese Speicherungen sind für die von Ihnen gewählte Darstellung bzw. die Dokumentation Ihrer
+        Einwilligungsentscheidung erforderlich oder dienen der Benutzerfreundlichkeit. Soweit sie
+        technisch unbedingt erforderlich sind, erfolgt der Einsatz im Rahmen von § 165 Abs. 3 TKG
+        2021; im Übrigen auf Grundlage von Art. 6 Abs. 1 lit. f DSGVO.
       </p>
 
       <p>
-        Wir verwenden keine vergleichbaren Technologien, um das Verhalten von Besuchern
-        websiteübergreifend zu verfolgen, personenbezogene Nutzerprofile zu erstellen oder
-        personalisierte Werbung anzuzeigen. Die anonyme Sitzungszählung (siehe oben) dient
-        ausschließlich aggregierten Nutzungszahlen.
+        Es werden keine Marketing-Cookies und kein websiteübergreifendes Tracking für Werbung
+        eingesetzt.
       </p>
 
-      <p>
-        Soweit technisch unbedingt erforderliche Cookies oder lokale Speicherungen für eine
-        ausdrücklich gewünschte Funktion eingesetzt werden, erfolgt dies im Rahmen von § 165 Abs. 3
-        TKG 2021.
-      </p>
-
-      <h2>10. Empfänger personenbezogener Daten</h2>
+      <h2>11. Empfänger personenbezogener Daten</h2>
 
       <p>
         Personenbezogene Daten werden nur weitergegeben, wenn dies zur Bereitstellung der Website
         oder einer angeforderten Funktion, zur Bearbeitung einer Anfrage, zur Vertragserfüllung, zur
-        Erfüllung einer gesetzlichen Verpflichtung oder zur Wahrung eines berechtigten Interesses
-        erforderlich ist.
+        Erfüllung einer gesetzlichen Verpflichtung, zur Wahrung eines berechtigten Interesses oder —
+        im Fall von Analytics — aufgrund Ihrer Einwilligung erforderlich ist.
       </p>
 
       <p>Empfänger oder Kategorien von Empfängern können insbesondere sein:</p>
 
       <ul>
-        <li>Hosting- und Infrastruktur-Dienstleister,</li>
+        <li>Hosting- und Infrastruktur-Dienstleister (Firebase / Google),</li>
+        <li>Analyse-Dienstleister (Firebase Analytics / Google), soweit eingewilligt,</li>
         <li>Datenbank- und Backend-Dienstleister,</li>
         <li>E-Mail- und Kontaktformular-Dienstleister,</li>
         <li>Karten-, Routing- und Wetterdatenanbieter,</li>
@@ -537,7 +582,7 @@ onMounted(() => {
         <li>Behörden bei Vorliegen einer gesetzlichen Verpflichtung.</li>
       </ul>
 
-      <h2>11. Speicherdauer</h2>
+      <h2>12. Speicherdauer</h2>
 
       <p>
         Personenbezogene Daten werden grundsätzlich nur so lange gespeichert, wie dies für den
@@ -552,7 +597,7 @@ onMounted(() => {
 
       <p>Für einzelne Dienste gelten die in den jeweiligen Abschnitten genannten Speicherfristen.</p>
 
-      <h2>12. Datensicherheit</h2>
+      <h2>13. Datensicherheit</h2>
 
       <p>
         Wir treffen angemessene technische und organisatorische Maßnahmen, um personenbezogene Daten
@@ -570,7 +615,7 @@ onMounted(() => {
         über das Internet nicht garantiert werden.
       </p>
 
-      <h2>13. Rechte betroffener Personen</h2>
+      <h2>14. Rechte betroffener Personen</h2>
 
       <p>Ihnen stehen nach Maßgabe der gesetzlichen Voraussetzungen insbesondere folgende Rechte zu:</p>
 
@@ -591,7 +636,7 @@ onMounted(() => {
 
       <p>Zur Ausübung Ihrer Rechte können Sie uns über die oben angegebene E-Mail-Adresse kontaktieren.</p>
 
-      <h2>14. Widerspruch gegen die Verarbeitung</h2>
+      <h2>15. Widerspruch gegen die Verarbeitung</h2>
 
       <p>
         Soweit wir personenbezogene Daten auf Grundlage von Art. 6 Abs. 1 lit. f DSGVO verarbeiten,
@@ -606,7 +651,7 @@ onMounted(() => {
         Verarbeitung dient der Geltendmachung, Ausübung oder Verteidigung von Rechtsansprüchen.
       </p>
 
-      <h2>15. Beschwerderecht</h2>
+      <h2>16. Beschwerderecht</h2>
 
       <p>
         Wenn Sie der Ansicht sind, dass die Verarbeitung Ihrer personenbezogenen Daten gegen das
@@ -625,14 +670,14 @@ onMounted(() => {
         Telefon: +43 1 52 152-0
       </p>
 
-      <h2>16. Keine automatisierte Entscheidungsfindung</h2>
+      <h2>17. Keine automatisierte Entscheidungsfindung</h2>
 
       <p>
         Es findet keine automatisierte Entscheidungsfindung einschließlich Profiling im Sinne von
         Art. 22 DSGVO statt.
       </p>
 
-      <h2>17. Änderungen dieser Datenschutzerklärung</h2>
+      <h2>18. Änderungen dieser Datenschutzerklärung</h2>
 
       <p>
         Wir behalten uns vor, diese Datenschutzerklärung anzupassen, wenn sich die rechtlichen
