@@ -249,6 +249,80 @@ export function hasElevationData(points: RoutePoint[]): boolean {
   return Math.max(...elevations) - Math.min(...elevations) > 1
 }
 
+/**
+ * DEM/GPS elevation noise filter (Strava-like).
+ * ORS returns DEM-sampled Z; raw positive deltas inflate gain badly.
+ * Light moving-average + ignore sub-threshold wiggles; real climbs still accumulate.
+ */
+const ELEV_SMOOTH_WINDOW = 5
+/** Meters — typical consumer apps use ~3 m after smoothing. */
+const ELEV_NOISE_THRESHOLD_M = 3
+
+export function smoothElevations(
+  elevations: number[],
+  window = ELEV_SMOOTH_WINDOW
+): number[] {
+  if (elevations.length < 3 || window < 3) return elevations.slice()
+  const half = Math.floor(window / 2)
+  const out: number[] = new Array(elevations.length)
+  for (let i = 0; i < elevations.length; i++) {
+    let sum = 0
+    let n = 0
+    const lo = Math.max(0, i - half)
+    const hi = Math.min(elevations.length - 1, i + half)
+    for (let j = lo; j <= hi; j++) {
+      sum += elevations[j]!
+      n++
+    }
+    out[i] = sum / n
+  }
+  return out
+}
+
+/**
+ * Cumulative ascent/descent with smoothing + minimum rise/fall threshold.
+ * Continuous climbs still count in full (threshold advances the baseline).
+ */
+export function elevationGainLoss(
+  elevations: number[],
+  opts?: { thresholdM?: number; smoothWindow?: number }
+): { ascentM: number; descentM: number } {
+  const threshold = opts?.thresholdM ?? ELEV_NOISE_THRESHOLD_M
+  const window = opts?.smoothWindow ?? ELEV_SMOOTH_WINDOW
+  if (elevations.length < 2) return { ascentM: 0, descentM: 0 }
+
+  const smoothed = smoothElevations(elevations, window)
+  let ascentM = 0
+  let descentM = 0
+  let last = smoothed[0]!
+
+  for (let i = 1; i < smoothed.length; i++) {
+    const elev = smoothed[i]!
+    const diff = elev - last
+    if (diff >= threshold) {
+      ascentM += diff
+      last = elev
+    } else if (diff <= -threshold) {
+      descentM += -diff
+      last = elev
+    }
+  }
+
+  return { ascentM, descentM }
+}
+
+export function routeElevationGainLoss(
+  points: RoutePoint[]
+): { ascentM: number; descentM: number } {
+  const elevations: number[] = []
+  for (const p of points) {
+    if (p.elevation != null && Number.isFinite(p.elevation)) {
+      elevations.push(p.elevation)
+    }
+  }
+  return elevationGainLoss(elevations)
+}
+
 export function buildKmMarkers(
   points: RoutePoint[],
   intervalKm: number
@@ -339,25 +413,16 @@ export function analyzeElevationSegment(
   if (start?.elevation == null || end?.elevation == null) return null
 
   const lengthKm = hi - lo
-  let ascentM = 0
-  let descentM = 0
-  let prevElev: number | null = null
-
+  const segmentElevs: number[] = []
+  if (start.elevation != null) segmentElevs.push(start.elevation)
   for (const p of points) {
     const km = p.distanceFromStart ?? 0
-    if (km < lo) {
-      if (p.elevation != null) prevElev = p.elevation
-      continue
-    }
-    if (km > hi) break
-    if (p.elevation == null) continue
-    if (prevElev != null) {
-      const diff = p.elevation - prevElev
-      if (diff > 0) ascentM += diff
-      else descentM -= diff
-    }
-    prevElev = p.elevation
+    if (km <= lo || km >= hi) continue
+    if (p.elevation == null || !Number.isFinite(p.elevation)) continue
+    segmentElevs.push(p.elevation)
   }
+  if (end.elevation != null) segmentElevs.push(end.elevation)
+  const { ascentM, descentM } = elevationGainLoss(segmentElevs)
 
   const netGainM = end.elevation - start.elevation
   const lengthM = lengthKm * 1000

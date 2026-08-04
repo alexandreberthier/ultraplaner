@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { computed, nextTick, onMounted, onUnmounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import maplibregl from 'maplibre-gl'
@@ -23,6 +23,7 @@ import {
 } from '../services/routing'
 import { totalRouteKm, buildRoutePoints, buildKmMarkers } from '../utils/route'
 import { poiCategoryLabel } from '../utils/poiLabels'
+import { ensureRouteEndImages, routeEndIconId } from '../utils/routeEndIcons'
 import { isSecureGeoContext } from '../utils/geoDevice'
 
 /** Vienna city center — default planner view before/without geolocation. */
@@ -216,13 +217,22 @@ function waypointsGeoJson() {
     features: pts.flatMap((w, i) => {
       // Skip duplicate end marker when start == finish
       if (loopClosed && i === n - 1) return []
+      let role: 'start' | 'end' | 'both' | 'mid' = 'mid'
+      if (loopClosed && i === 0) role = 'both'
+      else if (i === 0) role = 'start'
+      else if (i === n - 1) role = 'end'
       const label =
-        loopClosed && i === 0 ? t('planner.startEnd') : waypointLabel(i, n)
+        role === 'both' ? t('planner.startEnd') : waypointLabel(i, n)
       return [
         {
           type: 'Feature' as const,
           geometry: { type: 'Point' as const, coordinates: [w.lng, w.lat] },
-          properties: { label },
+          properties: {
+            label,
+            role,
+            icon: role === 'mid' ? '' : routeEndIconId(role),
+            index: String(i + 1),
+          },
         },
       ]
     }),
@@ -377,32 +387,61 @@ function addPlannerLayers() {
   })
 
   map.addLayer({
-    id: 'planner-waypoint-dot',
+    id: 'planner-waypoint-mid',
     type: 'circle',
     source: 'planner-waypoints',
+    filter: ['==', ['get', 'role'], 'mid'],
     paint: {
-      'circle-radius': 9,
-      'circle-color': '#fff',
-      'circle-stroke-width': 3,
-      'circle-stroke-color': '#2d6a4f',
+      'circle-radius': 7,
+      'circle-color': '#1b4332',
+      'circle-stroke-width': 2,
+      'circle-stroke-color': '#ffffff',
     },
   })
 
   map.addLayer({
-    id: 'planner-waypoint-label',
+    id: 'planner-waypoint-mid-label',
     type: 'symbol',
     source: 'planner-waypoints',
+    filter: ['==', ['get', 'role'], 'mid'],
     layout: {
-      'text-field': ['get', 'label'],
-      'text-size': 11,
+      'text-field': ['get', 'index'],
+      'text-size': 10,
       'text-font': [...MAP_LABEL_FONT],
-      'text-offset': [0, -1.6],
       'text-allow-overlap': true,
+      'text-ignore-placement': true,
     },
     paint: {
-      'text-color': '#1b4332',
-      'text-halo-color': '#fff',
-      'text-halo-width': 1.5,
+      'text-color': '#ffffff',
+      'text-halo-color': '#1b4332',
+      'text-halo-width': 0.8,
+    },
+  })
+
+  ensureRouteEndImages(map)
+  map.addLayer({
+    id: 'planner-waypoint-ends',
+    type: 'symbol',
+    source: 'planner-waypoints',
+    filter: ['in', ['get', 'role'], ['literal', ['start', 'end', 'both']]],
+    layout: {
+      'icon-image': ['get', 'icon'],
+      'icon-size': 1,
+      'icon-anchor': 'bottom',
+      'icon-allow-overlap': true,
+      'icon-ignore-placement': true,
+      'text-field': ['get', 'label'],
+      'text-size': 11,
+      'text-offset': [0, -3.35],
+      'text-font': [...MAP_LABEL_FONT],
+      'text-anchor': 'bottom',
+      'text-allow-overlap': true,
+      'text-ignore-placement': true,
+    },
+    paint: {
+      'text-color': '#0f172a',
+      'text-halo-color': '#ffffff',
+      'text-halo-width': 2,
     },
   })
 
@@ -411,10 +450,13 @@ function addPlannerLayers() {
 
 function onPlannerMapClick(e: maplibregl.MapMouseEvent) {
   if (!map) return
-  const hits = map.queryRenderedFeatures(e.point, { layers: ['planner-waypoint-dot'] })
+  const hits = map.queryRenderedFeatures(e.point, {
+    layers: ['planner-waypoint-ends', 'planner-waypoint-mid'].filter((id) => map!.getLayer(id)),
+  })
   if (hits.length) {
+    const role = String(hits[0]?.properties?.role ?? '')
     const label = String(hits[0]?.properties?.label ?? '')
-    if (label === t('planner.start') && canCloseLoop.value) {
+    if ((role === 'start' || label === t('planner.start')) && canCloseLoop.value) {
       closeLoop()
     }
     return
@@ -441,6 +483,28 @@ function initMap() {
     updateMapSources()
     centerOnUserLocation()
   })
+}
+
+function destroyPlannerMap() {
+  geoLocateAlive = false
+  if (autoRouteTimer) clearTimeout(autoRouteTimer)
+  autoRouteTimer = null
+  if (addressTimer) clearTimeout(addressTimer)
+  addressTimer = null
+  cancelStyleReady?.()
+  cancelStyleReady = null
+  resizeObserver?.disconnect()
+  resizeObserver = null
+  if (map) {
+    try {
+      map.off('error', onBasemapError)
+      map.off('click', onPlannerMapClick)
+      map.remove()
+    } catch (err) {
+      console.warn('[planner] destroy failed:', err)
+    }
+  }
+  map = null
 }
 
 /** Show Vienna immediately; fly to GPS if permission granted (non-blocking). */
@@ -597,6 +661,9 @@ async function createMap() {
     )
 
     if (store.mapReady) {
+      // Free planner WebGL before MapView creates its map (mobile context limit)
+      destroyPlannerMap()
+      await nextTick()
       await router.push('/map/view')
     } else if (store.error) {
       formError.value = store.error
@@ -619,16 +686,7 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
-  geoLocateAlive = false
-  if (autoRouteTimer) clearTimeout(autoRouteTimer)
-  if (addressTimer) clearTimeout(addressTimer)
-  cancelStyleReady?.()
-  cancelStyleReady = null
-  resizeObserver?.disconnect()
-  resizeObserver = null
-  map?.off('error', onBasemapError)
-  map?.remove()
-  map = null
+  destroyPlannerMap()
 })
 </script>
 
@@ -1208,19 +1266,29 @@ onUnmounted(() => {
 .cat-chip {
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
-  padding: 0.4rem 0.75rem;
+  gap: 0.4rem;
+  padding: 0.55rem 0.9rem;
+  min-height: 44px;
   border-radius: 999px;
   border: 1px solid var(--border);
   background: var(--surface);
   cursor: pointer;
-  font-size: 0.85rem;
+  font-size: 0.9rem;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .cat-chip.active {
   background: var(--primary);
   color: #fff;
   border-color: var(--primary);
+}
+
+@media (min-width: 769px) {
+  .cat-chip {
+    padding: 0.4rem 0.75rem;
+    min-height: 0;
+    font-size: 0.85rem;
+  }
 }
 
 .error {

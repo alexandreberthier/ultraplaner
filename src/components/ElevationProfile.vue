@@ -7,8 +7,10 @@ import {
   buildElevationSamples,
   hasElevationData,
   pointAtRouteKm,
+  routeElevationGainLoss,
 } from '../utils/route'
 import { formatDuration, hoursForDistanceKm } from '../utils/eta'
+import { formatElevM, formatKmInt } from '../services/geo'
 import { gradeToColor, colorblindMode } from '../config/mapStyle'
 import type { RouteSurfaceBucketId } from '../../shared/types'
 
@@ -32,7 +34,7 @@ const SURFACE_BAR_COLOR: Record<RouteSurfaceBucketId, string> = {
 }
 
 const store = useMapStore()
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const plotRef = ref<HTMLElement | null>(null)
 const hoverKm = ref<number | null>(null)
 const plotSize = ref({ width: 800, height: 180 })
@@ -60,21 +62,14 @@ const stats = computed(() => {
 
   let min = pts[0]!
   let max = pts[0]!
-  let ascent = 0
-  let descent = 0
-
-  for (let i = 0; i < pts.length; i++) {
-    const p = pts[i]!
+  for (const p of pts) {
     if (p.elevation < min.elevation) min = p
     if (p.elevation > max.elevation) max = p
-    if (i > 0) {
-      const diff = p.elevation - pts[i - 1]!.elevation
-      if (diff > 0) ascent += diff
-      else descent -= diff
-    }
   }
 
-  return { min, max, ascent, descent }
+  // Gain from full route (smoothed + noise threshold), not chart downsamples
+  const { ascentM, descentM } = routeElevationGainLoss(store.routePoints)
+  return { min, max, ascent: ascentM, descent: descentM }
 })
 
 const bounds = computed(() => {
@@ -273,7 +268,7 @@ const hoverLabel = computed(() => {
   const grade = hoverPoint.value.gradient
   return {
     km: km.toFixed(1),
-    elev: elev != null ? `${Math.round(elev)} m` : '–',
+    elev: elev != null ? formatElevM(elev, locale.value) : '–',
     grade:
       grade != null
         ? `${grade >= 0 ? '+' : ''}${grade.toFixed(1)}%`
@@ -444,10 +439,12 @@ onUnmounted(() => {
         <div class="toggle-main">
           <span class="title">{{ t('elevation.title') }}</span>
           <span class="subtitle">
-            {{ totalKm.toFixed(0) }} km · ↑{{ Math.round(stats.ascent / 100) / 10 }}k
+            {{ formatKmInt(totalKm, locale) }} · ↑{{ formatElevM(stats.ascent, locale) }}
           </span>
         </div>
-        <span class="chevron" aria-hidden="true">{{ profileOpen ? '▾' : '▸' }}</span>
+        <span class="chevron-wrap" aria-hidden="true">
+          <span class="chevron">{{ profileOpen ? '▾' : '▴' }}</span>
+        </span>
       </button>
 
       <div v-show="profileOpen" class="profile-body">
@@ -488,7 +485,7 @@ onUnmounted(() => {
                 </span>
                 <span class="live-cell">
                   <span class="live-kicker">{{ t('elevation.ascent') }}</span>
-                  <strong>{{ Math.round(segmentStats.ascentM) }} m</strong>
+                  <strong>{{ formatElevM(segmentStats.ascentM, locale) }}</strong>
                 </span>
                 <span class="live-cell">
                   <span class="live-kicker">{{ t('elevation.grade') }}</span>
@@ -734,13 +731,15 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   gap: 0.65rem;
-  padding: 0.55rem 0.85rem;
+  padding: 0.65rem 0.9rem;
+  min-height: 48px;
   border: none;
   border-bottom: 1px solid transparent;
   background: var(--surface-2);
   cursor: pointer;
   text-align: left;
   color: var(--text);
+  -webkit-tap-highlight-color: transparent;
 }
 
 .elevation-profile:not(.collapsed) .profile-toggle {
@@ -755,10 +754,24 @@ onUnmounted(() => {
   gap: 0.1rem;
 }
 
-.chevron {
+.chevron-wrap {
   flex-shrink: 0;
-  color: var(--text-muted);
-  font-size: 0.85rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 8px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+}
+
+.chevron {
+  color: var(--text);
+  font-size: 1.15rem;
+  line-height: 1;
+  font-weight: 700;
 }
 
 .title {
@@ -1133,12 +1146,21 @@ onUnmounted(() => {
 
 @media (max-width: 768px) {
   .profile-toggle {
-    padding: 0.5rem 0.75rem;
-    min-height: 44px;
+    padding: 0.7rem 0.85rem;
+    min-height: 52px;
+  }
+
+  .chevron-wrap {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+
+  .chevron {
+    font-size: 1.3rem;
   }
 
   .subtitle {
-    font-size: 0.75rem;
+    font-size: 0.78rem;
   }
 
   .profile-header {

@@ -118,6 +118,7 @@ function toggleCat(id: PoiCategory) {
   align-items: center;
   gap: 0.5rem;
   padding: 0.55rem 1rem;
+  min-height: 44px;
   border: none;
   background: none;
   cursor: pointer;
@@ -151,8 +152,13 @@ function toggleCat(id: PoiCategory) {
 
 .chevron {
   color: var(--text-muted);
-  font-size: 0.75rem;
+  font-size: 0.95rem;
   flex-shrink: 0;
+  width: 1.5rem;
+  height: 1.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .section-body {
@@ -202,9 +208,10 @@ function toggleCat(id: PoiCategory) {
 
 .map-poi-toggle {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 0.4rem;
   margin: 0.4rem 0 0;
+  min-height: 44px;
   font-size: 0.76rem;
   font-weight: 600;
   cursor: pointer;
@@ -212,7 +219,9 @@ function toggleCat(id: PoiCategory) {
 }
 
 .map-poi-toggle input {
-  margin-top: 0.12rem;
+  width: 1.1rem;
+  height: 1.1rem;
+  margin-top: 0;
   flex-shrink: 0;
 }
 
@@ -229,20 +238,21 @@ ul {
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 0.3rem;
+  gap: 0.4rem;
 }
 
 .cat-btn {
   display: flex;
   align-items: center;
-  gap: 0.35rem;
+  gap: 0.4rem;
   width: 100%;
-  padding: 0.35rem 0.45rem;
+  padding: 0.55rem 0.6rem;
+  min-height: 44px;
   border: 1px solid var(--border);
   border-radius: 8px;
   background: var(--surface);
   cursor: pointer;
-  font-size: 0.78rem;
+  font-size: 0.82rem;
   text-align: left;
   transition: opacity 0.15s, background 0.15s;
 }
@@ -257,14 +267,16 @@ ul {
 }
 
 .swatch {
-  width: 9px;
-  height: 9px;
+  width: 11px;
+  height: 11px;
   border-radius: 50%;
   flex-shrink: 0;
 }
 
 .icon {
   flex-shrink: 0;
+  font-size: 1.05rem;
+  line-height: 1;
 }
 
 .label {
@@ -283,9 +295,25 @@ ul {
 }
 
 .eye {
-  font-size: 0.75rem;
-  width: 1rem;
+  font-size: 0.85rem;
+  width: 1.25rem;
   text-align: center;
   flex-shrink: 0;
+}
+
+@media (min-width: 769px) {
+  .cat-btn {
+    padding: 0.4rem 0.5rem;
+    min-height: 0;
+    font-size: 0.78rem;
+  }
+
+  .section-toggle {
+    min-height: 0;
+  }
+
+  .map-poi-toggle {
+    min-height: 0;
+  }
 }
 </style>

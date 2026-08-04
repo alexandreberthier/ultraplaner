@@ -84,6 +84,8 @@ function goStartApp() {
         <router-link to="/impressum/">{{ t('legal.imprint') }}</router-link>
         ·
         <router-link to="/datenschutz/">{{ t('legal.privacy') }}</router-link>
+        ·
+        <a href="https://codedbyalex.dev/" target="_blank" rel="noopener noreferrer">{{ t('legal.portfolio') }}</a>
       </footer>
     </main>
   </div>

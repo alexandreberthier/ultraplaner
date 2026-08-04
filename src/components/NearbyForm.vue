@@ -288,24 +288,41 @@ function searchNearby() {
 .cat-chip {
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
-  padding: 0.4rem 0.75rem;
+  gap: 0.4rem;
+  padding: 0.55rem 0.9rem;
+  min-height: 44px;
   border-radius: 999px;
   border: 1px solid var(--border);
   background: var(--surface);
   cursor: pointer;
-  font-size: 0.85rem;
+  font-size: 0.9rem;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .in-map .cat-chip {
-  padding: 0.3rem 0.55rem;
-  font-size: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  min-height: 44px;
+  font-size: 0.82rem;
 }
 
 .cat-chip.active {
   background: var(--primary);
   color: #fff;
   border-color: var(--primary);
+}
+
+@media (min-width: 769px) {
+  .cat-chip {
+    padding: 0.4rem 0.75rem;
+    min-height: 0;
+    font-size: 0.85rem;
+  }
+
+  .in-map .cat-chip {
+    padding: 0.3rem 0.55rem;
+    min-height: 0;
+    font-size: 0.75rem;
+  }
 }
 
 .error {

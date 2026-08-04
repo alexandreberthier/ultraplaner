@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from './views/HomeView.vue'
+import { useMapStore } from './stores/mapStore'
 
 const MapView = () => import('./views/MapView.vue')
 const PoisAlongRouteView = () => import('./views/PoisAlongRouteView.vue')
@@ -65,10 +66,33 @@ const router = createRouter({
       name: 'wahoo-callback',
       component: () => import('./views/WahooCallbackView.vue'),
     },
+    {
+      path: '/routes/import/:id',
+      name: 'route-import',
+      component: () => import('./views/RouteImportView.vue'),
+    },
+    // Avoid blank RouterView if a stale PWA shell hits an unknown path
+    {
+      path: '/:pathMatch(.*)*',
+      name: 'not-found',
+      redirect: '/',
+    },
   ],
   scrollBehavior() {
     return { top: 0 }
   },
+})
+
+/** Dismiss stuck LoadingOverlay when navigating away mid-load (e.g. browser back). */
+router.beforeEach((to) => {
+  if (to.path.startsWith('/map')) return true
+  try {
+    const store = useMapStore()
+    if (store.mode === 'loading') store.cancelLoading()
+  } catch {
+    /* pinia may not be ready on first navigation */
+  }
+  return true
 })
 
 export default router

@@ -58,6 +58,7 @@ const steps = [
 
 const faqs = ['q1', 'q17', 'q3', 'q6', 'q19', 'q13', 'q14', 'q11'] as const
 const updates = [
+  { key: 'coros', kind: 'new' },
   { key: 'nearbyFromMap', kind: 'new' },
   { key: 'routeKeptOnNearby', kind: 'fix' },
   { key: 'rideSupply', kind: 'new' },
@@ -343,6 +344,8 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
             <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>
             ·
             <a href="https://www.geofabrik.de" target="_blank" rel="noopener">Geofabrik</a>
+            ·
+            <a href="https://codedbyalex.dev/" target="_blank" rel="noopener noreferrer">{{ t('legal.portfolio') }}</a>
           </p>
         </footer>
       </div>

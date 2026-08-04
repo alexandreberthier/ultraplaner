@@ -68,3 +68,27 @@ export function formatDistance(meters: number): string {
 export function formatKm(km: number): string {
   return `${km.toFixed(1)} km`
 }
+
+/** BCP-47 tags for Intl grouping (DE uses `.` thousands sep). */
+const LOCALE_TAGS: Record<string, string> = {
+  de: 'de-DE',
+  en: 'en-US',
+  es: 'es-ES',
+  fr: 'fr-FR',
+}
+
+/** Full integer with locale thousands separators — never compact/`k`. */
+export function formatLocaleInt(n: number, locale = 'de'): string {
+  const tag = LOCALE_TAGS[locale] ?? locale
+  return new Intl.NumberFormat(tag, { maximumFractionDigits: 0 }).format(Math.round(n))
+}
+
+/** Elevation meters, e.g. `3.100 m` (de) / `3,100 m` (en). */
+export function formatElevM(meters: number, locale = 'de'): string {
+  return `${formatLocaleInt(meters, locale)} m`
+}
+
+/** Whole kilometres with locale grouping, e.g. `1.250 km`. */
+export function formatKmInt(km: number, locale = 'de'): string {
+  return `${formatLocaleInt(km, locale)} km`
+}

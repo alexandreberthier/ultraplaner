@@ -647,6 +647,8 @@ onMounted(() => {
         <router-link to="/impressum/">{{ t('legal.imprint') }}</router-link>
         ·
         <router-link to="/versorgung-ultracycling/">{{ t('legal.poisGuide') }}</router-link>
+        ·
+        <a href="https://codedbyalex.dev/" target="_blank" rel="noopener noreferrer">{{ t('legal.portfolio') }}</a>
       </footer>
     </article>
   </div>

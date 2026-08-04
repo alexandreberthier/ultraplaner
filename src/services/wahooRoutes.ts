@@ -1,4 +1,5 @@
 import type { RoutePoint } from '../../shared/types'
+import { routeElevationGainLoss } from '../utils/route'
 import { getWahooAccessToken } from './wahooAuth'
 
 const API_BASE = 'https://api.wahooligan.com/v1'
@@ -25,19 +26,9 @@ function bytesToBase64(bytes: Uint8Array): string {
   return btoa(binary)
 }
 
-/** Cumulative ascent / descent from route elevations (meters). */
+/** Cumulative ascent / descent from route elevations (meters, smoothed). */
 export function routeElevationStats(points: RoutePoint[]): { ascentM: number; descentM: number } {
-  let ascentM = 0
-  let descentM = 0
-  for (let i = 1; i < points.length; i++) {
-    const a = points[i - 1]!.elevation
-    const b = points[i]!.elevation
-    if (a == null || b == null || !Number.isFinite(a) || !Number.isFinite(b)) continue
-    const diff = b - a
-    if (diff > 0) ascentM += diff
-    else descentM += -diff
-  }
-  return { ascentM, descentM }
+  return routeElevationGainLoss(points)
 }
 
 function buildRouteBody(input: WahooRouteUploadInput, opts: { includeExternalId: boolean }): URLSearchParams {

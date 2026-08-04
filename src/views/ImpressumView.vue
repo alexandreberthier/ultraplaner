@@ -48,7 +48,9 @@ onMounted(() => {
 
       <p>
         E-Mail:
-        <a href="mailto:alexandre.jean.berthier@outlook.de">alexandre.jean.berthier@outlook.de</a>
+        <a href="mailto:alexandre.jean.berthier@outlook.de">alexandre.jean.berthier@outlook.de</a><br />
+        Website:
+        <a href="https://codedbyalex.dev/" target="_blank" rel="noopener noreferrer">codedbyalex.dev</a>
       </p>
 
       <h2>Zweck der Website</h2>
@@ -87,6 +89,8 @@ onMounted(() => {
         <router-link to="/datenschutz/">{{ t('legal.privacy') }}</router-link>
         ·
         <router-link to="/versorgung-ultracycling/">{{ t('legal.poisGuide') }}</router-link>
+        ·
+        <a href="https://codedbyalex.dev/" target="_blank" rel="noopener noreferrer">{{ t('legal.portfolio') }}</a>
       </footer>
     </div>
   </div>

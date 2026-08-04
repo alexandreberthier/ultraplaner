@@ -73,11 +73,15 @@ export default defineConfig(({ mode }) => {
         workbox: {
           maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
           cleanupOutdatedCaches: true,
+          // Take over immediately after deploy so QR / deep links are not stuck on a stale shell
+          skipWaiting: true,
+          clientsClaim: true,
           // App-Shell only — no OSM tiles / Supabase bulk
           globPatterns: ['**/*.{js,css,html,svg,png,ico,webp,woff2}'],
           navigateFallback: '/index.html',
-          // OAuth must hit the network / static callback.html — never stale app shell
-          navigateFallbackDenylist: [/^\/oauth\//],
+          // Never serve a precached shell for these — always network (Firebase SPA rewrite).
+          // Stale shells after deploy caused white screens on /routes/import/:id (QR transfer).
+          navigateFallbackDenylist: [/^\/oauth\//, /^\/routes\/import\//],
           runtimeCaching: [
             {
               urlPattern: ({ request }) => request.mode === 'navigate',

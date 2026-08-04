@@ -103,6 +103,8 @@ const SUPPORTED_POI_CATEGORIES = new Set(POI_CATEGORY_DEFS.map((c) => c.id))
 export const useMapStore = defineStore('map', () => {
   const mode = ref<AppMode>('landing')
   const mapReady = ref(false)
+  /** Bumps on every successful map prepare — forces MapCanvas remount (WebGL). */
+  const mapEpoch = ref(0)
   const loadStatus = ref('')
   /** 0–100 while mode === 'loading'; null when idle. */
   const loadProgress = ref<number | null>(null)
@@ -420,6 +422,7 @@ export const useMapStore = defineStore('map', () => {
     syncVisibleCategories()
 
     setLoadProgress(100)
+    mapEpoch.value++
     mapReady.value = true
     mode.value = 'map'
     loadStatus.value = ''
@@ -469,6 +472,16 @@ export const useMapStore = defineStore('map', () => {
     loadGeneration++
     stopLoadTimer()
     mapReady.value = false
+    mode.value = 'landing'
+    loadStatus.value = ''
+    loadProgress.value = null
+    error.value = ''
+  }
+
+  function backToLanding() {
+    loadGeneration++
+    stopLoadTimer()
+    resetState()
     mode.value = 'landing'
     loadStatus.value = ''
     loadProgress.value = null
@@ -632,6 +645,7 @@ export const useMapStore = defineStore('map', () => {
       syncVisibleCategories()
 
       setLoadProgress(100)
+      mapEpoch.value++
       mapReady.value = true
       mode.value = 'map'
       loadStatus.value = ''
@@ -738,6 +752,7 @@ export const useMapStore = defineStore('map', () => {
       )
 
       setLoadProgress(100)
+      mapEpoch.value++
       mapReady.value = true
       mode.value = 'map'
       loadStatus.value = ''
@@ -921,14 +936,6 @@ export const useMapStore = defineStore('map', () => {
     scheduleFavoritesPersist()
   }
 
-  function backToLanding() {
-    stopLoadTimer()
-    resetState()
-    mode.value = 'landing'
-    loadStatus.value = ''
-    loadProgress.value = null
-  }
-
   function clearError() {
     error.value = ''
   }
@@ -936,6 +943,7 @@ export const useMapStore = defineStore('map', () => {
   return {
     mode,
     mapReady,
+    mapEpoch,
     loadStatus,
     loadProgress,
     loadSeconds,
