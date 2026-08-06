@@ -16,6 +16,7 @@ import NearbySearchPanel from '../components/NearbySearchPanel.vue'
 import NearbyForm from '../components/NearbyForm.vue'
 import CheatSheetPanel from '../components/CheatSheetPanel.vue'
 import ExportQrDialog from '../components/ExportQrDialog.vue'
+import OfflinePackPanel from '../components/OfflinePackPanel.vue'
 import { useOnline } from '../composables/useOnline'
 import { useI18n } from 'vue-i18n'
 import TopbarSettings from '../components/TopbarSettings.vue'
@@ -33,6 +34,8 @@ import {
   DEFAULT_POI_CATEGORIES,
   NEARBY_DEFAULT_POI_RADIUS_M,
 } from '../config/poiCategories'
+
+import { getPackMeta, type OfflinePackMeta } from '../services/offlinePacks'
 
 const store = useMapStore()
 const route = useRoute()
@@ -74,6 +77,7 @@ const {
 } = useWahoo()
 const mapCanvasRef = ref<{
   startLocation: (opts?: { follow?: boolean; heading?: boolean }) => void
+  setDragPanEnabled: (enabled: boolean) => void
 } | null>(null)
 
 const SUPPLY_CATEGORIES = new Set<PoiCategory>([
@@ -93,13 +97,33 @@ const showExportTip = ref(false)
 const cpMenuOpen = ref(false)
 const nearbyPanelRef = ref<{ setOpen: (value: boolean) => void } | null>(null)
 const nearbyRescanning = ref(false)
+const packMeta = ref<OfflinePackMeta | null>(null)
+
+const hasOfflinePack = computed(
+  () => packMeta.value?.status === 'ready' || packMeta.value?.status === 'partial'
+)
+
+async function refreshPackMeta() {
+  if (!store.savedMapId) {
+    packMeta.value = null
+    return
+  }
+  packMeta.value = await getPackMeta(store.savedMapId)
+}
+
+watch(
+  () => store.savedMapId,
+  () => {
+    void refreshPackMeta()
+  }
+)
 
 const nearbyFabLabel = computed(() =>
-  store.isNearbyMap
-    ? nearbyRescanning.value || store.poisLoading
-      ? t('nearby.searching')
-      : t('nearby.mapFabRescan')
-    : t('nearby.mapFab')
+  nearbyRescanning.value || store.poisLoading
+    ? t('nearby.searching')
+    : store.isNearbyMap
+      ? t('nearby.mapFabRescan')
+      : t('nearby.mapFab')
 )
 
 const cpKinds: { id: ControlPointKind; labelKey: string; category: 'checkpoint' | 'sleep' }[] = [
@@ -161,17 +185,22 @@ function openNearbyPanel() {
   mobilePanel.value = 'none'
 }
 
-/** Umgebung map: FAB reloads GPS + POIs. Route maps: open options panel. */
+/** Umgebung map: FAB reloads GPS + POIs. Route maps: GPS enrich (keep route). */
 function onNearbyFabClick() {
   if (store.isNearbyMap) {
     void quickNearbyRescan()
     return
   }
-  openNearbyPanel()
+  void quickRouteEnrich()
 }
 
 function nearbyRescanRadius(): number {
-  return store.poiRadiusM > 0 ? store.poiRadiusM : NEARBY_DEFAULT_POI_RADIUS_M
+  if (store.isNearbyMap) {
+    return store.poiRadiusM > 0 ? store.poiRadiusM : NEARBY_DEFAULT_POI_RADIUS_M
+  }
+  // Route map: last GPS enrich radius, else nearby default (not route corridor)
+  if (store.gpsEnrichFocus?.radiusM) return store.gpsEnrichFocus.radiusM
+  return NEARBY_DEFAULT_POI_RADIUS_M
 }
 
 function nearbyRescanCategories(): PoiCategory[] {
@@ -180,15 +209,15 @@ function nearbyRescanCategories(): PoiCategory[] {
     : [...DEFAULT_POI_CATEGORIES]
 }
 
-async function quickNearbyRescan() {
-  if (nearbyRescanning.value || store.poisLoading) return
+function beginGeoRescan(): boolean {
+  if (nearbyRescanning.value || store.poisLoading) return false
   if (typeof window !== 'undefined' && !window.isSecureContext) {
     store.error = t('nearby.geoInsecure')
-    return
+    return false
   }
   if (!navigator.geolocation) {
     store.error = t('nearby.geoUnsupported')
-    return
+    return false
   }
 
   store.selectedPoi = null
@@ -197,6 +226,19 @@ async function quickNearbyRescan() {
   store.cancelPlaceControlPoint()
   nearbyRescanning.value = true
   store.error = ''
+  return true
+}
+
+function onGeoRescanError(err: GeolocationPositionError) {
+  nearbyRescanning.value = false
+  if (err.code === 1) store.error = t('nearby.geoDenied')
+  else if (err.code === 2) store.error = t('nearby.geoUnavailable')
+  else if (err.code === 3) store.error = t('nearby.geoTimeout')
+  else store.error = t('nearby.geoFailed')
+}
+
+async function quickNearbyRescan() {
+  if (!beginGeoRescan()) return
 
   navigator.geolocation.getCurrentPosition(
     async (pos) => {
@@ -212,13 +254,38 @@ async function quickNearbyRescan() {
         nearbyRescanning.value = false
       }
     },
-    (err) => {
-      nearbyRescanning.value = false
-      if (err.code === 1) store.error = t('nearby.geoDenied')
-      else if (err.code === 2) store.error = t('nearby.geoUnavailable')
-      else if (err.code === 3) store.error = t('nearby.geoTimeout')
-      else store.error = t('nearby.geoFailed')
+    onGeoRescanError,
+    {
+      enableHighAccuracy: true,
+      maximumAge: 15_000,
+      timeout: 20_000,
+    }
+  )
+}
+
+/** Route map: enrich POIs around GPS without dropping the route. */
+async function quickRouteEnrich() {
+  if (!beginGeoRescan()) return
+
+  navigator.geolocation.getCurrentPosition(
+    async (pos) => {
+      try {
+        const radius = nearbyRescanRadius()
+        const cats = nearbyRescanCategories()
+        await store.enrichPoisAroundGps(
+          pos.coords.latitude,
+          pos.coords.longitude,
+          radius,
+          cats
+        )
+        await maybeStartNearbyLocationFollow()
+      } catch (err) {
+        store.error = err instanceof Error ? err.message : t('nearby.loadFailed')
+      } finally {
+        nearbyRescanning.value = false
+      }
     },
+    onGeoRescanError,
     {
       enableHighAccuracy: true,
       maximumAge: 15_000,
@@ -246,7 +313,7 @@ async function maybeStartNearbyLocationFollow() {
 }
 
 watch(
-  () => [store.mapReady, store.mapEpoch] as const,
+  () => [store.mapReady, store.mapEpoch, store.gpsFocusTick] as const,
   () => {
     void maybeStartNearbyLocationFollow()
   }
@@ -364,25 +431,9 @@ onMounted(() => {
   } else if (!store.mapReady) {
     void loadIfNeeded()
   }
-  maybeShowExportTip()
+  // Export tip/sheet stay closed — open only via toolbar / bottom sheet
+  void refreshPackMeta()
 })
-
-watch(
-  () => store.mapReady,
-  (ready) => {
-    if (ready) maybeShowExportTip()
-  }
-)
-
-function maybeShowExportTip() {
-  if (!store.mapReady) return
-  try {
-    if (localStorage.getItem(EXPORT_TIP_KEY)) return
-  } catch {
-    /* ignore */
-  }
-  showExportTip.value = true
-}
 
 function dismissExportTip(permanent = true) {
   showExportTip.value = false
@@ -476,14 +527,28 @@ function toggleSidebar() {
   sidebarOpen.value = !sidebarOpen.value
 }
 
+function syncMapDragPan() {
+  mapCanvasRef.value?.setDragPanEnabled(mobilePanel.value === 'none')
+}
+
 function openMobilePanel(panel: 'pois' | 'legend' | 'export' | 'nearby') {
   mobilePanel.value = mobilePanel.value === panel ? 'none' : panel
   if (mobilePanel.value !== 'none') showExportMenu.value = false
+  syncMapDragPan()
 }
 
 function closeMobilePanel() {
   mobilePanel.value = 'none'
+  syncMapDragPan()
 }
+
+watch(mobilePanel, () => {
+  syncMapDragPan()
+})
+
+watch(mapCanvasRef, (canvas) => {
+  if (canvas) syncMapDragPan()
+})
 
 function closeExportMenu() {
   showExportMenu.value = false
@@ -561,6 +626,7 @@ function onDocClick(e: MouseEvent) {
       <EtaPlanner v-if="!store.isNearbyMap" />
       <WeatherStrip />
       <NearbySearchPanel ref="nearbyPanelRef" @done="onNearbyDone" />
+      <OfflinePackPanel @updated="refreshPackMeta" />
       <ControlPointsPanel />
       <PoiCategoryFilter />
       <PoiList />
@@ -595,13 +661,12 @@ function onDocClick(e: MouseEvent) {
             type="button"
             class="tool-btn nearby-enter"
             :title="nearbyFabLabel"
-            :disabled="store.isNearbyMap && (nearbyRescanning || store.poisLoading)"
+            :disabled="nearbyRescanning || store.poisLoading"
             @click="onNearbyFabClick"
           >
             {{ nearbyFabLabel }}
           </button>
           <button
-            v-if="store.isNearbyMap"
             type="button"
             class="tool-btn nearby-opts"
             :title="t('nearby.mapFabOptions')"
@@ -832,15 +897,27 @@ function onDocClick(e: MouseEvent) {
 
       <Transition name="toast">
         <div
-          v-if="!isOnline || store.loadedFromCache"
+          v-if="!isOnline || store.loadedFromCache || hasOfflinePack"
           class="offline-banner"
           role="status"
         >
           <div class="offline-banner-text">
-            <strong v-if="!isOnline">{{ t('map.offline') }}</strong>
-            <strong v-else>{{ t('map.fromCache') }}</strong>
-            <span v-if="!isOnline">{{ t('map.offlineBanner') }}</span>
-            <span v-else>{{ t('map.cachedBanner') }}</span>
+            <template v-if="!isOnline && hasOfflinePack">
+              <strong>{{ t('map.offline') }}</strong>
+              <span>{{ t('map.offlineBannerPack') }}</span>
+            </template>
+            <template v-else-if="!isOnline">
+              <strong>{{ t('map.offline') }}</strong>
+              <span>{{ t('map.offlineBanner') }}</span>
+            </template>
+            <template v-else-if="hasOfflinePack">
+              <strong>{{ t('offlinePack.readyShort') }}</strong>
+              <span>{{ t('map.offlinePackReadyBanner') }}</span>
+            </template>
+            <template v-else>
+              <strong>{{ t('map.fromCache') }}</strong>
+              <span>{{ t('map.cachedBanner') }}</span>
+            </template>
           </div>
         </div>
       </Transition>
@@ -904,7 +981,6 @@ function onDocClick(e: MouseEvent) {
             <span class="map-cp-fab-label">{{ nearbyFabLabel }}</span>
           </button>
           <button
-            v-if="store.isNearbyMap"
             type="button"
             class="map-cp-fab map-nearby-opts"
             :class="{ active: mobilePanel === 'nearby' }"
@@ -1067,8 +1143,17 @@ function onDocClick(e: MouseEvent) {
       </button>
     </nav>
 
-    <div v-if="mobilePanel !== 'none'" class="mobile-sheet" @click.self="closeMobilePanel">
-      <div class="mobile-sheet-inner">
+    <div
+      v-if="mobilePanel !== 'none'"
+      class="mobile-sheet"
+      :class="{ 'nearby-open': mobilePanel === 'nearby' }"
+      @click.self="closeMobilePanel"
+    >
+      <div
+        class="mobile-sheet-inner"
+        @touchmove.stop
+        @pointerdown.stop
+      >
         <header class="sheet-header">
           <h2>
             {{
@@ -1091,6 +1176,7 @@ function onDocClick(e: MouseEvent) {
         <div v-else-if="mobilePanel === 'pois'" class="sheet-scroll">
           <EtaPlanner v-if="!store.isNearbyMap" embedded />
           <WeatherStrip embedded />
+          <OfflinePackPanel />
           <ControlPointsPanel />
           <PoiCategoryFilter embedded />
           <PoiList embedded />
@@ -2316,31 +2402,47 @@ function onDocClick(e: MouseEvent) {
     z-index: 200;
     background: rgba(0, 0, 0, 0.4);
     align-items: flex-end;
-    padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px));
+    justify-content: center;
+    padding:
+      env(safe-area-inset-top, 0px)
+      max(0.75rem, env(safe-area-inset-right, 0px))
+      calc(56px + 0.5rem + env(safe-area-inset-bottom, 0px))
+      max(0.75rem, env(safe-area-inset-left, 0px));
+    touch-action: none;
   }
 
   .mobile-sheet-inner {
     background: var(--surface);
     width: 100%;
-    max-height: min(78vh, 580px);
-    border-radius: 16px 16px 0 0;
+    max-width: 520px;
+    max-height: min(78dvh, 580px);
+    border-radius: 16px;
     overflow: hidden;
     display: flex;
     flex-direction: column;
+    box-shadow: 0 10px 36px rgba(0, 0, 0, 0.22);
+    touch-action: pan-y;
+    overscroll-behavior: contain;
+  }
+
+  /* Fixed height while open — slider/value edits must not resize the sheet */
+  .mobile-sheet.nearby-open .mobile-sheet-inner {
+    height: min(82dvh, 640px);
+    max-height: min(82dvh, 640px);
   }
 
   .sheet-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0.75rem 1rem;
+    padding: 0.85rem 1.1rem;
     border-bottom: 1px solid var(--border);
     flex-shrink: 0;
   }
 
   .sheet-header h2 {
     margin: 0;
-    font-size: 1rem;
+    font-size: 1.05rem;
   }
 
   .sheet-close {
@@ -2350,7 +2452,9 @@ function onDocClick(e: MouseEvent) {
     line-height: 1;
     color: var(--text-muted);
     cursor: pointer;
-    padding: 0 0.25rem;
+    padding: 0.25rem 0.4rem;
+    min-width: 44px;
+    min-height: 44px;
   }
 
   .mobile-sheet-inner :deep(.poi-list) {
@@ -2363,8 +2467,16 @@ function onDocClick(e: MouseEvent) {
     min-height: 0;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
     display: flex;
     flex-direction: column;
+    touch-action: pan-y;
+    scrollbar-gutter: stable;
+  }
+
+  .nearby-sheet {
+    padding: 1rem 1.15rem 1.35rem;
+    gap: 0;
   }
 
   .sheet-scroll :deep(.poi-list) {

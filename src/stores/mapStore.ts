@@ -31,6 +31,8 @@ import {
 import { buildRoutePoints, totalRouteKm } from '../utils/route'
 import { haversineM } from '../services/geo'
 import { thinPoisForMap } from '../utils/poiThin'
+import { tileIdsAlongRoute } from '../services/poiQuery'
+import { hasAnyCachedPoiTile } from '../services/offlinePacks'
 import { normalizePoiCategory, expandLegacyCategories } from '../utils/poiNormalize'
 import {
   defaultControlPointName,
@@ -148,6 +150,9 @@ export const useMapStore = defineStore('map', () => {
   const hideClosedAtEta = ref(loadHideClosedAtEta())
   const etaHoursBufferMinutes = ref(loadEtaBufferMinutes())
   const showAllPoisOnMap = ref(false)
+  /** After GPS enrich on a route map: keep GPS-near POIs visible despite route thinning. */
+  const gpsEnrichFocus = ref<{ lat: number; lng: number; radiusM: number } | null>(null)
+  const gpsFocusTick = ref(0)
 
   let loadTimer: ReturnType<typeof setInterval> | null = null
 
@@ -254,9 +259,22 @@ export const useMapStore = defineStore('map', () => {
     return counts
   })
 
-  const mapPois = computed(() =>
-    showAllPoisOnMap.value ? displayPois.value : thinPoisForMap(displayPois.value)
-  )
+  const mapPois = computed(() => {
+    if (showAllPoisOnMap.value) return displayPois.value
+    const thinned = thinPoisForMap(displayPois.value)
+    const focus = gpsEnrichFocus.value
+    if (!focus) return thinned
+
+    const kept = new Set(thinned.map((p) => p.id))
+    const extras = displayPois.value.filter((p) => {
+      if (kept.has(p.id)) return false
+      return haversineM(p, focus) <= focus.radiusM
+    })
+    if (extras.length === 0) return thinned
+    return [...thinned, ...extras].sort(
+      (a, b) => (a.distanceAlongRouteKm ?? 0) - (b.distanceAlongRouteKm ?? 0)
+    )
+  })
 
   const mapPoiThinnedCount = computed(() =>
     Math.max(0, displayPois.value.length - mapPois.value.length)
@@ -365,6 +383,7 @@ export const useMapStore = defineStore('map', () => {
     isNearbyMap.value = false
     poisLoading.value = false
     locationFollowRequested.value = false
+    gpsEnrichFocus.value = null
     savedMapId.value = null
     loadedFromCache.value = false
     persistWarning.value = ''
@@ -376,6 +395,12 @@ export const useMapStore = defineStore('map', () => {
     controlPointPlaceKind.value = null
     visibleCategories.value = [...DEFAULT_POI_CATEGORIES]
     error.value = ''
+  }
+
+  function requestGpsMapFocus(lat: number, lng: number, radiusM: number) {
+    gpsEnrichFocus.value = { lat, lng, radiusM }
+    gpsFocusTick.value++
+    locationFollowRequested.value = true
   }
 
   async function loadPoisForCoordinates(
@@ -646,7 +671,11 @@ export const useMapStore = defineStore('map', () => {
     setLoadProgress(5)
 
     try {
-      if (!isSupabaseConfigured()) {
+      const offlineId = savedMapId.value
+      const useOffline =
+        typeof navigator !== 'undefined' && !navigator.onLine && Boolean(offlineId)
+
+      if (!useOffline && !isSupabaseConfigured()) {
         throw new Error(tGlobal('store.supabaseNotConfiguredEnv'))
       }
 
@@ -660,7 +689,8 @@ export const useMapStore = defineStore('map', () => {
         points,
         radiusM,
         categories,
-        mapFetchProgress
+        mapFetchProgress,
+        { offlineMapId: offlineId }
       )
       if (gen !== loadGeneration) return
 
@@ -673,7 +703,9 @@ export const useMapStore = defineStore('map', () => {
       void persistMapInBackground()
     } catch (err) {
       if (gen !== loadGeneration) return
-      error.value = err instanceof Error ? err.message : tGlobal('nearby.loadFailed')
+      const msg = err instanceof Error ? err.message : tGlobal('nearby.loadFailed')
+      error.value =
+        msg === 'offline_no_pack' ? tGlobal('offlinePack.needSavedMap') : msg
     } finally {
       if (gen === loadGeneration) {
         poisLoading.value = false
@@ -687,6 +719,7 @@ export const useMapStore = defineStore('map', () => {
    * GPS-radius POI scan on an existing route map.
    * Keeps route, favorites, control points; unions new POIs into poiMap
    * (distanceAlongRouteKm re-projected onto the current route).
+   * Stays on the map (poisLoading banner) — no full remount / route fitBounds.
    */
   async function enrichPoisAroundGps(
     lat: number,
@@ -701,20 +734,29 @@ export const useMapStore = defineStore('map', () => {
 
     const gen = ++loadGeneration
     error.value = ''
-    mode.value = 'loading'
+    poisLoading.value = true
     loadStatus.value = tGlobal('store.loadingPois')
-    setLoadProgress(2)
-    startLoadTimer()
-
-    const timeout = setTimeout(() => {
-      if (gen === loadGeneration && mode.value === 'loading') {
-        error.value = tGlobal('store.timeout')
-      }
-    }, LOAD_TIMEOUT_MS)
+    setLoadProgress(5)
 
     try {
-      if (!isSupabaseConfigured()) {
+      const offlineId = savedMapId.value
+      const useOffline =
+        typeof navigator !== 'undefined' && !navigator.onLine && Boolean(offlineId)
+
+      if (typeof navigator !== 'undefined' && !navigator.onLine && !offlineId) {
+        throw new Error('offline_no_pack')
+      }
+
+      if (!useOffline && !isSupabaseConfigured()) {
         throw new Error(tGlobal('store.supabaseNotConfiguredEnv'))
+      }
+
+      if (useOffline && offlineId) {
+        const tileIds = tileIdsAlongRoute([[lng, lat]], radiusM)
+        const covered = await hasAnyCachedPoiTile(offlineId, tileIds)
+        if (!covered) {
+          throw new Error(tGlobal('offlinePack.noCoverageAroundGps'))
+        }
       }
 
       const coordinates: [number, number][] = [[lng, lat]]
@@ -724,7 +766,8 @@ export const useMapStore = defineStore('map', () => {
         gpsPoints,
         radiusM,
         categories,
-        mapFetchProgress
+        mapFetchProgress,
+        { offlineMapId: offlineId }
       )
       if (gen !== loadGeneration) return
 
@@ -745,24 +788,18 @@ export const useMapStore = defineStore('map', () => {
       syncVisibleCategories()
 
       setLoadProgress(100)
-      mapEpoch.value++
-      mapReady.value = true
-      mode.value = 'map'
-      loadStatus.value = ''
-      loadProgress.value = null
+      requestGpsMapFocus(lat, lng, radiusM)
       void persistMapInBackground()
     } catch (err) {
       if (gen !== loadGeneration) return
-      mode.value = 'map'
-      mapReady.value = true
-      loadStatus.value = ''
-      loadProgress.value = null
-      error.value = err instanceof Error ? err.message : tGlobal('nearby.loadFailed')
+      const msg = err instanceof Error ? err.message : tGlobal('nearby.loadFailed')
+      error.value =
+        msg === 'offline_no_pack' ? tGlobal('offlinePack.needSavedMap') : msg
     } finally {
-      clearTimeout(timeout)
       if (gen === loadGeneration) {
-        stopLoadTimer()
-        if (mode.value !== 'loading') loadProgress.value = null
+        poisLoading.value = false
+        loadStatus.value = ''
+        loadProgress.value = null
       }
     }
   }
@@ -1085,6 +1122,8 @@ export const useMapStore = defineStore('map', () => {
     showAllPoisOnMap,
     closedAtEtaHiddenCount,
     mapPoiThinnedCount,
+    gpsEnrichFocus,
+    gpsFocusTick,
     controlPoints,
     controlPointPlaceKind,
     setAvgSpeedKmh,

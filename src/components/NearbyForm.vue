@@ -211,15 +211,22 @@ defineExpose({ openMapFirst, searchNearby })
 
     <label class="field">
       <span class="field-label">{{ t('nearby.radius') }}</span>
-      <div class="radius-row">
+      <div
+        class="radius-row"
+        @touchstart.stop
+        @touchmove.stop
+        @pointerdown.stop
+      >
         <input
           v-model.number="radiusM"
           type="range"
+          class="radius-slider"
           :min="MIN_POI_RADIUS_M"
           :max="NEARBY_MAX_POI_RADIUS_M"
           step="50"
+          :aria-valuetext="`${radiusM} m`"
         />
-        <span class="radius-value">{{ radiusM }} m</span>
+        <span class="radius-value">{{ radiusM }}&nbsp;m</span>
       </div>
     </label>
 
@@ -256,7 +263,7 @@ defineExpose({ openMapFirst, searchNearby })
 }
 
 .nearby-form.in-map {
-  gap: 0.85rem;
+  gap: 1.1rem;
 }
 
 .nearby-form.map-first {
@@ -271,8 +278,8 @@ defineExpose({ openMapFirst, searchNearby })
 }
 
 .in-map .intro {
-  font-size: 0.8rem;
-  line-height: 1.35;
+  font-size: 0.86rem;
+  line-height: 1.4;
 }
 
 .load-summary {
@@ -285,6 +292,9 @@ defineExpose({ openMapFirst, searchNearby })
   font-size: 0.88rem;
   font-weight: 600;
   line-height: 1.35;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
+  min-height: 2.6em;
 }
 
 .ios-geo-hint {
@@ -300,8 +310,8 @@ defineExpose({ openMapFirst, searchNearby })
 
 .in-map .ios-geo-hint {
   margin: 0;
-  padding: 0.5rem 0.6rem;
-  font-size: 0.75rem;
+  padding: 0.6rem 0.7rem;
+  font-size: 0.8rem;
 }
 
 .field-label {
@@ -312,44 +322,160 @@ defineExpose({ openMapFirst, searchNearby })
 }
 
 .in-map .field-label {
-  font-size: 0.8rem;
-  margin-bottom: 0.35rem;
+  font-size: 0.85rem;
+  margin-bottom: 0.45rem;
 }
 
 .radius-row {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  min-height: 44px;
+  gap: 0.85rem;
+  min-height: 48px;
+  padding: 0.15rem 0.15rem 0.15rem 0.1rem;
+  touch-action: none;
+  /* Keep slider + value on one row so sheet width/height stay put while dragging */
+  min-width: 0;
 }
 
+.radius-slider,
 .radius-row input[type='range'] {
   flex: 1;
-  min-height: 44px;
+  min-width: 0;
+  min-height: 48px;
+  height: 48px;
+  margin: 0;
+  padding: 0;
+  touch-action: none;
+  accent-color: var(--primary);
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+.radius-slider::-webkit-slider-runnable-track,
+.radius-row input[type='range']::-webkit-slider-runnable-track {
+  height: 8px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--primary) 22%, var(--border));
+}
+
+.radius-slider::-moz-range-track,
+.radius-row input[type='range']::-moz-range-track {
+  height: 8px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--primary) 22%, var(--border));
+}
+
+.radius-slider::-webkit-slider-thumb,
+.radius-row input[type='range']::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 28px;
+  height: 28px;
+  margin-top: -10px;
+  border-radius: 50%;
+  border: 3px solid #fff;
+  background: var(--primary);
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.28);
+  cursor: grab;
+}
+
+.radius-slider::-moz-range-thumb,
+.radius-row input[type='range']::-moz-range-thumb {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 3px solid #fff;
+  background: var(--primary);
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.28);
+  cursor: grab;
+}
+
+/* Mobile: ~44px visual thumb + padded hit area */
+@media (max-width: 768px) {
+  .radius-row {
+    min-height: 56px;
+    padding: 0.35rem 0.2rem;
+  }
+
+  .radius-slider,
+  .radius-row input[type='range'] {
+    min-height: 56px;
+    height: 56px;
+  }
+
+  .radius-slider::-webkit-slider-runnable-track,
+  .radius-row input[type='range']::-webkit-slider-runnable-track {
+    height: 10px;
+  }
+
+  .radius-slider::-moz-range-track,
+  .radius-row input[type='range']::-moz-range-track {
+    height: 10px;
+  }
+
+  .radius-slider::-webkit-slider-thumb,
+  .radius-row input[type='range']::-webkit-slider-thumb {
+    width: 44px;
+    height: 44px;
+    margin-top: -17px;
+    border-width: 4px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.32);
+  }
+
+  .radius-slider::-moz-range-thumb,
+  .radius-row input[type='range']::-moz-range-thumb {
+    width: 44px;
+    height: 44px;
+    border-width: 4px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.32);
+  }
 }
 
 .radius-value {
-  flex-shrink: 0;
-  min-width: 4.5rem;
-  text-align: right;
+  /* Fixed slot for "10000 m" — avoids reflow when digits change (3000 → 10000) */
+  flex: 0 0 6.5rem;
+  width: 6.5rem;
+  box-sizing: border-box;
+  padding: 0.35rem 0.4rem;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--primary) 8%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--primary) 16%, var(--border));
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  white-space: nowrap;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
+  font-size: 0.9rem;
+  line-height: 1.2;
+}
+
+.in-map .radius-value {
+  flex-basis: 6.25rem;
+  width: 6.25rem;
+  font-size: 0.88rem;
 }
 
 .categories {
   border: none;
   padding: 0;
+  margin: 0;
 }
 
 .categories legend {
   font-weight: 600;
   font-size: 0.9rem;
   margin-bottom: 0.5rem;
+  padding: 0;
 }
 
 .in-map .categories legend {
-  font-size: 0.8rem;
-  margin-bottom: 0.35rem;
+  font-size: 0.85rem;
+  margin-bottom: 0.55rem;
 }
 
 .category-grid {
@@ -359,7 +485,7 @@ defineExpose({ openMapFirst, searchNearby })
 }
 
 .in-map .category-grid {
-  gap: 0.35rem;
+  gap: 0.45rem;
 }
 
 .cat-chip {
@@ -377,9 +503,10 @@ defineExpose({ openMapFirst, searchNearby })
 }
 
 .in-map .cat-chip {
-  padding: 0.5rem 0.75rem;
+  padding: 0.55rem 0.85rem;
   min-height: 44px;
-  font-size: 0.82rem;
+  font-size: 0.84rem;
+  gap: 0.35rem;
 }
 
 .cat-chip.active {
@@ -396,19 +523,20 @@ defineExpose({ openMapFirst, searchNearby })
   }
 
   .in-map .cat-chip {
-    padding: 0.3rem 0.55rem;
+    padding: 0.35rem 0.65rem;
     min-height: 0;
-    font-size: 0.75rem;
+    font-size: 0.78rem;
   }
 }
 
 .error {
   color: var(--danger);
   font-size: 0.9rem;
+  margin: 0;
 }
 
 .in-map .error {
-  font-size: 0.8rem;
+  font-size: 0.82rem;
 }
 
 .btn-primary {
@@ -416,16 +544,18 @@ defineExpose({ openMapFirst, searchNearby })
   background: var(--primary);
   color: #fff;
   border: none;
-  border-radius: 8px;
+  border-radius: 10px;
   font-weight: 600;
   font-size: 1rem;
   cursor: pointer;
 }
 
 .in-map .btn-primary {
-  padding: 0.75rem 1rem;
+  margin-top: 0.15rem;
+  padding: 0.85rem 1rem;
   font-size: 0.95rem;
   min-height: 48px;
+  border-radius: 10px;
 }
 
 .map-first .btn-primary {

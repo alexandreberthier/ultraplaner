@@ -35,6 +35,10 @@ import {
   resolveGeoHeading,
   setLocationMarkerHeading,
 } from '../utils/userLocationMarker'
+import {
+  ensureCyclosmOfflineProtocol,
+  setActiveOfflinePackMapId,
+} from '../services/offlinePacks'
 
 const store = useMapStore()
 const { t } = useI18n()
@@ -675,6 +679,17 @@ function focusOnPoi(lng: number, lat: number) {
   map.easeTo({ center: [lng, lat], zoom, duration: 550 })
 }
 
+function fitToRadius(lng: number, lat: number, radiusM: number) {
+  if (!map) return
+  const bounds = new maplibregl.LngLatBounds()
+  const latRad = (lat * Math.PI) / 180
+  const dLat = radiusM / 111_320
+  const dLng = radiusM / Math.max(111_320 * Math.cos(latRad), 1e-6)
+  bounds.extend([lng - dLng, lat - dLat])
+  bounds.extend([lng + dLng, lat + dLat])
+  map.fitBounds(bounds, { padding: 56, duration: 650, maxZoom: 16 })
+}
+
 function fitBounds() {
   if (!map || !store.routeCoords.length) return
   const bounds = new maplibregl.LngLatBounds()
@@ -789,6 +804,9 @@ async function initMap() {
     if (!mapContainer.value || map) return
   }
 
+  ensureCyclosmOfflineProtocol(maplibregl)
+  setActiveOfflinePackMapId(store.savedMapId || null)
+
   map = new maplibregl.Map({
     container: mapContainer.value,
     style: basemapStyle(basemap.value),
@@ -824,11 +842,40 @@ watch(colorblindMode, () => {
   updateSources()
 })
 
+watch(() => store.savedMapId, (id) => {
+  setActiveOfflinePackMapId(id || null)
+})
+
+watch(
+  () => [typeof navigator !== 'undefined' ? navigator.onLine : true, store.savedMapId] as const,
+  async () => {
+    if (typeof navigator === 'undefined' || navigator.onLine) return
+    const id = store.savedMapId
+    if (!id) return
+    const { getPackMeta } = await import('../services/offlinePacks')
+    const pack = await getPackMeta(id)
+    if (pack && (pack.status === 'ready' || pack.status === 'partial') && basemap.value !== 'cycling') {
+      basemap.value = 'cycling'
+      saveBasemapPreference('cycling')
+      if (map) map.setStyle(basemapStyle('cycling'), { diff: false })
+    }
+  }
+)
+
 watch(() => store.poiFocusTick, () => {
   const coords = store.poiFocusCoords
   if (!coords) return
   focusOnPoi(coords[0], coords[1])
 })
+
+watch(
+  () => store.gpsFocusTick,
+  () => {
+    const focus = store.gpsEnrichFocus
+    if (!focus || !map) return
+    fitToRadius(focus.lng, focus.lat, focus.radiusM)
+  }
+)
 
 watch(
   () => props.rideMode,
@@ -1343,9 +1390,16 @@ function setupMapDragBehavior() {
   })
 }
 
+function setDragPanEnabled(enabled: boolean) {
+  if (!map) return
+  if (enabled) map.dragPan.enable()
+  else map.dragPan.disable()
+}
+
 defineExpose({
   startLocation,
   stopLocation,
+  setDragPanEnabled,
 })
 
 onMounted(() => {

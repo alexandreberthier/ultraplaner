@@ -1086,5 +1086,47 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
   .steps {
     grid-template-columns: 1fr;
   }
+
+  /* Action area first, then how-it-works */
+  .page-wrap:not(.hero-wrap) {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .page-wrap:not(.hero-wrap) > .stats-bar {
+    order: 0;
+  }
+
+  .page-wrap:not(.hero-wrap) > .app-section {
+    order: 1;
+  }
+
+  .page-wrap:not(.hero-wrap) > .how-section {
+    order: 2;
+  }
+
+  .page-wrap:not(.hero-wrap) > .features-section {
+    order: 3;
+  }
+
+  .page-wrap:not(.hero-wrap) > .guide-teaser {
+    order: 4;
+  }
+
+  .page-wrap:not(.hero-wrap) > .updates-section {
+    order: 5;
+  }
+
+  .page-wrap:not(.hero-wrap) > .faq-section {
+    order: 6;
+  }
+
+  .page-wrap:not(.hero-wrap) > .feedback {
+    order: 7;
+  }
+
+  .page-wrap:not(.hero-wrap) > .site-footer {
+    order: 8;
+  }
 }
 </style>

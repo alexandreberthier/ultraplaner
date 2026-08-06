@@ -25,7 +25,7 @@ export function remapOpenFreeMapGlyphRequest(url: string): string {
     .replace(/Arial%20Unicode%20MS%20Bold/gi, 'Noto%20Sans%20Bold')
 }
 
-/** CyclOSM — freie OSM-Radkarte mit klaren Radwegen/Routen. */
+/** CyclOSM — freie OSM-Radkarte; tiles via cyclosm-offline protocol (cache + network). */
 export const CYCLOSM_STYLE: StyleSpecification = {
   version: 8,
   name: 'CyclOSM',
@@ -34,11 +34,7 @@ export const CYCLOSM_STYLE: StyleSpecification = {
   sources: {
     cyclosm: {
       type: 'raster',
-      tiles: [
-        'https://a.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png',
-        'https://b.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png',
-        'https://c.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png',
-      ],
+      tiles: ['cyclosm-offline://{z}/{x}/{y}'],
       tileSize: 256,
       attribution:
         '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> · <a href="https://www.cyclosm.org">CyclOSM</a>',

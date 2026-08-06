@@ -1,7 +1,8 @@
 import type { SavedMapRecord } from '../../shared/types'
 
 const DB_NAME = 'ultraplaner-offline'
-const DB_VERSION = 1
+/** Keep in sync with offlinePacks.OFFLINE_PACK_DB_VERSION */
+const DB_VERSION = 2
 const STORE = 'maps'
 const MAX_MAPS = 20
 
@@ -22,6 +23,19 @@ function openDb(): Promise<IDBDatabase> {
       if (!db.objectStoreNames.contains(STORE)) {
         const store = db.createObjectStore(STORE, { keyPath: 'id' })
         store.createIndex('cachedAt', 'cachedAt')
+      }
+      // Pack stores (also created in offlinePacks onupgrade)
+      if (!db.objectStoreNames.contains('poiTiles')) {
+        const store = db.createObjectStore('poiTiles', { keyPath: 'key' })
+        store.createIndex('mapId', 'mapId')
+        store.createIndex('geohash', 'geohash')
+      }
+      if (!db.objectStoreNames.contains('rasterTiles')) {
+        const store = db.createObjectStore('rasterTiles', { keyPath: 'key' })
+        store.createIndex('mapId', 'mapId')
+      }
+      if (!db.objectStoreNames.contains('packMeta')) {
+        db.createObjectStore('packMeta', { keyPath: 'mapId' })
       }
     }
   })
@@ -135,6 +149,8 @@ export async function deleteOfflineMap(id: string): Promise<void> {
     await withStore('readwrite', async (store) => {
       await idbReq(store.delete(id))
     })
+    const { deleteOfflinePack } = await import('./offlinePacks')
+    await deleteOfflinePack(id)
   } catch (err) {
     console.warn('[offline] Cache löschen fehlgeschlagen:', err)
   }

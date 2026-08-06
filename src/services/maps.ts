@@ -11,6 +11,7 @@ import { getSupabase } from '../supabase'
 import { tileIdsAlongRoute } from './poiQuery'
 import { filterPoisToRoute } from './poiFilter'
 import { getOfflineMap, putOfflineMap } from './offlineMaps'
+import { getCachedPoisByGeohashes } from './offlinePacks'
 import { generateWriteToken, setMapWriteToken } from './mapWriteToken'
 import { normalizePoiCategory } from '../utils/poiNormalize'
 
@@ -31,9 +32,9 @@ const MAP_TTL_MS = 180 * 24 * 60 * 60 * 1000
 
 export async function fetchTilesByIds(
   tileIds: string[],
-  onProgress?: (done: number, total: number) => void
+  onProgress?: (done: number, total: number) => void,
+  opts?: { offlineMapId?: string | null }
 ): Promise<Poi[]> {
-  const sb = getSupabase()
   const seen = new Set<string>()
   const merged: Poi[] = []
   const total = tileIds.length
@@ -45,6 +46,32 @@ export async function fetchTilesByIds(
   }
 
   onProgress?.(0, total)
+
+  const offline =
+    typeof navigator !== 'undefined' &&
+    (!navigator.onLine || Boolean(opts?.offlineMapId))
+  const packMapId = opts?.offlineMapId ?? null
+
+  // Prefer local pack when offline or when an offline pack map id is forced
+  if (packMapId && (typeof navigator === 'undefined' || !navigator.onLine)) {
+    const local = await getCachedPoisByGeohashes(packMapId, tileIds)
+    onProgress?.(total, total)
+    return local
+  }
+
+  // If offline without pack id, try nothing useful from network
+  if (typeof navigator !== 'undefined' && !navigator.onLine) {
+    if (packMapId) {
+      const local = await getCachedPoisByGeohashes(packMapId, tileIds)
+      onProgress?.(total, total)
+      return local
+    }
+    throw new Error('offline_no_pack')
+  }
+
+  void offline
+
+  const sb = getSupabase()
 
   for (let i = 0; i < tileIds.length; i += FETCH_CHUNK) {
     const chunk = tileIds.slice(i, i + FETCH_CHUNK)
@@ -72,7 +99,8 @@ export async function fetchPoisForRoute(
   routePoints: RoutePoint[],
   radiusM: number,
   categories: PoiCategory[],
-  onProgress?: (phase: 'tiles' | 'fetch' | 'filter', ratio: number) => void
+  onProgress?: (phase: 'tiles' | 'fetch' | 'filter', ratio: number) => void,
+  opts?: { offlineMapId?: string | null }
 ): Promise<PoiFetchResult> {
   const t0 = performance.now()
 
@@ -82,9 +110,13 @@ export async function fetchPoisForRoute(
   onProgress?.('tiles', 1)
 
   const tFetch = performance.now()
-  const rawPois = await fetchTilesByIds(tileIds, (done, total) => {
-    onProgress?.('fetch', total > 0 ? done / total : 1)
-  })
+  const rawPois = await fetchTilesByIds(
+    tileIds,
+    (done, total) => {
+      onProgress?.('fetch', total > 0 ? done / total : 1)
+    },
+    { offlineMapId: opts?.offlineMapId }
+  )
   const normalized = rawPois.map(normalizePoiCategory)
   const fetchMs = performance.now() - tFetch
 
