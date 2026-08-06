@@ -35,7 +35,7 @@ export const MIN_POI_RADIUS_M = 300
 export const MAX_POI_RADIUS_M = 2000
 /** Nearby search can look farther than corridor-along-route. */
 export const NEARBY_DEFAULT_POI_RADIUS_M = 3000
-export const NEARBY_MAX_POI_RADIUS_M = 5000
+export const NEARBY_MAX_POI_RADIUS_M = 10000
 export const MAX_GPX_SIZE_BYTES = 25 * 1024 * 1024
 export const MAX_ROUTE_KM = 2000
 

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import { onBeforeRouteLeave, useRoute, useRouter } from 'vue-router'
 import { useMapStore } from '../stores/mapStore'
 import { useMapExport } from '../composables/useMapExport'
@@ -29,6 +29,10 @@ import { formatDuration, formatClock, hoursForDistanceKm } from '../utils/eta'
 import { openStatusAtEta, hasOsmOpeningHours, type OpenStatus } from '../utils/openingHours'
 import { poiCategoryEmoji } from '../utils/poiLabels'
 import type { ControlPointKind, Poi, PoiCategory } from '../../shared/types'
+import {
+  DEFAULT_POI_CATEGORIES,
+  NEARBY_DEFAULT_POI_RADIUS_M,
+} from '../config/poiCategories'
 
 const store = useMapStore()
 const route = useRoute()
@@ -88,9 +92,14 @@ const showExportMenu = ref(false)
 const showExportTip = ref(false)
 const cpMenuOpen = ref(false)
 const nearbyPanelRef = ref<{ setOpen: (value: boolean) => void } | null>(null)
+const nearbyRescanning = ref(false)
 
 const nearbyFabLabel = computed(() =>
-  store.isNearbyMap ? t('nearby.mapFabRescan') : t('nearby.mapFab')
+  store.isNearbyMap
+    ? nearbyRescanning.value || store.poisLoading
+      ? t('nearby.searching')
+      : t('nearby.mapFabRescan')
+    : t('nearby.mapFab')
 )
 
 const cpKinds: { id: ControlPointKind; labelKey: string; category: 'checkpoint' | 'sleep' }[] = [
@@ -152,9 +161,96 @@ function openNearbyPanel() {
   mobilePanel.value = 'none'
 }
 
+/** Umgebung map: FAB reloads GPS + POIs. Route maps: open options panel. */
+function onNearbyFabClick() {
+  if (store.isNearbyMap) {
+    void quickNearbyRescan()
+    return
+  }
+  openNearbyPanel()
+}
+
+function nearbyRescanRadius(): number {
+  return store.poiRadiusM > 0 ? store.poiRadiusM : NEARBY_DEFAULT_POI_RADIUS_M
+}
+
+function nearbyRescanCategories(): PoiCategory[] {
+  return store.activeCategories.length
+    ? [...store.activeCategories]
+    : [...DEFAULT_POI_CATEGORIES]
+}
+
+async function quickNearbyRescan() {
+  if (nearbyRescanning.value || store.poisLoading) return
+  if (typeof window !== 'undefined' && !window.isSecureContext) {
+    store.error = t('nearby.geoInsecure')
+    return
+  }
+  if (!navigator.geolocation) {
+    store.error = t('nearby.geoUnsupported')
+    return
+  }
+
+  store.selectedPoi = null
+  showExportMenu.value = false
+  cpMenuOpen.value = false
+  store.cancelPlaceControlPoint()
+  nearbyRescanning.value = true
+  store.error = ''
+
+  navigator.geolocation.getCurrentPosition(
+    async (pos) => {
+      try {
+        const radius = nearbyRescanRadius()
+        const cats = nearbyRescanCategories()
+        store.prepareNearbyCenter(pos.coords.latitude, pos.coords.longitude, radius, cats)
+        await store.refreshNearbyPois(radius, cats)
+        await maybeStartNearbyLocationFollow()
+      } catch (err) {
+        store.error = err instanceof Error ? err.message : t('nearby.loadFailed')
+      } finally {
+        nearbyRescanning.value = false
+      }
+    },
+    (err) => {
+      nearbyRescanning.value = false
+      if (err.code === 1) store.error = t('nearby.geoDenied')
+      else if (err.code === 2) store.error = t('nearby.geoUnavailable')
+      else if (err.code === 3) store.error = t('nearby.geoTimeout')
+      else store.error = t('nearby.geoFailed')
+    },
+    {
+      enableHighAccuracy: true,
+      maximumAge: 15_000,
+      timeout: 20_000,
+    }
+  )
+}
+
 function onNearbyDone() {
   closeMobilePanel()
 }
+
+async function maybeStartNearbyLocationFollow() {
+  if (!store.mapReady) return
+  if (!store.consumeLocationFollowRequest()) return
+  // MapCanvas remounts on mapEpoch — wait until ref exposes startLocation
+  for (let i = 0; i < 20; i++) {
+    await nextTick()
+    if (mapCanvasRef.value?.startLocation) {
+      mapCanvasRef.value.startLocation({ follow: true, heading: true })
+      return
+    }
+    await new Promise<void>((r) => setTimeout(r, 40))
+  }
+}
+
+watch(
+  () => [store.mapReady, store.mapEpoch] as const,
+  () => {
+    void maybeStartNearbyLocationFollow()
+  }
+)
 
 function openExportMenuFromTip(e?: Event) {
   dismissExportTip()
@@ -499,9 +595,19 @@ function onDocClick(e: MouseEvent) {
             type="button"
             class="tool-btn nearby-enter"
             :title="nearbyFabLabel"
-            @click="openNearbyPanel"
+            :disabled="store.isNearbyMap && (nearbyRescanning || store.poisLoading)"
+            @click="onNearbyFabClick"
           >
             {{ nearbyFabLabel }}
+          </button>
+          <button
+            v-if="store.isNearbyMap"
+            type="button"
+            class="tool-btn nearby-opts"
+            :title="t('nearby.mapFabOptions')"
+            @click="openNearbyPanel"
+          >
+            {{ t('nearby.mapFabOptions') }}
           </button>
         </div>
 
@@ -772,6 +878,9 @@ function onDocClick(e: MouseEvent) {
 
       <div class="map-stack">
         <MapCanvas ref="mapCanvasRef" :key="store.mapEpoch" :ride-mode="rideMode" />
+        <p v-if="store.poisLoading" class="pois-loading-banner" role="status">
+          {{ t('nearby.loadingPois') }}
+        </p>
         <ElevationProfile v-if="!rideMode && !store.isNearbyMap" />
 
         <div
@@ -782,13 +891,29 @@ function onDocClick(e: MouseEvent) {
           <button
             type="button"
             class="map-cp-fab map-nearby-fab"
-            :class="{ active: mobilePanel === 'nearby' }"
+            :class="{
+              active: mobilePanel === 'nearby',
+              loading: nearbyRescanning || store.poisLoading,
+            }"
             :title="nearbyFabLabel"
-            :aria-expanded="mobilePanel === 'nearby'"
-            @click="openNearbyPanel"
+            :aria-busy="nearbyRescanning || store.poisLoading"
+            :disabled="nearbyRescanning || store.poisLoading"
+            @click="onNearbyFabClick"
           >
             <span aria-hidden="true">◎</span>
             <span class="map-cp-fab-label">{{ nearbyFabLabel }}</span>
+          </button>
+          <button
+            v-if="store.isNearbyMap"
+            type="button"
+            class="map-cp-fab map-nearby-opts"
+            :class="{ active: mobilePanel === 'nearby' }"
+            :title="t('nearby.mapFabOptions')"
+            :aria-expanded="mobilePanel === 'nearby'"
+            @click="openNearbyPanel"
+          >
+            <span aria-hidden="true">⚙</span>
+            <span class="map-cp-fab-label">{{ t('nearby.mapFabOptions') }}</span>
           </button>
           <template v-if="!store.isNearbyMap">
             <button
@@ -1569,6 +1694,25 @@ function onDocClick(e: MouseEvent) {
   position: relative;
 }
 
+.pois-loading-banner {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 40;
+  margin: 0;
+  padding: 0.55rem 0.9rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  border: 1px solid var(--border);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text);
+  pointer-events: none;
+  white-space: nowrap;
+}
+
 .map-cp-tools {
   position: absolute;
   top: 54px;
@@ -1697,6 +1841,38 @@ function onDocClick(e: MouseEvent) {
     display: none;
   }
 
+  /* Umgebung: readable one-thumb rescan pill */
+  .map-nearby-fab {
+    width: auto;
+    min-width: 52px;
+    min-height: 52px;
+    height: auto;
+    padding: 0.65rem 0.9rem;
+    gap: 0.45rem;
+    font-size: 0.92rem;
+  }
+
+  .map-nearby-fab .map-cp-fab-label {
+    display: inline;
+    font-size: 0.82rem;
+    font-weight: 700;
+    max-width: 9.5rem;
+    line-height: 1.15;
+    white-space: normal;
+    text-align: left;
+  }
+
+  .map-nearby-fab.loading {
+    opacity: 0.75;
+  }
+
+  .map-nearby-opts {
+    width: 48px;
+    height: 48px;
+    min-width: 48px;
+    min-height: 48px;
+  }
+
   .map-cp-banner {
     top: calc(12px + env(safe-area-inset-top, 0px));
     left: 72px;
@@ -1704,6 +1880,10 @@ function onDocClick(e: MouseEvent) {
     transform: none;
     max-width: none;
     border-radius: 12px;
+  }
+
+  .map-cp-tools:has(.map-nearby-fab) .map-cp-banner {
+    left: auto;
   }
 }
 
@@ -1719,6 +1899,10 @@ function onDocClick(e: MouseEvent) {
 }
 
 .tool-btn.nearby-enter {
+  font-weight: 600;
+}
+
+.tool-btn.nearby-opts {
   font-weight: 600;
 }
 

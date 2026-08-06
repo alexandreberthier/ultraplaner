@@ -30,6 +30,11 @@ import {
 import { ensurePoiCategoryImages, poiCategoryIconId } from '../utils/poiMapIcons'
 import { ensureRouteEndImages, routeEndIconId } from '../utils/routeEndIcons'
 import { isAppleMobile, isStandalonePwa } from '../utils/geoDevice'
+import {
+  createUserLocationElement,
+  resolveGeoHeading,
+  setLocationMarkerHeading,
+} from '../utils/userLocationMarker'
 
 const store = useMapStore()
 const { t } = useI18n()
@@ -74,36 +79,6 @@ let resumeLocationAfterVisible = false
 let locatingTimer: ReturnType<typeof setTimeout> | null = null
 /** Skip click toggle when GPS was already started on touch pointerdown */
 let startedFromPointerDown = false
-
-function bearingBetween(
-  lat1: number,
-  lng1: number,
-  lat2: number,
-  lng2: number
-): number {
-  const toRad = (d: number) => (d * Math.PI) / 180
-  const toDeg = (r: number) => (r * 180) / Math.PI
-  const φ1 = toRad(lat1)
-  const φ2 = toRad(lat2)
-  const Δλ = toRad(lng2 - lng1)
-  const y = Math.sin(Δλ) * Math.cos(φ2)
-  const x = Math.cos(φ1) * Math.sin(φ2) - Math.sin(φ1) * Math.cos(φ2) * Math.cos(Δλ)
-  return (toDeg(Math.atan2(y, x)) + 360) % 360
-}
-
-function createLocationElement(): HTMLDivElement {
-  const el = document.createElement('div')
-  el.className = 'user-location-marker'
-  el.innerHTML = `
-    <div class="user-location-pulse"></div>
-    <div class="user-location-arrow" aria-hidden="true">
-      <svg viewBox="0 0 40 40">
-        <path d="M20 4 L32 30 L20 24 L8 30 Z" fill="#2563eb" stroke="#fff" stroke-width="2.5" stroke-linejoin="round"/>
-      </svg>
-    </div>
-  `
-  return el
-}
 
 function createBikeCursorElement(): HTMLDivElement {
   const el = document.createElement('div')
@@ -150,18 +125,7 @@ function updateBikeCursorMarker() {
 function applyGeoPosition(pos: GeolocationPosition) {
   const lat = pos.coords.latitude
   const lng = pos.coords.longitude
-  let heading =
-    pos.coords.heading != null && !Number.isNaN(pos.coords.heading)
-      ? pos.coords.heading
-      : null
-
-  if (heading == null && lastFollowPos) {
-    const moved =
-      Math.abs(lat - lastFollowPos.lat) + Math.abs(lng - lastFollowPos.lng)
-    if (moved > 0.00002) {
-      heading = bearingBetween(lastFollowPos.lat, lastFollowPos.lng, lat, lng)
-    }
-  }
+  const heading = resolveGeoHeading(pos, lastFollowPos)
 
   lastFollowPos = { lat, lng }
   userLocation.value = {
@@ -342,7 +306,7 @@ function updateLocationMarker() {
   const { lat, lng, heading } = userLocation.value
 
   if (!locationMarker) {
-    const el = createLocationElement()
+    const el = createUserLocationElement()
     locationMarker = new maplibregl.Marker({
       element: el,
       anchor: 'center',
@@ -355,14 +319,24 @@ function updateLocationMarker() {
     locationMarker.setLngLat([lng, lat])
   }
 
-  const arrow = locationMarker
-    .getElement()
-    .querySelector('.user-location-arrow') as HTMLElement | null
-  if (arrow) {
-    const rot = heading == null ? 0 : headingUp.value ? 0 : heading
-    arrow.style.transform = `rotate(${rot}deg)`
-    arrow.classList.toggle('has-heading', heading != null)
+  setLocationMarkerHeading(locationMarker.getElement(), heading, headingUp.value)
+}
+
+/** Instant “you are here” on Umgebung maps before live GPS watch returns. */
+function seedNearbyLocationMarker() {
+  if (!map || !store.isNearbyMap) return
+  if (!userLocation.value) {
+    const c = store.routeCoords[0]
+    if (!c) return
+    userLocation.value = {
+      lat: c[1],
+      lng: c[0],
+      accuracy: 50,
+      heading: null,
+      speed: null,
+    }
   }
+  updateLocationMarker()
 }
 
 /**
@@ -775,6 +749,7 @@ function afterMapReady() {
   addLayers()
   scheduleMapResize()
   fitBounds()
+  seedNearbyLocationMarker()
   // Layout often settles a frame later on mobile (toolbar / bottom nav / elev)
   requestAnimationFrame(() => {
     scheduleMapResize()

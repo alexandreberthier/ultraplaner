@@ -52,12 +52,12 @@ const formError = ref('')
 const creating = ref(false)
 
 const introKey = computed(() => {
-  if (!props.inMap) return 'nearby.intro'
+  if (!props.inMap) return 'nearby.introMapFirst'
   return store.isNearbyMap ? 'nearby.introMap' : 'nearby.introMapRoute'
 })
 
 const searchLabelKey = computed(() => {
-  if (!props.inMap) return 'nearby.search'
+  if (!props.inMap) return 'nearby.openMap'
   return store.isNearbyMap ? 'nearby.searchRescan' : 'nearby.searchMapKeepRoute'
 })
 
@@ -91,22 +91,59 @@ function keepRouteOnScan(): boolean {
   return Boolean(props.inMap && !store.isNearbyMap && store.routePoints.length >= 2)
 }
 
-function searchNearby() {
+function ensureGeoReady(): boolean {
   formError.value = ''
   store.error = ''
 
   if (typeof window !== 'undefined' && !window.isSecureContext) {
     formError.value = t('nearby.geoInsecure')
-    return
+    return false
   }
   if (!navigator.geolocation) {
     formError.value = t('nearby.geoUnsupported')
-    return
+    return false
   }
+  return true
+}
 
+/** Landing: GPS → map shell with marker → navigate → load POIs (map stays visible). */
+function openMapFirst() {
+  if (!ensureGeoReady()) return
   creating.value = true
 
   // Sync call inside click handler — required for iOS geolocation permission
+  navigator.geolocation.getCurrentPosition(
+    async (pos) => {
+      try {
+        const lat = pos.coords.latitude
+        const lng = pos.coords.longitude
+        store.prepareNearbyCenter(lat, lng, radiusM.value, [...selected.value])
+        await router.push('/map/view')
+        await store.refreshNearbyPois(radiusM.value, [...selected.value])
+        if (store.error) formError.value = store.error
+      } catch (err) {
+        formError.value = err instanceof Error ? err.message : t('store.unknownError')
+      } finally {
+        creating.value = false
+      }
+    },
+    (err) => {
+      creating.value = false
+      formError.value = geoErrorMessage(err.code)
+    },
+    {
+      enableHighAccuracy: true,
+      maximumAge: 30_000,
+      timeout: 20_000,
+    }
+  )
+}
+
+/** In-map: rescan nearby or enrich route POIs (unchanged semantics). */
+function searchNearby() {
+  if (!ensureGeoReady()) return
+  creating.value = true
+
   navigator.geolocation.getCurrentPosition(
     async (pos) => {
       try {
@@ -117,6 +154,14 @@ function searchNearby() {
             radiusM.value,
             [...selected.value]
           )
+        } else if (store.isNearbyMap) {
+          store.prepareNearbyCenter(
+            pos.coords.latitude,
+            pos.coords.longitude,
+            radiusM.value,
+            [...selected.value]
+          )
+          await store.refreshNearbyPois(radiusM.value, [...selected.value])
         } else {
           await store.createMapFromNearby(
             pos.coords.latitude,
@@ -126,11 +171,7 @@ function searchNearby() {
           )
         }
         if (store.mapReady && !store.error) {
-          if (props.inMap) {
-            emit('done')
-          } else {
-            await router.push('/map/view')
-          }
+          emit('done')
         } else if (store.error) {
           formError.value = store.error
         }
@@ -151,11 +192,21 @@ function searchNearby() {
     }
   )
 }
+
+function onSubmit() {
+  if (props.inMap) searchNearby()
+  else openMapFirst()
+}
+
+defineExpose({ openMapFirst, searchNearby })
 </script>
 
 <template>
-  <form class="nearby-form" :class="{ 'in-map': inMap }" @submit.prevent="searchNearby">
+  <form class="nearby-form" :class="{ 'in-map': inMap, 'map-first': !inMap }" @submit.prevent="onSubmit">
     <p class="intro">{{ t(introKey) }}</p>
+    <p v-if="!inMap" class="load-summary">
+      {{ t('nearby.loadSummary', { m: radiusM, count: selected.length }) }}
+    </p>
     <p v-if="showIosGeoHint" class="ios-geo-hint">{{ t(iosGeoHintKey) }}</p>
 
     <label class="field">
@@ -168,7 +219,7 @@ function searchNearby() {
           :max="NEARBY_MAX_POI_RADIUS_M"
           step="50"
         />
-        <span>{{ radiusM }} m</span>
+        <span class="radius-value">{{ radiusM }} m</span>
       </div>
     </label>
 
@@ -208,6 +259,10 @@ function searchNearby() {
   gap: 0.85rem;
 }
 
+.nearby-form.map-first {
+  gap: 1rem;
+}
+
 .intro {
   margin: 0;
   color: var(--text-muted);
@@ -217,6 +272,18 @@ function searchNearby() {
 
 .in-map .intro {
   font-size: 0.8rem;
+  line-height: 1.35;
+}
+
+.load-summary {
+  margin: -0.35rem 0 0;
+  padding: 0.55rem 0.7rem;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--primary) 8%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--primary) 18%, var(--border));
+  color: var(--text);
+  font-size: 0.88rem;
+  font-weight: 600;
   line-height: 1.35;
 }
 
@@ -252,11 +319,21 @@ function searchNearby() {
 .radius-row {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 0.75rem;
+  min-height: 44px;
 }
 
 .radius-row input[type='range'] {
   flex: 1;
+  min-height: 44px;
+}
+
+.radius-value {
+  flex-shrink: 0;
+  min-width: 4.5rem;
+  text-align: right;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
 }
 
 .categories {
@@ -346,8 +423,15 @@ function searchNearby() {
 }
 
 .in-map .btn-primary {
-  padding: 0.65rem 1rem;
-  font-size: 0.9rem;
+  padding: 0.75rem 1rem;
+  font-size: 0.95rem;
+  min-height: 48px;
+}
+
+.map-first .btn-primary {
+  padding: 1rem 1.5rem;
+  font-size: 1.05rem;
+  min-height: 52px;
 }
 
 .btn-primary:disabled {

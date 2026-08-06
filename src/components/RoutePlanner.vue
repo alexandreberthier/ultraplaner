@@ -25,6 +25,11 @@ import { totalRouteKm, buildRoutePoints, buildKmMarkers } from '../utils/route'
 import { poiCategoryLabel } from '../utils/poiLabels'
 import { ensureRouteEndImages, routeEndIconId } from '../utils/routeEndIcons'
 import { isSecureGeoContext } from '../utils/geoDevice'
+import {
+  createUserLocationElement,
+  resolveGeoHeading,
+  setLocationMarkerHeading,
+} from '../utils/userLocationMarker'
 
 /** Vienna city center — default planner view before/without geolocation. */
 const VIENNA_CENTER: [number, number] = [16.3738, 48.2082]
@@ -67,6 +72,9 @@ let cancelStyleReady: (() => void) | null = null
 let basemapRecovering = false
 /** Ignore late geolocation results after unmount or after user started drawing. */
 let geoLocateAlive = false
+let locationWatchId: number | null = null
+let locationMarker: maplibregl.Marker | null = null
+let lastGeoPos: { lat: number; lng: number } | null = null
 
 const addressQuery = ref('')
 const addressResults = ref<GeocodeResult[]>([])
@@ -487,6 +495,7 @@ function initMap() {
 
 function destroyPlannerMap() {
   geoLocateAlive = false
+  stopPlannerLocation()
   if (autoRouteTimer) clearTimeout(autoRouteTimer)
   autoRouteTimer = null
   if (addressTimer) clearTimeout(addressTimer)
@@ -507,20 +516,72 @@ function destroyPlannerMap() {
   map = null
 }
 
-/** Show Vienna immediately; fly to GPS if permission granted (non-blocking). */
+function stopPlannerLocation() {
+  if (locationWatchId != null) {
+    navigator.geolocation.clearWatch(locationWatchId)
+    locationWatchId = null
+  }
+  locationMarker?.remove()
+  locationMarker = null
+  lastGeoPos = null
+}
+
+function updatePlannerLocationMarker(lat: number, lng: number, heading: number | null) {
+  if (!map) return
+  if (!locationMarker) {
+    const el = createUserLocationElement()
+    locationMarker = new maplibregl.Marker({
+      element: el,
+      anchor: 'center',
+      rotationAlignment: 'map',
+      pitchAlignment: 'map',
+    })
+      .setLngLat([lng, lat])
+      .addTo(map)
+  } else {
+    locationMarker.setLngLat([lng, lat])
+  }
+  setLocationMarkerHeading(locationMarker.getElement(), heading, false)
+}
+
+function onPlannerGeoPosition(pos: GeolocationPosition) {
+  if (!geoLocateAlive || !map) return
+  const lat = pos.coords.latitude
+  const lng = pos.coords.longitude
+  const heading = resolveGeoHeading(pos, lastGeoPos)
+  lastGeoPos = { lat, lng }
+  updatePlannerLocationMarker(lat, lng, heading)
+}
+
+/** Show Vienna immediately; fly to GPS + show nav triangle if permission granted. */
 function centerOnUserLocation() {
   if (!map || !navigator.geolocation || !isSecureGeoContext()) return
   geoLocateAlive = true
+
+  const onFix = (pos: GeolocationPosition) => {
+    if (!geoLocateAlive || !map) return
+    onPlannerGeoPosition(pos)
+    // Don't yank the camera once the user has started placing waypoints
+    if (waypoints.value.length > 0) return
+    map.flyTo({
+      center: [pos.coords.longitude, pos.coords.latitude],
+      zoom: Math.max(map.getZoom(), USER_LOCATION_ZOOM),
+      duration: 900,
+    })
+  }
+
+  // One-shot for quick center (works with cached position); then watch for heading updates
   navigator.geolocation.getCurrentPosition(
     (pos) => {
-      if (!geoLocateAlive || !map) return
-      // Don't yank the camera once the user has started placing waypoints
-      if (waypoints.value.length > 0) return
-      map.flyTo({
-        center: [pos.coords.longitude, pos.coords.latitude],
-        zoom: Math.max(map.getZoom(), USER_LOCATION_ZOOM),
-        duration: 900,
-      })
+      onFix(pos)
+      if (!geoLocateAlive || locationWatchId != null) return
+      locationWatchId = navigator.geolocation.watchPosition(
+        onPlannerGeoPosition,
+        () => {
+          /* keep last marker */
+        },
+        { enableHighAccuracy: true, timeout: 20_000, maximumAge: 10_000 }
+      )
     },
     () => {
       /* keep Vienna fallback */

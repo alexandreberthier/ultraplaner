@@ -13,6 +13,7 @@ import type {
 import {
   DEFAULT_POI_CATEGORIES,
   DEFAULT_POI_RADIUS_M,
+  NEARBY_DEFAULT_POI_RADIUS_M,
   POI_CATEGORY_DEFS,
 } from '../config/poiCategories'
 import { isSupabaseConfigured } from '../supabase'
@@ -124,6 +125,10 @@ export const useMapStore = defineStore('map', () => {
   const surfaceSummary = ref<RouteSurfaceSummary | null>(null)
   /** True when map was created from a single GPS point (Umgebung). */
   const isNearbyMap = ref(false)
+  /** Soft POI fetch while nearby map is already visible. */
+  const poisLoading = ref(false)
+  /** MapCanvas should start GPS follow after nearby map opens (permission just granted). */
+  const locationFollowRequested = ref(false)
   const poiRadiusM = ref(DEFAULT_POI_RADIUS_M)
   const activeCategories = ref<PoiCategory[]>([...DEFAULT_POI_CATEGORIES])
   const visibleCategories = ref<PoiCategory[]>([...DEFAULT_POI_CATEGORIES])
@@ -358,6 +363,8 @@ export const useMapStore = defineStore('map', () => {
     routePoints.value = []
     surfaceSummary.value = null
     isNearbyMap.value = false
+    poisLoading.value = false
+    locationFollowRequested.value = false
     savedMapId.value = null
     loadedFromCache.value = false
     persistWarning.value = ''
@@ -581,6 +588,99 @@ export const useMapStore = defineStore('map', () => {
         nearby: true,
       })
     }, tGlobal('nearby.loadFailed'))
+  }
+
+  /**
+   * Show Umgebung map immediately (center + radius, no POI wait).
+   * Caller navigates to MapView; then refreshNearbyPois loads markers.
+   */
+  function prepareNearbyCenter(
+    lat: number,
+    lng: number,
+    radiusM: number = NEARBY_DEFAULT_POI_RADIUS_M,
+    categories: PoiCategory[] = [...DEFAULT_POI_CATEGORIES]
+  ) {
+    loadGeneration++
+    stopLoadTimer()
+    resetState()
+    const coordinates: [number, number][] = [[lng, lat]]
+    routeName.value = tGlobal('nearby.mapName')
+    routePoints.value = buildRoutePoints(coordinates)
+    routeCoords.value = coordinates
+    surfaceSummary.value = null
+    isNearbyMap.value = true
+    poiRadiusM.value = radiusM
+    activeCategories.value = [...categories]
+    visibleCategories.value = [...categories]
+    showAllPoisOnMap.value = true
+    mapEpoch.value++
+    mapReady.value = true
+    mode.value = 'map'
+    loadStatus.value = ''
+    loadProgress.value = null
+    error.value = ''
+    locationFollowRequested.value = true
+  }
+
+  function consumeLocationFollowRequest(): boolean {
+    if (!locationFollowRequested.value) return false
+    locationFollowRequested.value = false
+    return true
+  }
+
+  /**
+   * Load/replace POIs for the current nearby center without hiding the map.
+   * Does not touch enrichPoisAroundGps (route maps).
+   */
+  async function refreshNearbyPois(radiusM: number, categories: PoiCategory[]) {
+    if (!isNearbyMap.value || routeCoords.value.length !== 1) {
+      const c = routeCoords.value[0]
+      if (c) await createMapFromNearby(c[1], c[0], radiusM, categories)
+      return
+    }
+
+    const gen = ++loadGeneration
+    error.value = ''
+    poisLoading.value = true
+    loadStatus.value = tGlobal('store.loadingPois')
+    setLoadProgress(5)
+
+    try {
+      if (!isSupabaseConfigured()) {
+        throw new Error(tGlobal('store.supabaseNotConfiguredEnv'))
+      }
+
+      const coordinates = routeCoords.value
+      const points = routePoints.value
+      poiRadiusM.value = radiusM
+      activeCategories.value = [...categories]
+
+      const { pois } = await fetchPoisForRoute(
+        coordinates,
+        points,
+        radiusM,
+        categories,
+        mapFetchProgress
+      )
+      if (gen !== loadGeneration) return
+
+      poiMap.value.clear()
+      for (const p of pois) {
+        poiMap.value.set(p.id, normalizePoiCategory(p))
+      }
+      syncVisibleCategories()
+      setLoadProgress(100)
+      void persistMapInBackground()
+    } catch (err) {
+      if (gen !== loadGeneration) return
+      error.value = err instanceof Error ? err.message : tGlobal('nearby.loadFailed')
+    } finally {
+      if (gen === loadGeneration) {
+        poisLoading.value = false
+        loadStatus.value = ''
+        loadProgress.value = null
+      }
+    }
   }
 
   /**
@@ -956,6 +1056,7 @@ export const useMapStore = defineStore('map', () => {
     routePoints,
     surfaceSummary,
     isNearbyMap,
+    poisLoading,
     poiRadiusM,
     activeCategories,
     visibleCategories,
@@ -996,6 +1097,9 @@ export const useMapStore = defineStore('map', () => {
     createMapFromGpx,
     createMapFromRoute,
     createMapFromNearby,
+    prepareNearbyCenter,
+    refreshNearbyPois,
+    consumeLocationFollowRequest,
     enrichPoisAroundGps,
     loadSavedMap,
     selectPoi,

@@ -17,9 +17,17 @@ const router = useRouter()
 const tab = ref<'gpx' | 'plan' | 'nearby'>('gpx')
 const appRef = ref<HTMLElement | null>(null)
 const plannerRef = ref<{ hasDraft: () => boolean } | null>(null)
+const nearbyFormRef = ref<{ openMapFirst: () => void } | null>(null)
 
 function scrollToApp() {
   appRef.value?.scrollIntoView({ behavior: 'smooth' })
+}
+
+/** Race-day: jump to nearby tab and start GPS → map in one tap (sync geo for iOS). */
+function startNearbyRace() {
+  tab.value = 'nearby'
+  scrollToApp()
+  nearbyFormRef.value?.openMapFirst()
 }
 
 function leavePlanMode() {
@@ -172,9 +180,14 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
                 <span class="hero-title-route">{{ t('landing.heroLine2') }}</span>
               </h1>
               <p class="hero-sub">{{ t('landing.heroSub') }}</p>
-              <button type="button" class="cta-primary" @click="scrollToApp">
-                {{ t('landing.startCta') }}
-              </button>
+              <div class="cta-row">
+                <button type="button" class="cta-primary" @click="scrollToApp">
+                  {{ t('landing.startCta') }}
+                </button>
+                <button type="button" class="cta-nearby" @click="startNearbyRace">
+                  {{ t('landing.nearbyCta') }}
+                </button>
+              </div>
             </div>
           </div>
         </header>
@@ -262,8 +275,8 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
             role="tabpanel"
             :aria-labelledby="tab === 'nearby' ? 'tab-nearby' : 'tab-gpx'"
           >
-            <NearbyForm v-if="tab === 'nearby'" />
-            <GpxForm v-else />
+            <NearbyForm v-show="tab === 'nearby'" ref="nearbyFormRef" />
+            <GpxForm v-if="tab === 'gpx'" />
           </section>
           <RecentMaps />
         </section>
@@ -566,6 +579,34 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
 
 .cta-primary:hover {
   background: var(--primary-dark);
+  transform: translateY(-1px);
+}
+
+.cta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  justify-content: center;
+  align-items: center;
+}
+
+.cta-nearby {
+  border-radius: 10px;
+  padding: 0.7rem 1.25rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(6px);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.18);
+  transition: background 0.15s ease, transform 0.15s ease, border-color 0.15s ease;
+}
+
+.cta-nearby:hover {
+  background: rgba(255, 255, 255, 0.24);
+  border-color: #fff;
   transform: translateY(-1px);
 }
 

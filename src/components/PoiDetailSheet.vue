@@ -4,7 +4,13 @@ import { useI18n } from 'vue-i18n'
 import { useMapStore } from '../stores/mapStore'
 import { formatDistance, formatKm } from '../services/geo'
 import { poiCategoryLabel } from '../utils/poiLabels'
-import { googleMapsDirectionsUrl } from '../services/navigation'
+import {
+  appleMapsDirectionsUrl,
+  geoDirectionsUri,
+  googleMapsDirectionsUrl,
+  preferredDirectionsUrl,
+} from '../services/navigation'
+import { isAppleMobile } from '../utils/geoDevice'
 import {
   fetchPlaceOpeningHours,
   isGooglePlacesConfigured,
@@ -194,6 +200,35 @@ onUnmounted(() => {
   document.removeEventListener('keydown', onSheetKeydown)
 })
 
+const onAppleDevice = isAppleMobile()
+
+const primaryNavHref = computed(() => {
+  const poi = store.selectedPoi
+  if (!poi) return '#'
+  return preferredDirectionsUrl(poi.lat, poi.lng, {
+    apple: onAppleDevice,
+    name: poi.name,
+  })
+})
+
+const googleNavHref = computed(() => {
+  const poi = store.selectedPoi
+  if (!poi) return '#'
+  return googleMapsDirectionsUrl(poi.lat, poi.lng)
+})
+
+const appleNavHref = computed(() => {
+  const poi = store.selectedPoi
+  if (!poi) return '#'
+  return appleMapsDirectionsUrl(poi.lat, poi.lng, poi.name)
+})
+
+const geoNavHref = computed(() => {
+  const poi = store.selectedPoi
+  if (!poi) return '#'
+  return geoDirectionsUri(poi.lat, poi.lng, poi.name)
+})
+
 function onNavigate() {
   onClose()
 }
@@ -289,7 +324,46 @@ function onNavigate() {
         <p v-if="showHoursUnknownHint" class="hours-hint">{{ t('detail.hoursUnknownHint') }}</p>
       </div>
 
-      <div class="actions">
+      <div class="actions" :class="{ 'nearby-nav': store.isNearbyMap }">
+        <a
+          class="nav-btn nav-btn-primary"
+          :href="primaryNavHref"
+          target="_blank"
+          rel="noopener noreferrer"
+          @click="onNavigate"
+        >
+          {{ t('detail.navigate') }}
+        </a>
+        <div class="nav-alts">
+          <a
+            v-if="onAppleDevice"
+            class="nav-btn nav-btn-alt"
+            :href="googleNavHref"
+            target="_blank"
+            rel="noopener noreferrer"
+            @click="onNavigate"
+          >
+            {{ t('detail.navGoogle') }}
+          </a>
+          <a
+            v-else
+            class="nav-btn nav-btn-alt"
+            :href="appleNavHref"
+            target="_blank"
+            rel="noopener noreferrer"
+            @click="onNavigate"
+          >
+            {{ t('detail.navApple') }}
+          </a>
+          <a
+            class="nav-btn nav-btn-alt"
+            :href="geoNavHref"
+            rel="noopener noreferrer"
+            @click="onNavigate"
+          >
+            {{ t('detail.navGeo') }}
+          </a>
+        </div>
         <button
           type="button"
           class="fav-btn"
@@ -298,15 +372,6 @@ function onNavigate() {
         >
           {{ isFavorite ? t('detail.removeFavorite') : t('detail.addFavorite') }}
         </button>
-        <a
-          class="nav-btn"
-          :href="googleMapsDirectionsUrl(store.selectedPoi.lat, store.selectedPoi.lng)"
-          target="_blank"
-          rel="noopener noreferrer"
-          @click="onNavigate"
-        >
-          {{ t('detail.navGoogle') }}
-        </a>
         <button
           v-if="isGooglePlacesConfigured() && !hasOsm"
           type="button"
@@ -516,11 +581,16 @@ dd {
   gap: 0.5rem;
 }
 
+.actions.nearby-nav {
+  gap: 0.65rem;
+}
+
 .fav-btn,
 .hours-btn,
 .nav-btn {
   width: 100%;
   padding: 0.65rem;
+  min-height: 44px;
   border: 1px solid var(--border);
   border-radius: 8px;
   background: var(--surface-2);
@@ -529,6 +599,45 @@ dd {
   text-decoration: none;
   color: inherit;
   font: inherit;
+}
+
+.nav-btn-primary {
+  order: -1;
+  padding: 0.85rem 1rem;
+  min-height: 48px;
+  border-color: var(--primary);
+  background: var(--primary);
+  color: #fff;
+  font-weight: 700;
+  font-size: 1.05rem;
+  box-shadow: 0 4px 14px color-mix(in srgb, var(--primary) 35%, transparent);
+}
+
+.nav-alts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.actions.nearby-nav .nav-btn-primary {
+  padding: 1rem 1.1rem;
+  min-height: 52px;
+  font-size: 1.1rem;
+}
+
+.nav-btn-alt {
+  flex: 1 1 calc(50% - 0.2rem);
+  min-width: 0;
+  min-height: 44px;
+  padding: 0.55rem 0.55rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--primary);
+  border-color: color-mix(in srgb, var(--primary) 35%, var(--border));
+  background: color-mix(in srgb, var(--primary) 8%, var(--surface));
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .fav-btn.active {
@@ -564,7 +673,7 @@ dd {
   cursor: pointer;
 }
 
-.nav-btn {
+.nav-btn:not(.nav-btn-primary):not(.nav-btn-alt) {
   border-color: var(--primary);
   color: var(--primary);
   font-weight: 600;
