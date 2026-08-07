@@ -247,7 +247,6 @@ export default {
     panelSummaryRouteKeep: 'Route bleibt · GPS-Umkreis',
     mapFab: 'Umgebung laden',
     mapFabRescan: 'POIs neu laden',
-    mapFabOptions: 'Optionen',
     loadFailed: 'Umgebungssuche fehlgeschlagen',
     geoUnsupported: 'Standort nicht unterstützt',
     geoDenied:

@@ -247,7 +247,6 @@ export default {
     panelSummaryRouteKeep: 'Ruta se mantiene · radio GPS',
     mapFab: 'Cargar alrededor',
     mapFabRescan: 'Recargar POIs',
-    mapFabOptions: 'Opciones',
     loadFailed: 'Búsqueda cercana fallida',
     geoUnsupported: 'Ubicación no compatible',
     geoDenied:

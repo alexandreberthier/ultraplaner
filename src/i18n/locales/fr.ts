@@ -246,7 +246,6 @@
     panelSummaryRouteKeep: 'Route conservée · rayon GPS',
     mapFab: 'Charger alentours',
     mapFabRescan: 'Recharger les POIs',
-    mapFabOptions: 'Options',
     loadFailed: 'Recherche alentours échouée',
     geoUnsupported: 'Géolocalisation non prise en charge',
     geoDenied:

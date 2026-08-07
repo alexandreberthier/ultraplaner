@@ -666,14 +666,6 @@ function onDocClick(e: MouseEvent) {
           >
             {{ nearbyFabLabel }}
           </button>
-          <button
-            type="button"
-            class="tool-btn nearby-opts"
-            :title="t('nearby.mapFabOptions')"
-            @click="openNearbyPanel"
-          >
-            {{ t('nearby.mapFabOptions') }}
-          </button>
         </div>
 
         <div class="toolbar-title">
@@ -969,7 +961,6 @@ function onDocClick(e: MouseEvent) {
             type="button"
             class="map-cp-fab map-nearby-fab"
             :class="{
-              active: mobilePanel === 'nearby',
               loading: nearbyRescanning || store.poisLoading,
             }"
             :title="nearbyFabLabel"
@@ -979,17 +970,6 @@ function onDocClick(e: MouseEvent) {
           >
             <span aria-hidden="true">◎</span>
             <span class="map-cp-fab-label">{{ nearbyFabLabel }}</span>
-          </button>
-          <button
-            type="button"
-            class="map-cp-fab map-nearby-opts"
-            :class="{ active: mobilePanel === 'nearby' }"
-            :title="t('nearby.mapFabOptions')"
-            :aria-expanded="mobilePanel === 'nearby'"
-            @click="openNearbyPanel"
-          >
-            <span aria-hidden="true">⚙</span>
-            <span class="map-cp-fab-label">{{ t('nearby.mapFabOptions') }}</span>
           </button>
           <template v-if="!store.isNearbyMap">
             <button
@@ -1176,6 +1156,7 @@ function onDocClick(e: MouseEvent) {
         <div v-else-if="mobilePanel === 'pois'" class="sheet-scroll">
           <EtaPlanner v-if="!store.isNearbyMap" embedded />
           <WeatherStrip embedded />
+          <NearbySearchPanel embedded @done="onNearbyDone" />
           <ControlPointsPanel />
           <OfflinePackPanel @updated="refreshPackMeta" />
           <PoiCategoryFilter embedded />
@@ -1952,13 +1933,6 @@ function onDocClick(e: MouseEvent) {
     opacity: 0.75;
   }
 
-  .map-nearby-opts {
-    width: 48px;
-    height: 48px;
-    min-width: 48px;
-    min-height: 48px;
-  }
-
   .map-cp-banner {
     top: calc(12px + env(safe-area-inset-top, 0px));
     left: 72px;
@@ -1989,11 +1963,6 @@ function onDocClick(e: MouseEvent) {
   background: color-mix(in srgb, var(--primary) 14%, var(--surface));
   border-color: color-mix(in srgb, var(--primary) 35%, var(--border));
   color: var(--primary);
-}
-
-.tool-btn.nearby-opts {
-  font-weight: 600;
-  color: var(--text-muted);
 }
 
 .ride-overlay {

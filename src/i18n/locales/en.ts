@@ -247,7 +247,6 @@ export default {
     panelSummaryRouteKeep: 'Route stays · GPS radius',
     mapFab: 'Scan nearby',
     mapFabRescan: 'Reload POIs',
-    mapFabOptions: 'Options',
     loadFailed: 'Nearby search failed',
     geoUnsupported: 'Location not supported',
     geoDenied:
