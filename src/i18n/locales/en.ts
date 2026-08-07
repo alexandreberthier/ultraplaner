@@ -184,8 +184,6 @@ export default {
     feedback: {
       title: 'Feedback & improvement ideas',
       intro: 'Missing a country, a feature, or something in the workflow? Write to me — I love concrete ideas from the road.',
-      roadmapNote:
-        'Roadmap (honest): COROS Cloud API is requested — only with partner access, no fixed date. Until then: QR / GPX.',
       name: 'Name (optional)',
       email: 'Email (optional, for follow-up)',
       message: 'Your suggestion',
@@ -243,13 +241,13 @@ export default {
     searchRescan: 'Reload POIs',
     searching: 'Loading location & POIs…',
     mapName: 'Nearby',
-    panelTitle: 'Nearby',
+    panelTitle: 'Nearby options',
     panelSummaryNearby: 'Radius {m} m',
     panelSummaryRoute: 'Search here',
     panelSummaryRouteKeep: 'Route stays · GPS radius',
     mapFab: 'Scan nearby',
     mapFabRescan: 'Reload POIs',
-    mapFabOptions: 'Radius',
+    mapFabOptions: 'Options',
     loadFailed: 'Nearby search failed',
     geoUnsupported: 'Location not supported',
     geoDenied:
@@ -371,7 +369,7 @@ export default {
     sheetPois: 'Supply points',
     sheetExport: 'Export route',
     sheetLegend: 'Legend',
-    sheetNearby: 'Nearby',
+    sheetNearby: 'Nearby options',
     exportIntro: '★ favorites · device · steps',
     gpxRoutePois: 'GPX — route only',
     gpxRoutePoisHint: 'Track only, no waypoints',
@@ -417,6 +415,7 @@ export default {
     needSavedMap: 'Map must be saved first (wait a moment).',
     noCoverageAroundGps:
       'Offline: no pack coverage around your location. Rebuild the pack (route corridor) or go online.',
+    help: 'Offline = whole route to take with you (map + POIs along the corridor). Nearby = POIs around your location.',
     hint: 'Use Wi‑Fi. Caches CyclOSM corridor (±1.5 km, zoom 10–13) + POIs for dead zones.',
   },
   pois: {

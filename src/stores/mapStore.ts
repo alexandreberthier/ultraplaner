@@ -153,6 +153,8 @@ export const useMapStore = defineStore('map', () => {
   /** After GPS enrich on a route map: keep GPS-near POIs visible despite route thinning. */
   const gpsEnrichFocus = ref<{ lat: number; lng: number; radiusM: number } | null>(null)
   const gpsFocusTick = ref(0)
+  /** Bumped after POI set mutations so MapCanvas refreshes GeoJSON without map remount. */
+  const poisEpoch = ref(0)
 
   let loadTimer: ReturnType<typeof setInterval> | null = null
 
@@ -261,17 +263,21 @@ export const useMapStore = defineStore('map', () => {
 
   const mapPois = computed(() => {
     if (showAllPoisOnMap.value) return displayPois.value
-    const thinned = thinPoisForMap(displayPois.value)
     const focus = gpsEnrichFocus.value
-    if (!focus) return thinned
+    if (!focus) return thinPoisForMap(displayPois.value)
 
-    const kept = new Set(thinned.map((p) => p.id))
-    const extras = displayPois.value.filter((p) => {
-      if (kept.has(p.id)) return false
-      return haversineM(p, focus) <= focus.radiusM
-    })
-    if (extras.length === 0) return thinned
-    return [...thinned, ...extras].sort(
+    // GPS enrich: never thin away POIs inside the scan radius (corridor thinning
+    // otherwise keeps only near-route stops at the same km).
+    const inFocus: Poi[] = []
+    const rest: Poi[] = []
+    for (const p of displayPois.value) {
+      if (haversineM(p, focus) <= focus.radiusM) inFocus.push(p)
+      else rest.push(p)
+    }
+    const thinnedRest = thinPoisForMap(rest)
+    const focusIds = new Set(inFocus.map((p) => p.id))
+    const merged = [...inFocus, ...thinnedRest.filter((p) => !focusIds.has(p.id))]
+    return merged.sort(
       (a, b) => (a.distanceAlongRouteKm ?? 0) - (b.distanceAlongRouteKm ?? 0)
     )
   })
@@ -384,6 +390,7 @@ export const useMapStore = defineStore('map', () => {
     poisLoading.value = false
     locationFollowRequested.value = false
     gpsEnrichFocus.value = null
+    poisEpoch.value = 0
     savedMapId.value = null
     loadedFromCache.value = false
     persistWarning.value = ''
@@ -401,6 +408,10 @@ export const useMapStore = defineStore('map', () => {
     gpsEnrichFocus.value = { lat, lng, radiusM }
     gpsFocusTick.value++
     locationFollowRequested.value = true
+  }
+
+  function bumpPoisEpoch() {
+    poisEpoch.value++
   }
 
   async function loadPoisForCoordinates(
@@ -700,6 +711,7 @@ export const useMapStore = defineStore('map', () => {
       }
       syncVisibleCategories()
       setLoadProgress(100)
+      bumpPoisEpoch()
       void persistMapInBackground()
     } catch (err) {
       if (gen !== loadGeneration) return
@@ -772,22 +784,27 @@ export const useMapStore = defineStore('map', () => {
       if (gen !== loadGeneration) return
 
       const routeTotalKm = routePoints.value.at(-1)?.distanceFromStart ?? 0
+      // Replace Map (not in-place .set) so Pinia/Vue computeds + MapCanvas watchers
+      // reliably see the union after enrich without a mapEpoch remount.
+      const next = new Map(poiMap.value)
       for (const raw of pois) {
         const p = normalizePoiCategory(raw)
         const snap = nearestPointOnRoute(p, routePoints.value)
-        poiMap.value.set(p.id, {
+        next.set(p.id, {
           ...p,
           distanceAlongRouteKm: snap.distanceAlongRouteKm,
           distanceToRouteM: snap.distanceToRouteM,
           distanceToFinishKm: routeTotalKm - snap.distanceAlongRouteKm,
         })
       }
+      poiMap.value = next
 
       const catSet = new Set<PoiCategory>([...activeCategories.value, ...categories])
       activeCategories.value = Array.from(catSet)
       syncVisibleCategories()
 
       setLoadProgress(100)
+      bumpPoisEpoch()
       requestGpsMapFocus(lat, lng, radiusM)
       void persistMapInBackground()
     } catch (err) {
@@ -1124,6 +1141,7 @@ export const useMapStore = defineStore('map', () => {
     mapPoiThinnedCount,
     gpsEnrichFocus,
     gpsFocusTick,
+    poisEpoch,
     controlPoints,
     controlPointPlaceKind,
     setAvgSpeedKmh,

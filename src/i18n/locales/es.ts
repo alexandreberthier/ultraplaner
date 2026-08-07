@@ -184,8 +184,6 @@ export default {
     feedback: {
       title: 'Feedback e ideas de mejora',
       intro: '¿Falta un país, una función o algo del flujo? Escríbeme — me encantan las ideas concretas de la carretera.',
-      roadmapNote:
-        'Roadmap (honesto): la API cloud de COROS está solicitada — solo con acceso de partner, sin fecha fija. Mientras tanto: QR / GPX.',
       name: 'Nombre (opcional)',
       email: 'Email (opcional, para responder)',
       message: 'Tu sugerencia',
@@ -243,13 +241,13 @@ export default {
     searchRescan: 'Recargar POIs',
     searching: 'Cargando ubicación y POIs…',
     mapName: 'Alrededor',
-    panelTitle: 'Alrededor',
+    panelTitle: 'Opciones alrededor',
     panelSummaryNearby: 'Radio {m} m',
     panelSummaryRoute: 'Buscar aquí',
     panelSummaryRouteKeep: 'Ruta se mantiene · radio GPS',
     mapFab: 'Cargar alrededor',
     mapFabRescan: 'Recargar POIs',
-    mapFabOptions: 'Radio',
+    mapFabOptions: 'Opciones',
     loadFailed: 'Búsqueda cercana fallida',
     geoUnsupported: 'Ubicación no compatible',
     geoDenied:
@@ -371,7 +369,7 @@ export default {
     sheetPois: 'Puntos de avituallamiento',
     sheetExport: 'Exportar ruta',
     sheetLegend: 'Leyenda',
-    sheetNearby: 'Alrededor',
+    sheetNearby: 'Opciones alrededor',
     exportIntro: '★ favoritos · dispositivo · pasos',
     gpxRoutePois: 'GPX — solo ruta',
     gpxRoutePoisHint: 'Solo track, sin waypoints',
@@ -417,6 +415,7 @@ export default {
     needSavedMap: 'Primero debe guardarse el mapa (espera un momento).',
     noCoverageAroundGps:
       'Sin conexión: sin cobertura del pack alrededor de tu ubicación. Reconstruye el pack (corredor de ruta) o conéctate.',
+    help: 'Offline = toda la ruta para llevar (mapa + POIs del corredor). Alrededor = POIs cerca de tu ubicación.',
     hint: 'Mejor con Wi‑Fi. Guarda el corredor CyclOSM (±1,5 km, zoom 10–13) + POIs para zonas sin cobertura.',
   },
   pois: {

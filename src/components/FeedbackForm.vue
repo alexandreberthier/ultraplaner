@@ -69,7 +69,6 @@ async function submit() {
   <section id="feedback" class="feedback" aria-labelledby="feedback-heading">
     <h2 id="feedback-heading">{{ t('landing.feedback.title') }}</h2>
     <p class="feedback-intro">{{ t('landing.feedback.intro') }}</p>
-    <p class="feedback-roadmap">{{ t('landing.feedback.roadmapNote') }}</p>
 
     <form class="feedback-form" @submit.prevent="submit">
       <!-- Honeypot -->
@@ -150,17 +149,6 @@ async function submit() {
   color: var(--text-muted);
   font-size: 0.92rem;
   line-height: 1.5;
-}
-
-.feedback-roadmap {
-  margin: 0 0 1.25rem;
-  padding: 0.65rem 0.8rem;
-  background: color-mix(in srgb, var(--primary) 8%, var(--bg));
-  border-left: 3px solid var(--primary);
-  border-radius: 0 10px 10px 0;
-  color: var(--text-muted);
-  font-size: 0.85rem;
-  line-height: 1.45;
 }
 
 .feedback-form {

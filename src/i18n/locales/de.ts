@@ -184,8 +184,6 @@ export default {
     feedback: {
       title: 'Feedback & Verbesserungsvorschläge',
       intro: 'Fehlt ein Land, eine Funktion oder etwas am Workflow? Schreib mir — ich freue mich über konkrete Ideen aus der Praxis.',
-      roadmapNote:
-        'Roadmap (ehrlich): COROS Cloud API ist beantragt — kommt nur mit Partner-Zugang, kein festes Datum. Bis dahin: QR / GPX.',
       name: 'Name (optional)',
       email: 'E-Mail (optional, für Rückfragen)',
       message: 'Dein Vorschlag',
@@ -243,13 +241,13 @@ export default {
     searchRescan: 'POIs neu laden',
     searching: 'Standort & POIs werden geladen…',
     mapName: 'Umgebung',
-    panelTitle: 'Umgebung',
+    panelTitle: 'Umgebung-Optionen',
     panelSummaryNearby: 'Umkreis {m} m',
     panelSummaryRoute: 'Hier suchen',
     panelSummaryRouteKeep: 'Route bleibt · GPS-Umkreis',
     mapFab: 'Umgebung laden',
     mapFabRescan: 'POIs neu laden',
-    mapFabOptions: 'Radius',
+    mapFabOptions: 'Optionen',
     loadFailed: 'Umgebungssuche fehlgeschlagen',
     geoUnsupported: 'Standort nicht unterstützt',
     geoDenied:
@@ -371,7 +369,7 @@ export default {
     sheetPois: 'Versorgungspunkte',
     sheetExport: 'Route exportieren',
     sheetLegend: 'Legende',
-    sheetNearby: 'Umgebung',
+    sheetNearby: 'Umgebung-Optionen',
     exportIntro: '★ Favoriten · Gerät · Schritte',
     gpxRoutePois: 'GPX — nur Route',
     gpxRoutePoisHint: 'Nur Track, ohne Wegpunkte',
@@ -417,6 +415,7 @@ export default {
     needSavedMap: 'Karte muss zuerst gespeichert sein (kurz warten).',
     noCoverageAroundGps:
       'Offline: Kein Pack-Coverage um deinen Standort. Pack neu bauen (Route-Korridor) oder online laden.',
+    help: 'Offline = ganze Strecke zum Mitnehmen (Karte + POIs im Routenkorridor). Umgebung = POIs um deinen Standort.',
     hint: 'WLAN empfohlen. Speichert CyclOSM-Korridor (±1,5 km, Zoom 10–13) + POIs für Funklöcher.',
   },
   pois: {

@@ -522,6 +522,19 @@ function routeGeoJson() {
 }
 
 function nearbyCenterGeoJson() {
+  const focus = store.gpsEnrichFocus
+  if (focus) {
+    return {
+      type: 'FeatureCollection' as const,
+      features: [
+        {
+          type: 'Feature' as const,
+          geometry: { type: 'Point' as const, coordinates: [focus.lng, focus.lat] },
+          properties: { label: t('mapCanvas.youAreHere') },
+        },
+      ],
+    }
+  }
   if (!store.isNearbyMap || !store.routeCoords.length) {
     return { type: 'FeatureCollection' as const, features: [] }
   }
@@ -539,11 +552,20 @@ function nearbyCenterGeoJson() {
 }
 
 function nearbyRadiusGeoJson() {
-  if (!store.isNearbyMap || !store.routeCoords.length) {
+  const focus = store.gpsEnrichFocus
+  let lng: number
+  let lat: number
+  let radiusM: number
+  if (focus) {
+    lng = focus.lng
+    lat = focus.lat
+    radiusM = focus.radiusM
+  } else if (store.isNearbyMap && store.routeCoords.length) {
+    ;[lng, lat] = store.routeCoords[0]!
+    radiusM = store.poiRadiusM
+  } else {
     return { type: 'FeatureCollection' as const, features: [] }
   }
-  const [lng, lat] = store.routeCoords[0]!
-  const radiusM = store.poiRadiusM
   const steps = 64
   const ring: [number, number][] = []
   const latRad = (lat * Math.PI) / 180
@@ -827,7 +849,15 @@ async function initMap() {
 }
 
 watch(
-  () => [store.mapPois, store.routeCoords, store.routePoints, store.isNearbyMap, store.poiRadiusM],
+  () => [
+    store.mapPois,
+    store.routeCoords,
+    store.routePoints,
+    store.isNearbyMap,
+    store.poiRadiusM,
+    store.poisEpoch,
+    store.gpsEnrichFocus,
+  ],
   () => updateSources(),
   { deep: true }
 )
@@ -873,7 +903,16 @@ watch(
   () => {
     const focus = store.gpsEnrichFocus
     if (!focus || !map) return
+    // Ensure POI GeoJSON is current before / while zooming to the scan area
+    updateSources()
     fitToRadius(focus.lng, focus.lat, focus.radiusM)
+  }
+)
+
+watch(
+  () => store.poisEpoch,
+  () => {
+    updateSources()
   }
 )
 
@@ -930,7 +969,8 @@ function updateSources() {
   if (map.getLayer('climbs-label')) {
     map.setLayoutProperty('climbs-label', 'visibility', hasGrades ? 'visible' : 'none')
   }
-  const nearbyVis = store.isNearbyMap ? 'visible' : 'none'
+  const nearbyVis =
+    store.isNearbyMap || store.gpsEnrichFocus ? 'visible' : 'none'
   if (map.getLayer('nearby-radius-fill')) {
     map.setLayoutProperty('nearby-radius-fill', 'visibility', nearbyVis)
   }
@@ -982,7 +1022,8 @@ function addLayers() {
   ensureRouteEndImages(map)
   ensurePoiCategoryImages(map)
 
-  const nearbyVis = store.isNearbyMap ? 'visible' : 'none'
+  const nearbyVis =
+    store.isNearbyMap || store.gpsEnrichFocus ? 'visible' : 'none'
 
   map.addLayer({
     id: 'nearby-radius-fill',

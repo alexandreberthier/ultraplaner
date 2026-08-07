@@ -3,6 +3,7 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useMapStore } from '../stores/mapStore'
 import { useOnline } from '../composables/useOnline'
+import { useSidebarSection } from '../composables/useSidebarSection'
 import {
   buildOfflinePack,
   deleteOfflinePack,
@@ -20,6 +21,7 @@ const emit = defineEmits<{ updated: [] }>()
 const store = useMapStore()
 const { t } = useI18n()
 const { isOnline } = useOnline()
+const { open, toggle } = useSidebarSection('offline', false)
 
 const meta = ref<OfflinePackMeta | null>(null)
 const busy = ref(false)
@@ -29,6 +31,10 @@ const progressPhase = ref<'pois' | 'raster' | 'done'>('pois')
 const error = ref('')
 const abortRef = ref<PackAbortSignal>({ aborted: false })
 
+const visible = computed(
+  () => !store.isNearbyMap && store.routeCoords.length >= 2
+)
+
 const estimate = computed(() => {
   if (store.routeCoords.length < 2) return null
   return estimatePackBytes(store.routeCoords as [number, number][])
@@ -36,8 +42,7 @@ const estimate = computed(() => {
 
 const canBuild = computed(
   () =>
-    !store.isNearbyMap &&
-    store.routeCoords.length >= 2 &&
+    visible.value &&
     Boolean(store.savedMapId) &&
     isOnline.value &&
     !busy.value
@@ -136,72 +141,122 @@ defineExpose({ refresh, meta })
 </script>
 
 <template>
-  <div v-if="!store.isNearbyMap && store.routeCoords.length >= 2" class="offline-pack">
-    <p class="pack-title">{{ t('offlinePack.title') }}</p>
-    <p class="pack-status">{{ statusLabel }}</p>
-    <p v-if="estimate && !meta && !busy" class="pack-estimate">
-      {{ t('offlinePack.estimate', { size: formatBytes(estimate.estimatedBytes), tiles: estimate.rasterTiles }) }}
-    </p>
-    <p v-if="meta && (meta.status === 'ready' || meta.status === 'partial')" class="pack-meta">
-      {{ formatBytes(meta.bytes) }} · {{ meta.rasterTileCount }} {{ t('offlinePack.tiles') }}
-      <template v-if="meta.status === 'partial'"> · {{ t('offlinePack.capHint') }}</template>
-    </p>
-    <div v-if="busy" class="pack-progress" role="progressbar" :aria-valuenow="Math.round(progressRatio * 100)">
-      <div class="pack-progress-bar" :style="{ width: `${Math.round(progressRatio * 100)}%` }" />
-      <span>{{ Math.round(progressRatio * 100) }}% · {{ formatBytes(progressBytes) }}</span>
+  <section v-if="visible" class="offline-pack" :class="{ open }">
+    <button
+      type="button"
+      class="section-toggle"
+      :aria-expanded="open"
+      @click="toggle"
+    >
+      <span class="toggle-title">{{ t('offlinePack.title') }}</span>
+      <span class="toggle-summary">{{ statusLabel }}</span>
+      <span class="chevron" aria-hidden="true">{{ open ? '▾' : '▸' }}</span>
+    </button>
+
+    <div v-show="open" class="section-body">
+      <p class="pack-help">{{ t('offlinePack.help') }}</p>
+      <p v-if="estimate && !meta && !busy" class="pack-estimate">
+        {{ t('offlinePack.estimate', { size: formatBytes(estimate.estimatedBytes), tiles: estimate.rasterTiles }) }}
+      </p>
+      <p v-if="meta && (meta.status === 'ready' || meta.status === 'partial')" class="pack-meta">
+        {{ formatBytes(meta.bytes) }} · {{ meta.rasterTileCount }} {{ t('offlinePack.tiles') }}
+        <template v-if="meta.status === 'partial'"> · {{ t('offlinePack.capHint') }}</template>
+      </p>
+      <div v-if="busy" class="pack-progress" role="progressbar" :aria-valuenow="Math.round(progressRatio * 100)">
+        <div class="pack-progress-bar" :style="{ width: `${Math.round(progressRatio * 100)}%` }" />
+        <span>{{ Math.round(progressRatio * 100) }}% · {{ formatBytes(progressBytes) }}</span>
+      </div>
+      <p v-if="error" class="pack-error">{{ error }}</p>
+      <div class="pack-actions">
+        <button
+          v-if="!busy"
+          type="button"
+          class="pack-btn primary"
+          :disabled="!canBuild"
+          @click="startBuild"
+        >
+          {{ meta ? t('offlinePack.rebuild') : t('offlinePack.build') }}
+        </button>
+        <button v-if="busy" type="button" class="pack-btn" @click="cancelBuild">
+          {{ t('offlinePack.cancel') }}
+        </button>
+        <button
+          v-if="meta && !busy"
+          type="button"
+          class="pack-btn danger"
+          @click="removePack"
+        >
+          {{ t('offlinePack.delete') }}
+        </button>
+      </div>
+      <p class="pack-hint">{{ t('offlinePack.hint') }}</p>
     </div>
-    <p v-if="error" class="pack-error">{{ error }}</p>
-    <div class="pack-actions">
-      <button
-        v-if="!busy"
-        type="button"
-        class="pack-btn primary"
-        :disabled="!canBuild"
-        @click="startBuild"
-      >
-        {{ meta ? t('offlinePack.rebuild') : t('offlinePack.build') }}
-      </button>
-      <button v-if="busy" type="button" class="pack-btn" @click="cancelBuild">
-        {{ t('offlinePack.cancel') }}
-      </button>
-      <button
-        v-if="meta && !busy"
-        type="button"
-        class="pack-btn danger"
-        @click="removePack"
-      >
-        {{ t('offlinePack.delete') }}
-      </button>
-    </div>
-    <p class="pack-hint">{{ t('offlinePack.hint') }}</p>
-  </div>
+  </section>
 </template>
 
 <style scoped>
 .offline-pack {
+  border-bottom: 1px solid var(--border, #e5e7eb);
+}
+
+.section-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 0.85rem;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+}
+
+.toggle-title {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted, #6b7280);
+  flex-shrink: 0;
+}
+
+.toggle-summary {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text, #111);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chevron {
+  color: var(--muted, #6b7280);
+  font-size: 0.75rem;
+  flex-shrink: 0;
+}
+
+.section-body {
   display: flex;
   flex-direction: column;
   gap: 0.4rem;
-  padding: 0.65rem 0.75rem;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  background: var(--surface-2);
+  padding: 0 0.85rem 0.85rem;
 }
 
-.pack-title {
-  margin: 0;
-  font-size: 0.8rem;
-  font-weight: 700;
-}
-
-.pack-status,
+.pack-help,
 .pack-estimate,
 .pack-meta,
 .pack-hint {
   margin: 0;
   font-size: 0.75rem;
-  color: var(--text-muted);
+  color: var(--text-muted, #6b7280);
   line-height: 1.35;
+}
+
+.pack-help {
+  color: var(--text, #111);
 }
 
 .pack-error {
@@ -215,7 +270,7 @@ defineExpose({ refresh, meta })
   flex-direction: column;
   gap: 0.25rem;
   font-size: 0.72rem;
-  color: var(--text-muted);
+  color: var(--text-muted, #6b7280);
 }
 
 .pack-progress-bar {

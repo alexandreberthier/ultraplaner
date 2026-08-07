@@ -183,8 +183,6 @@
     feedback: {
       title: 'Feedback et idées d’amélioration',
       intro: 'Il manque un pays, une fonction ou quelque chose dans le parcours ? Écrivez-moi — les idées concrètes du terrain sont les bienvenues.',
-      roadmapNote:
-        'Roadmap (honnête) : l’API cloud COROS est demandée — uniquement avec accès partenaire, pas de date fixe. En attendant : QR / GPX.',
       name: 'Nom (optionnel)',
       email: 'E-mail (optionnel, pour répondre)',
       message: 'Votre suggestion',
@@ -242,13 +240,13 @@
     searchRescan: 'Recharger les POIs',
     searching: 'Chargement de la position et des POIs…',
     mapName: 'Alentours',
-    panelTitle: 'Alentours',
+    panelTitle: 'Options alentours',
     panelSummaryNearby: 'Rayon {m} m',
     panelSummaryRoute: 'Chercher ici',
     panelSummaryRouteKeep: 'Route conservée · rayon GPS',
     mapFab: 'Charger alentours',
     mapFabRescan: 'Recharger les POIs',
-    mapFabOptions: 'Rayon',
+    mapFabOptions: 'Options',
     loadFailed: 'Recherche alentours échouée',
     geoUnsupported: 'Géolocalisation non prise en charge',
     geoDenied:
@@ -370,7 +368,7 @@
     sheetPois: 'Points de ravitaillement',
     sheetExport: 'Exporter la route',
     sheetLegend: 'Légende',
-    sheetNearby: 'Alentours',
+    sheetNearby: 'Options alentours',
     exportIntro: '★ favoris · appareil · étapes',
     gpxRoutePois: 'GPX — route seule',
     gpxRoutePoisHint: 'Track uniquement, sans points',
@@ -416,6 +414,7 @@
     needSavedMap: 'La carte doit d’abord être enregistrée (patientez un instant).',
     noCoverageAroundGps:
       'Hors ligne : pas de couverture du pack autour de votre position. Recréez le pack (corridor de route) ou connectez-vous.',
+    help: 'Hors ligne = tout le parcours à emporter (carte + POIs du corridor). Alentours = POIs autour de votre position.',
     hint: 'Wi‑Fi recommandé. Cache le corridor CyclOSM (±1,5 km, zoom 10–13) + POIs pour les zones sans réseau.',
   },
   pois: {

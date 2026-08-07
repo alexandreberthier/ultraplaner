@@ -626,8 +626,8 @@ function onDocClick(e: MouseEvent) {
       <EtaPlanner v-if="!store.isNearbyMap" />
       <WeatherStrip />
       <NearbySearchPanel ref="nearbyPanelRef" @done="onNearbyDone" />
-      <OfflinePackPanel @updated="refreshPackMeta" />
       <ControlPointsPanel />
+      <OfflinePackPanel @updated="refreshPackMeta" />
       <PoiCategoryFilter />
       <PoiList />
       <PoiLegend compact />
@@ -1176,8 +1176,8 @@ function onDocClick(e: MouseEvent) {
         <div v-else-if="mobilePanel === 'pois'" class="sheet-scroll">
           <EtaPlanner v-if="!store.isNearbyMap" embedded />
           <WeatherStrip embedded />
-          <OfflinePackPanel />
           <ControlPointsPanel />
+          <OfflinePackPanel @updated="refreshPackMeta" />
           <PoiCategoryFilter embedded />
           <PoiList embedded />
         </div>
@@ -1985,11 +1985,15 @@ function onDocClick(e: MouseEvent) {
 }
 
 .tool-btn.nearby-enter {
-  font-weight: 600;
+  font-weight: 700;
+  background: color-mix(in srgb, var(--primary) 14%, var(--surface));
+  border-color: color-mix(in srgb, var(--primary) 35%, var(--border));
+  color: var(--primary);
 }
 
 .tool-btn.nearby-opts {
   font-weight: 600;
+  color: var(--text-muted);
 }
 
 .ride-overlay {
