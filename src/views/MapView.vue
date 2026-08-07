@@ -880,6 +880,10 @@ function onDocClick(e: MouseEvent) {
         <div
           v-if="!isOnline || store.loadedFromCache || hasOfflinePack"
           class="offline-banner"
+          :class="{
+            'pack-ready-banner': isOnline && hasOfflinePack,
+            'pack-active-banner': !isOnline && hasOfflinePack,
+          }"
           role="status"
         >
           <div class="offline-banner-text">
@@ -1573,28 +1577,44 @@ function onDocClick(e: MouseEvent) {
   transform: translateX(-50%);
   z-index: 22;
   max-width: min(520px, calc(100% - 2rem));
-  padding: 0.65rem 0.85rem;
+  padding: 0.7rem 0.95rem;
   background: #fff7ed;
   border: 1px solid #fdba74;
   border-radius: 10px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}
+
+.offline-banner.pack-ready-banner {
+  background: #ecfdf5;
+  border-color: #6ee7b7;
+}
+
+.offline-banner.pack-active-banner {
+  background: #ecfdf5;
+  border-color: #34d399;
+  box-shadow: 0 4px 18px rgba(16, 185, 129, 0.18);
 }
 
 .offline-banner-text {
   display: flex;
   flex-direction: column;
-  gap: 0.15rem;
+  gap: 0.2rem;
   font-size: 0.85rem;
 }
 
 .offline-banner-text strong {
-  font-size: 0.9rem;
+  font-size: 0.92rem;
+}
+
+.offline-banner.pack-ready-banner .offline-banner-text strong,
+.offline-banner.pack-active-banner .offline-banner-text strong {
+  color: var(--primary, #2d6a4f);
 }
 
 .offline-banner-text span {
   color: var(--text-muted);
   font-size: 0.8rem;
-  line-height: 1.35;
+  line-height: 1.4;
 }
 
 .persist-banner {

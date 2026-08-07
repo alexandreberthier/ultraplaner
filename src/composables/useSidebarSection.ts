@@ -1,39 +1,50 @@
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 
-function loadOpen(key: string, fallback: boolean): boolean {
+const STORAGE_KEY = 'onroute-section-v3-active'
+/** Matches previous default: categories open, rest closed. */
+const DEFAULT_SECTION = 'categories'
+
+function loadActive(): string | null {
   try {
-    const v = localStorage.getItem(key)
-    if (v === '1') return true
-    if (v === '0') return false
+    const v = localStorage.getItem(STORAGE_KEY)
+    if (v === '') return null
+    if (v) return v
   } catch {
     /* ignore */
   }
-  return fallback
+  return DEFAULT_SECTION
 }
 
-function saveOpen(key: string, open: boolean) {
+function saveActive(id: string | null) {
   try {
-    localStorage.setItem(key, open ? '1' : '0')
+    if (id == null) localStorage.setItem(STORAGE_KEY, '')
+    else localStorage.setItem(STORAGE_KEY, id)
   } catch {
     /* ignore */
   }
 }
 
-/** Persistierte Ein-/Ausklappen-State für Sidebar-Abschnitte (Desktop + Mobile-Sheet).
- * Key-Prefix v2: neues Default — Kategorien offen, Rest zu.
+/**
+ * Accordion for sidebar sections (Desktop + Mobile-Sheet).
+ * Only one section open at a time — opening one closes the previous.
  */
-export function useSidebarSection(id: string, defaultOpen = false, _embedded = false) {
-  const key = `onroute-section-v2-${id}`
-  const open = ref(loadOpen(key, defaultOpen))
+const activeSectionId = ref<string | null>(loadActive())
 
-  function toggle() {
-    open.value = !open.value
-    saveOpen(key, open.value)
-  }
+export function useSidebarSection(id: string, _defaultOpen = false, _embedded = false) {
+  const open = computed(() => activeSectionId.value === id)
 
   function setOpen(value: boolean) {
-    open.value = value
-    saveOpen(key, value)
+    if (value) {
+      activeSectionId.value = id
+      saveActive(id)
+    } else if (activeSectionId.value === id) {
+      activeSectionId.value = null
+      saveActive(null)
+    }
+  }
+
+  function toggle() {
+    setOpen(!open.value)
   }
 
   return { open, toggle, setOpen }
