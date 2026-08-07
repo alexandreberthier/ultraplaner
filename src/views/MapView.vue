@@ -623,14 +623,16 @@ function onDocClick(e: MouseEvent) {
           </div>
         </div>
       </header>
-      <EtaPlanner v-if="!store.isNearbyMap" />
-      <WeatherStrip />
-      <NearbySearchPanel ref="nearbyPanelRef" @done="onNearbyDone" />
-      <ControlPointsPanel />
-      <OfflinePackPanel @updated="refreshPackMeta" />
-      <PoiCategoryFilter />
-      <PoiList />
-      <PoiLegend compact />
+      <div class="sidebar-body">
+        <EtaPlanner v-if="!store.isNearbyMap" />
+        <WeatherStrip />
+        <NearbySearchPanel ref="nearbyPanelRef" @done="onNearbyDone" />
+        <ControlPointsPanel />
+        <OfflinePackPanel @updated="refreshPackMeta" />
+        <PoiCategoryFilter />
+        <PoiList />
+        <PoiLegend compact />
+      </div>
     </aside>
 
     <main class="map-main">
@@ -666,19 +668,6 @@ function onDocClick(e: MouseEvent) {
           >
             {{ nearbyFabLabel }}
           </button>
-        </div>
-
-        <div class="toolbar-title">
-          <span class="route-name">{{ store.routeName }}</span>
-          <span class="route-meta">
-            <template v-if="store.isNearbyMap">
-              {{ t('map.nearbyMeta', { m: store.poiRadiusM }) }}
-            </template>
-            <template v-else>
-              {{ store.totalKm.toFixed(1) }} km · {{ rideDuration }}
-              <template v-if="finishEta.clockLabel"> · ETA {{ finishEta.clockLabel }}</template>
-            </template>
-          </span>
         </div>
 
         <div class="toolbar-right desktop-actions">
@@ -1400,6 +1389,7 @@ function onDocClick(e: MouseEvent) {
   overflow: hidden;
   min-width: 0;
   min-height: 0;
+  height: 100%;
   transition: opacity 0.15s ease;
 }
 
@@ -1413,6 +1403,17 @@ function onDocClick(e: MouseEvent) {
   padding: 1rem;
   border-bottom: 1px solid var(--border);
   flex-shrink: 0;
+}
+
+.sidebar-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  display: flex;
+  flex-direction: column;
 }
 
 .map-header h1 {
@@ -1483,6 +1484,7 @@ function onDocClick(e: MouseEvent) {
 .map-toolbar {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 0.65rem;
   min-height: 58px;
   padding: 0.7rem 1rem;
@@ -1497,27 +1499,6 @@ function onDocClick(e: MouseEvent) {
   display: flex;
   gap: 0.35rem;
   flex-shrink: 0;
-}
-
-.toolbar-title {
-  flex: 1;
-  min-width: 0;
-  text-align: center;
-}
-
-.route-name {
-  display: block;
-  font-size: 0.9rem;
-  font-weight: 600;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.route-meta {
-  display: block;
-  font-size: 0.75rem;
-  color: var(--text-muted);
 }
 
 .tool-btn {
@@ -1991,10 +1972,6 @@ function onDocClick(e: MouseEvent) {
     display: none;
   }
 
-  .toolbar-title {
-    display: none;
-  }
-
   .export-toggle {
     font-size: 0.82rem;
     padding: 0.55rem 0.75rem;
@@ -2017,10 +1994,6 @@ function onDocClick(e: MouseEvent) {
 
   .tool-btn.nearby-enter {
     display: none;
-  }
-
-  .toolbar-title {
-    text-align: left;
   }
 
   .map-toolbar {
