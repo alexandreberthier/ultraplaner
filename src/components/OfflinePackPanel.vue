@@ -158,7 +158,7 @@ defineExpose({ refresh, meta })
 </script>
 
 <template>
-  <section v-if="visible" class="offline-pack" :class="{ open, ready: hasUsablePack && !busy }">
+  <section v-if="visible" class="offline-pack" :class="{ open, ready: hasUsablePack && !busy }" data-sidebar-section="offline">
     <button
       type="button"
       class="section-toggle"

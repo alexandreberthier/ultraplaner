@@ -626,11 +626,11 @@ function onDocClick(e: MouseEvent) {
       <div class="sidebar-body">
         <EtaPlanner v-if="!store.isNearbyMap" />
         <WeatherStrip />
+        <PoiCategoryFilter />
+        <PoiList />
         <NearbySearchPanel ref="nearbyPanelRef" @done="onNearbyDone" />
         <ControlPointsPanel />
         <OfflinePackPanel @updated="refreshPackMeta" />
-        <PoiCategoryFilter />
-        <PoiList />
         <PoiLegend compact />
       </div>
     </aside>
@@ -1149,11 +1149,11 @@ function onDocClick(e: MouseEvent) {
         <div v-else-if="mobilePanel === 'pois'" class="sheet-scroll">
           <EtaPlanner v-if="!store.isNearbyMap" embedded />
           <WeatherStrip embedded />
+          <PoiCategoryFilter embedded />
+          <PoiList embedded />
           <NearbySearchPanel embedded @done="onNearbyDone" />
           <ControlPointsPanel />
           <OfflinePackPanel @updated="refreshPackMeta" />
-          <PoiCategoryFilter embedded />
-          <PoiList embedded />
         </div>
         <div v-else-if="mobilePanel === 'export'" class="export-sheet-body">
           <label class="export-name-field sheet">
@@ -1418,6 +1418,10 @@ function onDocClick(e: MouseEvent) {
   overscroll-behavior: contain;
   display: flex;
   flex-direction: column;
+}
+
+.sidebar-body :deep([data-sidebar-section]) {
+  scroll-margin-top: 0.35rem;
 }
 
 .map-header h1 {
@@ -2438,6 +2442,10 @@ function onDocClick(e: MouseEvent) {
     flex-direction: column;
     touch-action: pan-y;
     scrollbar-gutter: stable;
+  }
+
+  .sheet-scroll :deep([data-sidebar-section]) {
+    scroll-margin-top: 0.35rem;
   }
 
   .nearby-sheet {

@@ -33,7 +33,7 @@ defineExpose({ setOpen })
 </script>
 
 <template>
-  <section class="nearby-panel" :class="{ open, embedded }">
+  <section class="nearby-panel" :class="{ open, embedded }" data-sidebar-section="nearby">
     <button
       type="button"
       class="section-toggle"

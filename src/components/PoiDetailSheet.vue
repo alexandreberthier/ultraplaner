@@ -4,13 +4,7 @@ import { useI18n } from 'vue-i18n'
 import { useMapStore } from '../stores/mapStore'
 import { formatDistance, formatKm } from '../services/geo'
 import { poiCategoryLabel } from '../utils/poiLabels'
-import {
-  appleMapsDirectionsUrl,
-  geoDirectionsUri,
-  googleMapsDirectionsUrl,
-  preferredDirectionsUrl,
-} from '../services/navigation'
-import { isAppleMobile } from '../utils/geoDevice'
+import { googleMapsDirectionsUrl } from '../services/navigation'
 import {
   fetchPlaceOpeningHours,
   isGooglePlacesConfigured,
@@ -200,33 +194,10 @@ onUnmounted(() => {
   document.removeEventListener('keydown', onSheetKeydown)
 })
 
-const onAppleDevice = isAppleMobile()
-
-const primaryNavHref = computed(() => {
-  const poi = store.selectedPoi
-  if (!poi) return '#'
-  return preferredDirectionsUrl(poi.lat, poi.lng, {
-    apple: onAppleDevice,
-    name: poi.name,
-  })
-})
-
 const googleNavHref = computed(() => {
   const poi = store.selectedPoi
   if (!poi) return '#'
   return googleMapsDirectionsUrl(poi.lat, poi.lng)
-})
-
-const appleNavHref = computed(() => {
-  const poi = store.selectedPoi
-  if (!poi) return '#'
-  return appleMapsDirectionsUrl(poi.lat, poi.lng, poi.name)
-})
-
-const geoNavHref = computed(() => {
-  const poi = store.selectedPoi
-  if (!poi) return '#'
-  return geoDirectionsUri(poi.lat, poi.lng, poi.name)
 })
 
 function onNavigate() {
@@ -327,43 +298,13 @@ function onNavigate() {
       <div class="actions" :class="{ 'nearby-nav': store.isNearbyMap }">
         <a
           class="nav-btn nav-btn-primary"
-          :href="primaryNavHref"
+          :href="googleNavHref"
           target="_blank"
           rel="noopener noreferrer"
           @click="onNavigate"
         >
           {{ t('detail.navigate') }}
         </a>
-        <div class="nav-alts">
-          <a
-            v-if="onAppleDevice"
-            class="nav-btn nav-btn-alt"
-            :href="googleNavHref"
-            target="_blank"
-            rel="noopener noreferrer"
-            @click="onNavigate"
-          >
-            {{ t('detail.navGoogle') }}
-          </a>
-          <a
-            v-else
-            class="nav-btn nav-btn-alt"
-            :href="appleNavHref"
-            target="_blank"
-            rel="noopener noreferrer"
-            @click="onNavigate"
-          >
-            {{ t('detail.navApple') }}
-          </a>
-          <a
-            class="nav-btn nav-btn-alt"
-            :href="geoNavHref"
-            rel="noopener noreferrer"
-            @click="onNavigate"
-          >
-            {{ t('detail.navGeo') }}
-          </a>
-        </div>
         <button
           type="button"
           class="fav-btn"
@@ -613,31 +554,10 @@ dd {
   box-shadow: 0 4px 14px color-mix(in srgb, var(--primary) 35%, transparent);
 }
 
-.nav-alts {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem;
-}
-
 .actions.nearby-nav .nav-btn-primary {
   padding: 1rem 1.1rem;
   min-height: 52px;
   font-size: 1.1rem;
-}
-
-.nav-btn-alt {
-  flex: 1 1 calc(50% - 0.2rem);
-  min-width: 0;
-  min-height: 44px;
-  padding: 0.55rem 0.55rem;
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: var(--primary);
-  border-color: color-mix(in srgb, var(--primary) 35%, var(--border));
-  background: color-mix(in srgb, var(--primary) 8%, var(--surface));
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
 }
 
 .fav-btn.active {
@@ -671,12 +591,6 @@ dd {
   font-weight: 600;
   font-size: 0.85rem;
   cursor: pointer;
-}
-
-.nav-btn:not(.nav-btn-primary):not(.nav-btn-alt) {
-  border-color: var(--primary);
-  color: var(--primary);
-  font-weight: 600;
 }
 
 .hours-btn:disabled {

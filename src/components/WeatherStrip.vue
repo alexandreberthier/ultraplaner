@@ -111,7 +111,7 @@ watch(
 </script>
 
 <template>
-  <section v-if="store.mapReady" class="weather-strip" :class="{ open, embedded }" :aria-label="t('weather.title')">
+  <section v-if="store.mapReady" class="weather-strip" :class="{ open, embedded }" data-sidebar-section="weather" :aria-label="t('weather.title')">
     <button
       type="button"
       class="section-toggle"

@@ -30,7 +30,7 @@ function kindEmoji(kind: ControlPointKind) {
 </script>
 
 <template>
-  <section v-if="!store.isNearbyMap" class="controls-panel" :class="{ open }">
+  <section v-if="!store.isNearbyMap" class="controls-panel" :class="{ open }" data-sidebar-section="controls">
     <button
       type="button"
       class="section-toggle"

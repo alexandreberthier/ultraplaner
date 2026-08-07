@@ -50,7 +50,7 @@ function toggleCat(id: PoiCategory) {
 </script>
 
 <template>
-  <div v-if="loadedCategories.length" class="category-filter" :class="{ open, embedded }">
+  <div v-if="loadedCategories.length" class="category-filter" :class="{ open, embedded }" data-sidebar-section="categories">
     <button
       type="button"
       class="section-toggle"

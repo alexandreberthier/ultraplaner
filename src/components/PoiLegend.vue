@@ -43,7 +43,7 @@ const climbColor = computed(() => climbMarkerColor())
 </script>
 
 <template>
-  <div class="legend" :class="{ compact, open, embedded }">
+  <div class="legend" :class="{ compact, open, embedded }" data-sidebar-section="legend">
     <button
       v-if="compact && !embedded"
       type="button"

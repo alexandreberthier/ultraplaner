@@ -50,7 +50,7 @@ function setStartMinute(m: string) {
 </script>
 
 <template>
-  <section class="eta-planner" :class="{ open, embedded }" :aria-label="t('eta.title')">
+  <section class="eta-planner" :class="{ open, embedded }" data-sidebar-section="eta" :aria-label="t('eta.title')">
     <button
       type="button"
       class="section-toggle"

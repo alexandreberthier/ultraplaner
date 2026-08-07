@@ -74,7 +74,7 @@ function hoursBadge(poi: Poi): { status: OpenStatus; label: string } | null {
 </script>
 
 <template>
-  <div class="poi-list" :class="{ open, embedded }">
+  <div class="poi-list" :class="{ open, embedded }" data-sidebar-section="pois">
     <button
       type="button"
       class="section-toggle"
