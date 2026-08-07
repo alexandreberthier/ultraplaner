@@ -2420,13 +2420,13 @@ function onDocClick(e: MouseEvent) {
 
   .sheet-scroll :deep(.poi-list.open) {
     flex: 1 1 auto;
-    min-height: min(42vh, 320px);
+    min-height: min(48vh, 380px);
   }
 
   .sheet-scroll :deep(.poi-list.open .poi-body ul) {
     flex: 1 1 auto;
-    min-height: min(32vh, 260px);
-    max-height: min(48vh, 420px);
+    min-height: min(38vh, 300px);
+    max-height: min(56vh, 480px);
     overflow-y: auto;
   }
 }

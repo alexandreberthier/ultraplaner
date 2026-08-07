@@ -140,11 +140,23 @@ function hoursBadge(poi: Poi): { status: OpenStatus; label: string } | null {
         >
           <div class="row-main">
             <div class="row-text">
-              <span class="km">{{ formatKm(poi.distanceAlongRouteKm ?? 0) }}</span>
-              <span class="name">
-                <span v-if="store.favorites.has(poi.id)" class="star">★</span>
-                {{ store.favoriteLabel(poi) }}
-              </span>
+              <div class="row-title">
+                <span class="km">{{ formatKm(poi.distanceAlongRouteKm ?? 0) }}</span>
+                <span class="name">
+                  <span v-if="store.favorites.has(poi.id)" class="star">★</span>
+                  {{ store.favoriteLabel(poi) }}
+                </span>
+                <button
+                  v-if="store.favorites.has(poi.id)"
+                  type="button"
+                  class="remove-fav"
+                  :title="t('pois.removeFav')"
+                  :aria-label="t('pois.removeFav')"
+                  @click.stop="removeFavorite(poi.id)"
+                >
+                  ×
+                </button>
+              </div>
               <span v-if="store.favoriteNote(poi.id)" class="note">{{ store.favoriteNote(poi.id) }}</span>
               <span class="meta">
                 {{ categoryLabel(poi.category) }}
@@ -160,16 +172,6 @@ function hoursBadge(poi: Poi): { status: OpenStatus; label: string } | null {
                 </template>
               </span>
             </div>
-            <button
-              v-if="store.favorites.has(poi.id)"
-              type="button"
-              class="remove-fav"
-              :title="t('pois.removeFav')"
-              :aria-label="t('pois.removeFav')"
-              @click.stop="removeFavorite(poi.id)"
-            >
-              ×
-            </button>
           </div>
         </li>
       </ul>
@@ -205,7 +207,7 @@ function hoursBadge(poi: Poi): { status: OpenStatus; label: string } | null {
 
 .poi-list.open {
   flex: 1 1 auto;
-  min-height: min(42vh, 360px);
+  min-height: min(48vh, 420px);
 }
 
 .poi-list:not(.open) {
@@ -221,7 +223,7 @@ function hoursBadge(poi: Poi): { status: OpenStatus; label: string } | null {
 
 .poi-list.embedded.open {
   flex: 1 1 auto;
-  min-height: min(42vh, 320px);
+  min-height: min(48vh, 380px);
 }
 
 .section-toggle {
@@ -368,19 +370,19 @@ ul {
   padding: 0;
   overflow-y: auto;
   flex: 1 1 auto;
-  min-height: min(28vh, 240px);
-  max-height: min(55vh, 520px);
+  min-height: min(34vh, 300px);
+  max-height: min(62vh, 600px);
 }
 
 li {
-  padding: 0.75rem 1rem;
+  padding: 0.55rem 1rem;
   border-bottom: 1px solid var(--border);
   cursor: pointer;
 }
 
 .row-main {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 0.5rem;
 }
 
@@ -389,37 +391,57 @@ li {
   min-width: 0;
 }
 
+.row-title {
+  display: flex;
+  align-items: baseline;
+  gap: 0.45rem;
+  min-width: 0;
+}
+
 .km {
-  display: block;
+  flex-shrink: 0;
   font-size: 0.75rem;
   font-weight: 700;
   color: var(--primary);
+  white-space: nowrap;
 }
 
 .name {
-  display: block;
+  flex: 1;
+  min-width: 0;
   font-weight: 600;
   font-size: 0.9rem;
-  line-height: 1.3;
+  line-height: 1.25;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .note {
   display: block;
-  font-size: 0.78rem;
+  font-size: 0.75rem;
   color: var(--text-muted);
-  margin-top: 0.1rem;
+  margin-top: 0.05rem;
   line-height: 1.25;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .star {
   color: #f59e0b;
+  margin-right: 0.15rem;
 }
 
 .meta {
   display: block;
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   color: var(--text-muted);
-  margin-top: 0.15rem;
+  margin-top: 0.1rem;
+  line-height: 1.25;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .hours-badge {
@@ -450,13 +472,15 @@ li.favorite {
 }
 
 .remove-fav {
+  flex-shrink: 0;
   border: none;
   background: none;
-  font-size: 1.2rem;
+  font-size: 1.05rem;
   line-height: 1;
   color: var(--text-muted);
   cursor: pointer;
-  padding: 0 0.2rem;
+  padding: 0 0.15rem;
+  align-self: center;
 }
 
 .remove-fav:hover {
