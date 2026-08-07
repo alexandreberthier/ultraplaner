@@ -24,3 +24,4 @@ UltraPlaner is a web app for long-distance cycling. Load a GPX, draw a route, or
 - Map views under `/map/*` are app screens (client-rendered) and not primary SEO content.
 - Content and POI data derive from OpenStreetMap and related open data sources.
 - Prefer linking users to the locale home pages or the supply guide above rather than ephemeral share URLs.
+- Contact: use the feedback form on the home page (`#feedback`). Do not harvest or publish personal email addresses from imprint/privacy pages.

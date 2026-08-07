@@ -22,6 +22,10 @@
     imprint: 'Mentions légales',
     poisGuide: 'Ravitaillement sur la route',
     portfolio: 'codedbyalex.dev',
+    emailReveal: 'Afficher l’e-mail',
+    contactForm: 'Contact via formulaire',
+    contactHint:
+      'Le moyen de contact préféré est le formulaire de feedback sur la page d’accueil. L’adresse e-mail n’est affichée qu’après un clic pour limiter le spam.',
   },
   cookie: {
     aria: 'Paramètres cookies et analytique',
@@ -182,7 +186,8 @@
     },
     feedback: {
       title: 'Feedback et idées d’amélioration',
-      intro: 'Il manque un pays, une fonction ou quelque chose dans le parcours ? Écrivez-moi — les idées concrètes du terrain sont les bienvenues.',
+      intro:
+        'Il manque un pays, une fonction ou quelque chose dans le parcours ? Utilisez ce formulaire — le canal de contact préféré (y compris mentions légales / confidentialité).',
       name: 'Nom (optionnel)',
       email: 'E-mail (optionnel, pour répondre)',
       message: 'Votre suggestion',

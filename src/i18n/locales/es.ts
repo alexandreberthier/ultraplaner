@@ -22,6 +22,10 @@ export default {
     imprint: 'Aviso legal',
     poisGuide: 'Avituallamiento en la ruta',
     portfolio: 'codedbyalex.dev',
+    emailReveal: 'Mostrar email',
+    contactForm: 'Contacto por formulario',
+    contactHint:
+      'El contacto preferido es el formulario de feedback en la página de inicio. La dirección de email solo se muestra tras un clic para reducir el spam.',
   },
   cookie: {
     aria: 'Ajustes de cookies y analítica',
@@ -183,7 +187,8 @@ export default {
     },
     feedback: {
       title: 'Feedback e ideas de mejora',
-      intro: '¿Falta un país, una función o algo del flujo? Escríbeme — me encantan las ideas concretas de la carretera.',
+      intro:
+        '¿Falta un país, una función o algo del flujo? Usa este formulario — el canal preferido de contacto (también para aviso legal / privacidad).',
       name: 'Nombre (opcional)',
       email: 'Email (opcional, para responder)',
       message: 'Tu sugerencia',
@@ -194,7 +199,7 @@ export default {
       sentHint: '¡Gracias! He recibido tu feedback.',
       errorShort: 'Escribe al menos unas líneas con tu sugerencia.',
       errorSend: 'Error al enviar — inténtalo más tarde.',
-      errorConfig: 'El feedback no está configurado ahora. Escríbeme más tarde.',
+      errorConfig: 'El feedback no está configurado ahora. Inténtalo más tarde.',
       mailSubject: 'Feedback UltraPlaner',
     },
   },

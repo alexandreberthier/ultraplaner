@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n'
 import { localeHomePath, type AppLocale } from '../i18n'
 import { applyLegalSeo } from '../composables/useDocumentSeo'
 import TopbarSettings from '../components/TopbarSettings.vue'
+import ProtectedEmail from '../components/ProtectedEmail.vue'
 
 const { t, locale } = useI18n()
 const homePath = computed(() => localeHomePath(locale.value as AppLocale))
@@ -12,7 +13,7 @@ onMounted(() => {
   applyLegalSeo({
     title: 'Impressum – UltraPlaner',
     description:
-      'Impressum von UltraPlaner: Medieninhaber Alexandre Berthier (Wien), Kontakt per E-Mail sowie Angaben und Offenlegung gemäß österreichischem Mediengesetz.',
+      'Impressum von UltraPlaner: Medieninhaber Alexandre Berthier (Wien), Kontakt über Formular oder geschützte E-Mail sowie Angaben gemäß österreichischem Mediengesetz.',
     path: '/impressum/',
   })
 })
@@ -48,10 +49,12 @@ onMounted(() => {
 
       <p>
         E-Mail:
-        <a href="mailto:alexandre.jean.berthier@outlook.de">alexandre.jean.berthier@outlook.de</a><br />
+        <ProtectedEmail /><br />
         Website:
         <a href="https://codedbyalex.dev/" target="_blank" rel="noopener noreferrer">codedbyalex.dev</a>
       </p>
+
+      <p class="contact-hint">{{ t('legal.contactHint') }}</p>
 
       <h2>Zweck der Website</h2>
 
@@ -80,7 +83,7 @@ onMounted(() => {
         Alexandre Berthier<br />
         Wien, Österreich<br />
         E-Mail:
-        <a href="mailto:alexandre.jean.berthier@outlook.de">alexandre.jean.berthier@outlook.de</a>
+        <ProtectedEmail />
       </p>
 
       <footer class="legal-footer">
@@ -195,6 +198,11 @@ onMounted(() => {
   color: var(--primary);
   text-decoration-thickness: 1px;
   text-underline-offset: 2px;
+}
+
+.contact-hint {
+  font-size: 0.9rem;
+  color: var(--muted, #64748b);
 }
 
 @media (max-width: 640px) {

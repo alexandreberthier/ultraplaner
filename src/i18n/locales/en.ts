@@ -22,6 +22,10 @@ export default {
     imprint: 'Imprint',
     poisGuide: 'Supply along the route',
     portfolio: 'codedbyalex.dev',
+    emailReveal: 'Show email',
+    contactForm: 'Contact via form',
+    contactHint:
+      'Preferred contact is the feedback form on the home page. The email address is shown only after a click to reduce spam harvesting.',
   },
   cookie: {
     aria: 'Cookie and analytics settings',
@@ -183,7 +187,8 @@ export default {
     },
     feedback: {
       title: 'Feedback & improvement ideas',
-      intro: 'Missing a country, a feature, or something in the workflow? Write to me — I love concrete ideas from the road.',
+      intro:
+        'Missing a country, a feature, or something in the workflow? Use this form — the preferred way to contact me (including imprint / privacy questions).',
       name: 'Name (optional)',
       email: 'Email (optional, for follow-up)',
       message: 'Your suggestion',

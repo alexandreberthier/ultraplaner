@@ -22,6 +22,10 @@ export default {
     imprint: 'Impressum',
     poisGuide: 'Versorgung auf der Route',
     portfolio: 'codedbyalex.dev',
+    emailReveal: 'E-Mail anzeigen',
+    contactForm: 'Kontakt per Formular',
+    contactHint:
+      'Bevorzugter Kontaktweg ist das Feedback-Formular auf der Startseite. Die E-Mail-Adresse wird zum Schutz vor Spam erst nach Klick angezeigt.',
   },
   cookie: {
     aria: 'Cookie- und Analyse-Einstellungen',
@@ -183,7 +187,8 @@ export default {
     },
     feedback: {
       title: 'Feedback & Verbesserungsvorschläge',
-      intro: 'Fehlt ein Land, eine Funktion oder etwas am Workflow? Schreib mir — ich freue mich über konkrete Ideen aus der Praxis.',
+      intro:
+        'Fehlt ein Land, eine Funktion oder etwas am Workflow? Schreib mir über dieses Formular — der bevorzugte Kontaktweg (auch für Fragen zu Impressum/Datenschutz).',
       name: 'Name (optional)',
       email: 'E-Mail (optional, für Rückfragen)',
       message: 'Dein Vorschlag',
@@ -194,7 +199,7 @@ export default {
       sentHint: 'Danke! Dein Feedback ist angekommen.',
       errorShort: 'Bitte schreib mindestens ein paar Sätze zu deinem Vorschlag.',
       errorSend: 'Senden fehlgeschlagen — bitte später nochmal versuchen.',
-      errorConfig: 'Feedback ist gerade nicht konfiguriert. Bitte schreib mir später nochmal.',
+      errorConfig: 'Feedback ist gerade nicht konfiguriert. Bitte versuch es später nochmal.',
       mailSubject: 'UltraPlaner Feedback',
     },
   },
