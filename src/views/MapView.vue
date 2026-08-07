@@ -595,15 +595,6 @@ function onDocClick(e: MouseEvent) {
       <header class="map-header">
         <div class="sidebar-head-row">
           <div class="sidebar-head-text">
-            <button type="button" class="sidebar-brand" :aria-label="t('map.home')" @click="goHome">
-              <img
-                class="sidebar-logo"
-                src="/logo-ultraplaner.png"
-                alt="UltraPlaner"
-                width="140"
-                height="46"
-              />
-            </button>
             <h1>{{ store.routeName }}</h1>
             <p class="meta">
               <template v-if="store.isNearbyMap">
@@ -624,10 +615,10 @@ function onDocClick(e: MouseEvent) {
         </div>
       </header>
       <div class="sidebar-body">
+        <PoiList />
         <EtaPlanner v-if="!store.isNearbyMap" />
         <WeatherStrip />
         <PoiCategoryFilter />
-        <PoiList />
         <NearbySearchPanel ref="nearbyPanelRef" @done="onNearbyDone" />
         <ControlPointsPanel />
         <OfflinePackPanel @updated="refreshPackMeta" />
@@ -1147,10 +1138,10 @@ function onDocClick(e: MouseEvent) {
           <NearbyForm in-map @done="onNearbyDone" />
         </div>
         <div v-else-if="mobilePanel === 'pois'" class="sheet-scroll">
+          <PoiList embedded />
           <EtaPlanner v-if="!store.isNearbyMap" embedded />
           <WeatherStrip embedded />
           <PoiCategoryFilter embedded />
-          <PoiList embedded />
           <NearbySearchPanel embedded @done="onNearbyDone" />
           <ControlPointsPanel />
           <OfflinePackPanel @updated="refreshPackMeta" />
@@ -1443,32 +1434,6 @@ function onDocClick(e: MouseEvent) {
 .sidebar-head-text {
   min-width: 0;
   flex: 1;
-}
-
-.sidebar-brand {
-  display: block;
-  margin: 0 0 0.55rem;
-  padding: 0;
-  border: none;
-  background: transparent;
-  cursor: pointer;
-  text-align: left;
-}
-
-.sidebar-brand:focus-visible {
-  outline: 2px solid var(--primary);
-  outline-offset: 2px;
-  border-radius: 6px;
-}
-
-.sidebar-logo {
-  display: block;
-  height: 1.5rem;
-  width: auto;
-  max-width: 160px;
-  object-fit: contain;
-  object-position: left center;
-  pointer-events: none;
 }
 
 .meta {
@@ -2453,15 +2418,16 @@ function onDocClick(e: MouseEvent) {
     gap: 0;
   }
 
-  .sheet-scroll :deep(.poi-list) {
-    flex: none;
-    min-height: auto;
+  .sheet-scroll :deep(.poi-list.open) {
+    flex: 1 1 auto;
+    min-height: min(42vh, 320px);
   }
 
-  .sheet-scroll :deep(.poi-list ul) {
-    flex: none;
-    min-height: auto;
-    overflow: visible;
+  .sheet-scroll :deep(.poi-list.open .poi-body ul) {
+    flex: 1 1 auto;
+    min-height: min(32vh, 260px);
+    max-height: min(48vh, 420px);
+    overflow-y: auto;
   }
 }
 

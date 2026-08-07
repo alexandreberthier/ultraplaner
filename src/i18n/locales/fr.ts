@@ -438,7 +438,7 @@
     summaryFav: '{count} POIs · {fav} ★',
     removeFav: 'Retirer favori',
     search: 'Rechercher POIs',
-    searchPlaceholder: 'Nom, note, catégorie…',
+    searchPlaceholder: 'Rechercher…',
     searchEmpty: 'Aucun résultat pour cette recherche.',
   },
   poi: {

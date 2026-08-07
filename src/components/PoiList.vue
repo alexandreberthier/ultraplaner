@@ -88,7 +88,6 @@ function hoursBadge(poi: Poi): { status: OpenStatus; label: string } | null {
 
     <div v-show="open" class="poi-body">
       <header>
-        <p v-if="!embedded" class="route-info">{{ store.routeName }} · {{ store.totalKm.toFixed(1) }} km</p>
         <div class="tabs">
           <button
             type="button"
@@ -106,13 +105,19 @@ function hoursBadge(poi: Poi): { status: OpenStatus; label: string } | null {
           </button>
         </div>
         <label class="poi-search">
-          <span class="sr-only">{{ t('pois.search') }}</span>
+          <span class="search-icon" aria-hidden="true">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="7" />
+              <path d="M20 20l-3.5-3.5" />
+            </svg>
+          </span>
           <input
             v-model="searchQuery"
             type="search"
             enterkeyhint="search"
             autocomplete="off"
             :placeholder="t('pois.searchPlaceholder')"
+            :aria-label="t('pois.search')"
           />
           <button
             v-if="searchQuery"
@@ -198,6 +203,11 @@ function hoursBadge(poi: Poi): { status: OpenStatus; label: string } | null {
   border-bottom: 1px solid var(--border);
 }
 
+.poi-list.open {
+  flex: 1 1 auto;
+  min-height: min(42vh, 360px);
+}
+
 .poi-list:not(.open) {
   flex: 0 0 auto;
   min-height: auto;
@@ -207,6 +217,11 @@ function hoursBadge(poi: Poi): { status: OpenStatus; label: string } | null {
   flex: none;
   min-height: auto;
   border-bottom: none;
+}
+
+.poi-list.embedded.open {
+  flex: 1 1 auto;
+  min-height: min(42vh, 320px);
 }
 
 .section-toggle {
@@ -275,12 +290,6 @@ header {
   padding-top: 0.35rem;
 }
 
-.route-info {
-  margin: 0.25rem 0 0.5rem;
-  font-size: 0.85rem;
-  color: var(--text-muted);
-}
-
 .tabs {
   display: flex;
   gap: 0.4rem;
@@ -308,15 +317,30 @@ header {
   margin-top: 0.55rem;
 }
 
+.poi-search .search-icon {
+  position: absolute;
+  left: 0.65rem;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
 .poi-search input {
   width: 100%;
-  padding: 0.5rem 2rem 0.5rem 0.65rem;
+  padding: 0.5rem 2rem 0.5rem 2.15rem;
   border: 1px solid var(--border);
   border-radius: 8px;
   background: var(--surface-2);
   color: var(--text);
   font: inherit;
   font-size: 0.9rem;
+}
+
+.poi-search input::placeholder {
+  color: var(--text-muted);
+  opacity: 0.9;
 }
 
 .poi-search input:focus {
@@ -338,25 +362,14 @@ header {
   padding: 0.2rem 0.35rem;
 }
 
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
-}
-
 ul {
   list-style: none;
   margin: 0;
   padding: 0;
   overflow-y: auto;
-  flex: 1;
-  min-height: 0;
+  flex: 1 1 auto;
+  min-height: min(28vh, 240px);
+  max-height: min(55vh, 520px);
 }
 
 li {

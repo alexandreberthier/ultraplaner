@@ -439,7 +439,7 @@ export default {
     summaryFav: '{count} POIs · {fav} ★',
     removeFav: 'Favorit entfernen',
     search: 'POIs suchen',
-    searchPlaceholder: 'Name, Notiz, Kategorie…',
+    searchPlaceholder: 'Suchen…',
     searchEmpty: 'Keine Treffer für die Suche.',
   },
   poi: {
