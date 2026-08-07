@@ -7,7 +7,7 @@ import { localeHomePath, type AppLocale } from '../i18n'
  * Contact mail without plaintext mailto / address in HTML source.
  * Local + domain stored reversed; assembled only on reveal / click.
  */
-const USER_REV = 'reithreb.naej.erdnaxela'
+const USER_REV = 'reihtreb.naej.erdnaxela'
 const DOMAIN_REV = 'ed.kooltuo'
 
 const { t, locale } = useI18n()
