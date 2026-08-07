@@ -44,7 +44,6 @@ const { t, locale } = useI18n()
 const {
   exportGpxFavorites,
   exportFitCourse,
-  exportForCoros,
   openQrExport,
   switchQrFormat,
   closeQrDialog,
@@ -63,6 +62,7 @@ const {
   qrKind,
   qrAllowFitToggle,
 } = useMapExport()
+const showPcFiles = ref(false)
 const { isOnline } = useOnline()
 const { rideMode, setRideMode } = useRideMode()
 const { rideKmAlong } = useRidePosition()
@@ -534,11 +534,13 @@ function syncMapDragPan() {
 function openMobilePanel(panel: 'pois' | 'legend' | 'export' | 'nearby') {
   mobilePanel.value = mobilePanel.value === panel ? 'none' : panel
   if (mobilePanel.value !== 'none') showExportMenu.value = false
+  if (mobilePanel.value !== 'export') showPcFiles.value = false
   syncMapDragPan()
 }
 
 function closeMobilePanel() {
   mobilePanel.value = 'none'
+  showPcFiles.value = false
   syncMapDragPan()
 }
 
@@ -552,6 +554,11 @@ watch(mapCanvasRef, (canvas) => {
 
 function closeExportMenu() {
   showExportMenu.value = false
+  showPcFiles.value = false
+}
+
+function togglePcFiles() {
+  showPcFiles.value = !showPcFiles.value
 }
 
 function isMobileLayout() {
@@ -695,20 +702,54 @@ function onDocClick(e: MouseEvent) {
 
               <p v-if="store.isNearbyMap" class="export-nearby-hint">{{ t('map.exportNearbyHint') }}</p>
 
-              <p v-if="store.isNearbyMap" class="export-section">{{ t('map.deviceFavorites') }}</p>
               <button
                 type="button"
                 class="export-item"
-                :class="{ featured: (store.isNearbyMap || !wahooConfigured) && favCount > 0 }"
+                :class="{ featured: favCount > 0 && !showPcFiles }"
                 role="menuitem"
-                @click="runExport(exportGpxFavorites)"
+                :aria-expanded="showPcFiles"
+                @click="togglePcFiles"
               >
                 <span class="export-icon">↓</span>
                 <span class="export-text">
-                  <strong>{{ store.isNearbyMap ? t('map.gpxFavNearby') : t('map.gpxFav') }}</strong>
-                  <small>{{ t('map.gpxFavHint', { count: favCount }) }}</small>
+                  <strong>{{ t('map.devicePc') }}</strong>
+                  <small>
+                    {{
+                      store.isNearbyMap
+                        ? t('map.devicePcHintNearby', { count: favCount })
+                        : t('map.devicePcHint', { count: favCount })
+                    }}
+                  </small>
                 </span>
               </button>
+              <div v-if="showPcFiles" class="export-pc-panel" role="group" :aria-label="t('map.devicePc')">
+                <button
+                  type="button"
+                  class="export-item nested"
+                  role="menuitem"
+                  @click="runExport(exportGpxFavorites)"
+                >
+                  <span class="export-icon">↓</span>
+                  <span class="export-text">
+                    <strong>{{ store.isNearbyMap ? t('map.gpxFavNearby') : t('map.gpxFav') }}</strong>
+                    <small>{{ t('map.gpxFavHint', { count: favCount }) }}</small>
+                  </span>
+                </button>
+                <button
+                  v-if="!store.isNearbyMap"
+                  type="button"
+                  class="export-item nested"
+                  role="menuitem"
+                  @click="runExport(exportFitCourse)"
+                >
+                  <span class="export-icon">↓</span>
+                  <span class="export-text">
+                    <strong>{{ t('map.fitCourse') }}</strong>
+                    <small>{{ t('map.fitCourseHint', { count: favCount }) }}</small>
+                  </span>
+                </button>
+              </div>
+
               <button
                 type="button"
                 class="export-item"
@@ -775,60 +816,6 @@ function onDocClick(e: MouseEvent) {
                     <li>{{ t('map.howWahoo4') }}</li>
                   </ol>
                   <p class="export-howto-warn">{{ t('wahoo.cloudNote') }}</p>
-                </details>
-
-                <p class="export-section">{{ t('map.deviceGarmin') }}</p>
-                <button
-                  type="button"
-                  class="export-item"
-                  role="menuitem"
-                  @click="runExport(exportFitCourse)"
-                >
-                  <span class="export-icon">↓</span>
-                  <span class="export-text">
-                    <strong>{{ t('map.fitCourse') }}</strong>
-                    <small>{{ t('map.fitCourseHint', { count: favCount }) }}</small>
-                  </span>
-                </button>
-                <details class="export-howto-details">
-                  <summary>{{ t('map.howToggle') }}</summary>
-                  <ol class="export-howto">
-                    <li>{{ t('map.howGarmin1') }}</li>
-                    <li>{{ t('map.howGarmin2') }}</li>
-                    <li>{{ t('map.howGarmin3') }}</li>
-                    <li>{{ t('map.howGarmin4') }}</li>
-                  </ol>
-                  <p class="export-howto-warn">{{ t('map.howGarminWarn') }}</p>
-                </details>
-
-                <p class="export-section">{{ t('map.deviceCoros') }}</p>
-                <button
-                  type="button"
-                  class="export-item"
-                  role="menuitem"
-                  @click="runExport(() => exportForCoros(true))"
-                >
-                  <span class="export-icon">▦</span>
-                  <span class="export-text">
-                    <strong>{{ t('map.sendCoros') }}</strong>
-                    <small>{{ t('map.gpxCorosHint', { count: favCount }) }}</small>
-                  </span>
-                </button>
-                <details class="export-howto-details">
-                  <summary>{{ t('map.howToggle') }}</summary>
-                  <ol class="export-howto">
-                    <li>{{ t('map.howCoros1') }}</li>
-                    <li>{{ t('map.howCoros2') }}</li>
-                    <li>{{ t('map.howCoros3') }}</li>
-                    <li>{{ t('map.howCoros4') }}</li>
-                  </ol>
-                  <p class="export-howto-warn">{{ t('map.howCorosWarn') }}</p>
-                  <a
-                    class="export-howto-help"
-                    href="https://support.coros.com/hc/en-us/articles/26895703330196-Downloading-and-Syncing-Routes-to-DURA"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >{{ t('map.howCorosHelp') }}</a>
                 </details>
               </template>
 
@@ -1161,23 +1148,66 @@ function onDocClick(e: MouseEvent) {
 
           <p v-if="store.isNearbyMap" class="export-nearby-hint">{{ t('map.exportNearbyHint') }}</p>
 
-          <p v-if="store.isNearbyMap" class="export-sheet-section">{{ t('map.deviceFavorites') }}</p>
           <button
             type="button"
             class="export-sheet-btn"
-            :class="{ featured: (store.isNearbyMap || !wahooConfigured) && favCount > 0 }"
-            @click="exportGpxFavorites(); closeMobilePanel()"
+            :class="{ featured: favCount > 0 && !showPcFiles }"
+            :aria-expanded="showPcFiles"
+            @click="togglePcFiles"
           >
             <span class="sheet-btn-icon">↓</span>
             <span>
-              <strong>
+              <strong>{{ t('map.devicePc') }}</strong>
+              <small>
                 {{
                   store.isNearbyMap
-                    ? t('map.gpxFavNearbyShort', { count: favCount })
-                    : t('map.gpxFavShort', { count: favCount })
+                    ? t('map.devicePcHintNearby', { count: favCount })
+                    : t('map.devicePcHint', { count: favCount })
                 }}
-              </strong>
-              <small>{{ t('map.gpxFavHint', { count: favCount }) }}</small>
+              </small>
+            </span>
+          </button>
+          <div v-if="showPcFiles" class="export-pc-panel sheet" role="group" :aria-label="t('map.devicePc')">
+            <button
+              type="button"
+              class="export-sheet-btn nested"
+              @click="exportGpxFavorites(); closeMobilePanel()"
+            >
+              <span class="sheet-btn-icon">↓</span>
+              <span>
+                <strong>
+                  {{
+                    store.isNearbyMap
+                      ? t('map.gpxFavNearbyShort', { count: favCount })
+                      : t('map.gpxFavShort', { count: favCount })
+                  }}
+                </strong>
+                <small>{{ t('map.gpxFavHint', { count: favCount }) }}</small>
+              </span>
+            </button>
+            <button
+              v-if="!store.isNearbyMap"
+              type="button"
+              class="export-sheet-btn nested"
+              @click="void exportFitCourse().then(() => closeMobilePanel())"
+            >
+              <span class="sheet-btn-icon">↓</span>
+              <span>
+                <strong>{{ t('map.fitCourseShort', { count: favCount }) }}</strong>
+                <small>{{ t('map.fitCourseHint', { count: favCount }) }}</small>
+              </span>
+            </button>
+          </div>
+
+          <button
+            type="button"
+            class="export-sheet-btn"
+            @click="void openQrExport('gpx').then(() => closeMobilePanel())"
+          >
+            <span class="sheet-btn-icon">▦</span>
+            <span>
+              <strong>{{ t('map.qrToPhone') }}</strong>
+              <small>{{ t('map.qrToPhoneHint') }}</small>
             </span>
           </button>
 
@@ -1231,58 +1261,6 @@ function onDocClick(e: MouseEvent) {
                 <li>{{ t('map.howWahoo4') }}</li>
               </ol>
               <p class="export-howto-warn">{{ t('wahoo.cloudNote') }}</p>
-            </details>
-
-            <p class="export-sheet-section">{{ t('map.deviceGarmin') }}</p>
-            <button
-              type="button"
-              class="export-sheet-btn"
-              @click="void exportFitCourse().then(() => closeMobilePanel())"
-            >
-              <span class="sheet-btn-icon">↓</span>
-              <span>
-                <strong>{{ t('map.fitCourseShort', { count: favCount }) }}</strong>
-                <small>{{ t('map.fitCourseHint', { count: favCount }) }}</small>
-              </span>
-            </button>
-            <details class="export-howto-details">
-              <summary>{{ t('map.howToggle') }}</summary>
-              <ol class="export-howto">
-                <li>{{ t('map.howGarmin1') }}</li>
-                <li>{{ t('map.howGarmin2') }}</li>
-                <li>{{ t('map.howGarmin3') }}</li>
-                <li>{{ t('map.howGarmin4') }}</li>
-              </ol>
-              <p class="export-howto-warn">{{ t('map.howGarminWarn') }}</p>
-            </details>
-
-            <p class="export-sheet-section">{{ t('map.deviceCoros') }}</p>
-            <button
-              type="button"
-              class="export-sheet-btn"
-              @click="void exportForCoros(false).then(() => closeMobilePanel())"
-            >
-              <span class="sheet-btn-icon">↓</span>
-              <span>
-                <strong>{{ t('map.sendCoros') }}</strong>
-                <small>{{ t('map.gpxCorosHint', { count: favCount }) }}</small>
-              </span>
-            </button>
-            <details class="export-howto-details">
-              <summary>{{ t('map.howToggle') }}</summary>
-              <ol class="export-howto">
-                <li>{{ t('map.howCoros1') }}</li>
-                <li>{{ t('map.howCoros2') }}</li>
-                <li>{{ t('map.howCoros3') }}</li>
-                <li>{{ t('map.howCoros4') }}</li>
-              </ol>
-              <p class="export-howto-warn">{{ t('map.howCorosWarn') }}</p>
-              <a
-                class="export-howto-help"
-                href="https://support.coros.com/hc/en-us/articles/26895703330196-Downloading-and-Syncing-Routes-to-DURA"
-                target="_blank"
-                rel="noopener noreferrer"
-              >{{ t('map.howCorosHelp') }}</a>
             </details>
           </template>
 
@@ -2514,6 +2492,28 @@ function onDocClick(e: MouseEvent) {
   color: #334155;
   font-size: 0.78rem;
   line-height: 1.35;
+}
+
+.export-pc-panel {
+  margin: 0 0.55rem 0.45rem 1.1rem;
+  padding: 0.15rem 0 0.15rem 0.35rem;
+  border-left: 2px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.export-pc-panel.sheet {
+  margin: 0.15rem 0 0.45rem 0.65rem;
+}
+
+.export-item.nested,
+.export-sheet-btn.nested {
+  opacity: 0.98;
+}
+
+.export-sheet-btn.nested {
+  margin-top: 0;
 }
 
 .export-sheet-body .export-nearby-hint {
