@@ -1,0 +1,27 @@
+---
+description: Nach fehlerfreien Feature-/UX-Änderungen automatisch committen, pushen und deployen
+alwaysApply: true
+---
+
+# Auto Commit + Deploy
+
+Nach erfolgreichen, fehlerfreien Feature-/UX-Änderungen in diesem Repo **automatisch**:
+
+1. Committen (Why-fokussierte Message im bestehenden Stil)
+2. Zu `origin` pushen
+3. Deployen mit `npm run deploy`
+
+**Ohne** extra nachzufragen.
+
+## Nicht committen / pushen / deployen wenn
+
+- Build, Typecheck oder Deploy fehlschlägt
+- Nur exploratory/plan ohne Code-Änderung
+- User explizit „nicht deployen“ (oder gleichbedeutend) sagt
+
+## Commit-Hygiene
+
+- Keine Secrets (`.env`, Credentials, API-Keys)
+- `.firebase` Cache / Hosting-Cache nicht committen
+- Nie `--force`, nie git config ändern, nie `--no-verify`
+- Commit-Message Why-fokussiert (wie bestehende History), nicht nur What
