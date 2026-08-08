@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { RouterView } from 'vue-router'
 import LoadingOverlay from './components/LoadingOverlay.vue'
-import CookieBanner from './components/CookieBanner.vue'
 import { useMapStore } from './stores/mapStore'
 
 const store = useMapStore()
@@ -10,7 +9,6 @@ const store = useMapStore()
 <template>
   <RouterView />
   <LoadingOverlay />
-  <CookieBanner />
   <div v-if="store.error && store.mode !== 'loading'" class="global-error" role="alert">
     {{ store.error }}
   </div>

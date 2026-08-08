@@ -27,6 +27,8 @@ Einmalig Browser: `npx playwright install chromium`
 
 Nach Schema-Änderungen an Share-Maps einmal `supabase/maps.sql` im Supabase SQL Editor ausführen (Write-Token / Rate-Limits).
 
+Anonyme Seitenbesuche: einmal `supabase/page_stats.sql` im Supabase SQL Editor ausführen (Tabelle `page_stats_daily` + RPC `record_page_session`). Lesen nur mit Service-Role: `npm run page-stats`.
+
 ## POI-Import
 
 ```bash

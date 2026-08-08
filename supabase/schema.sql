@@ -36,4 +36,4 @@ create policy "import_meta_public_read" on import_meta for select using (true);
 -- import_progress: no anon access (admin/import only via service_role)
 
 -- Saved maps: see maps.sql for secure RLS + RPCs (create_shared_map / update_shared_map)
--- Page stats (optional / unused by app): see page_stats.sql
+-- Anonymous page stats: see page_stats.sql (RPC record_page_session)
