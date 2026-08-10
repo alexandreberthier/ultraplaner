@@ -18,15 +18,23 @@ import {
   ROUTE_CASING,
   MAP_LABEL_FONT,
   basemapStyle,
+  captureMapFrame,
   loadBasemapPreference,
   saveBasemapPreference,
   KM_MARKER_INTERVAL_KM,
   isBasemapStyleError,
+  otherBasemap,
+  preloadBasemapStyle,
+  resolveBasemapWithFallback,
   whenStyleReady,
   remapOpenFreeMapGlyphRequest,
   gradeLegend,
   type BasemapId,
 } from '../config/mapStyle'
+import {
+  ensureCyclosmOfflineProtocol,
+  setCyclosmOutageHandler,
+} from '../services/offlinePacks'
 import {
   fetchCyclingRoute,
   isOrsConfigured,
@@ -108,8 +116,13 @@ const exporting = ref(false)
 const showExportMenu = ref(false)
 const basemap = ref<BasemapId>(loadBasemapPreference())
 const basemapFallbackHint = ref('')
+const basemapRetryId = ref<BasemapId>('standard')
+const basemapSwitching = ref(false)
+const basemapFreezeUrl = ref<string | null>(null)
 let cancelStyleReady: (() => void) | null = null
 let basemapRecovering = false
+let basemapErrorRetried = false
+let basemapSwitchGen = 0
 /** Ignore late geolocation results after unmount or after user started drawing. */
 let geoLocateAlive = false
 let locationWatchId: number | null = null
@@ -127,6 +140,23 @@ const addressError = ref('')
 const emit = defineEmits<{
   'can-export-change': [value: boolean]
 }>()
+
+function clearBasemapFallbackHint() {
+  basemapFallbackHint.value = ''
+}
+
+function setFallbackHint(failedId: BasemapId) {
+  basemapRetryId.value = failedId
+  basemapFallbackHint.value =
+    failedId === 'standard'
+      ? t('mapCanvas.basemapFallback')
+      : t('mapCanvas.basemapFallbackCycling')
+}
+
+function finishBasemapSwitch() {
+  basemapSwitching.value = false
+  basemapFreezeUrl.value = null
+}
 
 const routePoints = computed(() =>
   routeCoords.value.length
@@ -737,12 +767,44 @@ function onPlannerMapClick(e: maplibregl.MapMouseEvent) {
   addWaypoint(e.lngLat.lat, e.lngLat.lng)
 }
 
-function initMap() {
+async function initMap() {
   if (!mapEl.value || map) return
+
+  ensureCyclosmOfflineProtocol(maplibregl)
+  setCyclosmOutageHandler(() => {
+    if (basemap.value !== 'cycling' || basemapRecovering) return
+    console.warn('[planner] CyclOSM tile outage — falling back to standard map')
+    setFallbackHint('cycling')
+    void setBasemap('standard', { auto: true })
+  })
+
+  basemapSwitching.value = true
+  basemapErrorRetried = false
+  let initialStyle: import('maplibre-gl').StyleSpecification | string = basemapStyle(
+    basemap.value
+  )
+  try {
+    const resolved = await resolveBasemapWithFallback(basemap.value)
+    if (!mapEl.value || map) {
+      finishBasemapSwitch()
+      return
+    }
+    if (resolved.usedFallback && resolved.failedId) {
+      basemap.value = resolved.id
+      setFallbackHint(resolved.failedId)
+    }
+    initialStyle = resolved.style
+  } catch (err) {
+    console.error('[planner] Initial basemap resolve failed:', err)
+    basemapFallbackHint.value = t('mapCanvas.basemapSwitchFailed')
+    basemapRetryId.value = basemap.value
+    initialStyle = basemapStyle('cycling')
+    basemap.value = 'cycling'
+  }
 
   map = new maplibregl.Map({
     container: mapEl.value,
-    style: basemapStyle(basemap.value),
+    style: initialStyle,
     center: VIENNA_CENTER,
     zoom: VIENNA_ZOOM,
     transformRequest: (url) => ({ url: remapOpenFreeMapGlyphRequest(url) }),
@@ -753,10 +815,14 @@ function initMap() {
   map.on('error', onBasemapError)
   map.getCanvas().addEventListener('webglcontextlost', onPlannerWebGlLost, false)
   map.on('load', () => {
+    finishBasemapSwitch()
     addPlannerLayers()
     updateMapSources()
     centerOnUserLocation()
   })
+  window.setTimeout(() => {
+    if (basemapSwitching.value) finishBasemapSwitch()
+  }, 8000)
 }
 
 function onPlannerWebGlLost(ev: Event) {
@@ -767,7 +833,7 @@ function onPlannerWebGlLost(ev: Event) {
   destroyPlannerMap()
   void nextTick(() => {
     webglRecoveryScheduled = false
-    initMap()
+    void initMap()
   })
 }
 
@@ -780,6 +846,9 @@ function destroyPlannerMap() {
   addressTimer = null
   cancelStyleReady?.()
   cancelStyleReady = null
+  basemapSwitchGen++
+  finishBasemapSwitch()
+  setCyclosmOutageHandler(null)
   resizeObserver?.disconnect()
   resizeObserver = null
   routeCursorMarker?.remove()
@@ -873,59 +942,149 @@ function centerOnUserLocation() {
   )
 }
 
-function clearBasemapFallbackHint() {
-  basemapFallbackHint.value = ''
+function applyStyleAndRestore(
+  style: import('maplibre-gl').StyleSpecification,
+  camera: {
+    center: maplibregl.LngLat
+    zoom: number
+    bearing: number
+    pitch: number
+  },
+  gen: number
+) {
+  if (!map || gen !== basemapSwitchGen) return
+
+  let restored = false
+  const restoreOverlays = () => {
+    if (!map || restored || gen !== basemapSwitchGen) {
+      finishBasemapSwitch()
+      return
+    }
+    if (!map.isStyleLoaded()) {
+      finishBasemapSwitch()
+      return
+    }
+    if (map.getSource('planner-waypoints')) {
+      restored = true
+      updateMapSources()
+      finishBasemapSwitch()
+      return
+    }
+    try {
+      map.jumpTo({
+        center: camera.center,
+        zoom: camera.zoom,
+        bearing: camera.bearing,
+        pitch: camera.pitch,
+      })
+      addPlannerLayers()
+      updateMapSources()
+      restored = true
+    } catch (err) {
+      console.error('[planner] Overlay nach Kartenwechsel fehlgeschlagen:', err)
+    } finally {
+      finishBasemapSwitch()
+    }
+  }
+
+  cancelStyleReady?.()
+  map.setStyle(style, { diff: false })
+  cancelStyleReady = whenStyleReady(map, restoreOverlays)
 }
 
-function setBasemap(id: BasemapId, opts: { auto?: boolean } = {}) {
+async function setBasemap(id: BasemapId, opts: { auto?: boolean } = {}) {
   if (!map || basemap.value === id) return
+  const prevId = basemap.value
+  const gen = ++basemapSwitchGen
+  basemapErrorRetried = false
+  basemapSwitching.value = true
+  basemapFreezeUrl.value = captureMapFrame(map)
+
+  const camera = {
+    center: map.getCenter(),
+    zoom: map.getZoom(),
+    bearing: map.getBearing(),
+    pitch: map.getPitch(),
+  }
+
   basemap.value = id
   if (!opts.auto) {
     saveBasemapPreference(id)
     clearBasemapFallbackHint()
   }
 
-  const center = map.getCenter()
-  const zoom = map.getZoom()
-  const bearing = map.getBearing()
-  const pitch = map.getPitch()
-
-  let restored = false
-  const restoreOverlays = () => {
-    if (!map || restored) return
-    if (!map.isStyleLoaded()) return
-    if (map.getSource('planner-waypoints')) {
-      restored = true
-      updateMapSources()
-      return
-    }
+  try {
+    const style = await preloadBasemapStyle(id)
+    if (!map || gen !== basemapSwitchGen) return
+    applyStyleAndRestore(style, camera, gen)
+  } catch (err) {
+    console.warn(`[planner] Basemap ${id} preload failed:`, err)
+    if (!map || gen !== basemapSwitchGen) return
+    const fallback = otherBasemap(id)
     try {
-      map.jumpTo({ center, zoom, bearing, pitch })
-      addPlannerLayers()
-      updateMapSources()
-      restored = true
-    } catch (err) {
-      console.error('[planner] Overlay nach Kartenwechsel fehlgeschlagen:', err)
+      const style = await preloadBasemapStyle(fallback)
+      if (!map || gen !== basemapSwitchGen) return
+      basemap.value = fallback
+      if (!opts.auto) saveBasemapPreference(fallback)
+      setFallbackHint(id)
+      applyStyleAndRestore(style, camera, gen)
+    } catch (fallbackErr) {
+      console.error('[planner] Basemap fallback also failed:', fallbackErr)
+      basemap.value = prevId
+      basemapFallbackHint.value = t('mapCanvas.basemapSwitchFailed')
+      basemapRetryId.value = id
+      finishBasemapSwitch()
     }
   }
-
-  cancelStyleReady?.()
-  map.setStyle(basemapStyle(id), { diff: false })
-  cancelStyleReady = whenStyleReady(map, restoreOverlays)
 }
 
 function onBasemapError(e: { error?: Error | string }) {
   if (!map || basemapRecovering) return
   if (!isBasemapStyleError(e.error)) return
-  if (basemap.value !== 'standard') return
 
+  const failed = basemap.value
+  const gen = basemapSwitchGen
+
+  if (!basemapErrorRetried) {
+    basemapErrorRetried = true
+    console.warn('[planner] Basemap error — retrying once:', e.error)
+    basemapSwitching.value = true
+    void preloadBasemapStyle(failed)
+      .then((style) => {
+        if (!map || gen !== basemapSwitchGen) return
+        const camera = {
+          center: map.getCenter(),
+          zoom: map.getZoom(),
+          bearing: map.getBearing(),
+          pitch: map.getPitch(),
+        }
+        basemapFreezeUrl.value = captureMapFrame(map) ?? basemapFreezeUrl.value
+        applyStyleAndRestore(style, camera, gen)
+      })
+      .catch(() => {
+        basemapRecovering = true
+        const fallback = otherBasemap(failed)
+        console.warn(`[planner] Retry failed — falling back to ${fallback}`)
+        setFallbackHint(failed)
+        void setBasemap(fallback, { auto: true }).finally(() => {
+          window.setTimeout(() => {
+            basemapRecovering = false
+          }, 2500)
+        })
+      })
+    return
+  }
+
+  if (basemapRecovering) return
   basemapRecovering = true
-  console.warn('[planner] Basiskarte fehlgeschlagen, Fallback auf Radkarte:', e.error)
-  basemapFallbackHint.value = t('mapCanvas.basemapFallback')
-  setBasemap('cycling', { auto: true })
-  window.setTimeout(() => {
-    basemapRecovering = false
-  }, 2500)
+  const fallback = otherBasemap(failed)
+  console.warn(`[planner] Basemap ${failed} failed, fallback to ${fallback}:`, e.error)
+  setFallbackHint(failed)
+  void setBasemap(fallback, { auto: true }).finally(() => {
+    window.setTimeout(() => {
+      basemapRecovering = false
+    }, 2500)
+  })
 }
 
 function abortPendingRoute() {
@@ -1084,7 +1243,7 @@ async function createMap() {
 }
 
 onMounted(() => {
-  initMap()
+  void initMap()
   if (mapEl.value) {
     resizeObserver = new ResizeObserver(() => {
       map?.resize()
@@ -1102,6 +1261,16 @@ onUnmounted(() => {
   <div class="route-planner" @keydown.escape="closeExportMenu">
     <div class="planner-map-wrap">
       <div ref="mapEl" class="planner-map" />
+      <div
+        v-if="basemapSwitching"
+        class="basemap-loading"
+        :style="basemapFreezeUrl ? { backgroundImage: `url(${basemapFreezeUrl})` } : undefined"
+        role="status"
+        aria-live="polite"
+      >
+        <span class="basemap-loading-spinner" aria-hidden="true" />
+        <span>{{ t('mapCanvas.basemapLoading') }}</span>
+      </div>
       <div v-if="routeKm > 0 || routing" class="route-km-badge" aria-live="polite">
         <template v-if="routeKm > 0">
           <strong>{{ routeKm.toFixed(1) }}</strong>
@@ -1115,8 +1284,12 @@ onUnmounted(() => {
       </div>
       <p v-if="basemapFallbackHint" class="basemap-fallback" role="status">
         {{ basemapFallbackHint }}
-        <button type="button" @click="clearBasemapFallbackHint(); setBasemap('standard')">
-          {{ t('mapCanvas.basemapRetry') }}
+        <button type="button" @click="clearBasemapFallbackHint(); setBasemap(basemapRetryId)">
+          {{
+            basemapRetryId === 'standard'
+              ? t('mapCanvas.basemapRetry')
+              : t('mapCanvas.basemapRetryCycling')
+          }}
         </button>
       </p>
       <ul
@@ -1713,6 +1886,39 @@ onUnmounted(() => {
   font-size: 0.8rem;
   line-height: 1.35;
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
+}
+
+.basemap-loading {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  background-color: rgba(248, 250, 252, 0.72);
+  background-size: cover;
+  background-position: center;
+  color: #0f172a;
+  font-size: 0.85rem;
+  font-weight: 600;
+  pointer-events: none;
+}
+
+.basemap-loading-spinner {
+  width: 1.55rem;
+  height: 1.55rem;
+  border: 2.5px solid rgba(15, 23, 42, 0.2);
+  border-top-color: #0f172a;
+  border-radius: 50%;
+  animation: basemap-spin 0.7s linear infinite;
+}
+
+@keyframes basemap-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .basemap-fallback button {

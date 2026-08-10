@@ -56,7 +56,11 @@ export function basemapStyle(id: BasemapId): string | StyleSpecification {
   return id === 'cycling' ? CYCLOSM_STYLE : MAP_STYLE_URL
 }
 
-/** True for OpenFreeMap/liberty tile-schema mismatches that blank the map. */
+export function otherBasemap(id: BasemapId): BasemapId {
+  return id === 'cycling' ? 'standard' : 'cycling'
+}
+
+/** True for style/tile failures that blank the map (Liberty schema, AJAX, CyclOSM). */
 export function isBasemapStyleError(error: unknown): boolean {
   const msg =
     error instanceof Error
@@ -64,9 +68,110 @@ export function isBasemapStyleError(error: unknown): boolean {
       : typeof error === 'string'
         ? error
         : String((error as { message?: string } | null | undefined)?.message ?? '')
-  return /source layer .+ does not exist|does not exist on source ['"]?openmaptiles|failed to load (style|sprite|glyph)|AJAXError/i.test(
+  return /source layer .+ does not exist|does not exist on source ['"]?openmaptiles|failed to load (style|sprite|glyph|tile|source)|AJAXError|Failed to fetch|NetworkError|CyclOSM|status (4|5)\d\d|Load failed/i.test(
     msg
   )
+}
+
+const CYCLOSM_PROBE_HOSTS = [
+  'https://a.tile-cyclosm.openstreetmap.fr/cyclosm',
+  'https://b.tile-cyclosm.openstreetmap.fr/cyclosm',
+  'https://c.tile-cyclosm.openstreetmap.fr/cyclosm',
+] as const
+
+/** Vienna-ish tile — enough to know CyclOSM responds. */
+const CYCLOSM_PROBE_PATH = '10/550/335.png'
+
+async function fetchOnce(url: string, init?: RequestInit): Promise<Response> {
+  const res = await fetch(url, init)
+  if (!res.ok) throw new Error(`Failed to load style/tile status ${res.status}`)
+  return res
+}
+
+/** One automatic retry for transient network/tile failures. */
+async function withOneRetry<T>(run: () => Promise<T>): Promise<T> {
+  try {
+    return await run()
+  } catch (first) {
+    await new Promise((r) => setTimeout(r, 350))
+    try {
+      return await run()
+    } catch (second) {
+      throw second instanceof Error ? second : first
+    }
+  }
+}
+
+async function probeCyclosmReachable(): Promise<void> {
+  if (typeof navigator !== 'undefined' && !navigator.onLine) {
+    // Offline: pack/protocol may still serve tiles — don't block the style object.
+    return
+  }
+  let lastErr: unknown
+  for (const host of CYCLOSM_PROBE_HOSTS) {
+    try {
+      await fetchOnce(`${host}/${CYCLOSM_PROBE_PATH}`, { method: 'GET', cache: 'no-store' })
+      return
+    } catch (err) {
+      lastErr = err
+    }
+  }
+  throw lastErr instanceof Error
+    ? lastErr
+    : new Error('CyclOSM tiles unreachable')
+}
+
+/**
+ * Resolve a basemap to a concrete StyleSpecification *before* setStyle,
+ * so a dead primary URL never tears down a working map.
+ * Retries the primary once, then throws (caller may fall back).
+ */
+export async function preloadBasemapStyle(id: BasemapId): Promise<StyleSpecification> {
+  return withOneRetry(async () => {
+    if (id === 'cycling') {
+      await probeCyclosmReachable()
+      return structuredClone(CYCLOSM_STYLE) as StyleSpecification
+    }
+    const res = await fetchOnce(MAP_STYLE_URL, { cache: 'no-store' })
+    const style = (await res.json()) as StyleSpecification
+    if (!style || style.version !== 8 || !style.sources) {
+      throw new Error('Failed to load style: invalid Liberty JSON')
+    }
+    return style
+  })
+}
+
+export type ResolvedBasemap = {
+  id: BasemapId
+  style: StyleSpecification
+  usedFallback: boolean
+  failedId?: BasemapId
+}
+
+/** Preferred style with 1× retry, then the other basemap (also 1× retry). */
+export async function resolveBasemapWithFallback(
+  preferred: BasemapId
+): Promise<ResolvedBasemap> {
+  try {
+    const style = await preloadBasemapStyle(preferred)
+    return { id: preferred, style, usedFallback: false }
+  } catch (primaryErr) {
+    console.warn(`[map] Basemap ${preferred} failed, trying fallback:`, primaryErr)
+    const fallback = otherBasemap(preferred)
+    const style = await preloadBasemapStyle(fallback)
+    return { id: fallback, style, usedFallback: true, failedId: preferred }
+  }
+}
+
+/** Snapshot for freeze-frame overlay while setStyle blanks the WebGL canvas. */
+export function captureMapFrame(map: MaplibreMap): string | null {
+  try {
+    const canvas = map.getCanvas()
+    if (!canvas.width || !canvas.height) return null
+    return canvas.toDataURL('image/jpeg', 0.72)
+  } catch {
+    return null
+  }
 }
 
 /**

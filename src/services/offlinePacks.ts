@@ -67,6 +67,35 @@ interface RasterTileRow {
 let activePackMapId: string | null = null
 let protocolRegistered = false
 
+/** Fired once when online CyclOSM fetches fail repeatedly (blank-tile risk). */
+type CyclosmOutageHandler = () => void
+let cyclosmOutageHandler: CyclosmOutageHandler | null = null
+let cyclosmFailStreak = 0
+let cyclosmOutageNotified = false
+
+export function setCyclosmOutageHandler(handler: CyclosmOutageHandler | null) {
+  cyclosmOutageHandler = handler
+  cyclosmFailStreak = 0
+  cyclosmOutageNotified = false
+}
+
+function noteCyclosmNetworkOk() {
+  cyclosmFailStreak = 0
+  cyclosmOutageNotified = false
+}
+
+function noteCyclosmNetworkFail() {
+  cyclosmFailStreak++
+  // ~viewport of misses before treating as outage (avoids single 404 flip)
+  if (cyclosmFailStreak < 6 || cyclosmOutageNotified) return
+  cyclosmOutageNotified = true
+  try {
+    cyclosmOutageHandler?.()
+  } catch (err) {
+    console.warn('[offline] CyclOSM outage handler failed:', err)
+  }
+}
+
 /** Transparent 1×1 PNG for missing offline tiles */
 const EMPTY_PNG = Uint8Array.from(
   atob(
@@ -554,19 +583,25 @@ export function ensureCyclosmOfflineProtocol(
       }
     }
 
-    // Network fallback when online
+    // Network fallback when online — try all hosts before failing soft
     if (typeof navigator !== 'undefined' && navigator.onLine) {
-      const host = CYCLOSM_HOSTS[Math.abs(x + y) % CYCLOSM_HOSTS.length]!
-      const url = `${host}/${z}/${x}/${y}.png`
-      try {
-        const res = await fetch(url)
-        if (res.ok) {
-          const data = await res.arrayBuffer()
-          return { data }
+      const start = Math.abs(x + y) % CYCLOSM_HOSTS.length
+      for (let i = 0; i < CYCLOSM_HOSTS.length; i++) {
+        const host = CYCLOSM_HOSTS[(start + i) % CYCLOSM_HOSTS.length]!
+        const url = `${host}/${z}/${x}/${y}.png`
+        try {
+          const res = await fetch(url)
+          if (res.ok) {
+            const data = await res.arrayBuffer()
+            noteCyclosmNetworkOk()
+            return { data }
+          }
+        } catch {
+          /* try next host */
         }
-      } catch {
-        /* fall through */
       }
+      // Soft-fail tile (no MapLibre error spam) + notify after repeated misses
+      noteCyclosmNetworkFail()
     }
 
     return { data: EMPTY_PNG.slice().buffer }

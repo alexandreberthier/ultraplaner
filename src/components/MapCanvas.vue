@@ -9,13 +9,17 @@ import {
   ROUTE_CASING,
   ROUTE_COLOR,
   basemapStyle,
+  captureMapFrame,
   climbMarkerColor,
   gradeLegend,
   isBasemapStyleError,
   kmMarkerInterval,
   loadBasemapPreference,
+  otherBasemap,
   poiColors,
+  preloadBasemapStyle,
   remapOpenFreeMapGlyphRequest,
+  resolveBasemapWithFallback,
   saveBasemapPreference,
   whenStyleReady,
   type BasemapId,
@@ -45,6 +49,7 @@ import {
 import {
   ensureCyclosmOfflineProtocol,
   setActiveOfflinePackMapId,
+  setCyclosmOutageHandler,
 } from '../services/offlinePacks'
 
 const store = useMapStore()
@@ -435,64 +440,180 @@ const locationBtnTitle = computed(() => {
 
 const basemap = ref<BasemapId>(loadBasemapPreference())
 const basemapFallbackHint = ref('')
+/** Which style the hint offers to retry (the one that failed). */
+const basemapRetryId = ref<BasemapId>('standard')
+const basemapSwitching = ref(false)
+const basemapFreezeUrl = ref<string | null>(null)
 let cancelStyleReady: (() => void) | null = null
 let basemapRecovering = false
+/** Avoid cascading tile-error fallbacks for the same switch. */
+let basemapErrorRetried = false
+let basemapSwitchGen = 0
 
 function clearBasemapFallbackHint() {
   basemapFallbackHint.value = ''
 }
 
-function setBasemap(id: BasemapId, opts: { auto?: boolean } = {}) {
-  if (!map || basemap.value === id) return
-  basemap.value = id
-  if (!opts.auto) {
-    saveBasemapPreference(id)
-    clearBasemapFallbackHint()
-  }
+function setFallbackHint(failedId: BasemapId) {
+  basemapRetryId.value = failedId
+  basemapFallbackHint.value =
+    failedId === 'standard'
+      ? t('mapCanvas.basemapFallback')
+      : t('mapCanvas.basemapFallbackCycling')
+}
 
-  const center = map.getCenter()
-  const zoom = map.getZoom()
-  const bearing = map.getBearing()
-  const pitch = map.getPitch()
+function finishBasemapSwitch() {
+  basemapSwitching.value = false
+  basemapFreezeUrl.value = null
+}
+
+function applyStyleAndRestore(
+  style: import('maplibre-gl').StyleSpecification,
+  camera: {
+    center: maplibregl.LngLat
+    zoom: number
+    bearing: number
+    pitch: number
+  },
+  gen: number
+) {
+  if (!map || gen !== basemapSwitchGen) return
 
   let restored = false
   const restoreOverlays = () => {
-    if (!map || restored) return
-    if (!map.isStyleLoaded()) return
+    if (!map || restored || gen !== basemapSwitchGen) {
+      finishBasemapSwitch()
+      return
+    }
+    if (!map.isStyleLoaded()) {
+      finishBasemapSwitch()
+      return
+    }
     if (map.getSource('route')) {
       restored = true
       updateSources()
       updateBikeCursorMarker()
+      finishBasemapSwitch()
       return
     }
     try {
-      map.jumpTo({ center, zoom, bearing, pitch })
+      map.jumpTo({
+        center: camera.center,
+        zoom: camera.zoom,
+        bearing: camera.bearing,
+        pitch: camera.pitch,
+      })
       addLayers()
       updateSources()
       updateBikeCursorMarker()
       restored = true
     } catch (err) {
       console.error('[map] Overlay nach Kartenwechsel fehlgeschlagen:', err)
+    } finally {
+      finishBasemapSwitch()
     }
   }
 
   cancelStyleReady?.()
-  map.setStyle(basemapStyle(id), { diff: false })
+  map.setStyle(style, { diff: false })
   cancelStyleReady = whenStyleReady(map, restoreOverlays)
+}
+
+async function setBasemap(id: BasemapId, opts: { auto?: boolean } = {}) {
+  if (!map || basemap.value === id) return
+  const prevId = basemap.value
+  const gen = ++basemapSwitchGen
+  basemapErrorRetried = false
+  basemapSwitching.value = true
+  basemapFreezeUrl.value = captureMapFrame(map)
+
+  const camera = {
+    center: map.getCenter(),
+    zoom: map.getZoom(),
+    bearing: map.getBearing(),
+    pitch: map.getPitch(),
+  }
+
+  basemap.value = id
+  if (!opts.auto) {
+    saveBasemapPreference(id)
+    clearBasemapFallbackHint()
+  }
+
+  try {
+    const style = await preloadBasemapStyle(id)
+    if (!map || gen !== basemapSwitchGen) return
+    applyStyleAndRestore(style, camera, gen)
+  } catch (err) {
+    console.warn(`[map] Basemap ${id} preload failed:`, err)
+    if (!map || gen !== basemapSwitchGen) return
+    const fallback = otherBasemap(id)
+    try {
+      const style = await preloadBasemapStyle(fallback)
+      if (!map || gen !== basemapSwitchGen) return
+      basemap.value = fallback
+      if (!opts.auto) saveBasemapPreference(fallback)
+      setFallbackHint(id)
+      applyStyleAndRestore(style, camera, gen)
+    } catch (fallbackErr) {
+      console.error('[map] Basemap fallback also failed:', fallbackErr)
+      basemap.value = prevId
+      basemapFallbackHint.value = t('mapCanvas.basemapSwitchFailed')
+      basemapRetryId.value = id
+      finishBasemapSwitch()
+    }
+  }
 }
 
 function onBasemapError(e: { error?: Error | string }) {
   if (!map || basemapRecovering) return
   if (!isBasemapStyleError(e.error)) return
-  if (basemap.value !== 'standard') return
 
+  const failed = basemap.value
+  const gen = basemapSwitchGen
+
+  // First tile/style error after a successful preload: one in-place retry
+  if (!basemapErrorRetried) {
+    basemapErrorRetried = true
+    console.warn('[map] Basemap error — retrying once:', e.error)
+    basemapSwitching.value = true
+    void preloadBasemapStyle(failed)
+      .then((style) => {
+        if (!map || gen !== basemapSwitchGen) return
+        const camera = {
+          center: map.getCenter(),
+          zoom: map.getZoom(),
+          bearing: map.getBearing(),
+          pitch: map.getPitch(),
+        }
+        basemapFreezeUrl.value = captureMapFrame(map) ?? basemapFreezeUrl.value
+        applyStyleAndRestore(style, camera, gen)
+      })
+      .catch(() => {
+        // Fall through to bidirectional fallback below on next error path
+        basemapRecovering = true
+        const fallback = otherBasemap(failed)
+        console.warn(`[map] Retry failed — falling back to ${fallback}`)
+        setFallbackHint(failed)
+        void setBasemap(fallback, { auto: true }).finally(() => {
+          window.setTimeout(() => {
+            basemapRecovering = false
+          }, 2500)
+        })
+      })
+    return
+  }
+
+  if (basemapRecovering) return
   basemapRecovering = true
-  console.warn('[map] Basiskarte fehlgeschlagen, Fallback auf Radkarte:', e.error)
-  basemapFallbackHint.value = t('mapCanvas.basemapFallback')
-  setBasemap('cycling', { auto: true })
-  window.setTimeout(() => {
-    basemapRecovering = false
-  }, 2500)
+  const fallback = otherBasemap(failed)
+  console.warn(`[map] Basemap ${failed} failed, fallback to ${fallback}:`, e.error)
+  setFallbackHint(failed)
+  void setBasemap(fallback, { auto: true }).finally(() => {
+    window.setTimeout(() => {
+      basemapRecovering = false
+    }, 2500)
+  })
 }
 
 function poiGeoJson() {
@@ -790,6 +911,9 @@ function fitBounds() {
 function destroyMap() {
   cancelStyleReady?.()
   cancelStyleReady = null
+  basemapSwitchGen++
+  finishBasemapSwitch()
+  setCyclosmOutageHandler(null)
   resizeObserver?.disconnect()
   resizeObserver = null
   stopLocation()
@@ -883,16 +1007,54 @@ async function initMap() {
 
   ensureCyclosmOfflineProtocol(maplibregl)
   setActiveOfflinePackMapId(store.savedMapId || null)
+  setCyclosmOutageHandler(() => {
+    if (basemap.value !== 'cycling' || basemapRecovering) return
+    console.warn('[map] CyclOSM tile outage — falling back to standard map')
+    setFallbackHint('cycling')
+    void setBasemap('standard', { auto: true })
+  })
+
+  basemapSwitching.value = true
+  basemapErrorRetried = false
+  let initialStyle: import('maplibre-gl').StyleSpecification | string = basemapStyle(
+    basemap.value
+  )
+  try {
+    const resolved = await resolveBasemapWithFallback(basemap.value)
+    if (!mapContainer.value || map) {
+      finishBasemapSwitch()
+      return
+    }
+    if (resolved.usedFallback && resolved.failedId) {
+      basemap.value = resolved.id
+      setFallbackHint(resolved.failedId)
+    }
+    initialStyle = resolved.style
+  } catch (err) {
+    console.error('[map] Initial basemap resolve failed:', err)
+    basemapFallbackHint.value = t('mapCanvas.basemapSwitchFailed')
+    basemapRetryId.value = basemap.value
+    // Last resort: inline CyclOSM object (no network for style JSON)
+    initialStyle = basemapStyle('cycling')
+    basemap.value = 'cycling'
+  }
 
   map = new maplibregl.Map({
     container: mapContainer.value,
-    style: basemapStyle(basemap.value),
+    style: initialStyle,
     transformRequest: (url) => ({ url: remapOpenFreeMapGlyphRequest(url) }),
   })
 
   map.addControl(new maplibregl.NavigationControl(), 'top-right')
   map.on('error', onBasemapError)
-  map.once('load', afterMapReady)
+  map.once('load', () => {
+    finishBasemapSwitch()
+    afterMapReady()
+  })
+  // Safety: never leave spinner forever if load hangs
+  window.setTimeout(() => {
+    if (basemapSwitching.value) finishBasemapSwitch()
+  }, 8000)
   map.getCanvas().addEventListener('webglcontextlost', onWebGlContextLost, false)
 
   if (mapCanvasWrap.value) {
@@ -945,9 +1107,7 @@ watch(
     const { getPackMeta } = await import('../services/offlinePacks')
     const pack = await getPackMeta(id)
     if (pack && (pack.status === 'ready' || pack.status === 'partial') && basemap.value !== 'cycling') {
-      basemap.value = 'cycling'
-      saveBasemapPreference('cycling')
-      if (map) map.setStyle(basemapStyle('cycling'), { diff: false })
+      void setBasemap('cycling')
     }
   }
 )
@@ -1560,6 +1720,16 @@ onUnmounted(() => {
   <div ref="mapCanvasWrap" class="map-canvas-wrap" :class="{ 'ride-mode': rideMode }">
     <div ref="mapContainer" class="map-canvas" />
 
+    <div
+      v-if="basemapSwitching"
+      class="basemap-loading"
+      :style="basemapFreezeUrl ? { backgroundImage: `url(${basemapFreezeUrl})` } : undefined"
+      role="status"
+      aria-live="polite"
+    >
+      <span class="basemap-loading-spinner" aria-hidden="true" />
+      <span>{{ t('mapCanvas.basemapLoading') }}</span>
+    </div>
     <ul
       v-if="routeColorMode === 'surface' && surfaceLegendBuckets.length && !rideMode && !store.isNearbyMap"
       class="surface-legend"
@@ -1641,8 +1811,12 @@ onUnmounted(() => {
 
       <p v-if="basemapFallbackHint" class="basemap-fallback" role="status">
         {{ basemapFallbackHint }}
-        <button type="button" @click="clearBasemapFallbackHint(); setBasemap('standard')">
-          {{ t('mapCanvas.basemapRetry') }}
+        <button type="button" @click="clearBasemapFallbackHint(); setBasemap(basemapRetryId)">
+          {{
+            basemapRetryId === 'standard'
+              ? t('mapCanvas.basemapRetry')
+              : t('mapCanvas.basemapRetryCycling')
+          }}
         </button>
       </p>
 
@@ -1841,6 +2015,39 @@ onUnmounted(() => {
   font-size: 0.8rem;
   line-height: 1.35;
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
+}
+
+.basemap-loading {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  background-color: rgba(248, 250, 252, 0.72);
+  background-size: cover;
+  background-position: center;
+  color: #0f172a;
+  font-size: 0.85rem;
+  font-weight: 600;
+  pointer-events: none;
+}
+
+.basemap-loading-spinner {
+  width: 1.55rem;
+  height: 1.55rem;
+  border: 2.5px solid rgba(15, 23, 42, 0.2);
+  border-top-color: #0f172a;
+  border-radius: 50%;
+  animation: basemap-spin 0.7s linear infinite;
+}
+
+@keyframes basemap-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .basemap-fallback button {
