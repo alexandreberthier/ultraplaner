@@ -17,6 +17,7 @@ import { ROUTE_COLOR, ROUTE_CASING, MAP_LABEL_FONT, basemapStyle, loadBasemapPre
 import {
   fetchCyclingRoute,
   isOrsConfigured,
+  isRouteAborted,
   searchAddresses,
   SURFACE_PREFERENCES,
   HILL_PREFERENCES,
@@ -67,6 +68,8 @@ let waypointId = 0
 let autoRouteTimer: ReturnType<typeof setTimeout> | null = null
 let addressTimer: ReturnType<typeof setTimeout> | null = null
 let routeGeneration = 0
+let routeAbort: AbortController | null = null
+let webglRecoveryScheduled = false
 
 const waypoints = ref<Waypoint[]>([])
 const routeCoords = ref<[number, number][]>([])
@@ -557,6 +560,7 @@ function initMap() {
   map.addControl(new maplibregl.NavigationControl(), 'top-right')
   map.on('click', onPlannerMapClick)
   map.on('error', onBasemapError)
+  map.getCanvas().addEventListener('webglcontextlost', onPlannerWebGlLost, false)
   map.on('load', () => {
     addPlannerLayers()
     updateMapSources()
@@ -564,11 +568,23 @@ function initMap() {
   })
 }
 
+function onPlannerWebGlLost(ev: Event) {
+  ev.preventDefault()
+  if (webglRecoveryScheduled) return
+  webglRecoveryScheduled = true
+  console.warn('[planner] WebGL context lost — remounting')
+  destroyPlannerMap()
+  void nextTick(() => {
+    webglRecoveryScheduled = false
+    initMap()
+  })
+}
+
 function destroyPlannerMap() {
   geoLocateAlive = false
   stopPlannerLocation()
-  if (autoRouteTimer) clearTimeout(autoRouteTimer)
-  autoRouteTimer = null
+  abortPendingRoute()
+  routing.value = false
   if (addressTimer) clearTimeout(addressTimer)
   addressTimer = null
   cancelStyleReady?.()
@@ -579,6 +595,7 @@ function destroyPlannerMap() {
     try {
       map.off('error', onBasemapError)
       map.off('click', onPlannerMapClick)
+      map.getCanvas().removeEventListener('webglcontextlost', onPlannerWebGlLost)
       map.remove()
     } catch (err) {
       console.warn('[planner] destroy failed:', err)
@@ -716,13 +733,24 @@ function onBasemapError(e: { error?: Error | string }) {
   }, 2500)
 }
 
+function abortPendingRoute() {
+  if (autoRouteTimer) {
+    clearTimeout(autoRouteTimer)
+    autoRouteTimer = null
+  }
+  routeAbort?.abort()
+  routeAbort = null
+}
+
 function scheduleAutoRoute() {
-  if (autoRouteTimer) clearTimeout(autoRouteTimer)
+  // Cancel prior debounce + in-flight ORS so asphalt/mixed toggles don't stack requests.
+  abortPendingRoute()
 
   if (waypoints.value.length < 2) {
     routeCoords.value = []
     routeElevations.value = []
     routeSurfaceSummary.value = null
+    routing.value = false
     updateMapSources()
     return
   }
@@ -730,8 +758,9 @@ function scheduleAutoRoute() {
   if (!isOrsConfigured()) return
 
   autoRouteTimer = setTimeout(() => {
+    autoRouteTimer = null
     void calculateRoute()
-  }, 400)
+  }, 450)
 }
 
 async function calculateRoute() {
@@ -743,6 +772,9 @@ async function calculateRoute() {
     return
   }
 
+  routeAbort?.abort()
+  const ac = new AbortController()
+  routeAbort = ac
   const gen = ++routeGeneration
   formError.value = ''
   routing.value = true
@@ -754,21 +786,22 @@ async function calculateRoute() {
       profile: cyclingProfileForSurface(surfacePreference.value),
       hillPreference: hillPreference.value,
       avoidSteps: true,
+      signal: ac.signal,
     })
-    if (gen !== routeGeneration) return
+    if (gen !== routeGeneration || ac.signal.aborted) return
     routeCoords.value = result.coordinates
     routeElevations.value = result.elevations
     routeSurfaceSummary.value = result.surfaceSummary
     updateMapSources()
   } catch (err) {
-    if (gen !== routeGeneration) return
-    routeCoords.value = []
-    routeElevations.value = []
-    routeSurfaceSummary.value = null
-    updateMapSources()
+    if (gen !== routeGeneration || isRouteAborted(err) || ac.signal.aborted) return
+    // Keep previous geometry so a failed profile switch does not blank the map.
     formError.value = err instanceof Error ? err.message : t('planner.routeFailed')
   } finally {
-    if (gen === routeGeneration) routing.value = false
+    if (gen === routeGeneration) {
+      routing.value = false
+      if (routeAbort === ac) routeAbort = null
+    }
   }
 }
 

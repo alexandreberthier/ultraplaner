@@ -103,13 +103,13 @@ export function parseGpxFile(text: string): {
     if (feature.geometry.type === 'LineString') {
       for (const coord of feature.geometry.coordinates) {
         coordinates.push([coord[0], coord[1]])
-        elevations.push(coord[2] ?? 0)
+        elevations.push(typeof coord[2] === 'number' && Number.isFinite(coord[2]) ? coord[2] : 0)
       }
     } else if (feature.geometry.type === 'MultiLineString') {
       for (const line of feature.geometry.coordinates) {
         for (const coord of line) {
           coordinates.push([coord[0], coord[1]])
-          elevations.push(coord[2] ?? 0)
+          elevations.push(typeof coord[2] === 'number' && Number.isFinite(coord[2]) ? coord[2] : 0)
         }
       }
     }

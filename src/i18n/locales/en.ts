@@ -761,6 +761,9 @@ export default {
     rateLimited: 'Too many search requests — please wait a moment',
     invalidKey: 'Route planning temporarily unavailable',
     dailyLimit: 'Daily routing limit reached — try again later',
+    serviceBusy:
+      'Routing service is busy — wait a moment and try again (avoid rapid asphalt/mixed toggles).',
+    networkError: 'Could not reach the routing service — check your connection and retry.',
     routeCalcFailed: 'Could not calculate cycling route. Check waypoints or use GPX.',
     noRouteFound: 'No cycling route found between waypoints',
   },

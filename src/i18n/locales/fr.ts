@@ -760,6 +760,9 @@
     rateLimited: 'Trop de recherches — patientez un instant',
     invalidKey: 'Planification temporairement indisponible',
     dailyLimit: 'Limite quotidienne de routes atteinte — réessayez plus tard',
+    serviceBusy:
+      'Service d’itinéraires saturé — patientez et réessayez (évitez de basculer asphalt/mixte rapidement).',
+    networkError: 'Impossible de joindre le service d’itinéraires — vérifiez le réseau et réessayez.',
     routeCalcFailed: 'Impossible de calculer la route. Vérifiez les points ou utilisez un GPX.',
     noRouteFound: 'Aucune route vélo entre les points',
   },

@@ -29,7 +29,7 @@ import {
   validateGpxFile,
   type GpxWaypointImport,
 } from '../services/gpx'
-import { buildRoutePoints, totalRouteKm } from '../utils/route'
+import { buildRoutePoints, sanitizeRouteCoords, sanitizeRoutePoints, totalRouteKm } from '../utils/route'
 import { haversineM } from '../services/geo'
 import { thinPoisForMap } from '../utils/poiThin'
 import { tileIdsAlongRoute } from '../services/poiQuery'
@@ -879,8 +879,8 @@ export const useMapStore = defineStore('map', () => {
       loadedFromCache.value = source === 'cache'
 
       routeName.value = record.name
-      routeCoords.value = record.routeCoords
-      routePoints.value = record.routePoints
+      routeCoords.value = sanitizeRouteCoords(record.routeCoords)
+      routePoints.value = sanitizeRoutePoints(record.routePoints)
       isNearbyMap.value =
         record.routeCoords.length === 1 ||
         (record.routeCoords.length <= 2 && totalRouteKm(record.routePoints) < 0.05)

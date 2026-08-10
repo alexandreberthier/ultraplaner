@@ -2,11 +2,75 @@ import type { RoutePoint } from '../../shared/types'
 import { haversineM } from '../services/geo'
 import { gradeToColor } from '../config/mapStyle'
 
+function isFiniteLngLat(lng: unknown, lat: unknown): boolean {
+  return typeof lng === 'number' && typeof lat === 'number' && Number.isFinite(lng) && Number.isFinite(lat)
+}
+
+function finiteElev(v: unknown): number | undefined {
+  return typeof v === 'number' && Number.isFinite(v) ? v : undefined
+}
+
+/** Drop null/NaN vertices before MapLibre setData / charts. */
+export function sanitizeRouteCoords(coordinates: [number, number][]): [number, number][] {
+  const out: [number, number][] = []
+  for (const c of coordinates) {
+    if (!c || c.length < 2) continue
+    const lng = c[0]
+    const lat = c[1]
+    if (isFiniteLngLat(lng, lat)) out.push([lng as number, lat as number])
+  }
+  return out
+}
+
+/** Normalize shared/GPX points so elevation/coords never pass null into MapLibre. */
+export function sanitizeRoutePoints(points: RoutePoint[]): RoutePoint[] {
+  const out: RoutePoint[] = []
+  for (const p of points) {
+    if (!isFiniteLngLat(p.lng, p.lat)) continue
+    const elevation = finiteElev(p.elevation)
+    const distanceFromStart =
+      typeof p.distanceFromStart === 'number' && Number.isFinite(p.distanceFromStart)
+        ? p.distanceFromStart
+        : undefined
+    const gradient =
+      typeof p.gradient === 'number' && Number.isFinite(p.gradient) ? p.gradient : undefined
+    out.push({
+      lat: p.lat,
+      lng: p.lng,
+      ...(elevation != null ? { elevation } : {}),
+      ...(distanceFromStart != null ? { distanceFromStart } : {}),
+      ...(gradient != null ? { gradient } : {}),
+    })
+  }
+  return out
+}
+
 export function buildRoutePoints(
   coordinates: [number, number][],
   elevations?: number[]
 ): RoutePoint[] {
-  const simplified = simplifyCoords(coordinates, elevations, 3000)
+  const cleanedCoords: [number, number][] = []
+  const cleanedEle: number[] | undefined = elevations?.length ? [] : undefined
+
+  for (let i = 0; i < coordinates.length; i++) {
+    const pair = coordinates[i]
+    if (!pair || !isFiniteLngLat(pair[0], pair[1])) continue
+    cleanedCoords.push([pair[0] as number, pair[1] as number])
+    if (cleanedEle && elevations) {
+      const e = finiteElev(elevations[i])
+      cleanedEle.push(e ?? 0)
+    }
+  }
+
+  // If caller passed elevations but none were finite, omit elevation entirely.
+  const useEle =
+    cleanedEle &&
+    elevations &&
+    elevations.some((e) => finiteElev(e) != null)
+      ? cleanedEle
+      : undefined
+
+  const simplified = simplifyCoords(cleanedCoords, useEle, 3000)
   const points: RoutePoint[] = []
   let totalM = 0
 
@@ -18,9 +82,10 @@ export function buildRoutePoints(
     }
 
     let gradient: number | undefined
+    const elev = finiteElev(simplified.elevations?.[i])
     if (i > 0 && simplified.elevations) {
-      const prevEle = simplified.elevations[i - 1]
-      const currEle = simplified.elevations[i]
+      const prevEle = finiteElev(simplified.elevations[i - 1])
+      const currEle = elev
       const prev = simplified.coords[i - 1]!
       const distM = haversineM({ lat: prev[1], lng: prev[0] }, { lat, lng })
       if (distM > 1 && prevEle != null && currEle != null) {
@@ -31,9 +96,9 @@ export function buildRoutePoints(
     points.push({
       lat,
       lng,
-      elevation: simplified.elevations?.[i],
+      ...(elev != null ? { elevation: elev } : {}),
       distanceFromStart: totalM / 1000,
-      gradient,
+      ...(gradient != null ? { gradient } : {}),
     })
   }
 
@@ -53,12 +118,12 @@ function simplifyCoords(
   const simplifiedEle: number[] = []
   for (let i = 0; i < coords.length; i += step) {
     simplified.push(coords[i]!)
-    if (elevations) simplifiedEle.push(elevations[i] ?? 0)
+    if (elevations) simplifiedEle.push(finiteElev(elevations[i]) ?? 0)
   }
   const last = coords[coords.length - 1]!
   if (simplified.at(-1)?.[0] !== last[0] || simplified.at(-1)?.[1] !== last[1]) {
     simplified.push(last)
-    if (elevations) simplifiedEle.push(elevations[elevations.length - 1] ?? 0)
+    if (elevations) simplifiedEle.push(finiteElev(elevations[elevations.length - 1]) ?? 0)
   }
   return { coords: simplified, elevations: elevations ? simplifiedEle : undefined }
 }
@@ -222,7 +287,11 @@ export function buildElevationSamples(
   maxPoints = 400
 ): { km: number; elevation: number }[] {
   const samples = points.filter(
-    (p) => p.elevation != null && p.distanceFromStart != null
+    (p) =>
+      typeof p.elevation === 'number' &&
+      Number.isFinite(p.elevation) &&
+      typeof p.distanceFromStart === 'number' &&
+      Number.isFinite(p.distanceFromStart)
   )
   if (!samples.length) return []
 

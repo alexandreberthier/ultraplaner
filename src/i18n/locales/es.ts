@@ -761,6 +761,9 @@ export default {
     rateLimited: 'Demasiadas búsquedas — espera un momento',
     invalidKey: 'Planificación temporalmente no disponible',
     dailyLimit: 'Límite diario de rutas alcanzado — inténtalo más tarde',
+    serviceBusy:
+      'El servicio de rutas está saturado — espera un momento e inténtalo de nuevo (no cambies asfalto/mixto rápidamente).',
+    networkError: 'Sin conexión al servicio de rutas — comprueba la red e inténtalo de nuevo.',
     routeCalcFailed: 'No se pudo calcular la ruta. Revisa los puntos o usa GPX.',
     noRouteFound: 'No hay ruta ciclista entre los puntos',
   },

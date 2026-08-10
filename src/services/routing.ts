@@ -47,6 +47,8 @@ export interface RouteRequestOptions {
   /** Default true — avoid stairways on bike routes. */
   avoidSteps?: boolean
   avoidFerries?: boolean
+  /** Cancel in-flight ORS request (profile/surface toggles). */
+  signal?: AbortSignal
 }
 
 export interface GeocodeResult {
@@ -59,6 +61,12 @@ export interface CyclingRouteResult {
   coordinates: [number, number][]
   elevations: number[]
   surfaceSummary: RouteSurfaceSummary | null
+}
+
+export function isRouteAborted(err: unknown): boolean {
+  if (!err || typeof err !== 'object') return false
+  const name = (err as { name?: string }).name
+  return name === 'AbortError' || name === 'OrsRouteAbortedError'
 }
 
 function orsKey(): string {
@@ -98,6 +106,45 @@ function buildOrsOptions(opts: RouteRequestOptions): Record<string, unknown> | u
   }
 }
 
+function finiteNumber(v: unknown): number | null {
+  return typeof v === 'number' && Number.isFinite(v) ? v : null
+}
+
+function throwIfAborted(signal?: AbortSignal) {
+  if (signal?.aborted) {
+    const err = new DOMException('Aborted', 'AbortError')
+    throw err
+  }
+}
+
+function sleep(ms: number, signal?: AbortSignal): Promise<void> {
+  return new Promise((resolve, reject) => {
+    if (signal?.aborted) {
+      reject(new DOMException('Aborted', 'AbortError'))
+      return
+    }
+    const timer = setTimeout(() => resolve(), ms)
+    const onAbort = () => {
+      clearTimeout(timer)
+      reject(new DOMException('Aborted', 'AbortError'))
+    }
+    signal?.addEventListener('abort', onAbort, { once: true })
+  })
+}
+
+function isTransientOrsStatus(status: number): boolean {
+  return status === 502 || status === 503 || status === 504
+}
+
+function isNetworkFailure(err: unknown): boolean {
+  if (isRouteAborted(err)) return false
+  if (err instanceof TypeError) return true
+  if (err instanceof Error) {
+    return /network|failed to fetch|NetworkError|Load failed/i.test(err.message)
+  }
+  return false
+}
+
 /** Search addresses in supported Central European region. */
 export async function searchAddresses(query: string, limit = 6): Promise<GeocodeResult[]> {
   const text = query.trim()
@@ -130,7 +177,8 @@ export async function searchAddresses(query: string, limit = 6): Promise<Geocode
 
   return (data.features ?? [])
     .map((f) => {
-      const [lng, lat] = f.geometry?.coordinates ?? []
+      const lng = finiteNumber(f.geometry?.coordinates?.[0])
+      const lat = finiteNumber(f.geometry?.coordinates?.[1])
       if (lat == null || lng == null) return null
       const label = f.properties?.label ?? f.properties?.name ?? `${lat.toFixed(4)}, ${lng.toFixed(4)}`
       return { lat, lng, label }
@@ -138,7 +186,81 @@ export async function searchAddresses(query: string, limit = 6): Promise<Geocode
     .filter((r): r is GeocodeResult => r != null)
 }
 
-/** Fetch a cycling route through waypoints via OpenRouteService (free tier). */
+type OrsGeoJson = {
+  features?: {
+    geometry?: { type?: string; coordinates?: ([number, number] | [number, number, number | null])[] }
+    properties?: {
+      extras?: {
+        surface?: {
+          summary?: OrsSurfaceSummaryRow[]
+        }
+      }
+    }
+  }[]
+}
+
+function parseOrsRoute(data: OrsGeoJson): CyclingRouteResult {
+  const feature = data.features?.[0]
+  const line = feature?.geometry
+  if (line?.type !== 'LineString' || !line.coordinates?.length) {
+    throw new Error(tGlobal('routing.noRouteFound'))
+  }
+
+  const coords: [number, number][] = []
+  const elevRaw: (number | null)[] = []
+  for (const c of line.coordinates) {
+    const lng = finiteNumber(c[0])
+    const lat = finiteNumber(c[1])
+    if (lng == null || lat == null) continue
+    coords.push([lng, lat])
+    elevRaw.push(c.length >= 3 ? finiteNumber(c[2]) : null)
+  }
+
+  if (coords.length < 2) {
+    throw new Error(tGlobal('routing.noRouteFound'))
+  }
+
+  // Keep elevation only when every kept vertex has a finite Z (null → 0 would fake flats).
+  const elevations =
+    elevRaw.length === coords.length && elevRaw.every((e) => e != null)
+      ? (elevRaw as number[])
+      : elevRaw.length === coords.length && elevRaw.some((e) => e != null)
+        ? elevRaw.map((e) => e ?? 0)
+        : []
+
+  const surfaceSummary = bucketOrsSurfaceSummary(
+    feature?.properties?.extras?.surface?.summary
+  )
+
+  return {
+    coordinates: coords,
+    elevations,
+    surfaceSummary,
+  }
+}
+
+async function postOrsDirections(
+  profile: CyclingProfile,
+  body: Record<string, unknown>,
+  key: string,
+  signal?: AbortSignal
+): Promise<Response> {
+  return fetch(`https://api.openrouteservice.org/v2/directions/${profile}/geojson`, {
+    method: 'POST',
+    headers: {
+      Authorization: key,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(body),
+    signal,
+  })
+}
+
+/**
+ * Fetch a cycling route through waypoints via OpenRouteService (free tier).
+ * Retries transient 503/network once with short backoff; asphalt (cycling-road)
+ * falls back to cycling-regular after exhausted 503 retries.
+ */
 export async function fetchCyclingRoute(
   waypoints: LatLng[],
   profileOrOpts: CyclingProfile | RouteRequestOptions = CYCLING_PROFILE
@@ -152,80 +274,88 @@ export async function fetchCyclingRoute(
   const opts: RouteRequestOptions =
     typeof profileOrOpts === 'string' ? { profile: profileOrOpts } : profileOrOpts
   const profile = opts.profile ?? CYCLING_PROFILE
+  const signal = opts.signal
 
   const coordinates = waypoints.map((w) => [w.lng, w.lat])
   // Default ORS snap radius is only 350 m — mountain/parking clicks often fail (code 2010).
   const radiuses = waypoints.map(() => 2000)
   const options = buildOrsOptions(opts)
-
-  const res = await fetch(
-    `https://api.openrouteservice.org/v2/directions/${profile}/geojson`,
-    {
-      method: 'POST',
-      headers: {
-        Authorization: key,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        coordinates,
-        elevation: true,
-        radiuses,
-        extra_info: ['surface'],
-        ...(options ? { options } : {}),
-      }),
-    }
-  )
-
-  if (!res.ok) {
-    let detail = res.statusText
-    try {
-      const err = (await res.json()) as { error?: { message?: string } }
-      detail = err.error?.message ?? detail
-    } catch {
-      /* ignore */
-    }
-    if (res.status === 401 || res.status === 403) {
-      throw new Error(tGlobal('routing.invalidKey'))
-    }
-    if (res.status === 429) {
-      throw new Error(tGlobal('routing.dailyLimit'))
-    }
-    throw new Error(tGlobal('routing.routeCalcFailed', { detail }))
+  const body: Record<string, unknown> = {
+    coordinates,
+    elevation: true,
+    radiuses,
+    extra_info: ['surface'],
+    ...(options ? { options } : {}),
   }
 
-  const data = (await res.json()) as {
-    features?: {
-      geometry?: { type?: string; coordinates?: ([number, number] | [number, number, number])[] }
-      properties?: {
-        extras?: {
-          surface?: {
-            summary?: OrsSurfaceSummaryRow[]
+  const profilesToTry: CyclingProfile[] =
+    profile === 'cycling-road' ? ['cycling-road', 'cycling-regular'] : [profile]
+
+  let lastBusy = false
+  let lastNetwork = false
+
+  for (let pi = 0; pi < profilesToTry.length; pi++) {
+    const tryProfile = profilesToTry[pi]!
+    const maxAttempts = 2 // initial + 1 backoff retry
+
+    for (let attempt = 0; attempt < maxAttempts; attempt++) {
+      throwIfAborted(signal)
+      let res: Response
+      try {
+        res = await postOrsDirections(tryProfile, body, key, signal)
+      } catch (err) {
+        if (isRouteAborted(err)) throw err
+        if (isNetworkFailure(err)) {
+          lastNetwork = true
+          if (attempt < maxAttempts - 1) {
+            await sleep(450 + attempt * 350, signal)
+            continue
           }
+          break
         }
+        throw err
       }
-    }[]
+
+      if (res.ok) {
+        const data = (await res.json()) as OrsGeoJson
+        throwIfAborted(signal)
+        return parseOrsRoute(data)
+      }
+
+      if (res.status === 401 || res.status === 403) {
+        throw new Error(tGlobal('routing.invalidKey'))
+      }
+      if (res.status === 429) {
+        throw new Error(tGlobal('routing.dailyLimit'))
+      }
+
+      if (isTransientOrsStatus(res.status)) {
+        lastBusy = true
+        if (attempt < maxAttempts - 1) {
+          await sleep(450 + attempt * 350, signal)
+          continue
+        }
+        break
+      }
+
+      let detail = res.statusText
+      try {
+        const errBody = (await res.json()) as { error?: { message?: string } }
+        detail = errBody.error?.message ?? detail
+      } catch {
+        /* ignore */
+      }
+      throw new Error(tGlobal('routing.routeCalcFailed', { detail }))
+    }
+
+    // Fallback cycling-road → cycling-regular only after transient/network exhaustion.
+    if (pi === 0 && profilesToTry.length > 1 && (lastBusy || lastNetwork)) {
+      continue
+    }
+    break
   }
 
-  const feature = data.features?.[0]
-  const line = feature?.geometry
-  if (line?.type !== 'LineString' || !line.coordinates?.length) {
-    throw new Error(tGlobal('routing.noRouteFound'))
-  }
-
-  const coords: [number, number][] = []
-  const elevations: number[] = []
-  for (const c of line.coordinates) {
-    coords.push([c[0], c[1]])
-    if (c.length >= 3 && typeof c[2] === 'number') elevations.push(c[2])
-  }
-
-  const surfaceSummary = bucketOrsSurfaceSummary(
-    feature?.properties?.extras?.surface?.summary
-  )
-
-  return {
-    coordinates: coords,
-    elevations: elevations.length === coords.length ? elevations : [],
-    surfaceSummary,
-  }
+  if (lastNetwork) throw new Error(tGlobal('routing.networkError'))
+  if (lastBusy) throw new Error(tGlobal('routing.serviceBusy'))
+  throw new Error(tGlobal('routing.routeCalcFailed', { detail: '' }))
 }

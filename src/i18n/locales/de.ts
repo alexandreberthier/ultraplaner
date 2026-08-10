@@ -763,6 +763,10 @@ export default {
     rateLimited: 'Zu viele Suchanfragen — bitte kurz warten',
     invalidKey: 'Routenplanung vorübergehend nicht verfügbar',
     dailyLimit: 'Tageslimit der Routenplanung erreicht — bitte später erneut versuchen',
+    serviceBusy:
+      'Routen-Service gerade überlastet — bitte kurz warten und erneut versuchen (Asphalt/Gemischt nicht rasch umschalten).',
+    networkError:
+      'Keine Verbindung zum Routen-Service — Netz prüfen und erneut versuchen.',
     routeCalcFailed: 'Radroute konnte nicht berechnet werden. Bitte Wegpunkte prüfen oder GPX nutzen.',
     noRouteFound: 'Keine Radroute zwischen den Wegpunkten gefunden',
   },
