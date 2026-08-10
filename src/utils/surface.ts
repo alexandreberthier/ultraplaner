@@ -4,13 +4,14 @@ import type {
   RouteSurfaceSegment,
   RouteSurfaceSummary,
 } from '../../shared/types'
+import { haversineCoords } from '../services/geo'
 
 /**
  * ORS surface IDs → rider buckets.
  * @see https://giscience.github.io/openrouteservice/api-reference/endpoints/directions/extra-info/surface
  */
 const SURFACE_TO_BUCKET: Record<number, RouteSurfaceBucketId> = {
-  0: 'unknown',
+  0: 'unknown', // Unknown / untagged
   1: 'asphalt', // Paved
   2: 'unpaved',
   3: 'asphalt',
@@ -18,17 +19,36 @@ const SURFACE_TO_BUCKET: Record<number, RouteSurfaceBucketId> = {
   5: 'cobble',
   6: 'asphalt', // Metal
   7: 'asphalt', // Wood
-  8: 'gravel',
-  9: 'gravel',
+  8: 'gravel', // Compacted gravel
+  9: 'gravel', // Fine gravel
   10: 'gravel',
-  11: 'unpaved',
-  12: 'unpaved',
-  13: 'unpaved', // Ice
-  14: 'cobble', // Paving stones
-  15: 'unpaved',
-  16: 'unpaved',
-  17: 'unpaved',
+  11: 'unpaved', // Dirt
+  12: 'unpaved', // Ground
+  13: 'unpaved', // Ice / snow
+  14: 'cobble', // Paving stones / sett / brick
+  15: 'unpaved', // Sand
+  16: 'unpaved', // Woodchips
+  17: 'unpaved', // Grass
   18: 'unpaved', // Grass paver
+}
+
+/**
+ * ORS waytype IDs → rider surface buckets (when OSM surface is missing).
+ * Central-EU cycling heuristic: roads/streets/cycleways ≈ paved; tracks ≈ gravel; paths ≈ unpaved.
+ * @see https://giscience.github.io/openrouteservice/api-reference/endpoints/directions/extra-info/waytype
+ */
+const WAYTYPE_TO_BUCKET: Record<number, RouteSurfaceBucketId> = {
+  0: 'unknown',
+  1: 'asphalt', // State road
+  2: 'asphalt', // Road
+  3: 'asphalt', // Street
+  4: 'unpaved', // Path
+  5: 'gravel', // Track
+  6: 'asphalt', // Cycleway
+  7: 'asphalt', // Footway / pedestrian
+  8: 'unknown', // Steps
+  9: 'unknown', // Ferry
+  10: 'unknown', // Construction
 }
 
 const BUCKET_ORDER: RouteSurfaceBucketId[] = [
@@ -62,11 +82,15 @@ export type OrsSurfaceSummaryRow = {
   amount: number
 }
 
-/** ORS extras.surface.values row: [fromIdx, toIdx, surfaceId] */
+/** ORS extras.*.values row: [fromIdx, toIdx, valueId] — covers edges [from, to). */
 export type OrsSurfaceValueRow = [number, number, number]
 
 export function orsSurfaceIdToBucket(value: number): RouteSurfaceBucketId {
   return SURFACE_TO_BUCKET[value] ?? 'unknown'
+}
+
+export function orsWaytypeIdToBucket(value: number): RouteSurfaceBucketId {
+  return WAYTYPE_TO_BUCKET[value] ?? 'unknown'
 }
 
 /** Merge adjacent same-bucket index ranges (fewer map features). */
@@ -122,6 +146,156 @@ export function parseOrsSurfaceValues(
   return mergeSurfaceSegments(raw)
 }
 
+/** Value covering edge from vertex `edgeIdx` → edgeIdx+1 (ORS [from, to) ranges). */
+function lookupExtraAtEdge(
+  values: OrsSurfaceValueRow[] | undefined | null,
+  edgeIdx: number
+): number | null {
+  if (!values?.length) return null
+  for (const row of values) {
+    if (!Array.isArray(row) || row.length < 3) continue
+    const from = row[0]
+    const to = row[1]
+    const id = row[2]
+    if (!Number.isFinite(from) || !Number.isFinite(to) || !Number.isFinite(id)) continue
+    if (edgeIdx >= from && edgeIdx < to) return id
+  }
+  return null
+}
+
+/**
+ * Per-edge buckets: prefer ORS surface; when unknown/untagged, fall back to waytype
+ * (highway-class heuristic). Gaps with neither stay unknown.
+ */
+export function buildEnrichedSurfaceSegments(
+  coordCount: number,
+  surfaceValues: OrsSurfaceValueRow[] | undefined | null,
+  waytypeValues: OrsSurfaceValueRow[] | undefined | null
+): RouteSurfaceSegment[] {
+  if (coordCount < 2) return []
+  const hasSurface = Boolean(surfaceValues?.length)
+  const hasWaytype = Boolean(waytypeValues?.length)
+  if (!hasSurface && !hasWaytype) return []
+
+  const edgeBuckets: RouteSurfaceBucketId[] = []
+  for (let i = 0; i < coordCount - 1; i++) {
+    let bucket: RouteSurfaceBucketId = 'unknown'
+    if (hasSurface) {
+      const sid = lookupExtraAtEdge(surfaceValues, i)
+      if (sid != null) bucket = orsSurfaceIdToBucket(sid)
+    }
+    if (bucket === 'unknown' && hasWaytype) {
+      const wid = lookupExtraAtEdge(waytypeValues, i)
+      if (wid != null) bucket = orsWaytypeIdToBucket(wid)
+    }
+    edgeBuckets.push(bucket)
+  }
+
+  const raw: RouteSurfaceSegment[] = []
+  for (let i = 0; i < edgeBuckets.length; i++) {
+    const id = edgeBuckets[i]!
+    const last = raw.at(-1)
+    if (last && last.id === id && last.endIdx === i) {
+      last.endIdx = i + 1
+    } else {
+      raw.push({ startIdx: i, endIdx: i + 1, id })
+    }
+  }
+  return mergeSurfaceSegments(raw)
+}
+
+function bucketsFromDistances(
+  distM: Record<RouteSurfaceBucketId, number>,
+  totalM: number
+): RouteSurfaceBucket[] {
+  if (totalM <= 0) return []
+  const buckets: RouteSurfaceBucket[] = []
+  for (const id of BUCKET_ORDER) {
+    const m = distM[id]
+    if (m <= 0) continue
+    buckets.push({
+      id,
+      km: Math.round((m / 1000) * 100) / 100,
+      percent: Math.round((m / totalM) * 1000) / 10,
+    })
+  }
+  if (buckets.length) {
+    const sum = buckets.reduce((s, b) => s + b.percent, 0)
+    const delta = Math.round((100 - sum) * 10) / 10
+    if (delta !== 0) {
+      const largest = buckets.reduce((a, b) => (b.percent >= a.percent ? b : a))
+      largest.percent = Math.round((largest.percent + delta) * 10) / 10
+    }
+  }
+  buckets.sort((a, b) => b.percent - a.percent)
+  return buckets
+}
+
+/** Distance-weighted summary from enriched segments + route coordinates. */
+export function summarizeSurfaceSegments(
+  coords: [number, number][],
+  segments: RouteSurfaceSegment[]
+): RouteSurfaceSummary | null {
+  if (!coords.length || !segments.length) return null
+
+  const distM: Record<RouteSurfaceBucketId, number> = {
+    asphalt: 0,
+    cobble: 0,
+    gravel: 0,
+    unpaved: 0,
+    unknown: 0,
+  }
+
+  let totalM = 0
+  const last = coords.length - 1
+
+  for (const seg of segments) {
+    const from = Math.max(0, Math.min(seg.startIdx, last))
+    const to = Math.max(0, Math.min(seg.endIdx, last))
+    for (let i = from; i < to; i++) {
+      const a = coords[i]
+      const b = coords[i + 1]
+      if (!a || !b) continue
+      const m = haversineCoords(a, b)
+      if (m <= 0) continue
+      distM[seg.id] += m
+      totalM += m
+    }
+  }
+
+  if (totalM <= 0) return null
+
+  return {
+    buckets: bucketsFromDistances(distM, totalM),
+    totalKm: Math.round((totalM / 1000) * 100) / 100,
+    segments,
+  }
+}
+
+/**
+ * Build rider-facing surface summary from ORS surface (+ optional waytype) extras.
+ * Waytype fills OSM-untagged (surface=0) stretches with highway-class heuristics.
+ */
+export function buildRouteSurfaceSummary(
+  coords: [number, number][],
+  surfaceValues: OrsSurfaceValueRow[] | undefined | null,
+  waytypeValues?: OrsSurfaceValueRow[] | undefined | null,
+  surfaceSummaryRows?: OrsSurfaceSummaryRow[] | undefined | null
+): RouteSurfaceSummary | null {
+  const segments = buildEnrichedSurfaceSegments(
+    coords.length,
+    surfaceValues,
+    waytypeValues
+  )
+
+  if (segments.length) {
+    return summarizeSurfaceSegments(coords, segments)
+  }
+
+  // No geometry ranges — fall back to ORS distance summary only (no map coloring).
+  return bucketOrsSurfaceSummary(surfaceSummaryRows, null)
+}
+
 /** Aggregate ORS surface summary rows into rider buckets (sorted by %). */
 export function bucketOrsSurfaceSummary(
   rows: OrsSurfaceSummaryRow[] | undefined | null,
@@ -154,33 +328,9 @@ export function bucketOrsSurfaceSummary(
     return segments?.length ? { buckets: [], totalKm: 0, segments } : null
   }
 
-  const totalKm = totalM / 1000
-  const buckets: RouteSurfaceBucket[] = []
-
-  for (const id of BUCKET_ORDER) {
-    const m = distM[id]
-    if (m <= 0) continue
-    buckets.push({
-      id,
-      km: Math.round((m / 1000) * 100) / 100,
-      percent: Math.round((m / totalM) * 1000) / 10,
-    })
-  }
-
-  // Fix rounding so percents sum ~100
-  if (buckets.length) {
-    const sum = buckets.reduce((s, b) => s + b.percent, 0)
-    const delta = Math.round((100 - sum) * 10) / 10
-    if (delta !== 0) {
-      const largest = buckets.reduce((a, b) => (b.percent >= a.percent ? b : a))
-      largest.percent = Math.round((largest.percent + delta) * 10) / 10
-    }
-  }
-
-  buckets.sort((a, b) => b.percent - a.percent)
   return {
-    buckets,
-    totalKm: Math.round(totalKm * 100) / 100,
+    buckets: bucketsFromDistances(distM, totalM),
+    totalKm: Math.round((totalM / 1000) * 100) / 100,
     ...(segments?.length ? { segments } : {}),
   }
 }
@@ -219,7 +369,7 @@ export function buildSurfaceLineFeatures(
 
 /**
  * Ordered percent shares along the route (for the compact bar).
- * Falls back to summary buckets (mix-only) when no segments.
+ * Uses distance-weighted bucket percents when segments lack geometry weighting.
  */
 export function surfaceBarShares(
   summary: RouteSurfaceSummary | null | undefined

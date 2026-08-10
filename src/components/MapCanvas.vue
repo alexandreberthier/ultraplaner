@@ -1542,7 +1542,7 @@ onUnmounted(() => {
     >
       <li v-for="b in surfaceLegendBuckets" :key="b.id">
         <span class="surface-dot" :style="{ background: SURFACE_COLORS[b.id] }" />
-        <span>{{ t(SURFACE_I18N_KEYS[b.id]) }}</span>
+        <span>{{ t(SURFACE_I18N_KEYS[b.id]) }} {{ b.percent }}%</span>
       </li>
     </ul>
 

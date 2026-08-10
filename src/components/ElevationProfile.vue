@@ -527,7 +527,7 @@ onUnmounted(() => {
                 :key="`${b.id}-${i}`"
                 class="surface-seg"
                 :style="{ width: `${b.percent}%`, background: SURFACE_COLORS[b.id] }"
-                :title="surfaceLabel(b.id)"
+                :title="`${surfaceLabel(b.id)} ${b.percent}%`"
               />
             </div>
           </div>

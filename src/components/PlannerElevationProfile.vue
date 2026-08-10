@@ -304,7 +304,7 @@ onUnmounted(() => {
                 :key="`${b.id}-${i}`"
                 class="surface-seg"
                 :style="{ width: `${b.percent}%`, background: SURFACE_COLORS[b.id] }"
-                :title="surfaceLabel(b.id)"
+                :title="`${surfaceLabel(b.id)} ${b.percent}%`"
               />
             </div>
           </div>
@@ -312,6 +312,7 @@ onUnmounted(() => {
             <li v-for="b in surfaceBuckets" :key="`l-${b.id}`" class="surface-item">
               <span class="surface-swatch" :style="{ background: SURFACE_COLORS[b.id] }" />
               <span class="surface-name">{{ surfaceLabel(b.id) }}</span>
+              <strong class="surface-pct">{{ b.percent }}%</strong>
             </li>
           </ul>
         </div>
@@ -522,10 +523,11 @@ onUnmounted(() => {
 
 .surface-item {
   display: inline-flex;
-  align-items: center;
+  align-items: baseline;
   gap: 0.25rem;
   font-size: 0.7rem;
   color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
   line-height: 1.1;
 }
 
@@ -534,10 +536,16 @@ onUnmounted(() => {
   height: 0.45rem;
   border-radius: 50%;
   flex-shrink: 0;
+  align-self: center;
 }
 
 .surface-name {
   font-weight: 600;
+}
+
+.surface-pct {
+  font-weight: 800;
+  color: var(--text);
 }
 
 .plot {

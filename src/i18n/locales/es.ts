@@ -568,7 +568,7 @@ export default {
     surfaceCobble: 'Adoquín',
     surfaceGravel: 'Grava',
     surfaceUnpaved: 'Sin pavimentar',
-    surfaceUnknown: 'Desconocido',
+    surfaceUnknown: 'Sin dato',
   },
   mapCanvas: {
     basemap: 'Estilo de mapa',

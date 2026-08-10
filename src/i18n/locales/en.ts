@@ -568,7 +568,7 @@ export default {
     surfaceCobble: 'Cobble',
     surfaceGravel: 'Gravel',
     surfaceUnpaved: 'Unpaved',
-    surfaceUnknown: 'Unknown',
+    surfaceUnknown: 'No data',
   },
   mapCanvas: {
     basemap: 'Map style',

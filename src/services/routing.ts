@@ -2,8 +2,7 @@ import type { LatLng, RouteSurfaceSummary } from '../../shared/types'
 import { GEOCODE_BBOX } from '../config/poiCategories'
 import { tGlobal } from '../i18n'
 import {
-  bucketOrsSurfaceSummary,
-  parseOrsSurfaceValues,
+  buildRouteSurfaceSummary,
   type OrsSurfaceSummaryRow,
   type OrsSurfaceValueRow,
 } from '../utils/surface'
@@ -204,15 +203,20 @@ export async function searchAddresses(query: string, limit = 6): Promise<Geocode
     .filter((r): r is GeocodeResult => r != null)
 }
 
+type OrsExtraBlock = {
+  summary?: OrsSurfaceSummaryRow[]
+  values?: OrsSurfaceValueRow[]
+}
+
 type OrsGeoJson = {
   features?: {
     geometry?: { type?: string; coordinates?: ([number, number] | [number, number, number | null])[] }
     properties?: {
       extras?: {
-        surface?: {
-          summary?: OrsSurfaceSummaryRow[]
-          values?: OrsSurfaceValueRow[]
-        }
+        surface?: OrsExtraBlock
+        /** Docs table key (plural); some responses use singular `waytype`. */
+        waytypes?: OrsExtraBlock
+        waytype?: OrsExtraBlock
       }
     }
   }[]
@@ -247,11 +251,14 @@ function parseOrsRoute(data: OrsGeoJson): CyclingRouteResult {
         ? elevRaw.map((e) => e ?? 0)
         : []
 
-  const surfaceExtras = feature?.properties?.extras?.surface
-  const surfaceSegments = parseOrsSurfaceValues(surfaceExtras?.values)
-  const surfaceSummary = bucketOrsSurfaceSummary(
-    surfaceExtras?.summary,
-    surfaceSegments
+  const extras = feature?.properties?.extras
+  const surfaceExtras = extras?.surface
+  const waytypeExtras = extras?.waytypes ?? extras?.waytype
+  const surfaceSummary = buildRouteSurfaceSummary(
+    coords,
+    surfaceExtras?.values,
+    waytypeExtras?.values,
+    surfaceExtras?.summary
   )
 
   return {
@@ -307,7 +314,8 @@ export async function fetchCyclingRoute(
     coordinates,
     elevation: true,
     radiuses,
-    extra_info: ['surface'],
+    // surface = OSM surface tags; waytype fills untagged stretches via highway class
+    extra_info: ['surface', 'waytype'],
     ...(preference ? { preference } : {}),
     ...(options ? { options } : {}),
   }

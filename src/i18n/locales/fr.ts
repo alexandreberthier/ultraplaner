@@ -567,7 +567,7 @@
     surfaceCobble: 'Pavé',
     surfaceGravel: 'Gravier',
     surfaceUnpaved: 'Non bitumé',
-    surfaceUnknown: 'Inconnu',
+    surfaceUnknown: 'Non renseigné',
   },
   mapCanvas: {
     basemap: 'Style de carte',

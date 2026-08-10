@@ -568,7 +568,7 @@ export default {
     surfaceCobble: 'Pflaster',
     surfaceGravel: 'Schotter',
     surfaceUnpaved: 'Unbefestigt',
-    surfaceUnknown: 'Unbekannt',
+    surfaceUnknown: 'ohne Angabe',
   },
   mapCanvas: {
     basemap: 'Kartenstil',
