@@ -32,6 +32,7 @@ import { poiCategoryEmoji } from '../utils/poiLabels'
 import type { ControlPointKind, Poi, PoiCategory } from '../../shared/types'
 import {
   DEFAULT_POI_CATEGORIES,
+  NEARBY_DEFAULT_POI_CATEGORIES,
   NEARBY_DEFAULT_POI_RADIUS_M,
 } from '../config/poiCategories'
 
@@ -204,8 +205,9 @@ function nearbyRescanRadius(): number {
 }
 
 function nearbyRescanCategories(): PoiCategory[] {
-  return store.activeCategories.length
-    ? [...store.activeCategories]
+  if (store.activeCategories.length) return [...store.activeCategories]
+  return store.isNearbyMap
+    ? [...NEARBY_DEFAULT_POI_CATEGORIES]
     : [...DEFAULT_POI_CATEGORIES]
 }
 
@@ -317,6 +319,18 @@ watch(
   () => {
     void maybeStartNearbyLocationFollow()
   }
+)
+
+/** Nearby maps: Umgebung-Optionen in Sidebar/Sheet auffindbar (Filter + Rescan). */
+watch(
+  () => store.isNearbyMap && store.mapReady,
+  (nearbyReady) => {
+    if (!nearbyReady) return
+    void nextTick(() => {
+      nearbyPanelRef.value?.setOpen(true)
+    })
+  },
+  { immediate: true }
 )
 
 function openExportMenuFromTip(e?: Event) {
@@ -941,6 +955,15 @@ function onDocClick(e: MouseEvent) {
           >
             <span aria-hidden="true">◎</span>
             <span class="map-cp-fab-label">{{ nearbyFabLabel }}</span>
+          </button>
+          <button
+            type="button"
+            class="map-cp-fab map-nearby-options"
+            :title="t('nearby.panelTitle')"
+            @click="openNearbyPanel"
+          >
+            <span aria-hidden="true">⚙</span>
+            <span class="map-cp-fab-label">{{ t('nearby.options') }}</span>
           </button>
           <template v-if="!store.isNearbyMap">
             <button
@@ -1857,7 +1880,8 @@ function onDocClick(e: MouseEvent) {
   }
 
   /* Umgebung: readable one-thumb rescan pill */
-  .map-nearby-fab {
+  .map-nearby-fab,
+  .map-nearby-options {
     width: auto;
     min-width: 52px;
     min-height: 52px;
@@ -1867,7 +1891,8 @@ function onDocClick(e: MouseEvent) {
     font-size: 0.92rem;
   }
 
-  .map-nearby-fab .map-cp-fab-label {
+  .map-nearby-fab .map-cp-fab-label,
+  .map-nearby-options .map-cp-fab-label {
     display: inline;
     font-size: 0.82rem;
     font-weight: 700;

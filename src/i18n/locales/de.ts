@@ -37,7 +37,6 @@ export default {
     uploadGpx: 'GPX hochladen',
     planRoute: 'Route planen',
     nearby: 'Umgebung',
-    nearbyCta: 'Umgebung öffnen',
     startCta: 'Jetzt loslegen',
     skipToContent: 'Zum Inhalt',
     appTitle: 'Route starten',
@@ -138,7 +137,7 @@ export default {
       a15: 'Siehe „Wie plane ich die Versorgung?“ bzw. „Öffnungszeiten & Höhenprofil?“.',
       q16: 'Was ist „Umgebung“?',
       a16:
-        'Umgebung = Standort + Umkreis-POIs (Pause, ohne Route). Kein Fahrtmodus — der gibt’s nur mit geladener Rennroute (nächste Versorgung entlang des Tracks). In der Umgebung: Radius/Kategorien wählen, Karte öffnen, Navigieren zum POI.',
+        'Umgebung = Standort + Umkreis-POIs (Pause, ohne Route). Ein Tipp auf „Umgebung“ öffnet direkt die Karte (Standard: 5 km, Tankstellen/Supermärkte/Trinkwasser). Radius und Kategorien danach in der Liste/Sidebar anpassen und neu laden. Kein Fahrtmodus — der braucht eine geladene Rennroute.',
       q18: 'Was sind Kontrollpunkte?',
       a18: 'Siehe „Wie plane ich die Versorgung?“.',
       q20: 'Wie funktioniert „Mit Wahoo verbinden“?',
@@ -221,7 +220,7 @@ export default {
     intro:
       'Pause unterwegs? Umgebung nutzt deinen Standort und sucht Versorgung im Umkreis — ohne GPX. (Fahrtmodus nur mit Route.)',
     introMapFirst:
-      'Umgebung: POIs im Umkreis um dich — nicht entlang einer Route. Radius und Kategorien unten wählen, dann ein Tipp zur Karte.',
+      'Standort wird geholt und die Karte öffnet sich sofort (Standard: 5 km, Tankstellen, Supermärkte, Trinkwasser). Radius und Kategorien kannst du auf der Karte in den Umgebung-Optionen ändern.',
     introMap:
       'Standort erneut holen und POIs im Umkreis neu laden. (Kein Fahrtmodus — der braucht eine Route.)',
     introMapRoute:
@@ -229,7 +228,7 @@ export default {
     radius: 'Suchradius',
     options: 'Radius & Kategorien',
     loadSummary: 'Lädt {count} Kategorien im Umkreis {m} m',
-    openMap: 'Umgebung öffnen',
+    openMap: 'Zur Karte',
     loadingPois: 'POIs werden geladen…',
     search: 'Standort nutzen & suchen',
     searchMap: 'Hier suchen',

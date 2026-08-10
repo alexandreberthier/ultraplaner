@@ -37,7 +37,6 @@ export default {
     uploadGpx: 'Subir GPX',
     planRoute: 'Planificar ruta',
     nearby: 'Alrededor',
-    nearbyCta: 'Abrir alrededor',
     startCta: 'Empezar',
     skipToContent: 'Ir al contenido',
     appTitle: 'Empezar la ruta',
@@ -142,7 +141,7 @@ export default {
       a15: 'Marcan huecos de suministro: tramos de al menos unos 25 km sin POI con tus categorías/filtros actuales. Así ves dónde planificar más o marcar favoritos.',
       q16: '¿Qué es «Alrededor»?',
       a16:
-        'Alrededor = tu ubicación + POIs en un radio (p. ej. una parada, sin ruta). Sin modo de marcha — ese solo existe con una ruta de carrera cargada (próximo avituallamiento a lo largo del track). En Alrededor: elige radio/categorías, abre el mapa, navega al POI.',
+        'Alrededor = tu ubicación + POIs en un radio (p. ej. una parada, sin ruta). Un toque en «Alrededor» abre el mapa al momento (por defecto: 5 km, gasolineras/supermercados/agua). Ajusta radio y categorías después en la lista/barra lateral y vuelve a cargar. Sin modo de marcha — hace falta una ruta de carrera cargada.',
     },
     poiGuide: {
       title: 'Avituallamiento para rutas ultracycling',
@@ -221,7 +220,7 @@ export default {
     intro:
       '¿Parada en ruta? Alrededor usa tu ubicación para buscar avituallamiento en un radio — sin GPX. (Modo de marcha solo con ruta.)',
     introMapFirst:
-      'Alrededor: POIs a tu alrededor — no a lo largo de una ruta. Elige radio y categorías abajo, luego un toque al mapa.',
+      'Se obtiene tu ubicación y se abre el mapa al momento (por defecto: 5 km, gasolineras, supermercados, agua). Cambia radio y categorías en el mapa bajo opciones de Alrededor.',
     introMap:
       'Actualiza el GPS y vuelve a cargar los POIs en el radio. (Sin modo de marcha — hace falta una ruta.)',
     introMapRoute:
@@ -229,7 +228,7 @@ export default {
     radius: 'Radio de búsqueda',
     options: 'Radio y categorías',
     loadSummary: 'Carga {count} categorías en {m} m',
-    openMap: 'Abrir alrededor',
+    openMap: 'Ir al mapa',
     loadingPois: 'Cargando POIs…',
     search: 'Usar ubicación y buscar',
     searchMap: 'Buscar aquí',

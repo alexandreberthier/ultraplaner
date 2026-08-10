@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { defineAsyncComponent, ref } from 'vue'
+import { defineAsyncComponent, nextTick, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import GpxForm from '../components/GpxForm.vue'
 import NearbyForm from '../components/NearbyForm.vue'
@@ -23,11 +23,12 @@ function scrollToApp() {
   appRef.value?.scrollIntoView({ behavior: 'smooth' })
 }
 
-/** Race-day: jump to nearby tab and start GPS → map in one tap (sync geo for iOS). */
-function startNearbyRace() {
+/** Umgebung: GPS → Karte sofort (Defaults), Form bleibt Fallback bei Geo-Fehler. */
+function startNearbyMapFirst() {
   tab.value = 'nearby'
-  scrollToApp()
-  nearbyFormRef.value?.openMapFirst()
+  void nextTick(() => {
+    nearbyFormRef.value?.openMapFirst()
+  })
 }
 
 function leavePlanMode() {
@@ -184,9 +185,6 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
                 <button type="button" class="cta-primary" @click="scrollToApp">
                   {{ t('landing.startCta') }}
                 </button>
-                <button type="button" class="cta-nearby" @click="startNearbyRace">
-                  {{ t('landing.nearbyCta') }}
-                </button>
               </div>
             </div>
           </div>
@@ -263,7 +261,7 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
               :aria-selected="tab === 'nearby'"
               :tabindex="tab === 'nearby' ? 0 : -1"
               :class="{ active: tab === 'nearby' }"
-              @click="tab = 'nearby'"
+              @click="startNearbyMapFirst"
             >
               {{ t('landing.nearby') }}
             </button>
@@ -588,26 +586,6 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
   gap: 0.65rem;
   justify-content: center;
   align-items: center;
-}
-
-.cta-nearby {
-  border-radius: 10px;
-  padding: 0.7rem 1.25rem;
-  font-size: 0.95rem;
-  font-weight: 700;
-  cursor: pointer;
-  background: rgba(255, 255, 255, 0.14);
-  color: #fff;
-  border: 1px solid rgba(255, 255, 255, 0.55);
-  backdrop-filter: blur(6px);
-  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.18);
-  transition: background 0.15s ease, transform 0.15s ease, border-color 0.15s ease;
-}
-
-.cta-nearby:hover {
-  background: rgba(255, 255, 255, 0.24);
-  border-color: #fff;
-  transform: translateY(-1px);
 }
 
 .stats-bar {

@@ -37,7 +37,6 @@ export default {
     uploadGpx: 'Upload GPX',
     planRoute: 'Plan route',
     nearby: 'Nearby',
-    nearbyCta: 'Open Nearby',
     startCta: 'Get started',
     skipToContent: 'Skip to content',
     appTitle: 'Start your route',
@@ -142,7 +141,7 @@ export default {
       a15: 'Red markings show supply gaps: stretches of at least about 25 km without a POI under your current categories/filters. That helps you spot where to plan extra or mark favorites.',
       q16: 'What is “Nearby”?',
       a16:
-        'Nearby = your location + radius POIs (e.g. a break, no route). No ride mode — that needs a loaded race route (next supply along the track). In Nearby: set radius/categories, open the map, navigate to a POI.',
+        'Nearby = your location + radius POIs (e.g. a break, no route). One tap on Nearby opens the map right away (defaults: 5 km, fuel/supermarkets/drinking water). Adjust radius and categories later in the list/sidebar and reload. No ride mode — that needs a loaded race route.',
     },
     poiGuide: {
       title: 'Supply planning for ultracycling routes',
@@ -221,7 +220,7 @@ export default {
     intro:
       'Taking a break? Nearby uses your location to find supply in a radius — no GPX. (Ride mode only with a route.)',
     introMapFirst:
-      'Nearby: POIs around you — not along a route. Set radius and categories below, then one tap to the map.',
+      'Getting your location and opening the map right away (defaults: 5 km, fuel, supermarkets, drinking water). Change radius and categories on the map under Nearby options.',
     introMap:
       'Refresh your GPS and reload POIs in the radius. (No ride mode — that needs a route.)',
     introMapRoute:
@@ -229,7 +228,7 @@ export default {
     radius: 'Search radius',
     options: 'Radius & categories',
     loadSummary: 'Loads {count} categories within {m} m',
-    openMap: 'Open Nearby',
+    openMap: 'Open map',
     loadingPois: 'Loading POIs…',
     search: 'Use location & search',
     searchMap: 'Search here',

@@ -5,8 +5,8 @@ import { useI18n } from 'vue-i18n'
 import type { PoiCategory } from '../../shared/types'
 import { useMapStore } from '../stores/mapStore'
 import {
-  DEFAULT_POI_CATEGORIES,
   MIN_POI_RADIUS_M,
+  NEARBY_DEFAULT_POI_CATEGORIES,
   NEARBY_DEFAULT_POI_RADIUS_M,
   NEARBY_MAX_POI_RADIUS_M,
   POI_CATEGORY_DEFS,
@@ -43,7 +43,7 @@ function initialCategories(): PoiCategory[] {
   if (props.inMap && store.activeCategories.length) {
     return [...store.activeCategories]
   }
-  return [...DEFAULT_POI_CATEGORIES]
+  return [...NEARBY_DEFAULT_POI_CATEGORIES]
 }
 
 const radiusM = ref(initialRadius())
@@ -108,6 +108,7 @@ function ensureGeoReady(): boolean {
 
 /** Landing: GPS → map shell with marker → navigate → load POIs (map stays visible). */
 function openMapFirst() {
+  if (creating.value) return
   if (!ensureGeoReady()) return
   creating.value = true
 

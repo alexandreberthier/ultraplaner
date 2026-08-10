@@ -13,6 +13,7 @@ import type {
 import {
   DEFAULT_POI_CATEGORIES,
   DEFAULT_POI_RADIUS_M,
+  NEARBY_DEFAULT_POI_CATEGORIES,
   NEARBY_DEFAULT_POI_RADIUS_M,
   POI_CATEGORY_DEFS,
 } from '../config/poiCategories'
@@ -634,7 +635,7 @@ export const useMapStore = defineStore('map', () => {
     lat: number,
     lng: number,
     radiusM: number = NEARBY_DEFAULT_POI_RADIUS_M,
-    categories: PoiCategory[] = [...DEFAULT_POI_CATEGORIES]
+    categories: PoiCategory[] = [...NEARBY_DEFAULT_POI_CATEGORIES]
   ) {
     loadGeneration++
     stopLoadTimer()
