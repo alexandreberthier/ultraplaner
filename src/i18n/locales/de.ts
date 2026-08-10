@@ -700,13 +700,13 @@ export default {
       'cycling-mountain': 'Gravel / MTB',
       'cycling-electric': 'E-Bike',
     },
-    surfaceTitle: 'Oberfläche',
-    surfaceHint: 'Bestimmt, welche Wege bevorzugt werden.',
+    surfaceTitle: 'Routenwahl',
+    surfaceHint: 'Schnellste Straßenverbindung oder auch Radwege und Nebenstrecken.',
     surface: {
-      asphalt: 'Asphalt bevorzugt',
-      asphaltHint: 'Straßen & asphaltierte Wege — weniger Schotter.',
-      mixed: 'Gemischt',
-      mixedHint: 'Radwege, Straßen und gemischte Beläge.',
+      fastest: 'Schnellste (Straßen)',
+      fastestHint: 'Schnellste Verbindung, eher normale Straßen — Radwege nicht priorisieren.',
+      mixed: 'Gemischt / Radwege ok',
+      mixedHint: 'Auch Radwege und Nebenstrecken — Beläge gemischt.',
     },
     hillTitle: 'Steigung',
     hillHint: 'Flachere Wege bevorzugen oder Steigungen eher akzeptieren.',
@@ -764,7 +764,7 @@ export default {
     invalidKey: 'Routenplanung vorübergehend nicht verfügbar',
     dailyLimit: 'Tageslimit der Routenplanung erreicht — bitte später erneut versuchen',
     serviceBusy:
-      'Routen-Service gerade überlastet — bitte kurz warten und erneut versuchen (Asphalt/Gemischt nicht rasch umschalten).',
+      'Routen-Service gerade überlastet — bitte kurz warten und erneut versuchen (Schnellste/Gemischt nicht rasch umschalten).',
     networkError:
       'Keine Verbindung zum Routen-Service — Netz prüfen und erneut versuchen.',
     routeCalcFailed: 'Radroute konnte nicht berechnet werden. Bitte Wegpunkte prüfen oder GPX nutzen.',

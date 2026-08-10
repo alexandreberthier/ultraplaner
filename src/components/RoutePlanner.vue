@@ -22,6 +22,7 @@ import {
   SURFACE_PREFERENCES,
   HILL_PREFERENCES,
   cyclingProfileForSurface,
+  orsPreferenceForSurface,
   type SurfacePreference,
   type HillPreference,
   type GeocodeResult,
@@ -743,7 +744,7 @@ function abortPendingRoute() {
 }
 
 function scheduleAutoRoute() {
-  // Cancel prior debounce + in-flight ORS so asphalt/mixed toggles don't stack requests.
+  // Cancel prior debounce + in-flight ORS so fastest/mixed toggles don't stack requests.
   abortPendingRoute()
 
   if (waypoints.value.length < 2) {
@@ -784,6 +785,7 @@ async function calculateRoute() {
     const pts: LatLng[] = waypoints.value.map((w) => ({ lat: w.lat, lng: w.lng }))
     const result = await fetchCyclingRoute(pts, {
       profile: cyclingProfileForSurface(surfacePreference.value),
+      preference: orsPreferenceForSurface(surfacePreference.value),
       hillPreference: hillPreference.value,
       avoidSteps: true,
       signal: ac.signal,

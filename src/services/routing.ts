@@ -20,15 +20,23 @@ export const CYCLING_PROFILES: readonly CyclingProfile[] = [
 export const CYCLING_PROFILE: CyclingProfile = 'cycling-regular'
 
 /**
- * Simplified planner surface choice (maps to ORS cycling profiles).
- * asphalt → cycling-road; mixed → cycling-regular (paths + streets).
+ * Planner route style (ORS profile + preference).
+ * fastest → cycling-road + preference fastest (streets over cycleways)
+ * mixed → cycling-regular + recommended (cycleways/side paths OK)
  */
-export type SurfacePreference = 'asphalt' | 'mixed'
+export type SurfacePreference = 'fastest' | 'mixed'
 
-export const SURFACE_PREFERENCES: readonly SurfacePreference[] = ['asphalt', 'mixed'] as const
+/** ORS Directions `preference` — fastest still accepted; default API value is recommended. */
+export type OrsRoutePreference = 'fastest' | 'shortest' | 'recommended'
+
+export const SURFACE_PREFERENCES: readonly SurfacePreference[] = ['fastest', 'mixed'] as const
 
 export function cyclingProfileForSurface(surface: SurfacePreference): CyclingProfile {
-  return surface === 'asphalt' ? 'cycling-road' : 'cycling-regular'
+  return surface === 'fastest' ? 'cycling-road' : 'cycling-regular'
+}
+
+export function orsPreferenceForSurface(surface: SurfacePreference): OrsRoutePreference {
+  return surface === 'fastest' ? 'fastest' : 'recommended'
 }
 
 /**
@@ -43,6 +51,8 @@ export const HILL_PREFERENCES: readonly HillPreference[] = ['balanced', 'steep']
 
 export interface RouteRequestOptions {
   profile?: CyclingProfile
+  /** ORS routing preference (fastest / shortest / recommended). */
+  preference?: OrsRoutePreference
   hillPreference?: HillPreference
   /** Default true — avoid stairways on bike routes. */
   avoidSteps?: boolean
@@ -258,7 +268,7 @@ async function postOrsDirections(
 
 /**
  * Fetch a cycling route through waypoints via OpenRouteService (free tier).
- * Retries transient 503/network once with short backoff; asphalt (cycling-road)
+ * Retries transient 503/network once with short backoff; cycling-road (fastest/streets)
  * falls back to cycling-regular after exhausted 503 retries.
  */
 export async function fetchCyclingRoute(
@@ -275,6 +285,7 @@ export async function fetchCyclingRoute(
     typeof profileOrOpts === 'string' ? { profile: profileOrOpts } : profileOrOpts
   const profile = opts.profile ?? CYCLING_PROFILE
   const signal = opts.signal
+  const preference = opts.preference
 
   const coordinates = waypoints.map((w) => [w.lng, w.lat])
   // Default ORS snap radius is only 350 m — mountain/parking clicks often fail (code 2010).
@@ -285,6 +296,7 @@ export async function fetchCyclingRoute(
     elevation: true,
     radiuses,
     extra_info: ['surface'],
+    ...(preference ? { preference } : {}),
     ...(options ? { options } : {}),
   }
 
