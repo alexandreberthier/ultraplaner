@@ -18,6 +18,7 @@ export interface RegionDef {
  * GB, IE, NI, IS, GR, CY, MT, AD, Balkan (inkl. XK), Baltikum, FI,
  * FR (Metropole inkl. Korsika). FR-Übersee (DOM/TOM) nicht enthalten.
  * GB = Großbritannien (Geofabrik). NI teilt sich den Ireland-and-Northern-Ireland-Extract mit IE.
+ * Plus Hawaii (Geofabrik US-Subextract, außerhalb Europa).
  */
 export const IMPORT_REGIONS: RegionDef[] = [
   {
@@ -633,18 +634,34 @@ export const IMPORT_REGIONS: RegionDef[] = [
     geofabrikPath: 'europe/france/poitou-charentes-latest.osm.pbf',
     file: 'poitou-charentes-latest.osm.pbf',
   },
+  // —— Nordamerika ——
+  {
+    code: 'HI',
+    label: 'Hawaii',
+    // Hauptinseln (Geofabrik north-america/us/hawaii)
+    south: 18.85,
+    west: -160.35,
+    north: 22.35,
+    east: -154.7,
+    geofabrikPath: 'north-america/us/hawaii-latest.osm.pbf',
+    file: 'hawaii-latest.osm.pbf',
+  },
 ]
 
 export const IMPORT_REGION_CODES = IMPORT_REGIONS.map((r) => r.code)
 
 /** Kurzer Text für UI / Fehlermeldungen. */
 export const SUPPORTED_REGIONS_LABEL =
-  'AT, CH, LI, DE, DK, IT, SK, SI, CZ, HU, LU, BE, NL, HR, ES (inkl. Balearen/Kanaren), PT, PL, GB, NO, SE, FI, EE, LV, LT, RO, IE, NI, IS, GR, CY, MT, AD, BG, RS, BA, ME, AL, MK, XK, FR (Metropole)'
+  'AT, CH, LI, DE, DK, IT, SK, SI, CZ, HU, LU, BE, NL, HR, ES (inkl. Balearen/Kanaren), PT, PL, GB, NO, SE, FI, EE, LV, LT, RO, IE, NI, IS, GR, CY, MT, AD, BG, RS, BA, ME, AL, MK, XK, FR (Metropole), HI (Hawaii)'
 
-/** ORS Geocode-Suchfenster (deckt alle Import-BBoxes ab). */
+/**
+ * Historisches EU-Fenster — nicht mehr an ORS Geocode gebunden.
+ * EU + Hawaii sind disjunkt; Adresssuche läuft weltweit ohne boundary.rect
+ * (siehe searchAddresses). Konstante bleibt für Doku/Tooling.
+ */
 export const GEOCODE_BBOX = {
-  minLon: -31.3,
-  minLat: 27.5,
+  minLon: -160.35,
+  minLat: 18.85,
   maxLon: 34.7,
   maxLat: 71.2,
 } as const

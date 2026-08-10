@@ -165,7 +165,7 @@
         "La navigation montre la ligne. UltraPlaner ajoute la planification du ravitaillement : lacunes sur le profil, ETA par point, filtres, points de contrôle personnels et aide-mémoire imprimable — pensé pour les longues distances où les arrêts au hasard ne suffisent pas.",
       coverTitle: 'Couverture',
       coverBody:
-        "POIs : 61 régions Geofabrik en Europe (France en plusieurs extraits), plus de 1,9 million de points de ravitaillement OpenStreetMap. Le routing vélo (OpenRouteService) fonctionne dans le monde entier — y compris Hawaï — par clic sur la carte ; recherche d’adresses et POIs restent limités à l’Europe.",
+        "POIs : 62 régions Geofabrik (Europe incl. France en sous-extraits, plus Hawaï), plus de 1,9 million de points de ravitaillement OpenStreetMap. Le routing vélo (OpenRouteService) et la recherche d’adresses fonctionnent dans le monde entier ; les POIs le long de la route couvrent les régions importées (Europe + Hawaï).",
       cta: 'Planifier une route avec ravitaillement',
       seoTitle: 'Ravitaillement pour routes ultracycling – UltraPlaner',
       seoDescription:

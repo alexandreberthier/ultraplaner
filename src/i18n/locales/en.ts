@@ -166,7 +166,7 @@ export default {
         'Navigation shows the line. UltraPlaner adds supply planning: gaps on the elevation profile, ETA per point, filters, your own control points and a printable cheat sheet — built for long rides where chance stops are not enough.',
       coverTitle: 'Coverage',
       coverBody:
-        'POIs: 61 Geofabrik regions across Europe (France as multiple sub-extracts), over 1.9 million supply points from OpenStreetMap. Bike routing (OpenRouteService) works worldwide — including Hawaii — via map clicks; address search and POIs stay Europe-only.',
+        'POIs: 62 Geofabrik regions (Europe including France as sub-extracts, plus Hawaii), over 1.9 million supply points from OpenStreetMap. Bike routing (OpenRouteService) and address search work worldwide; route POIs cover the imported regions (Europe + Hawaii).',
       cta: 'Plan a route with supply now',
       seoTitle: 'Supply planning for ultracycling routes – UltraPlaner',
       seoDescription:

@@ -166,7 +166,7 @@ export default {
         'La navegación muestra la línea. UltraPlaner añade planificación de avituallamiento: huecos en el perfil, ETA por punto, filtros, puntos de control propios y chuleta imprimible — pensado para rutas largas donde las paradas al azar no bastan.',
       coverTitle: 'Cobertura',
       coverBody:
-        'POIs: 61 regiones Geofabrik en Europa (Francia en varios extractos), más de 1,9 millones de puntos de avituallamiento de OpenStreetMap. El routing ciclista (OpenRouteService) funciona en todo el mundo — incl. Hawái — pulsando en el mapa; búsqueda de direcciones y POIs siguen limitados a Europa.',
+        'POIs: 62 regiones Geofabrik (Europa incl. Francia en sub-extractos, más Hawái), más de 1,9 millones de puntos de avituallamiento de OpenStreetMap. El routing ciclista (OpenRouteService) y la búsqueda de direcciones funcionan en todo el mundo; los POIs a lo largo de la ruta cubren las regiones importadas (Europa + Hawái).',
       cta: 'Planificar ruta con avituallamiento',
       seoTitle: 'Avituallamiento para rutas ultracycling – UltraPlaner',
       seoDescription:

@@ -4,7 +4,7 @@ Ultracycling-Routenplanung mit Versorgungspunkten, Höhenprofil, ETA und Spickze
 
 **Live:** https://ultraplaner.com
 
-**Regionen:** AT, CH, LI, DE, DK, IT, SK, SI, CZ, HU, LU, BE, NL, HR, ES (inkl. Balearen/Kanaren), PT, PL, GB, NO, SE, FI, EE, LV, LT, RO, IE, NI, IS, GR, CY, MT, AD, BG, RS, BA, ME, AL, MK, XK, FR (Metropole)
+**Regionen:** AT, CH, LI, DE, DK, IT, SK, SI, CZ, HU, LU, BE, NL, HR, ES (inkl. Balearen/Kanaren), PT, PL, GB, NO, SE, FI, EE, LV, LT, RO, IE, NI, IS, GR, CY, MT, AD, BG, RS, BA, ME, AL, MK, XK, FR (Metropole), HI (Hawaii)
 
 ## Schnellstart
 
@@ -31,8 +31,11 @@ Anonyme Seitenbesuche: einmal `supabase/page_stats.sql` im Supabase SQL Editor a
 
 ## POI-Import
 
+Geofabrik-PBF → Supabase (`VITE_SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY` in `.env`).
+
 ```bash
 npm run import-dach-pois-pbf -- --region ES
+npm run import-dach-pois-pbf -- --region HI   # Hawaii (~25 MB PBF)
 npm run import-status
 ```
 

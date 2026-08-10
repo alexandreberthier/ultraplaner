@@ -166,7 +166,7 @@ export default {
         'Klassische Navigation zeigt die Linie. UltraPlaner ergänzt Versorgung und Planung: Lücken im Höhenprofil, ETA je Punkt, Filter, eigene Kontrollpunkte und einen druckbaren Spickzettel. Gebaut für lange Strecken, bei denen Zufallstreffer an der Straße nicht reichen.',
       coverTitle: 'Abdeckung',
       coverBody:
-        'POIs: 61 Geofabrik-Regionen in Europa (Frankreich als mehrere Teil-Extracts), über 1,9 Millionen Versorgungspunkte aus OpenStreetMap. Rad-Routing (OpenRouteService) funktioniert weltweit — inkl. z. B. Hawaii — per Klick auf die Karte; Adresssuche und POIs bleiben auf Europa begrenzt.',
+        'POIs: 62 Geofabrik-Regionen (Europa inkl. Frankreich als Teil-Extracts, plus Hawaii), über 1,9 Millionen Versorgungspunkte aus OpenStreetMap. Rad-Routing (OpenRouteService) und Adresssuche funktionieren weltweit; POIs entlang der Route in den importierten Regionen (Europa + Hawaii).',
       cta: 'Jetzt Route mit Versorgung planen',
       seoTitle: 'Versorgung auf der Ultracycling-Route – UltraPlaner',
       seoDescription:

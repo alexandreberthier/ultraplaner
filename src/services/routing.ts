@@ -1,5 +1,4 @@
 import type { LatLng, RouteSurfaceSummary } from '../../shared/types'
-import { GEOCODE_BBOX } from '../config/poiCategories'
 import { tGlobal } from '../i18n'
 import {
   buildRouteSurfaceSummary,
@@ -173,7 +172,7 @@ function isNetworkFailure(err: unknown): boolean {
   return false
 }
 
-/** Search addresses in supported Central European region. */
+/** Search addresses worldwide via ORS Pelias (no Europe-only bbox — covers Hawaii etc.). */
 export async function searchAddresses(query: string, limit = 6): Promise<GeocodeResult[]> {
   const text = query.trim()
   if (text.length < 2) return []
@@ -181,10 +180,6 @@ export async function searchAddresses(query: string, limit = 6): Promise<Geocode
   const params = new URLSearchParams({
     text,
     size: String(limit),
-    'boundary.rect.min_lon': String(GEOCODE_BBOX.minLon),
-    'boundary.rect.min_lat': String(GEOCODE_BBOX.minLat),
-    'boundary.rect.max_lon': String(GEOCODE_BBOX.maxLon),
-    'boundary.rect.max_lat': String(GEOCODE_BBOX.maxLat),
   })
 
   const res = await fetch(`https://api.openrouteservice.org/geocode/search?${params}`, {
