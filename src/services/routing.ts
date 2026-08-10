@@ -21,8 +21,10 @@ export const CYCLING_PROFILE: CyclingProfile = 'cycling-regular'
 
 /**
  * Planner route style (ORS profile + preference).
- * fastest → cycling-road + preference fastest (streets over cycleways)
+ * fastest → cycling-road + preference fastest (streets over cycleways; support-car friendly, still bike-legal)
  * mixed → cycling-regular + recommended (cycleways/side paths OK)
+ * No driving-car: route must remain cyclable.
+ * ORS avoid_features for cycling has no cycleways option (only steps/ferries/fords/hills) — street bias is profile+preference only.
  */
 export type SurfacePreference = 'fastest' | 'mixed'
 
@@ -98,6 +100,7 @@ function steepnessDifficulty(hill: HillPreference | undefined): number | null {
 }
 
 function buildOrsOptions(opts: RouteRequestOptions): Record<string, unknown> | undefined {
+  // Cycling avoid_features: steps | ferries | fords | hills — not cycleways (ORS API).
   const avoid: string[] = []
   if (opts.avoidSteps !== false) avoid.push('steps')
   if (opts.avoidFerries) avoid.push('ferries')

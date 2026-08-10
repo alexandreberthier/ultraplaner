@@ -689,19 +689,10 @@ export default {
     routeNamePlaceholder: 'p. ej. Cruce Alpes día 1',
     orsMissing: 'Planificación de ruta temporalmente no disponible',
     orsHint: 'Inténtalo más tarde o sube un archivo GPX.',
-    profileTitle: 'Perfil de routing',
-    profileHint:
-      'Perfiles ORS: Road ≈ asfalto/carretera, Regular ≈ carriles bici, Mountain ≈ gravel/pistas. No hay opción «ruta más bonita».',
-    profile: {
-      'cycling-regular': 'Carriles / touring',
-      'cycling-road': 'Asfalto / carretera',
-      'cycling-mountain': 'Gravel / MTB',
-      'cycling-electric': 'E-bike',
-    },
-    surfaceTitle: 'Preferencia de ruta',
+    surfaceTitle: 'Ruta',
     surface: {
-      fastest: 'Más rápida (carreteras)',
-      mixed: 'Mixto / carriles',
+      fastest: 'Más rápida · carreteras',
+      mixed: 'Mixto · carriles',
     },
     hillTitle: 'Pendiente',
     hill: {

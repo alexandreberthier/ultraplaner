@@ -688,19 +688,10 @@
     routeNamePlaceholder: 'p. ex. Traversée des Alpes jour 1',
     orsMissing: 'Planification d’itinéraire temporairement indisponible',
     orsHint: 'Réessayez plus tard ou importez un fichier GPX.',
-    profileTitle: 'Profil de routing',
-    profileHint:
-      'Profils ORS : Road ≈ asphalte/route, Regular ≈ pistes cyclables, Mountain ≈ gravel/chemins. Pas d’option « plus belle route ».',
-    profile: {
-      'cycling-regular': 'Pistes / touring',
-      'cycling-road': 'Asphalte / route',
-      'cycling-mountain': 'Gravel / VTT',
-      'cycling-electric': 'Vélo électrique',
-    },
-    surfaceTitle: 'Choix d’itinéraire',
+    surfaceTitle: 'Itinéraire',
     surface: {
-      fastest: 'Plus rapide (routes)',
-      mixed: 'Mixte / pistes',
+      fastest: 'Plus rapide · routes',
+      mixed: 'Mixte · pistes',
     },
     hillTitle: 'Pente',
     hill: {

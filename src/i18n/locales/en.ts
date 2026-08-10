@@ -689,19 +689,10 @@ export default {
     routeNamePlaceholder: 'e.g. Alps crossing day 1',
     orsMissing: 'Route planning temporarily unavailable',
     orsHint: 'Please try again later or upload a GPX file.',
-    profileTitle: 'Routing profile',
-    profileHint:
-      'ORS profiles: Road ≈ asphalt/streets, Regular ≈ cycleways, Mountain ≈ gravel/tracks. No separate “scenic” option.',
-    profile: {
-      'cycling-regular': 'Cycleways / touring',
-      'cycling-road': 'Asphalt / road bike',
-      'cycling-mountain': 'Gravel / MTB',
-      'cycling-electric': 'E-bike',
-    },
-    surfaceTitle: 'Route preference',
+    surfaceTitle: 'Route',
     surface: {
-      fastest: 'Fastest (roads)',
-      mixed: 'Mixed / cycleways',
+      fastest: 'Fastest · roads',
+      mixed: 'Mixed · cycleways',
     },
     hillTitle: 'Hills',
     hill: {

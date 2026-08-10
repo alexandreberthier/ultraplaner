@@ -691,19 +691,10 @@ export default {
     routeNamePlaceholder: 'z. B. Alpenüberquerung Tag 1',
     orsMissing: 'Routenplanung vorübergehend nicht verfügbar',
     orsHint: 'Bitte später erneut versuchen oder eine GPX-Datei hochladen.',
-    profileTitle: 'Routing-Profil',
-    profileHint:
-      'ORS-Profile: Road ≈ Asphalt/Straße, Regular ≈ Radwege, Mountain ≈ Gravel/Tracks. Kein separates „schönste Strecke“.',
-    profile: {
-      'cycling-regular': 'Radwege / Touring',
-      'cycling-road': 'Asphalt / Rennrad',
-      'cycling-mountain': 'Gravel / MTB',
-      'cycling-electric': 'E-Bike',
-    },
-    surfaceTitle: 'Routenwahl',
+    surfaceTitle: 'Route',
     surface: {
-      fastest: 'Schnellste (Straßen)',
-      mixed: 'Gemischt / Radwege',
+      fastest: 'Schnellste · Straßen',
+      mixed: 'Gemischt · Radwege',
     },
     hillTitle: 'Steigung',
     hill: {
