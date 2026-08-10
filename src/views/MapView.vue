@@ -974,68 +974,66 @@ function onDocClick(e: MouseEvent) {
       </Transition>
 
       <div class="map-stack">
-        <MapCanvas ref="mapCanvasRef" :key="store.mapEpoch" :ride-mode="rideMode" />
+        <MapCanvas ref="mapCanvasRef" :key="store.mapEpoch" :ride-mode="rideMode">
+          <template v-if="!rideMode" #left-controls>
+            <div class="map-cp-tools" :aria-label="t('nearby.panelTitle')">
+              <button
+                type="button"
+                class="map-cp-fab map-nearby-fab"
+                :class="{
+                  loading: nearbyRescanning || store.poisLoading,
+                }"
+                :title="nearbyFabLabel"
+                :aria-busy="nearbyRescanning || store.poisLoading"
+                :disabled="nearbyRescanning || store.poisLoading"
+                @click="onNearbyFabClick"
+              >
+                <span aria-hidden="true">◎</span>
+                <span class="map-cp-fab-label">{{ nearbyFabLabel }}</span>
+              </button>
+              <button
+                type="button"
+                class="map-cp-fab map-nearby-options"
+                :title="t('nearby.panelTitle')"
+                @click="openNearbyPanel"
+              >
+                <span aria-hidden="true">⚙</span>
+                <span class="map-cp-fab-label">{{ t('nearby.options') }}</span>
+              </button>
+              <template v-if="!store.isNearbyMap">
+                <button
+                  type="button"
+                  class="map-cp-fab"
+                  :class="{ active: cpMenuOpen || !!store.controlPointPlaceKind }"
+                  :title="t('controls.mapFab')"
+                  :aria-expanded="cpMenuOpen || !!store.controlPointPlaceKind"
+                  @click="toggleCpMenu"
+                >
+                  <span aria-hidden="true">⚑</span>
+                  <span class="map-cp-fab-label">{{ t('controls.kindCp') }}</span>
+                </button>
+                <div v-if="cpMenuOpen || store.controlPointPlaceKind" class="map-cp-menu" role="menu">
+                  <button
+                    v-for="k in cpKinds"
+                    :key="k.id"
+                    type="button"
+                    class="map-cp-kind"
+                    role="menuitem"
+                    :class="{ active: store.controlPointPlaceKind === k.id }"
+                    @click="startPlaceControlPoint(k.id)"
+                  >
+                    <span aria-hidden="true">{{ poiCategoryEmoji(k.category) }}</span>
+                    {{ t(k.labelKey) }}
+                  </button>
+                </div>
+              </template>
+            </div>
+          </template>
+        </MapCanvas>
         <p v-if="store.poisLoading" class="pois-loading-banner" role="status">
           {{ t('nearby.loadingPois') }}
         </p>
         <ElevationProfile v-if="!rideMode && !store.isNearbyMap" />
-
-        <div
-          v-if="!rideMode"
-          class="map-cp-tools"
-          :aria-label="t('nearby.panelTitle')"
-        >
-          <button
-            type="button"
-            class="map-cp-fab map-nearby-fab"
-            :class="{
-              loading: nearbyRescanning || store.poisLoading,
-            }"
-            :title="nearbyFabLabel"
-            :aria-busy="nearbyRescanning || store.poisLoading"
-            :disabled="nearbyRescanning || store.poisLoading"
-            @click="onNearbyFabClick"
-          >
-            <span aria-hidden="true">◎</span>
-            <span class="map-cp-fab-label">{{ nearbyFabLabel }}</span>
-          </button>
-          <button
-            type="button"
-            class="map-cp-fab map-nearby-options"
-            :title="t('nearby.panelTitle')"
-            @click="openNearbyPanel"
-          >
-            <span aria-hidden="true">⚙</span>
-            <span class="map-cp-fab-label">{{ t('nearby.options') }}</span>
-          </button>
-          <template v-if="!store.isNearbyMap">
-            <button
-              type="button"
-              class="map-cp-fab"
-              :class="{ active: cpMenuOpen || !!store.controlPointPlaceKind }"
-              :title="t('controls.mapFab')"
-              :aria-expanded="cpMenuOpen || !!store.controlPointPlaceKind"
-              @click="toggleCpMenu"
-            >
-              <span aria-hidden="true">⚑</span>
-              <span class="map-cp-fab-label">{{ t('controls.kindCp') }}</span>
-            </button>
-            <div v-if="cpMenuOpen || store.controlPointPlaceKind" class="map-cp-menu" role="menu">
-              <button
-                v-for="k in cpKinds"
-                :key="k.id"
-                type="button"
-                class="map-cp-kind"
-                role="menuitem"
-                :class="{ active: store.controlPointPlaceKind === k.id }"
-                @click="startPlaceControlPoint(k.id)"
-              >
-                <span aria-hidden="true">{{ poiCategoryEmoji(k.category) }}</span>
-                {{ t(k.labelKey) }}
-              </button>
-            </div>
-          </template>
-        </div>
 
         <div
           v-if="!rideMode && store.controlPointPlaceKind"
@@ -1820,21 +1818,12 @@ function onDocClick(e: MouseEvent) {
   white-space: nowrap;
 }
 
+/* Nested flex group inside MapCanvas .map-left-stack */
 .map-cp-tools {
-  position: absolute;
-  /* Below MapCanvas .basemap-toggle (top ~10 + ~36px height) */
-  top: calc(54px + env(safe-area-inset-top, 0px));
-  left: calc(10px + env(safe-area-inset-left, 0px));
-  z-index: 35;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: 0.45rem;
-  pointer-events: none;
-}
-
-.map-cp-tools > * {
-  pointer-events: auto;
 }
 
 .map-cp-fab {
@@ -1929,13 +1918,6 @@ function onDocClick(e: MouseEvent) {
 }
 
 @media (max-width: 768px) {
-  .map-cp-tools {
-    /* Stay in left stack under basemap — do not share the top row with the style toggle */
-    top: calc(56px + env(safe-area-inset-top, 0px));
-    bottom: auto;
-    left: calc(10px + env(safe-area-inset-left, 0px));
-  }
-
   .map-cp-fab {
     width: 52px;
     height: 52px;
@@ -1978,7 +1960,7 @@ function onDocClick(e: MouseEvent) {
   }
 
   .map-cp-banner {
-    top: calc(56px + env(safe-area-inset-top, 0px));
+    top: calc(12px + env(safe-area-inset-top, 0px));
     left: 50%;
     right: auto;
     transform: translateX(-50%);
@@ -2837,29 +2819,5 @@ function onDocClick(e: MouseEvent) {
 
 .export-sheet-print {
   opacity: 0.92;
-}
-</style>
-
-<style>
-/*
-  Unscoped on purpose: Vue scoped :has() would stamp MapView's data-attr onto
-  .route-color-toggle and miss the MapCanvas child.
-*/
-.map-stack:has(.route-color-toggle) > .map-cp-tools {
-  top: calc(92px + env(safe-area-inset-top, 0px));
-}
-
-.map-stack:has(.route-color-toggle) > .map-cp-banner {
-  top: calc(92px + env(safe-area-inset-top, 0px));
-}
-
-@media (max-width: 768px) {
-  .map-stack:has(.route-color-toggle) > .map-cp-tools {
-    top: calc(96px + env(safe-area-inset-top, 0px));
-  }
-
-  .map-stack:has(.route-color-toggle) > .map-cp-banner {
-    top: calc(96px + env(safe-area-inset-top, 0px));
-  }
 }
 </style>

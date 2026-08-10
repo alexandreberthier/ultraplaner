@@ -1560,13 +1560,6 @@ onUnmounted(() => {
   <div ref="mapCanvasWrap" class="map-canvas-wrap" :class="{ 'ride-mode': rideMode }">
     <div ref="mapContainer" class="map-canvas" />
 
-    <p v-if="basemapFallbackHint" class="basemap-fallback" role="status">
-      {{ basemapFallbackHint }}
-      <button type="button" @click="clearBasemapFallbackHint(); setBasemap('standard')">
-        {{ t('mapCanvas.basemapRetry') }}
-      </button>
-    </p>
-
     <ul
       v-if="routeColorMode === 'surface' && surfaceLegendBuckets.length && !rideMode && !store.isNearbyMap"
       class="surface-legend"
@@ -1589,59 +1582,71 @@ onUnmounted(() => {
       </li>
     </ul>
 
-    <div
-      v-if="showRouteColorToggle && !rideMode && !store.isNearbyMap"
-      class="route-color-toggle"
-      role="group"
-      :aria-label="t('mapCanvas.routeColorMode')"
-    >
-      <button
-        type="button"
-        :class="{ active: routeColorMode === 'surface' }"
-        :aria-pressed="routeColorMode === 'surface'"
-        :disabled="!canRouteSurface"
-        :title="canRouteSurface ? undefined : t('elevation.surfaceDrawnOnly')"
-        @click="setRouteColorMode('surface')"
-      >
-        {{ t('mapCanvas.routeColorSurface') }}
-      </button>
-      <button
-        type="button"
-        :class="{ active: routeColorMode === 'grade' }"
-        :aria-pressed="routeColorMode === 'grade'"
-        :disabled="!canRouteGrade"
-        @click="setRouteColorMode('grade')"
-      >
-        {{ t('mapCanvas.routeColorGrade') }}
-      </button>
-    </div>
+    <!-- Left flex stack: style toggles + optional FABs (slot) — no fixed top offsets -->
+    <div class="map-left-stack">
+      <div v-show="!rideMode" class="basemap-toggle" role="group" :aria-label="t('mapCanvas.basemap')">
+        <button
+          type="button"
+          :class="{ active: basemap === 'standard' }"
+          @click="setBasemap('standard')"
+        >
+          {{ t('mapCanvas.map') }}
+        </button>
+        <button
+          type="button"
+          :class="{ active: basemap === 'cycling' }"
+          :title="t('mapCanvas.cycling')"
+          @click="setBasemap('cycling')"
+        >
+          {{ t('mapCanvas.cycling') }}
+        </button>
+        <button
+          type="button"
+          class="colorblind-btn"
+          :class="{ active: colorblindMode }"
+          :aria-pressed="colorblindMode"
+          :title="t('mapCanvas.colorblind')"
+          @click="toggleColorblindMode()"
+        >
+          {{ t('mapCanvas.colorblind') }}
+        </button>
+      </div>
 
-    <div v-show="!rideMode" class="basemap-toggle" role="group" :aria-label="t('mapCanvas.basemap')">
-      <button
-        type="button"
-        :class="{ active: basemap === 'standard' }"
-        @click="setBasemap('standard')"
+      <div
+        v-if="showRouteColorToggle && !rideMode && !store.isNearbyMap"
+        class="route-color-toggle"
+        role="group"
+        :aria-label="t('mapCanvas.routeColorMode')"
       >
-        {{ t('mapCanvas.map') }}
-      </button>
-      <button
-        type="button"
-        :class="{ active: basemap === 'cycling' }"
-        :title="t('mapCanvas.cycling')"
-        @click="setBasemap('cycling')"
-      >
-        {{ t('mapCanvas.cycling') }}
-      </button>
-      <button
-        type="button"
-        class="colorblind-btn"
-        :class="{ active: colorblindMode }"
-        :aria-pressed="colorblindMode"
-        :title="t('mapCanvas.colorblind')"
-        @click="toggleColorblindMode()"
-      >
-        {{ t('mapCanvas.colorblind') }}
-      </button>
+        <button
+          type="button"
+          :class="{ active: routeColorMode === 'surface' }"
+          :aria-pressed="routeColorMode === 'surface'"
+          :disabled="!canRouteSurface"
+          :title="canRouteSurface ? undefined : t('elevation.surfaceDrawnOnly')"
+          @click="setRouteColorMode('surface')"
+        >
+          {{ t('mapCanvas.routeColorSurface') }}
+        </button>
+        <button
+          type="button"
+          :class="{ active: routeColorMode === 'grade' }"
+          :aria-pressed="routeColorMode === 'grade'"
+          :disabled="!canRouteGrade"
+          @click="setRouteColorMode('grade')"
+        >
+          {{ t('mapCanvas.routeColorGrade') }}
+        </button>
+      </div>
+
+      <p v-if="basemapFallbackHint" class="basemap-fallback" role="status">
+        {{ basemapFallbackHint }}
+        <button type="button" @click="clearBasemapFallbackHint(); setBasemap('standard')">
+          {{ t('mapCanvas.basemapRetry') }}
+        </button>
+      </p>
+
+      <slot name="left-controls" />
     </div>
 
     <!-- Standort / Follow / Heading -->
@@ -1709,11 +1714,36 @@ onUnmounted(() => {
   height: 100%;
 }
 
-/* ── Standort-Button ── */
+/* ── Left control stack (flex gap — no fixed tops / :has hacks) ── */
+.map-left-stack {
+  position: absolute;
+  top: calc(10px + env(safe-area-inset-top, 0px));
+  left: calc(10px + env(safe-area-inset-left, 0px));
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.45rem;
+  max-width: min(100% - 72px, 22rem);
+  pointer-events: none;
+}
+
+.map-left-stack > * {
+  pointer-events: auto;
+  max-width: 100%;
+}
+
+/* Slotted FABs from MapView get parent scope attrs — pierce for hit-testing */
+.map-left-stack > :deep(*) {
+  pointer-events: auto;
+  max-width: 100%;
+}
+
+/* ── Standort-Button (rechts, separat) ── */
 .location-btn {
   position: absolute;
   bottom: 28px;
-  right: 10px;
+  right: calc(10px + env(safe-area-inset-right, 0px));
   z-index: 40;
   width: 40px;
   height: 40px;
@@ -1733,12 +1763,8 @@ onUnmounted(() => {
 }
 
 .basemap-toggle {
-  position: absolute;
-  top: calc(10px + env(safe-area-inset-top, 0px));
-  left: calc(10px + env(safe-area-inset-left, 0px));
-  z-index: 40;
   display: flex;
-  max-width: calc(100% - 72px);
+  flex-shrink: 0;
   background: #fff;
   border-radius: 6px;
   box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
@@ -1746,12 +1772,8 @@ onUnmounted(() => {
 }
 
 .route-color-toggle {
-  position: absolute;
-  top: calc(48px + env(safe-area-inset-top, 0px));
-  left: calc(10px + env(safe-area-inset-left, 0px));
-  z-index: 40;
   display: flex;
-  max-width: calc(100% - 72px);
+  flex-shrink: 0;
   background: #fff;
   border-radius: 6px;
   box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
@@ -1807,11 +1829,6 @@ onUnmounted(() => {
 }
 
 .basemap-fallback {
-  position: absolute;
-  top: calc(52px + env(safe-area-inset-top, 0px));
-  left: calc(10px + env(safe-area-inset-left, 0px));
-  right: calc(10px + env(safe-area-inset-right, 0px));
-  z-index: 41;
   margin: 0;
   padding: 0.55rem 0.7rem;
   display: flex;
@@ -1862,7 +1879,7 @@ onUnmounted(() => {
 .location-error {
   position: absolute;
   bottom: 76px;
-  right: 10px;
+  right: calc(10px + env(safe-area-inset-right, 0px));
   background: #fee2e2;
   color: #991b1b;
   padding: 0.55rem 0.65rem;
@@ -1903,11 +1920,17 @@ onUnmounted(() => {
 }
 
 @media (max-width: 768px) {
+  .map-left-stack {
+    top: calc(12px + env(safe-area-inset-top, 0px));
+    left: calc(10px + env(safe-area-inset-left, 0px));
+    max-width: calc(100% - 72px - env(safe-area-inset-right, 0px));
+  }
+
   .location-btn {
     /* Always top-right on mobile — never under bottom nav */
     top: calc(12px + env(safe-area-inset-top, 0px));
     bottom: auto;
-    right: 12px;
+    right: calc(12px + env(safe-area-inset-right, 0px));
     z-index: 120;
     width: 48px;
     height: 48px;
@@ -1919,7 +1942,7 @@ onUnmounted(() => {
   .map-canvas-wrap.ride-mode .location-btn {
     top: calc(12px + env(safe-area-inset-top, 0px));
     bottom: auto;
-    right: 12px;
+    right: calc(12px + env(safe-area-inset-right, 0px));
     z-index: 120;
     width: 52px;
     height: 52px;
@@ -1934,8 +1957,8 @@ onUnmounted(() => {
   .location-error {
     top: calc(68px + env(safe-area-inset-top, 0px));
     bottom: auto;
-    right: 12px;
-    left: 12px;
+    right: calc(12px + env(safe-area-inset-right, 0px));
+    left: calc(12px + env(safe-area-inset-left, 0px));
     z-index: 120;
     max-width: none;
   }
@@ -1943,26 +1966,9 @@ onUnmounted(() => {
   .map-canvas-wrap.ride-mode .location-error {
     top: calc(72px + env(safe-area-inset-top, 0px));
     bottom: auto;
-    right: 12px;
   }
 
-  /* Keep style toggles top-left (same stack as MapView FABs); clear location FAB on the right */
-  .basemap-toggle {
-    top: calc(12px + env(safe-area-inset-top, 0px));
-    left: calc(10px + env(safe-area-inset-left, 0px));
-    right: auto;
-    max-width: calc(100% - 72px);
-  }
-
-  .route-color-toggle {
-    top: calc(52px + env(safe-area-inset-top, 0px));
-    left: calc(10px + env(safe-area-inset-left, 0px));
-    right: auto;
-    max-width: calc(100% - 72px);
-  }
-
-  .map-canvas-wrap.ride-mode .basemap-toggle,
-  .map-canvas-wrap.ride-mode .route-color-toggle {
+  .map-canvas-wrap.ride-mode .map-left-stack {
     display: none;
   }
 
