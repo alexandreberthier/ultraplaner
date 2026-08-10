@@ -180,8 +180,6 @@ export default {
     },
     feedback: {
       title: 'Feedback & improvement ideas',
-      intro:
-        'Missing a country, a feature, or something in the workflow? Use this form — the preferred way to contact me (including imprint / privacy questions).',
       name: 'Name (optional)',
       email: 'Email (optional, for follow-up)',
       message: 'Your suggestion',

@@ -180,8 +180,6 @@ export default {
     },
     feedback: {
       title: 'Feedback e ideas de mejora',
-      intro:
-        '¿Falta un país, una función o algo del flujo? Usa este formulario — el canal preferido de contacto (también para aviso legal / privacidad).',
       name: 'Nombre (opcional)',
       email: 'Email (opcional, para responder)',
       message: 'Tu sugerencia',

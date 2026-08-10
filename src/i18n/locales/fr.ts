@@ -179,8 +179,6 @@
     },
     feedback: {
       title: 'Feedback et idées d’amélioration',
-      intro:
-        'Il manque un pays, une fonction ou quelque chose dans le parcours ? Utilisez ce formulaire — le canal de contact préféré (y compris mentions légales / confidentialité).',
       name: 'Nom (optionnel)',
       email: 'E-mail (optionnel, pour répondre)',
       message: 'Votre suggestion',

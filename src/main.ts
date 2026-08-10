@@ -8,6 +8,10 @@ import { initPwaInstallListener } from './composables/usePwaInstall'
 import { applyDocumentSeo, enforcePreferredHostSeo } from './composables/useDocumentSeo'
 import { i18n, localeFromPath, setAppLocale, isLocaleHomePath, type AppLocale } from './i18n'
 import { recordSessionPageView } from './services/pageStats'
+import {
+  clearChunkReloadFlag,
+  reloadOnceOnChunkError,
+} from './utils/chunkLoadRecovery'
 import './style.css'
 
 enforcePreferredHostSeo()
@@ -28,6 +32,16 @@ if (isLocaleHomePath(window.location.pathname)) {
   applyDocumentSeo(i18n.global.locale.value as AppLocale)
 }
 
+// Stale PWA/shell after deploy: old main still imports deleted hashed chunks
+router.onError((error) => {
+  reloadOnceOnChunkError(error)
+})
+window.addEventListener('vite:preloadError', ((event: Event) => {
+  const pe = event as Event & { payload?: unknown; preventDefault?: () => void }
+  pe.preventDefault?.()
+  reloadOnceOnChunkError(pe.payload ?? pe)
+}) as EventListener)
+
 router.afterEach((to) => {
   recordSessionPageView(to.path)
   const fromPath = localeFromPath(to.path)
@@ -40,3 +54,8 @@ router.afterEach((to) => {
 })
 
 app.mount('#app')
+
+// Only clear after a successful resolve — clearing at boot would allow reload loops
+void router.isReady().then(() => {
+  clearChunkReloadFlag()
+})

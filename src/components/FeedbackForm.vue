@@ -68,7 +68,6 @@ async function submit() {
 <template>
   <section id="feedback" class="feedback" aria-labelledby="feedback-heading">
     <h2 id="feedback-heading">{{ t('landing.feedback.title') }}</h2>
-    <p class="feedback-intro">{{ t('landing.feedback.intro') }}</p>
 
     <form class="feedback-form" @submit.prevent="submit">
       <!-- Honeypot -->
@@ -138,17 +137,10 @@ async function submit() {
 }
 
 .feedback h2 {
-  margin: 0 0 0.5rem;
+  margin: 0 0 1rem;
   font-size: 1.55rem;
   font-weight: 800;
   color: var(--primary-dark);
-}
-
-.feedback-intro {
-  margin: 0 0 0.65rem;
-  color: var(--text-muted);
-  font-size: 0.92rem;
-  line-height: 1.5;
 }
 
 .feedback-form {
