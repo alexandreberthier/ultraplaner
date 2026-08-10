@@ -14,7 +14,7 @@ function loadPreference(): RouteColorMode {
   return 'surface'
 }
 
-/** Shared across MapCanvas, RoutePlanner, PoiLegend. */
+/** Shared across MapCanvas and RoutePlanner. */
 const preferredMode = ref<RouteColorMode>(loadPreference())
 
 export function resolveRouteColorMode(
@@ -44,7 +44,8 @@ export function useRouteColorMode(opts: {
     resolveRouteColorMode(preferredMode.value, canSurface.value, canGrade.value)
   )
 
-  const showToggle = computed(() => canSurface.value && canGrade.value)
+  /** Show Belag|Steigung when at least one mode has data (GPX often has grade only). */
+  const showToggle = computed(() => canSurface.value || canGrade.value)
 
   function setRouteColorMode(mode: RouteColorMode) {
     preferredMode.value = mode

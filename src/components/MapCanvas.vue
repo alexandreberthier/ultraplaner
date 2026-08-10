@@ -55,10 +55,19 @@ const { setRideKmAlong } = useRidePosition()
 const {
   effectiveMode: routeColorMode,
   showToggle: showRouteColorToggle,
+  canSurface: canRouteSurface,
+  canGrade: canRouteGrade,
   setRouteColorMode,
 } = useRouteColorMode({
-  canSurface: () => !store.isNearbyMap && (store.surfaceSummary?.segments?.length ?? 0) > 0,
-  canGrade: () => !store.isNearbyMap && hasElevationData(store.routePoints),
+  // Nearby maps are a point+radius, not a track — no Belag/Steigung toggle.
+  canSurface: () =>
+    !store.isNearbyMap &&
+    store.routeCoords.length >= 2 &&
+    (store.surfaceSummary?.segments?.length ?? 0) > 0,
+  canGrade: () =>
+    !store.isNearbyMap &&
+    store.routeCoords.length >= 2 &&
+    hasElevationData(store.routePoints),
 })
 
 const gradeLegendItems = computed(() => {
@@ -1590,6 +1599,8 @@ onUnmounted(() => {
         type="button"
         :class="{ active: routeColorMode === 'surface' }"
         :aria-pressed="routeColorMode === 'surface'"
+        :disabled="!canRouteSurface"
+        :title="canRouteSurface ? undefined : t('elevation.surfaceDrawnOnly')"
         @click="setRouteColorMode('surface')"
       >
         {{ t('mapCanvas.routeColorSurface') }}
@@ -1598,6 +1609,7 @@ onUnmounted(() => {
         type="button"
         :class="{ active: routeColorMode === 'grade' }"
         :aria-pressed="routeColorMode === 'grade'"
+        :disabled="!canRouteGrade"
         @click="setRouteColorMode('grade')"
       >
         {{ t('mapCanvas.routeColorGrade') }}
@@ -1761,6 +1773,11 @@ onUnmounted(() => {
 .route-color-toggle button.active {
   background: #111;
   color: #fff;
+}
+
+.route-color-toggle button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 
 .basemap-toggle button {

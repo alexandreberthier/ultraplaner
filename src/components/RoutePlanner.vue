@@ -382,6 +382,8 @@ const hasSurfaceOnRoute = computed(
 const {
   effectiveMode: routeColorMode,
   showToggle: showRouteColorToggle,
+  canSurface: canRouteSurface,
+  canGrade: canRouteGrade,
   setRouteColorMode,
 } = useRouteColorMode({
   canSurface: hasSurfaceOnRoute,
@@ -1147,6 +1149,8 @@ onUnmounted(() => {
           type="button"
           :class="{ active: routeColorMode === 'surface' }"
           :aria-pressed="routeColorMode === 'surface'"
+          :disabled="!canRouteSurface"
+          :title="canRouteSurface ? undefined : t('elevation.surfaceDrawnOnly')"
           @click="setRouteColorMode('surface')"
         >
           {{ t('mapCanvas.routeColorSurface') }}
@@ -1155,6 +1159,7 @@ onUnmounted(() => {
           type="button"
           :class="{ active: routeColorMode === 'grade' }"
           :aria-pressed="routeColorMode === 'grade'"
+          :disabled="!canRouteGrade"
           @click="setRouteColorMode('grade')"
         >
           {{ t('mapCanvas.routeColorGrade') }}
@@ -1683,6 +1688,11 @@ onUnmounted(() => {
 .route-color-toggle button.active {
   background: #111;
   color: #fff;
+}
+
+.route-color-toggle button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 
 .basemap-fallback {

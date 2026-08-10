@@ -8,7 +8,6 @@ import ElevationProfile from '../components/ElevationProfile.vue'
 import PoiList from '../components/PoiList.vue'
 import PoiCategoryFilter from '../components/PoiCategoryFilter.vue'
 import PoiDetailSheet from '../components/PoiDetailSheet.vue'
-import PoiLegend from '../components/PoiLegend.vue'
 import EtaPlanner from '../components/EtaPlanner.vue'
 import WeatherStrip from '../components/WeatherStrip.vue'
 import ControlPointsPanel from '../components/ControlPointsPanel.vue'
@@ -94,7 +93,7 @@ const SUPPLY_CATEGORIES = new Set<PoiCategory>([
 ])
 
 const sidebarOpen = ref(true)
-const mobilePanel = ref<'none' | 'pois' | 'legend' | 'export' | 'nearby'>('none')
+const mobilePanel = ref<'none' | 'pois' | 'export' | 'nearby'>('none')
 const shareCopied = ref(false)
 const showExportMenu = ref(false)
 const showExportTip = ref(false)
@@ -548,7 +547,7 @@ function syncMapDragPan() {
   mapCanvasRef.value?.setDragPanEnabled(mobilePanel.value === 'none')
 }
 
-function openMobilePanel(panel: 'pois' | 'legend' | 'export' | 'nearby') {
+function openMobilePanel(panel: 'pois' | 'export' | 'nearby') {
   mobilePanel.value = mobilePanel.value === panel ? 'none' : panel
   if (mobilePanel.value !== 'none') showExportMenu.value = false
   if (mobilePanel.value !== 'export') showPcFiles.value = false
@@ -646,7 +645,6 @@ function onDocClick(e: MouseEvent) {
         <NearbySearchPanel ref="nearbyPanelRef" @done="onNearbyDone" />
         <ControlPointsPanel />
         <OfflinePackPanel @updated="refreshPackMeta" />
-        <PoiLegend compact />
       </div>
     </aside>
 
@@ -1144,15 +1142,6 @@ function onDocClick(e: MouseEvent) {
       </button>
       <button
         type="button"
-        class="nav-item"
-        :class="{ active: mobilePanel === 'legend' }"
-        @click="openMobilePanel('legend')"
-      >
-        <span class="nav-icon">🗺️</span>
-        <span>{{ t('map.navLegend') }}</span>
-      </button>
-      <button
-        type="button"
         class="nav-item nav-export"
         :class="{ active: mobilePanel === 'export' }"
         @click="openMobilePanel('export')"
@@ -1182,9 +1171,7 @@ function onDocClick(e: MouseEvent) {
                   ? store.isNearbyMap
                     ? t('map.exportTitleNearby')
                     : t('map.sheetExport')
-                  : mobilePanel === 'nearby'
-                    ? t('map.sheetNearby')
-                    : t('map.sheetLegend')
+                  : t('map.sheetNearby')
             }}
           </h2>
           <button type="button" class="sheet-close" @click="closeMobilePanel">×</button>
@@ -1409,7 +1396,6 @@ function onDocClick(e: MouseEvent) {
           </button>
 
         </div>
-        <PoiLegend v-else embedded />
       </div>
     </div>
 
