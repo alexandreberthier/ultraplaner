@@ -3,6 +3,7 @@ import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { climbMarkerColor, gradeLegend } from '../config/mapStyle'
 import { useColorblindMode } from '../composables/useColorblindMode'
+import { useRouteColorMode } from '../composables/useRouteColorMode'
 import { useSidebarSection } from '../composables/useSidebarSection'
 import { useMapStore } from '../stores/mapStore'
 import { hasElevationData } from '../utils/route'
@@ -19,8 +20,14 @@ const { colorblindMode, setColorblindMode } = useColorblindMode()
 const { open, toggle } = useSidebarSection('legend', false)
 const { t } = useI18n()
 
+const { effectiveMode: routeColorMode } = useRouteColorMode({
+  canSurface: () => !store.isNearbyMap && (store.surfaceSummary?.segments?.length ?? 0) > 0,
+  canGrade: () => !store.isNearbyMap && hasElevationData(store.routePoints),
+})
+
 const showBody = computed(() => props.embedded || !props.compact || open.value)
-const showGrades = computed(() => hasElevationData(store.routePoints))
+const showGrades = computed(() => routeColorMode.value === 'grade')
+const hasClimbsOrKm = computed(() => hasElevationData(store.routePoints))
 const legendGrades = computed(() => {
   const colors = gradeLegend()
   const labels = [
@@ -36,6 +43,7 @@ const legendGrades = computed(() => {
 
 const summary = computed(() => {
   if (colorblindMode.value) return t('legend.colorblindOn')
+  if (routeColorMode.value === 'surface') return t('mapCanvas.routeColorSurface')
   if (showGrades.value) return t('legend.gradeColors')
   return t('legend.colors')
 })
@@ -71,6 +79,20 @@ const climbColor = computed(() => climbMarkerColor())
             <span class="grade-label">{{ g.label }}</span>
           </span>
         </div>
+        <p class="climb-hint">
+          <span
+            class="swatch climb-swatch"
+            :style="{ background: climbColor, boxShadow: `0 0 0 1px ${climbColor}` }"
+          />
+          {{ t('legend.climb') }}
+        </p>
+        <p class="km-hint">
+          <span class="swatch km-swatch" />
+          {{ t('legend.kmMarkers') }}
+        </p>
+      </div>
+
+      <div v-else-if="hasClimbsOrKm" class="grade-block">
         <p class="climb-hint">
           <span
             class="swatch climb-swatch"

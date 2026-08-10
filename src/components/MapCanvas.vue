@@ -10,6 +10,7 @@ import {
   ROUTE_COLOR,
   basemapStyle,
   climbMarkerColor,
+  gradeLegend,
   isBasemapStyleError,
   kmMarkerInterval,
   loadBasemapPreference,
@@ -21,6 +22,7 @@ import {
 } from '../config/mapStyle'
 import { useColorblindMode } from '../composables/useColorblindMode'
 import { useRidePosition } from '../composables/useRidePosition'
+import { useRouteColorMode } from '../composables/useRouteColorMode'
 import { distanceAlongRouteKm } from '../services/poiFilter'
 import { buildKmMarkers, buildGradeSegments, detectClimbs, hasElevationData } from '../utils/route'
 import {
@@ -49,6 +51,28 @@ const store = useMapStore()
 const { t } = useI18n()
 const { colorblindMode, toggleColorblindMode } = useColorblindMode()
 const { setRideKmAlong } = useRidePosition()
+
+const {
+  effectiveMode: routeColorMode,
+  showToggle: showRouteColorToggle,
+  setRouteColorMode,
+} = useRouteColorMode({
+  canSurface: () => !store.isNearbyMap && (store.surfaceSummary?.segments?.length ?? 0) > 0,
+  canGrade: () => !store.isNearbyMap && hasElevationData(store.routePoints),
+})
+
+const gradeLegendItems = computed(() => {
+  const colors = gradeLegend()
+  const labels = [
+    t('legend.downhill'),
+    t('legend.gradeLt2'),
+    t('legend.grade2to5'),
+    t('legend.grade5to8'),
+    t('legend.grade8to12'),
+    t('legend.gradeGt12'),
+  ]
+  return colors.map((g, i) => ({ label: labels[i] ?? g.label, color: g.color }))
+})
 
 const props = defineProps<{
   /** Mobile cockpit: larger location, less map chrome */
@@ -620,10 +644,6 @@ function gradeGeoJson() {
   }
 }
 
-function hasSurfaceSegments(): boolean {
-  return (store.surfaceSummary?.segments?.length ?? 0) > 0
-}
-
 function surfaceGeoJson() {
   const features = buildSurfaceLineFeatures(
     store.routeCoords,
@@ -899,6 +919,10 @@ watch(colorblindMode, () => {
   updateSources()
 })
 
+watch(routeColorMode, () => {
+  updateSources()
+})
+
 watch(() => store.savedMapId, (id) => {
   setActiveOfflinePackMapId(id || null)
 })
@@ -984,16 +1008,16 @@ function updateSources() {
   const canvas = map.getCanvas()
   canvas.style.cursor = store.controlPointPlaceKind ? 'crosshair' : ''
 
-  const showSurface = !store.isNearbyMap && hasSurfaceSegments()
-  const hasGrades = !store.isNearbyMap && !showSurface && hasElevationData(store.routePoints)
+  const showSurface = routeColorMode.value === 'surface'
+  const showGrades = routeColorMode.value === 'grade'
   if (map.getLayer('route-line')) {
-    map.setPaintProperty('route-line', 'line-opacity', showSurface || hasGrades ? 0.15 : 1)
+    map.setPaintProperty('route-line', 'line-opacity', showSurface || showGrades ? 0.15 : 1)
   }
   if (map.getLayer('route-surface')) {
     map.setLayoutProperty('route-surface', 'visibility', showSurface ? 'visible' : 'none')
   }
   if (map.getLayer('route-grades')) {
-    map.setLayoutProperty('route-grades', 'visibility', hasGrades ? 'visible' : 'none')
+    map.setLayoutProperty('route-grades', 'visibility', showGrades ? 'visible' : 'none')
   }
   if (map.getLayer('climbs-dot')) {
     map.setLayoutProperty(
@@ -1123,13 +1147,12 @@ function addLayers() {
       'line-color': ROUTE_COLOR,
       'line-width': ['interpolate', ['linear'], ['zoom'], 8, 4, 14, 7],
       'line-opacity':
-        hasSurfaceSegments() || hasElevationData(store.routePoints) ? 0.15 : 1,
+        routeColorMode.value === 'surface' || routeColorMode.value === 'grade' ? 0.15 : 1,
     },
   })
 
-  const showSurfaceOnInit = hasSurfaceSegments()
-  const showGradesOnInit =
-    !showSurfaceOnInit && hasElevationData(store.routePoints)
+  const showSurfaceOnInit = routeColorMode.value === 'surface'
+  const showGradesOnInit = routeColorMode.value === 'grade'
 
   map.addLayer({
     id: 'route-surface',
@@ -1536,7 +1559,7 @@ onUnmounted(() => {
     </p>
 
     <ul
-      v-if="surfaceLegendBuckets.length && !rideMode && !store.isNearbyMap"
+      v-if="routeColorMode === 'surface' && surfaceLegendBuckets.length && !rideMode && !store.isNearbyMap"
       class="surface-legend"
       :aria-label="t('elevation.surfaceTitle')"
     >
@@ -1545,6 +1568,41 @@ onUnmounted(() => {
         <span>{{ t(SURFACE_I18N_KEYS[b.id]) }} {{ b.percent }}%</span>
       </li>
     </ul>
+
+    <ul
+      v-if="routeColorMode === 'grade' && !rideMode && !store.isNearbyMap"
+      class="surface-legend grade-legend"
+      :aria-label="t('legend.gradeTitle')"
+    >
+      <li v-for="g in gradeLegendItems" :key="g.label">
+        <span class="grade-bar" :style="{ background: g.color }" />
+        <span>{{ g.label }}</span>
+      </li>
+    </ul>
+
+    <div
+      v-if="showRouteColorToggle && !rideMode && !store.isNearbyMap"
+      class="route-color-toggle"
+      role="group"
+      :aria-label="t('mapCanvas.routeColorMode')"
+    >
+      <button
+        type="button"
+        :class="{ active: routeColorMode === 'surface' }"
+        :aria-pressed="routeColorMode === 'surface'"
+        @click="setRouteColorMode('surface')"
+      >
+        {{ t('mapCanvas.routeColorSurface') }}
+      </button>
+      <button
+        type="button"
+        :class="{ active: routeColorMode === 'grade' }"
+        :aria-pressed="routeColorMode === 'grade'"
+        @click="setRouteColorMode('grade')"
+      >
+        {{ t('mapCanvas.routeColorGrade') }}
+      </button>
+    </div>
 
     <div v-show="!rideMode" class="basemap-toggle" role="group" :aria-label="t('mapCanvas.basemap')">
       <button
@@ -1672,6 +1730,37 @@ onUnmounted(() => {
   border-radius: 6px;
   box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
   overflow: hidden;
+}
+
+.route-color-toggle {
+  position: absolute;
+  top: 48px;
+  left: 10px;
+  z-index: 10;
+  display: flex;
+  background: #fff;
+  border-radius: 6px;
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.route-color-toggle button {
+  border: none;
+  background: transparent;
+  padding: 0.4rem 0.65rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #4b5563;
+  cursor: pointer;
+}
+
+.route-color-toggle button + button {
+  border-left: 1px solid #e5e7eb;
+}
+
+.route-color-toggle button.active {
+  background: #111;
+  color: #fff;
 }
 
 .basemap-toggle button {
@@ -1844,13 +1933,25 @@ onUnmounted(() => {
     left: auto;
   }
 
-  .map-canvas-wrap.ride-mode .basemap-toggle {
+  .route-color-toggle {
+    top: calc(50px + env(safe-area-inset-top, 0px));
+    right: 68px;
+    left: auto;
+  }
+
+  .map-canvas-wrap.ride-mode .basemap-toggle,
+  .map-canvas-wrap.ride-mode .route-color-toggle {
     display: none;
   }
 
   .basemap-toggle button {
     padding: 0.4rem 0.55rem;
     font-size: 0.72rem;
+  }
+
+  .route-color-toggle button {
+    padding: 0.35rem 0.5rem;
+    font-size: 0.7rem;
   }
 }
 </style>
@@ -1952,6 +2053,13 @@ onUnmounted(() => {
   width: 0.5rem;
   height: 0.5rem;
   border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.grade-legend .grade-bar {
+  width: 12px;
+  height: 4px;
+  border-radius: 2px;
   flex-shrink: 0;
 }
 

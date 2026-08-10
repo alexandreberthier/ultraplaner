@@ -13,7 +13,20 @@ import {
   MIN_POI_RADIUS_M,
   POI_CATEGORY_DEFS,
 } from '../config/poiCategories'
-import { ROUTE_COLOR, ROUTE_CASING, MAP_LABEL_FONT, basemapStyle, loadBasemapPreference, saveBasemapPreference, KM_MARKER_INTERVAL_KM, isBasemapStyleError, whenStyleReady, remapOpenFreeMapGlyphRequest, type BasemapId } from '../config/mapStyle'
+import {
+  ROUTE_COLOR,
+  ROUTE_CASING,
+  MAP_LABEL_FONT,
+  basemapStyle,
+  loadBasemapPreference,
+  saveBasemapPreference,
+  KM_MARKER_INTERVAL_KM,
+  isBasemapStyleError,
+  whenStyleReady,
+  remapOpenFreeMapGlyphRequest,
+  gradeLegend,
+  type BasemapId,
+} from '../config/mapStyle'
 import {
   fetchCyclingRoute,
   isOrsConfigured,
@@ -31,6 +44,7 @@ import {
   totalRouteKm,
   buildRoutePoints,
   buildKmMarkers,
+  buildGradeSegments,
   hasElevationData,
   routeElevationGainLoss,
 } from '../utils/route'
@@ -48,6 +62,7 @@ import {
   resolveGeoHeading,
   setLocationMarkerHeading,
 } from '../utils/userLocationMarker'
+import { useRouteColorMode } from '../composables/useRouteColorMode'
 import PlannerElevationProfile from './PlannerElevationProfile.vue'
 
 /** Vienna city center — default planner view before/without geolocation. */
@@ -364,6 +379,44 @@ const hasSurfaceOnRoute = computed(
   () => (routeSurfaceSummary.value?.segments?.length ?? 0) > 0
 )
 
+const {
+  effectiveMode: routeColorMode,
+  showToggle: showRouteColorToggle,
+  setRouteColorMode,
+} = useRouteColorMode({
+  canSurface: hasSurfaceOnRoute,
+  canGrade: () => hasElevationData(routePoints.value),
+})
+
+const gradeLegendItems = computed(() => {
+  const colors = gradeLegend()
+  const labels = [
+    t('legend.downhill'),
+    t('legend.gradeLt2'),
+    t('legend.grade2to5'),
+    t('legend.grade5to8'),
+    t('legend.grade8to12'),
+    t('legend.gradeGt12'),
+  ]
+  return colors.map((g, i) => ({ label: labels[i] ?? g.label, color: g.color }))
+})
+
+function gradeGeoJson() {
+  const segments = buildGradeSegments(routePoints.value)
+  return {
+    type: 'FeatureCollection' as const,
+    features: segments.map((s) => ({
+      type: 'Feature' as const,
+      geometry: { type: 'LineString' as const, coordinates: s.coordinates },
+      properties: { grade: Math.round(s.grade * 10) / 10, color: s.color },
+    })),
+  }
+}
+
+watch(routeColorMode, () => {
+  updateMapSources()
+})
+
 function previewGeoJson() {
   if (routeCoords.value.length >= 2 || waypoints.value.length < 2) return emptyGeoJson()
   return {
@@ -404,18 +457,31 @@ function updateMapSources() {
   ;(map.getSource('planner-waypoints') as maplibregl.GeoJSONSource)?.setData(waypointsGeoJson())
   ;(map.getSource('planner-route') as maplibregl.GeoJSONSource)?.setData(routeGeoJson())
   ;(map.getSource('planner-route-surface') as maplibregl.GeoJSONSource)?.setData(surfaceGeoJson())
+  ;(map.getSource('planner-route-grades') as maplibregl.GeoJSONSource)?.setData(gradeGeoJson())
   ;(map.getSource('planner-preview') as maplibregl.GeoJSONSource)?.setData(previewGeoJson())
   ;(map.getSource('planner-km-markers') as maplibregl.GeoJSONSource)?.setData(kmMarkerGeoJson())
 
-  const showSurface = hasSurfaceOnRoute.value
+  const showSurface = routeColorMode.value === 'surface'
+  const showGrades = routeColorMode.value === 'grade'
   if (map.getLayer('planner-route-line')) {
-    map.setPaintProperty('planner-route-line', 'line-opacity', showSurface ? 0.18 : 1)
+    map.setPaintProperty(
+      'planner-route-line',
+      'line-opacity',
+      showSurface || showGrades ? 0.18 : 1
+    )
   }
   if (map.getLayer('planner-route-surface')) {
     map.setLayoutProperty(
       'planner-route-surface',
       'visibility',
       showSurface ? 'visible' : 'none'
+    )
+  }
+  if (map.getLayer('planner-route-grades')) {
+    map.setLayoutProperty(
+      'planner-route-grades',
+      'visibility',
+      showGrades ? 'visible' : 'none'
     )
   }
 }
@@ -488,6 +554,7 @@ function addPlannerLayers() {
   map.addSource('planner-waypoints', { type: 'geojson', data: waypointsGeoJson() })
   map.addSource('planner-route', { type: 'geojson', data: routeGeoJson() })
   map.addSource('planner-route-surface', { type: 'geojson', data: surfaceGeoJson() })
+  map.addSource('planner-route-grades', { type: 'geojson', data: gradeGeoJson() })
   map.addSource('planner-preview', { type: 'geojson', data: previewGeoJson() })
   map.addSource('planner-km-markers', { type: 'geojson', data: kmMarkerGeoJson() })
 
@@ -514,6 +581,9 @@ function addPlannerLayers() {
     },
   })
 
+  const showSurfaceOnInit = routeColorMode.value === 'surface'
+  const showGradesOnInit = routeColorMode.value === 'grade'
+
   map.addLayer({
     id: 'planner-route-line',
     type: 'line',
@@ -522,7 +592,7 @@ function addPlannerLayers() {
     paint: {
       'line-color': ROUTE_COLOR,
       'line-width': 4,
-      'line-opacity': hasSurfaceOnRoute.value ? 0.18 : 1,
+      'line-opacity': showSurfaceOnInit || showGradesOnInit ? 0.18 : 1,
     },
   })
 
@@ -533,7 +603,22 @@ function addPlannerLayers() {
     layout: {
       'line-cap': 'round',
       'line-join': 'round',
-      visibility: hasSurfaceOnRoute.value ? 'visible' : 'none',
+      visibility: showSurfaceOnInit ? 'visible' : 'none',
+    },
+    paint: {
+      'line-color': ['coalesce', ['get', 'color'], ROUTE_COLOR],
+      'line-width': 5,
+    },
+  })
+
+  map.addLayer({
+    id: 'planner-route-grades',
+    type: 'line',
+    source: 'planner-route-grades',
+    layout: {
+      'line-cap': 'round',
+      'line-join': 'round',
+      visibility: showGradesOnInit ? 'visible' : 'none',
     },
     paint: {
       'line-color': ['coalesce', ['get', 'color'], ROUTE_COLOR],
@@ -1033,7 +1118,7 @@ onUnmounted(() => {
         </button>
       </p>
       <ul
-        v-if="surfaceLegendBuckets.length"
+        v-if="routeColorMode === 'surface' && surfaceLegendBuckets.length"
         class="surface-legend"
         :aria-label="t('elevation.surfaceTitle')"
       >
@@ -1042,6 +1127,39 @@ onUnmounted(() => {
           <span>{{ t(SURFACE_I18N_KEYS[b.id]) }} {{ b.percent }}%</span>
         </li>
       </ul>
+      <ul
+        v-if="routeColorMode === 'grade'"
+        class="surface-legend grade-legend"
+        :aria-label="t('legend.gradeTitle')"
+      >
+        <li v-for="g in gradeLegendItems" :key="g.label">
+          <span class="grade-bar" :style="{ background: g.color }" />
+          <span>{{ g.label }}</span>
+        </li>
+      </ul>
+      <div
+        v-if="showRouteColorToggle"
+        class="route-color-toggle"
+        role="group"
+        :aria-label="t('mapCanvas.routeColorMode')"
+      >
+        <button
+          type="button"
+          :class="{ active: routeColorMode === 'surface' }"
+          :aria-pressed="routeColorMode === 'surface'"
+          @click="setRouteColorMode('surface')"
+        >
+          {{ t('mapCanvas.routeColorSurface') }}
+        </button>
+        <button
+          type="button"
+          :class="{ active: routeColorMode === 'grade' }"
+          :aria-pressed="routeColorMode === 'grade'"
+          @click="setRouteColorMode('grade')"
+        >
+          {{ t('mapCanvas.routeColorGrade') }}
+        </button>
+      </div>
       <div class="basemap-toggle" role="group" :aria-label="t('mapCanvas.basemap')">
         <button
           type="button"
@@ -1361,6 +1479,13 @@ onUnmounted(() => {
   flex-shrink: 0;
 }
 
+.grade-legend .grade-bar {
+  width: 12px;
+  height: 4px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
 :deep(.route-bike-cursor) {
   position: relative;
   width: 26px;
@@ -1527,6 +1652,37 @@ onUnmounted(() => {
   border-radius: 6px;
   box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
   overflow: hidden;
+}
+
+.route-color-toggle {
+  position: absolute;
+  top: 48px;
+  left: 10px;
+  z-index: 3;
+  display: flex;
+  background: #fff;
+  border-radius: 6px;
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.route-color-toggle button {
+  border: none;
+  background: transparent;
+  padding: 0.4rem 0.65rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #4b5563;
+  cursor: pointer;
+}
+
+.route-color-toggle button + button {
+  border-left: 1px solid #e5e7eb;
+}
+
+.route-color-toggle button.active {
+  background: #111;
+  color: #fff;
 }
 
 .basemap-fallback {
