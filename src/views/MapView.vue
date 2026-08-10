@@ -44,7 +44,9 @@ const router = useRouter()
 const { t, locale } = useI18n()
 const {
   exportGpxFavorites,
+  exportGpxRoute,
   exportFitCourse,
+  exportFitRoute,
   openQrExport,
   switchQrFormat,
   closeQrDialog,
@@ -54,6 +56,7 @@ const {
   cheatSheetOpen,
   exportWaypoints,
   courseName,
+  hasRealTrack,
   qrOpen,
   qrBusy,
   qrUrl,
@@ -716,6 +719,48 @@ function onDocClick(e: MouseEvent) {
 
               <p v-if="store.isNearbyMap" class="export-nearby-hint">{{ t('map.exportNearbyHint') }}</p>
 
+              <template v-if="hasRealTrack()">
+                <p class="export-section">{{ t('map.exportRouteOnlySection') }}</p>
+                <button
+                  type="button"
+                  class="export-item featured"
+                  role="menuitem"
+                  @click="runExport(exportGpxRoute)"
+                >
+                  <span class="export-icon">↓</span>
+                  <span class="export-text">
+                    <strong>{{ t('map.gpxAll') }}</strong>
+                    <small>{{ t('map.gpxAllHint') }}</small>
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  class="export-item featured"
+                  role="menuitem"
+                  @click="runExport(() => void exportFitRoute())"
+                >
+                  <span class="export-icon">↓</span>
+                  <span class="export-text">
+                    <strong>{{ t('map.fitRouteOnly') }}</strong>
+                    <small>{{ t('map.fitRouteOnlyHint') }}</small>
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  class="export-item"
+                  role="menuitem"
+                  @click="runExport(() => openQrExport('gpx', { routeOnly: true }))"
+                >
+                  <span class="export-icon">▦</span>
+                  <span class="export-text">
+                    <strong>{{ t('map.qrRouteOnly') }}</strong>
+                    <small>{{ t('map.qrRouteOnlyHint') }}</small>
+                  </span>
+                </button>
+                <div class="export-divider" />
+                <p class="export-section">{{ t('map.exportWithStopsSection') }}</p>
+              </template>
+
               <button
                 type="button"
                 class="export-item"
@@ -1170,6 +1215,44 @@ function onDocClick(e: MouseEvent) {
           </label>
 
           <p v-if="store.isNearbyMap" class="export-nearby-hint">{{ t('map.exportNearbyHint') }}</p>
+
+          <template v-if="hasRealTrack()">
+            <p class="export-sheet-section">{{ t('map.exportRouteOnlySection') }}</p>
+            <button
+              type="button"
+              class="export-sheet-btn featured"
+              @click="exportGpxRoute(); closeMobilePanel()"
+            >
+              <span class="sheet-btn-icon">↓</span>
+              <span>
+                <strong>{{ t('map.gpxAll') }}</strong>
+                <small>{{ t('map.gpxAllHint') }}</small>
+              </span>
+            </button>
+            <button
+              type="button"
+              class="export-sheet-btn featured"
+              @click="void exportFitRoute().then(() => closeMobilePanel())"
+            >
+              <span class="sheet-btn-icon">↓</span>
+              <span>
+                <strong>{{ t('map.fitRouteOnly') }}</strong>
+                <small>{{ t('map.fitRouteOnlyHint') }}</small>
+              </span>
+            </button>
+            <button
+              type="button"
+              class="export-sheet-btn"
+              @click="void openQrExport('gpx', { routeOnly: true }).then(() => closeMobilePanel())"
+            >
+              <span class="sheet-btn-icon">▦</span>
+              <span>
+                <strong>{{ t('map.qrRouteOnly') }}</strong>
+                <small>{{ t('map.qrRouteOnlyHint') }}</small>
+              </span>
+            </button>
+            <p class="export-sheet-section">{{ t('map.exportWithStopsSection') }}</p>
+          </template>
 
           <button
             type="button"

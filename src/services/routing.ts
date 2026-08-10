@@ -3,9 +3,36 @@ import { GEOCODE_BBOX } from '../config/poiCategories'
 import { tGlobal } from '../i18n'
 import { bucketOrsSurfaceSummary, type OrsSurfaceSummaryRow } from '../utils/surface'
 
-export type CyclingProfile = 'cycling-regular'
+/** ORS cycling profiles — surface bias is baked into the profile, not a separate surface filter. */
+export type CyclingProfile =
+  | 'cycling-regular'
+  | 'cycling-road'
+  | 'cycling-mountain'
+  | 'cycling-electric'
+
+export const CYCLING_PROFILES: readonly CyclingProfile[] = [
+  'cycling-regular',
+  'cycling-road',
+  'cycling-mountain',
+  'cycling-electric',
+] as const
 
 export const CYCLING_PROFILE: CyclingProfile = 'cycling-regular'
+
+/**
+ * Hill preference via ORS steepness_difficulty (cycling only).
+ * Higher = rider accepts steeper grades (often shorter/faster climbs).
+ * There is no ORS “scenic” weighting for cycling profiles.
+ */
+export type HillPreference = 'flat' | 'balanced' | 'steep'
+
+export interface RouteRequestOptions {
+  profile?: CyclingProfile
+  hillPreference?: HillPreference
+  /** Default true — avoid stairways on bike routes. */
+  avoidSteps?: boolean
+  avoidFerries?: boolean
+}
 
 export interface GeocodeResult {
   lat: number
@@ -29,6 +56,31 @@ function orsKey(): string {
 
 export function isOrsConfigured(): boolean {
   return Boolean(import.meta.env.VITE_ORS_API_KEY)
+}
+
+function steepnessDifficulty(hill: HillPreference | undefined): number | null {
+  if (hill === 'flat') return 0
+  if (hill === 'steep') return 3
+  return null
+}
+
+function buildOrsOptions(opts: RouteRequestOptions): Record<string, unknown> | undefined {
+  const avoid: string[] = []
+  if (opts.avoidSteps !== false) avoid.push('steps')
+  if (opts.avoidFerries) avoid.push('ferries')
+
+  const difficulty = steepnessDifficulty(opts.hillPreference)
+  const profileParams =
+    difficulty != null
+      ? { weightings: { steepness_difficulty: difficulty } }
+      : undefined
+
+  if (!avoid.length && !profileParams) return undefined
+
+  return {
+    ...(avoid.length ? { avoid_features: avoid } : {}),
+    ...(profileParams ? { profile_params: profileParams } : {}),
+  }
 }
 
 /** Search addresses in supported Central European region. */
@@ -74,7 +126,7 @@ export async function searchAddresses(query: string, limit = 6): Promise<Geocode
 /** Fetch a cycling route through waypoints via OpenRouteService (free tier). */
 export async function fetchCyclingRoute(
   waypoints: LatLng[],
-  profile: CyclingProfile = CYCLING_PROFILE
+  profileOrOpts: CyclingProfile | RouteRequestOptions = CYCLING_PROFILE
 ): Promise<CyclingRouteResult> {
   const key = orsKey()
 
@@ -82,9 +134,14 @@ export async function fetchCyclingRoute(
     throw new Error(tGlobal('routing.minWaypoints'))
   }
 
+  const opts: RouteRequestOptions =
+    typeof profileOrOpts === 'string' ? { profile: profileOrOpts } : profileOrOpts
+  const profile = opts.profile ?? CYCLING_PROFILE
+
   const coordinates = waypoints.map((w) => [w.lng, w.lat])
   // Default ORS snap radius is only 350 m — mountain/parking clicks often fail (code 2010).
   const radiuses = waypoints.map(() => 2000)
+  const options = buildOrsOptions(opts)
 
   const res = await fetch(
     `https://api.openrouteservice.org/v2/directions/${profile}/geojson`,
@@ -99,6 +156,7 @@ export async function fetchCyclingRoute(
         elevation: true,
         radiuses,
         extra_info: ['surface'],
+        ...(options ? { options } : {}),
       }),
     }
   )

@@ -95,16 +95,29 @@ export function useMapExport() {
     downloadFile(payload.filename, payload.gpx)
   }
 
-  /** Track-only GPX. */
-  function exportGpxRoute() {
+  function buildGpxRoutePayload(): { name: string; filename: string; gpx: string } | null {
+    if (!hasRealTrack()) {
+      alert(tGlobal('export.fitNeedsTrack'))
+      return null
+    }
     const name = courseName()
-    downloadFile(
-      `${name}.gpx`,
-      buildGpxExport(name, store.routePoints, [], { markFavorites: false })
-    )
+    return {
+      name,
+      filename: `${name}.gpx`,
+      gpx: buildGpxExport(name, store.routePoints, [], { markFavorites: false }),
+    }
   }
 
-  async function buildFitCoursePayload(): Promise<{
+  /** Track-only GPX (no POIs / waypoints). */
+  function exportGpxRoute() {
+    const payload = buildGpxRoutePayload()
+    if (!payload) return
+    downloadFile(payload.filename, payload.gpx)
+  }
+
+  async function buildFitCoursePayload(opts?: {
+    routeOnly?: boolean
+  }): Promise<{
     name: string
     filename: string
     bytes: Uint8Array
@@ -113,12 +126,15 @@ export function useMapExport() {
       alert(tGlobal('export.fitNeedsTrack'))
       return null
     }
-    if (!requireExportStops()) return null
+    const routeOnly = Boolean(opts?.routeOnly)
+    if (!routeOnly && !requireExportStops()) return null
     try {
       const { buildFitCourseExport, MAX_FIT_COURSE_POINTS } = await import('../services/fitCourse')
       const name = courseName()
-      const filename = `${name}-course.fit`
-      const pois = exportWaypoints().map(({ label: _l, note: _n, ...poi }) => poi)
+      const filename = routeOnly ? `${name}.fit` : `${name}-course.fit`
+      const pois = routeOnly
+        ? []
+        : exportWaypoints().map(({ label: _l, note: _n, ...poi }) => poi)
       if (pois.length > MAX_FIT_COURSE_POINTS) {
         alert(tGlobal('export.fitPointLimit', { max: MAX_FIT_COURSE_POINTS, count: pois.length }))
       }
@@ -138,6 +154,13 @@ export function useMapExport() {
     downloadBinary(payload.filename, payload.bytes, 'application/octet-stream')
   }
 
+  /** Track-only FIT Course (no course points). */
+  async function exportFitRoute() {
+    const payload = await buildFitCoursePayload({ routeOnly: true })
+    if (!payload) return
+    downloadBinary(payload.filename, payload.bytes, 'application/octet-stream')
+  }
+
   function closeQrDialog() {
     qrOpen.value = false
     qrBusy.value = false
@@ -153,29 +176,39 @@ export function useMapExport() {
     closeQrDialog()
   }
 
-  async function openQrExport(kind: QrExportKind) {
+  async function openQrExport(kind: QrExportKind, opts?: { routeOnly?: boolean }) {
+    const routeOnly = Boolean(opts?.routeOnly)
     qrOpen.value = true
     qrBusy.value = true
     qrUrl.value = ''
     qrError.value = ''
     qrLocalDownload.value = null
     qrKind.value = kind
-    qrAllowFitToggle.value = (kind === 'gpx' || kind === 'fit') && hasRealTrack()
+    qrAllowFitToggle.value =
+      (kind === 'gpx' || kind === 'fit') && hasRealTrack() && !routeOnly
 
     if (kind === 'fit') {
-      qrTitle.value = tGlobal('export.qrTitleFit')
-      qrHint.value = tGlobal('export.qrHintFit')
+      qrTitle.value = routeOnly
+        ? tGlobal('export.qrTitleFitRoute')
+        : tGlobal('export.qrTitleFit')
+      qrHint.value = routeOnly
+        ? tGlobal('export.qrHintFitRoute')
+        : tGlobal('export.qrHintFit')
     } else if (kind === 'coros') {
       qrTitle.value = tGlobal('export.qrTitleCoros')
       qrHint.value = tGlobal('export.qrHintCoros')
     } else {
-      qrTitle.value = tGlobal('export.qrTitleGpx')
-      qrHint.value = tGlobal('export.qrHintGpx')
+      qrTitle.value = routeOnly
+        ? tGlobal('export.qrTitleGpxRoute')
+        : tGlobal('export.qrTitleGpx')
+      qrHint.value = routeOnly
+        ? tGlobal('export.qrHintGpxRoute')
+        : tGlobal('export.qrHintGpx')
     }
 
     try {
       if (kind === 'fit') {
-        const payload = await buildFitCoursePayload()
+        const payload = await buildFitCoursePayload({ routeOnly })
         if (!payload) {
           closeQrDialog()
           return
@@ -185,7 +218,7 @@ export function useMapExport() {
         const created = await createFitRouteExport(payload)
         qrUrl.value = created.url
       } else {
-        const payload = buildGpxFavoritesPayload()
+        const payload = routeOnly ? buildGpxRoutePayload() : buildGpxFavoritesPayload()
         if (!payload) {
           closeQrDialog()
           return
@@ -240,6 +273,7 @@ export function useMapExport() {
     exportGpxRoute,
     exportGpxFavorites,
     exportFitCourse,
+    exportFitRoute,
     exportForCoros,
     openQrExport,
     switchQrFormat,

@@ -73,10 +73,6 @@ export function useWahoo() {
       alert(tGlobal('wahoo.needRoute'))
       return
     }
-    if (store.exportStops.length === 0) {
-      alert(tGlobal('export.noFavorites'))
-      return
-    }
 
     busy.value = true
     try {
@@ -87,6 +83,7 @@ export function useWahoo() {
           .replace(/\s+/g, ' ')
           .trim()
           .slice(0, 48) || 'Route'
+      // Stops optional — track-only is fine for navigation without POIs.
       const pois = store.exportStops.map(({ label: _l, note: _n, ...poi }) => poi)
       if (pois.length > MAX_FIT_COURSE_POINTS) {
         alert(tGlobal('export.fitPointLimit', { max: MAX_FIT_COURSE_POINTS, count: pois.length }))
