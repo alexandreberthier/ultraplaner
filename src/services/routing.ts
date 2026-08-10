@@ -33,10 +33,13 @@ export function cyclingProfileForSurface(surface: SurfacePreference): CyclingPro
 
 /**
  * Hill preference via ORS steepness_difficulty (cycling only).
- * Higher = rider accepts steeper grades (often shorter/faster climbs).
- * There is no ORS “scenic” weighting for cycling profiles.
+ * ORS levels 0–3 = novice→pro; preferred gradient rises with the value.
+ * Level 0 heavily penalises hills (long detours, often more total ascent) — skip it.
+ * balanced→1 (moderate), steep→3 (pro / hills OK).
  */
-export type HillPreference = 'flat' | 'balanced' | 'steep'
+export type HillPreference = 'balanced' | 'steep'
+
+export const HILL_PREFERENCES: readonly HillPreference[] = ['balanced', 'steep'] as const
 
 export interface RouteRequestOptions {
   profile?: CyclingProfile
@@ -71,7 +74,7 @@ export function isOrsConfigured(): boolean {
 }
 
 function steepnessDifficulty(hill: HillPreference | undefined): number | null {
-  if (hill === 'flat') return 0
+  if (hill === 'balanced') return 1
   if (hill === 'steep') return 3
   return null
 }

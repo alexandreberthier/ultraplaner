@@ -19,6 +19,7 @@ import {
   isOrsConfigured,
   searchAddresses,
   SURFACE_PREFERENCES,
+  HILL_PREFERENCES,
   cyclingProfileForSurface,
   type SurfacePreference,
   type HillPreference,
@@ -1064,34 +1065,16 @@ onUnmounted(() => {
           <p class="routing-hint">{{ t('planner.hillHint') }}</p>
           <div class="option-grid">
             <button
+              v-for="h in HILL_PREFERENCES"
+              :key="h"
               type="button"
               class="option-chip option-chip--stack"
-              :class="{ active: hillPreference === 'flat' }"
-              :title="t('planner.hill.flatHint')"
-              @click="setHillPreference('flat')"
+              :class="{ active: hillPreference === h }"
+              :title="t(`planner.hill.${h}Hint`)"
+              @click="setHillPreference(h)"
             >
-              <span>{{ t('planner.hill.flat') }}</span>
-              <small>{{ t('planner.hill.flatHint') }}</small>
-            </button>
-            <button
-              type="button"
-              class="option-chip option-chip--stack"
-              :class="{ active: hillPreference === 'balanced' }"
-              :title="t('planner.hill.balancedHint')"
-              @click="setHillPreference('balanced')"
-            >
-              <span>{{ t('planner.hill.balanced') }}</span>
-              <small>{{ t('planner.hill.balancedHint') }}</small>
-            </button>
-            <button
-              type="button"
-              class="option-chip option-chip--stack"
-              :class="{ active: hillPreference === 'steep' }"
-              :title="t('planner.hill.steepHint')"
-              @click="setHillPreference('steep')"
-            >
-              <span>{{ t('planner.hill.steep') }}</span>
-              <small>{{ t('planner.hill.steepHint') }}</small>
+              <span>{{ t(`planner.hill.${h}`) }}</span>
+              <small>{{ t(`planner.hill.${h}Hint`) }}</small>
             </button>
           </div>
         </fieldset>
@@ -1150,16 +1133,24 @@ onUnmounted(() => {
   flex: 1;
   min-height: 0;
   height: 100%;
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: 320px minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr) auto;
+  grid-template-areas:
+    'controls map'
+    'controls elev';
   background: var(--bg);
 }
 
 .planner-map-wrap {
+  grid-area: map;
   position: relative;
-  flex: 1;
   min-height: 0;
   overflow: hidden;
+}
+
+.route-planner > :deep(.planner-elev) {
+  grid-area: elev;
 }
 
 .planner-map {
@@ -1386,16 +1377,21 @@ onUnmounted(() => {
 }
 
 .planner-controls {
+  grid-area: controls;
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
   gap: 0.85rem;
-  max-height: min(52vh, 520px);
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
   overflow-y: auto;
-  padding: 0.85rem 1rem 1rem;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  padding: 1rem 1.1rem 1.25rem;
   background: var(--surface);
-  border-top: 1px solid var(--border);
-  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.06);
+  border-right: 1px solid var(--border);
+  box-shadow: 4px 0 20px rgba(0, 0, 0, 0.05);
 }
 
 .address-search {
@@ -1790,24 +1786,23 @@ onUnmounted(() => {
   cursor: wait;
 }
 
-@media (min-width: 900px) {
+@media (max-width: 899px) {
   .route-planner {
-    flex-direction: row;
-    align-items: stretch;
-  }
-
-  .planner-map-wrap {
-    flex: 1;
+    grid-template-columns: 1fr;
+    grid-template-rows: minmax(0, 1fr) auto auto;
+    grid-template-areas:
+      'map'
+      'elev'
+      'controls';
   }
 
   .planner-controls {
-    width: min(380px, 36vw);
-    max-height: none;
-    height: 100%;
-    border-top: none;
-    border-left: 1px solid var(--border);
-    box-shadow: -4px 0 20px rgba(0, 0, 0, 0.05);
-    padding: 1rem 1.1rem 1.25rem;
+    max-height: min(52vh, 520px);
+    height: auto;
+    border-right: none;
+    border-top: 1px solid var(--border);
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.06);
+    padding: 0.85rem 1rem 1rem;
   }
 }
 </style>
