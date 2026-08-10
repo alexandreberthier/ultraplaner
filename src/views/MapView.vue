@@ -1822,13 +1822,14 @@ function onDocClick(e: MouseEvent) {
 
 .map-cp-tools {
   position: absolute;
-  top: 54px;
-  left: 10px;
+  /* Below MapCanvas .basemap-toggle (top ~10 + ~36px height) */
+  top: calc(54px + env(safe-area-inset-top, 0px));
+  left: calc(10px + env(safe-area-inset-left, 0px));
   z-index: 35;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 0.4rem;
+  gap: 0.45rem;
   pointer-events: none;
 }
 
@@ -1929,9 +1930,10 @@ function onDocClick(e: MouseEvent) {
 
 @media (max-width: 768px) {
   .map-cp-tools {
-    top: 10px;
+    /* Stay in left stack under basemap — do not share the top row with the style toggle */
+    top: calc(56px + env(safe-area-inset-top, 0px));
     bottom: auto;
-    left: 10px;
+    left: calc(10px + env(safe-area-inset-left, 0px));
   }
 
   .map-cp-fab {
@@ -1976,16 +1978,12 @@ function onDocClick(e: MouseEvent) {
   }
 
   .map-cp-banner {
-    top: calc(12px + env(safe-area-inset-top, 0px));
-    left: 72px;
-    right: 12px;
-    transform: none;
-    max-width: none;
+    top: calc(56px + env(safe-area-inset-top, 0px));
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+    max-width: min(92vw, 420px);
     border-radius: 12px;
-  }
-
-  .map-cp-tools:has(.map-nearby-fab) .map-cp-banner {
-    left: auto;
   }
 }
 
@@ -2839,5 +2837,29 @@ function onDocClick(e: MouseEvent) {
 
 .export-sheet-print {
   opacity: 0.92;
+}
+</style>
+
+<style>
+/*
+  Unscoped on purpose: Vue scoped :has() would stamp MapView's data-attr onto
+  .route-color-toggle and miss the MapCanvas child.
+*/
+.map-stack:has(.route-color-toggle) > .map-cp-tools {
+  top: calc(92px + env(safe-area-inset-top, 0px));
+}
+
+.map-stack:has(.route-color-toggle) > .map-cp-banner {
+  top: calc(92px + env(safe-area-inset-top, 0px));
+}
+
+@media (max-width: 768px) {
+  .map-stack:has(.route-color-toggle) > .map-cp-tools {
+    top: calc(96px + env(safe-area-inset-top, 0px));
+  }
+
+  .map-stack:has(.route-color-toggle) > .map-cp-banner {
+    top: calc(96px + env(safe-area-inset-top, 0px));
+  }
 }
 </style>

@@ -1734,10 +1734,11 @@ onUnmounted(() => {
 
 .basemap-toggle {
   position: absolute;
-  top: 10px;
-  left: 10px;
-  z-index: 10;
+  top: calc(10px + env(safe-area-inset-top, 0px));
+  left: calc(10px + env(safe-area-inset-left, 0px));
+  z-index: 40;
   display: flex;
+  max-width: calc(100% - 72px);
   background: #fff;
   border-radius: 6px;
   box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
@@ -1746,10 +1747,11 @@ onUnmounted(() => {
 
 .route-color-toggle {
   position: absolute;
-  top: 48px;
-  left: 10px;
-  z-index: 10;
+  top: calc(48px + env(safe-area-inset-top, 0px));
+  left: calc(10px + env(safe-area-inset-left, 0px));
+  z-index: 40;
   display: flex;
+  max-width: calc(100% - 72px);
   background: #fff;
   border-radius: 6px;
   box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
@@ -1806,10 +1808,10 @@ onUnmounted(() => {
 
 .basemap-fallback {
   position: absolute;
-  top: 52px;
-  left: 10px;
-  right: 10px;
-  z-index: 11;
+  top: calc(52px + env(safe-area-inset-top, 0px));
+  left: calc(10px + env(safe-area-inset-left, 0px));
+  right: calc(10px + env(safe-area-inset-right, 0px));
+  z-index: 41;
   margin: 0;
   padding: 0.55rem 0.7rem;
   display: flex;
@@ -1944,16 +1946,19 @@ onUnmounted(() => {
     right: 12px;
   }
 
+  /* Keep style toggles top-left (same stack as MapView FABs); clear location FAB on the right */
   .basemap-toggle {
     top: calc(12px + env(safe-area-inset-top, 0px));
-    right: 68px;
-    left: auto;
+    left: calc(10px + env(safe-area-inset-left, 0px));
+    right: auto;
+    max-width: calc(100% - 72px);
   }
 
   .route-color-toggle {
-    top: calc(50px + env(safe-area-inset-top, 0px));
-    right: 68px;
-    left: auto;
+    top: calc(52px + env(safe-area-inset-top, 0px));
+    left: calc(10px + env(safe-area-inset-left, 0px));
+    right: auto;
+    max-width: calc(100% - 72px);
   }
 
   .map-canvas-wrap.ride-mode .basemap-toggle,
