@@ -140,7 +140,7 @@
       a15: 'Ce sont des lacunes de ravitaillement : tronçons d’au moins ~25 km sans POI avec vos catégories/filtres actuels. Utile pour anticiper ou marquer des favoris.',
       q16: 'Qu’est-ce que « Alentours » ?',
       a16:
-        'Alentours = votre position + POIs dans un rayon (pause, sans route). Un tap sur « Alentours » ouvre directement la carte (défaut : 5 km, stations/supermarchés/eau). Ajustez rayon et catégories ensuite dans la liste/barre latérale et rechargez. Pas de mode conduite — il faut une route de course chargée.',
+        'Alentours = votre position + POIs dans un rayon (pause, sans route). Un tap sur « Alentours » ouvre directement la carte (défaut : 5 km, stations/supermarchés/eau/hôtels). Ajustez rayon et catégories ensuite dans la liste/barre latérale et rechargez. Pas de mode conduite — il faut une route de course chargée.',
     },
     poiGuide: {
       title: 'Ravitaillement pour routes ultracycling',
@@ -219,7 +219,7 @@
     intro:
       'Pause sur la route ? Alentours utilise votre position pour chercher des ravitaillements dans un rayon — sans GPX. (Mode conduite seulement avec une route.)',
     introMapFirst:
-      'La position est récupérée et la carte s’ouvre tout de suite (défaut : 5 km, stations, supermarchés, eau). Changez rayon et catégories sur la carte sous Options Alentours.',
+      'La position est récupérée et la carte s’ouvre tout de suite (défaut : 5 km, stations, supermarchés, eau, hôtels). Changez rayon et catégories sur la carte sous Options Alentours.',
     introMap:
       'Rafraîchir le GPS et recharger les POIs dans le rayon. (Pas de mode conduite — il faut une route.)',
     introMapRoute:

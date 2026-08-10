@@ -35,6 +35,7 @@ export const NEARBY_DEFAULT_POI_CATEGORIES: PoiCategory[] = [
   'fuel',
   'supermarket',
   'water',
+  'hotel',
 ]
 
 export const DEFAULT_POI_RADIUS_M = 500
