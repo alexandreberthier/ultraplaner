@@ -694,7 +694,7 @@ export default {
     surfaceTitle: 'Route',
     surface: {
       shortest: 'Kürzeste',
-      streets: 'Straßen',
+      streets: 'Asphalt bevorzugen',
     },
     hillTitle: 'Steigung',
     hill: {

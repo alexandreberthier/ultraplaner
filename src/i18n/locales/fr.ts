@@ -691,7 +691,7 @@
     surfaceTitle: 'Itinéraire',
     surface: {
       shortest: 'Plus courte',
-      streets: 'Routes',
+      streets: 'Préférer l’asphalte',
     },
     hillTitle: 'Pente',
     hill: {

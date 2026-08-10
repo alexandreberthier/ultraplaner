@@ -692,7 +692,7 @@ export default {
     surfaceTitle: 'Route',
     surface: {
       shortest: 'Shortest',
-      streets: 'Roads',
+      streets: 'Prefer asphalt',
     },
     hillTitle: 'Hills',
     hill: {
