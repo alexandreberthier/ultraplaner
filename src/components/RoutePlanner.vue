@@ -1078,38 +1078,32 @@ onUnmounted(() => {
       <template v-if="showRoutingOptions">
         <fieldset class="routing-options">
           <legend>{{ t('planner.surfaceTitle') }}</legend>
-          <p class="routing-hint">{{ t('planner.surfaceHint') }}</p>
           <div class="option-grid">
             <button
               v-for="s in SURFACE_PREFERENCES"
               :key="s"
               type="button"
-              class="option-chip option-chip--stack"
+              class="option-chip"
               :class="{ active: surfacePreference === s }"
-              :title="t(`planner.surface.${s}Hint`)"
               @click="setSurfacePreference(s)"
             >
-              <span>{{ t(`planner.surface.${s}`) }}</span>
-              <small>{{ t(`planner.surface.${s}Hint`) }}</small>
+              {{ t(`planner.surface.${s}`) }}
             </button>
           </div>
         </fieldset>
 
         <fieldset class="routing-options">
           <legend>{{ t('planner.hillTitle') }}</legend>
-          <p class="routing-hint">{{ t('planner.hillHint') }}</p>
           <div class="option-grid">
             <button
               v-for="h in HILL_PREFERENCES"
               :key="h"
               type="button"
-              class="option-chip option-chip--stack"
+              class="option-chip"
               :class="{ active: hillPreference === h }"
-              :title="t(`planner.hill.${h}Hint`)"
               @click="setHillPreference(h)"
             >
-              <span>{{ t(`planner.hill.${h}`) }}</span>
-              <small>{{ t(`planner.hill.${h}Hint`) }}</small>
+              {{ t(`planner.hill.${h}`) }}
             </button>
           </div>
         </fieldset>
@@ -1733,13 +1727,6 @@ onUnmounted(() => {
   margin-bottom: 0.25rem;
 }
 
-.routing-hint {
-  margin: 0 0 0.45rem;
-  font-size: 0.78rem;
-  color: var(--muted);
-  line-height: 1.35;
-}
-
 .option-grid {
   display: flex;
   flex-wrap: wrap;
@@ -1765,28 +1752,6 @@ onUnmounted(() => {
   background: var(--primary);
   color: #fff;
   border-color: var(--primary);
-}
-
-.option-chip--stack {
-  flex: 1 1 8.5rem;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0.15rem;
-  min-height: 0;
-  padding: 0.5rem 0.65rem;
-  text-align: left;
-}
-
-.option-chip--stack small {
-  font-size: 0.7rem;
-  font-weight: 500;
-  line-height: 1.3;
-  opacity: 0.85;
-  white-space: normal;
-}
-
-.option-chip--stack.active small {
-  opacity: 0.92;
 }
 
 .route-elev {
