@@ -16,8 +16,13 @@ const { t, locale } = useI18n()
 const router = useRouter()
 const tab = ref<'gpx' | 'plan' | 'nearby'>('gpx')
 const appRef = ref<HTMLElement | null>(null)
-const plannerRef = ref<{ hasDraft: () => boolean } | null>(null)
+const plannerRef = ref<{
+  hasDraft: () => boolean
+  toggleExportMenu: () => void
+  closeExportMenu: () => void
+} | null>(null)
 const nearbyFormRef = ref<{ openMapFirst: () => void } | null>(null)
+const plannerCanExport = ref(false)
 
 function scrollToApp() {
   appRef.value?.scrollIntoView({ behavior: 'smooth' })
@@ -35,9 +40,15 @@ function leavePlanMode() {
   if (plannerRef.value?.hasDraft?.()) {
     if (!window.confirm(t('landing.discardPlan'))) return
   }
+  plannerRef.value?.closeExportMenu?.()
+  plannerCanExport.value = false
   tab.value = 'gpx'
   void router.push(localeHomePath(locale.value as AppLocale))
   window.scrollTo({ top: 0, behavior: 'smooth' })
+}
+
+function togglePlannerExport() {
+  plannerRef.value?.toggleExportMenu?.()
 }
 
 function goStart() {
@@ -111,7 +122,18 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
             />
           </picture>
         </button>
-        <TopbarSettings force-menu />
+        <div class="plan-topbar-actions">
+          <button
+            type="button"
+            class="plan-export-btn"
+            :disabled="!plannerCanExport"
+            :title="t('map.exportRoute')"
+            @click="togglePlannerExport"
+          >
+            ↓ {{ t('map.exportRoute') }} ▾
+          </button>
+          <TopbarSettings force-menu />
+        </div>
       </header>
       <section
         id="tabpanel-plan"
@@ -119,7 +141,7 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
         role="tabpanel"
         aria-labelledby="tab-plan"
       >
-        <RoutePlanner ref="plannerRef" />
+        <RoutePlanner ref="plannerRef" @can-export-change="plannerCanExport = $event" />
       </section>
     </template>
 
@@ -993,6 +1015,48 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
   object-fit: contain;
   object-position: left center;
   pointer-events: none;
+}
+
+.plan-topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+.plan-export-btn {
+  border: 1px solid var(--border);
+  background: var(--surface-2, var(--bg));
+  border-radius: 8px;
+  padding: 0.45rem 0.7rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--text);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.plan-export-btn:hover:not(:disabled) {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.plan-export-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+@media (max-width: 520px) {
+  .plan-export-btn {
+    padding: 0.4rem 0.5rem;
+    font-size: 0.75rem;
+  }
+
+  .back-btn {
+    padding: 0.4rem 0.55rem;
+    font-size: 0.78rem;
+  }
 }
 
 .planner-stage {

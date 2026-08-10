@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, onMounted, onUnmounted, ref } from 'vue'
+import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import maplibregl from 'maplibre-gl'
@@ -18,12 +18,19 @@ import {
   fetchCyclingRoute,
   isOrsConfigured,
   searchAddresses,
-  CYCLING_PROFILES,
-  type CyclingProfile,
+  SURFACE_PREFERENCES,
+  cyclingProfileForSurface,
+  type SurfacePreference,
   type HillPreference,
   type GeocodeResult,
 } from '../services/routing'
-import { totalRouteKm, buildRoutePoints, buildKmMarkers } from '../utils/route'
+import {
+  totalRouteKm,
+  buildRoutePoints,
+  buildKmMarkers,
+  hasElevationData,
+  routeElevationGainLoss,
+} from '../utils/route'
 import { buildGpxExport, downloadFile, downloadBinary } from '../services/export'
 import { poiCategoryLabel } from '../utils/poiLabels'
 import { ensureRouteEndImages, routeEndIconId } from '../utils/routeEndIcons'
@@ -33,6 +40,7 @@ import {
   resolveGeoHeading,
   setLocationMarkerHeading,
 } from '../utils/userLocationMarker'
+import PlannerElevationProfile from './PlannerElevationProfile.vue'
 
 /** Vienna city center — default planner view before/without geolocation. */
 const VIENNA_CENTER: [number, number] = [16.3738, 48.2082]
@@ -64,7 +72,7 @@ const routeCoords = ref<[number, number][]>([])
 const routeElevations = ref<number[]>([])
 const routeSurfaceSummary = ref<RouteSurfaceSummary | null>(null)
 const routeName = ref('')
-const cyclingProfile = ref<CyclingProfile>('cycling-regular')
+const surfacePreference = ref<SurfacePreference>('mixed')
 const hillPreference = ref<HillPreference>('balanced')
 const radiusM = ref(DEFAULT_POI_RADIUS_M)
 const selected = ref<PoiCategory[]>([...DEFAULT_POI_CATEGORIES])
@@ -72,6 +80,7 @@ const formError = ref('')
 const routing = ref(false)
 const creating = ref(false)
 const exporting = ref(false)
+const showExportMenu = ref(false)
 const basemap = ref<BasemapId>(loadBasemapPreference())
 const basemapFallbackHint = ref('')
 let cancelStyleReady: (() => void) | null = null
@@ -87,10 +96,29 @@ const addressResults = ref<GeocodeResult[]>([])
 const addressSearching = ref(false)
 const addressError = ref('')
 
+const emit = defineEmits<{
+  'can-export-change': [value: boolean]
+}>()
+
+const routePoints = computed(() =>
+  routeCoords.value.length
+    ? buildRoutePoints(routeCoords.value, routeElevations.value)
+    : []
+)
+
 const routeKm = computed(() => {
-  if (!routeCoords.value.length) return 0
-  return totalRouteKm(buildRoutePoints(routeCoords.value, routeElevations.value))
+  if (!routePoints.value.length) return 0
+  return totalRouteKm(routePoints.value)
 })
+
+const elevationStats = computed(() => {
+  if (!hasElevationData(routePoints.value)) return null
+  return routeElevationGainLoss(routePoints.value)
+})
+
+const showElevation = computed(
+  () => routePoints.value.length >= 2 && (hasElevationData(routePoints.value) || routing.value)
+)
 
 const canCreate = computed(
   () => waypoints.value.length >= 2 && routeCoords.value.length >= 2 && !routing.value && !creating.value
@@ -104,9 +132,18 @@ const showPoiOptions = computed(() => waypoints.value.length >= 2)
 
 const showRoutingOptions = computed(() => waypoints.value.length >= 2 && isOrsConfigured())
 
-function setCyclingProfile(profile: CyclingProfile) {
-  if (cyclingProfile.value === profile) return
-  cyclingProfile.value = profile
+watch(
+  canExportRoute,
+  (v) => {
+    emit('can-export-change', v)
+    if (!v) showExportMenu.value = false
+  },
+  { immediate: true }
+)
+
+function setSurfacePreference(surface: SurfacePreference) {
+  if (surfacePreference.value === surface) return
+  surfacePreference.value = surface
   scheduleAutoRoute()
 }
 
@@ -116,11 +153,20 @@ function setHillPreference(hill: HillPreference) {
   scheduleAutoRoute()
 }
 
+function toggleExportMenu() {
+  if (!canExportRoute.value && !showExportMenu.value) return
+  showExportMenu.value = !showExportMenu.value
+}
+
+function closeExportMenu() {
+  showExportMenu.value = false
+}
+
 function hasDraft() {
   return waypoints.value.length > 0
 }
 
-defineExpose({ hasDraft })
+defineExpose({ hasDraft, toggleExportMenu, closeExportMenu, canExportRoute })
 
 const canCloseLoop = computed(() => {
   if (waypoints.value.length < 2) return false
@@ -674,6 +720,8 @@ function scheduleAutoRoute() {
 
   if (waypoints.value.length < 2) {
     routeCoords.value = []
+    routeElevations.value = []
+    routeSurfaceSummary.value = null
     updateMapSources()
     return
   }
@@ -702,7 +750,7 @@ async function calculateRoute() {
   try {
     const pts: LatLng[] = waypoints.value.map((w) => ({ lat: w.lat, lng: w.lng }))
     const result = await fetchCyclingRoute(pts, {
-      profile: cyclingProfile.value,
+      profile: cyclingProfileForSurface(surfacePreference.value),
       hillPreference: hillPreference.value,
       avoidSteps: true,
     })
@@ -736,8 +784,9 @@ function plannerCourseName(): string {
 function exportPlannerGpx() {
   if (!canExportRoute.value) return
   const name = plannerCourseName()
-  const points = buildRoutePoints(routeCoords.value, routeElevations.value)
+  const points = routePoints.value
   downloadFile(`${name}.gpx`, buildGpxExport(name, points, [], { markFavorites: false }))
+  showExportMenu.value = false
 }
 
 async function exportPlannerFit() {
@@ -747,9 +796,10 @@ async function exportPlannerFit() {
   try {
     const { buildFitCourseExport } = await import('../services/fitCourse')
     const name = plannerCourseName()
-    const points = buildRoutePoints(routeCoords.value, routeElevations.value)
+    const points = routePoints.value
     const bytes = buildFitCourseExport(name, points, [])
     downloadBinary(`${name}.fit`, bytes, 'application/octet-stream')
+    showExportMenu.value = false
   } catch (err) {
     console.error('[planner] FIT export failed', err)
     formError.value = err instanceof Error ? err.message : t('export.fitFailed')
@@ -815,13 +865,17 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="route-planner">
+  <div class="route-planner" @keydown.escape="closeExportMenu">
     <div class="planner-map-wrap">
       <div ref="mapEl" class="planner-map" />
       <div v-if="routeKm > 0 || routing" class="route-km-badge" aria-live="polite">
         <template v-if="routeKm > 0">
           <strong>{{ routeKm.toFixed(1) }}</strong>
           <span>km</span>
+          <template v-if="elevationStats">
+            <span class="badge-sep" aria-hidden="true">·</span>
+            <span class="badge-elev">↑{{ Math.round(elevationStats.ascentM) }} m</span>
+          </template>
         </template>
         <template v-else>{{ t('planner.routeDrawing') }}</template>
       </div>
@@ -853,7 +907,55 @@ onUnmounted(() => {
         <template v-else-if="canCloseLoop">{{ t('planner.mapHintLoop') }}</template>
         <template v-else>{{ t('planner.mapHintClick') }}</template>
       </p>
+
+      <div v-if="showExportMenu" class="export-menu-backdrop" @click="closeExportMenu" />
+      <div v-if="showExportMenu" class="export-menu" role="menu" @click.stop>
+        <header class="export-menu-head">
+          <strong>{{ t('planner.exportRouteTitle') }}</strong>
+          <p>{{ t('planner.exportRouteHint') }}</p>
+        </header>
+        <label class="export-name-field">
+          <span>{{ t('planner.routeName') }}</span>
+          <input
+            v-model="routeName"
+            type="text"
+            maxlength="48"
+            :placeholder="t('planner.routeNamePlaceholder')"
+            @keydown.stop
+          />
+        </label>
+        <button
+          type="button"
+          class="export-item"
+          role="menuitem"
+          :disabled="!canExportRoute"
+          @click="exportPlannerGpx"
+        >
+          <span class="export-icon">↓</span>
+          <span class="export-text">
+            <strong>{{ t('planner.exportGpx') }}</strong>
+          </span>
+        </button>
+        <button
+          type="button"
+          class="export-item"
+          role="menuitem"
+          :disabled="!canExportRoute"
+          @click="void exportPlannerFit()"
+        >
+          <span class="export-icon">↓</span>
+          <span class="export-text">
+            <strong>{{ exporting ? t('planner.exporting') : t('planner.exportFit') }}</strong>
+          </span>
+        </button>
+      </div>
     </div>
+
+    <PlannerElevationProfile
+      v-if="showElevation"
+      :points="routePoints"
+      :surface-summary="routeSurfaceSummary"
+    />
 
     <div class="planner-controls">
       <div class="address-search">
@@ -899,7 +1001,12 @@ onUnmounted(() => {
 
         <div v-if="routeKm > 0" class="route-km-card">
           <span class="route-km-label">{{ t('planner.distance') }}</span>
-          <span class="route-km-value">{{ routeKm.toFixed(1) }} <small>km</small></span>
+          <span class="route-km-value">
+            {{ routeKm.toFixed(1) }} <small>km</small>
+            <template v-if="elevationStats">
+              <small class="route-elev">↑{{ Math.round(elevationStats.ascentM) }} m</small>
+            </template>
+          </span>
         </div>
         <p v-else-if="waypoints.length >= 2 && routing" class="route-km muted">{{ t('planner.routeDrawing') }}</p>
 
@@ -934,18 +1041,20 @@ onUnmounted(() => {
 
       <template v-if="showRoutingOptions">
         <fieldset class="routing-options">
-          <legend>{{ t('planner.profileTitle') }}</legend>
-          <p class="routing-hint">{{ t('planner.profileHint') }}</p>
+          <legend>{{ t('planner.surfaceTitle') }}</legend>
+          <p class="routing-hint">{{ t('planner.surfaceHint') }}</p>
           <div class="option-grid">
             <button
-              v-for="p in CYCLING_PROFILES"
-              :key="p"
+              v-for="s in SURFACE_PREFERENCES"
+              :key="s"
               type="button"
-              class="option-chip"
-              :class="{ active: cyclingProfile === p }"
-              @click="setCyclingProfile(p)"
+              class="option-chip option-chip--stack"
+              :class="{ active: surfacePreference === s }"
+              :title="t(`planner.surface.${s}Hint`)"
+              @click="setSurfacePreference(s)"
             >
-              {{ t(`planner.profile.${p}`) }}
+              <span>{{ t(`planner.surface.${s}`) }}</span>
+              <small>{{ t(`planner.surface.${s}Hint`) }}</small>
             </button>
           </div>
         </fieldset>
@@ -956,56 +1065,39 @@ onUnmounted(() => {
           <div class="option-grid">
             <button
               type="button"
-              class="option-chip"
+              class="option-chip option-chip--stack"
               :class="{ active: hillPreference === 'flat' }"
+              :title="t('planner.hill.flatHint')"
               @click="setHillPreference('flat')"
             >
-              {{ t('planner.hill.flat') }}
+              <span>{{ t('planner.hill.flat') }}</span>
+              <small>{{ t('planner.hill.flatHint') }}</small>
             </button>
             <button
               type="button"
-              class="option-chip"
+              class="option-chip option-chip--stack"
               :class="{ active: hillPreference === 'balanced' }"
+              :title="t('planner.hill.balancedHint')"
               @click="setHillPreference('balanced')"
             >
-              {{ t('planner.hill.balanced') }}
+              <span>{{ t('planner.hill.balanced') }}</span>
+              <small>{{ t('planner.hill.balancedHint') }}</small>
             </button>
             <button
               type="button"
-              class="option-chip"
+              class="option-chip option-chip--stack"
               :class="{ active: hillPreference === 'steep' }"
+              :title="t('planner.hill.steepHint')"
               @click="setHillPreference('steep')"
             >
-              {{ t('planner.hill.steep') }}
+              <span>{{ t('planner.hill.steep') }}</span>
+              <small>{{ t('planner.hill.steepHint') }}</small>
             </button>
           </div>
         </fieldset>
       </template>
 
       <template v-if="showPoiOptions">
-        <div v-if="canExportRoute || routing" class="export-route-block">
-          <p class="export-route-label">{{ t('planner.exportRouteTitle') }}</p>
-          <p class="routing-hint">{{ t('planner.exportRouteHint') }}</p>
-          <div class="export-route-actions">
-            <button
-              type="button"
-              class="btn-secondary"
-              :disabled="!canExportRoute"
-              @click="exportPlannerGpx"
-            >
-              {{ t('planner.exportGpx') }}
-            </button>
-            <button
-              type="button"
-              class="btn-secondary"
-              :disabled="!canExportRoute"
-              @click="void exportPlannerFit()"
-            >
-              {{ exporting ? t('planner.exporting') : t('planner.exportFit') }}
-            </button>
-          </div>
-        </div>
-
         <label class="field">
           <span class="field-label">{{ t('gpx.maxDist') }}</span>
           <div class="radius-row">
@@ -1118,6 +1210,116 @@ onUnmounted(() => {
   font-size: 0.85rem;
   font-weight: 700;
   opacity: 0.9;
+}
+
+.badge-sep {
+  opacity: 0.55;
+  margin: 0 0.05rem;
+}
+
+.badge-elev {
+  font-size: 0.78rem !important;
+  font-weight: 700 !important;
+  opacity: 0.95 !important;
+}
+
+.export-menu-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background: transparent;
+}
+
+.export-menu {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 41;
+  width: min(320px, calc(100% - 20px));
+  padding: 0.65rem;
+  border-radius: 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.18);
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.export-menu-head {
+  padding: 0.15rem 0.25rem 0.35rem;
+}
+
+.export-menu-head strong {
+  display: block;
+  font-size: 0.95rem;
+}
+
+.export-menu-head p {
+  margin: 0.25rem 0 0;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  line-height: 1.35;
+}
+
+.export-name-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.35rem 0.25rem 0.45rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.export-name-field input {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.45rem 0.55rem;
+  font: inherit;
+  font-weight: 500;
+  color: var(--text);
+  background: var(--bg);
+}
+
+.export-item {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  width: 100%;
+  padding: 0.55rem 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-2, var(--bg));
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  color: var(--text);
+}
+
+.export-item:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.export-item:not(:disabled):hover {
+  border-color: var(--primary);
+}
+
+.export-icon {
+  font-weight: 800;
+  font-size: 1rem;
+}
+
+.export-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
+}
+
+.export-text strong {
+  font-size: 0.88rem;
 }
 
 .basemap-toggle {
@@ -1514,6 +1716,8 @@ onUnmounted(() => {
 }
 
 .option-chip {
+  display: inline-flex;
+  align-items: center;
   padding: 0.45rem 0.7rem;
   min-height: 40px;
   border-radius: 8px;
@@ -1532,44 +1736,32 @@ onUnmounted(() => {
   border-color: var(--primary);
 }
 
-.export-route-block {
-  display: flex;
+.option-chip--stack {
+  flex: 1 1 8.5rem;
   flex-direction: column;
-  gap: 0.35rem;
-  padding: 0.65rem 0.75rem;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  background: var(--surface-2, color-mix(in srgb, var(--surface) 92%, var(--primary) 8%));
+  align-items: flex-start;
+  gap: 0.15rem;
+  min-height: 0;
+  padding: 0.5rem 0.65rem;
+  text-align: left;
 }
 
-.export-route-label {
-  margin: 0;
+.option-chip--stack small {
+  font-size: 0.7rem;
+  font-weight: 500;
+  line-height: 1.3;
+  opacity: 0.85;
+  white-space: normal;
+}
+
+.option-chip--stack.active small {
+  opacity: 0.92;
+}
+
+.route-elev {
+  margin-left: 0.45rem;
   font-weight: 700;
-  font-size: 0.9rem;
-}
-
-.export-route-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.45rem;
-}
-
-.btn-secondary {
-  flex: 1;
-  min-width: 7rem;
-  padding: 0.65rem 0.9rem;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: var(--surface);
-  color: var(--text);
-  font-weight: 600;
-  font-size: 0.9rem;
-  cursor: pointer;
-}
-
-.btn-secondary:disabled {
-  opacity: 0.55;
-  cursor: wait;
+  color: var(--text-muted);
 }
 
 .error {

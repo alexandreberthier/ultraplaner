@@ -20,6 +20,18 @@ export const CYCLING_PROFILES: readonly CyclingProfile[] = [
 export const CYCLING_PROFILE: CyclingProfile = 'cycling-regular'
 
 /**
+ * Simplified planner surface choice (maps to ORS cycling profiles).
+ * asphalt → cycling-road; mixed → cycling-regular (paths + streets).
+ */
+export type SurfacePreference = 'asphalt' | 'mixed'
+
+export const SURFACE_PREFERENCES: readonly SurfacePreference[] = ['asphalt', 'mixed'] as const
+
+export function cyclingProfileForSurface(surface: SurfacePreference): CyclingProfile {
+  return surface === 'asphalt' ? 'cycling-road' : 'cycling-regular'
+}
+
+/**
  * Hill preference via ORS steepness_difficulty (cycling only).
  * Higher = rider accepts steeper grades (often shorter/faster climbs).
  * There is no ORS “scenic” weighting for cycling profiles.
