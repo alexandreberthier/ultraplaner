@@ -691,7 +691,7 @@ export default {
     orsHint: 'Please try again later or upload a GPX file.',
     surfaceTitle: 'Prefer',
     surface: {
-      fastest: 'Streets',
+      fastest: 'Fast (roads · bike-legal)',
       mixed: 'Cycleways',
     },
     hillTitle: 'Hills',

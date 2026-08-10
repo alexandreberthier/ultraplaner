@@ -691,7 +691,7 @@ export default {
     orsHint: 'Inténtalo más tarde o sube un archivo GPX.',
     surfaceTitle: 'Preferir',
     surface: {
-      fastest: 'Carretera',
+      fastest: 'Rápida (carretera · ciclable)',
       mixed: 'Carriles',
     },
     hillTitle: 'Pendiente',

@@ -690,7 +690,7 @@
     orsHint: 'Réessayez plus tard ou importez un fichier GPX.',
     surfaceTitle: 'Préférer',
     surface: {
-      fastest: 'Route',
+      fastest: 'Rapide (routes · cyclable)',
       mixed: 'Pistes',
     },
     hillTitle: 'Pente',

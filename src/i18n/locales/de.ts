@@ -693,7 +693,7 @@ export default {
     orsHint: 'Bitte später erneut versuchen oder eine GPX-Datei hochladen.',
     surfaceTitle: 'Bevorzugen',
     surface: {
-      fastest: 'Straße',
+      fastest: 'Schnell (Straßen · radfahrbar)',
       mixed: 'Radwege',
     },
     hillTitle: 'Steigung',
@@ -749,7 +749,7 @@ export default {
     invalidKey: 'Routenplanung vorübergehend nicht verfügbar',
     dailyLimit: 'Tageslimit der Routenplanung erreicht — bitte später erneut versuchen',
     serviceBusy:
-      'Routen-Service gerade überlastet — bitte kurz warten und erneut versuchen (Straße/Radwege nicht rasch umschalten).',
+      'Routen-Service gerade überlastet — bitte kurz warten und erneut versuchen (Routing-Optionen nicht rasch umschalten).',
     networkError:
       'Keine Verbindung zum Routen-Service — Netz prüfen und erneut versuchen.',
     routeCalcFailed: 'Radroute konnte nicht berechnet werden. Bitte Wegpunkte prüfen oder GPX nutzen.',

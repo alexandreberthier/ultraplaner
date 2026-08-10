@@ -24,15 +24,24 @@ export const CYCLING_PROFILES: readonly CyclingProfile[] = [
 export const CYCLING_PROFILE: CyclingProfile = 'cycling-regular'
 
 /**
- * Planner route style (ORS profile + preference).
- * fastest → cycling-road + preference fastest (streets over cycleways; support-car friendly, still bike-legal)
- * mixed → cycling-regular + recommended (cycleways/side paths OK)
- * No driving-car: route must remain cyclable.
- * ORS avoid_features for cycling has no cycleways option (only steps/ferries/fords/hills) — street bias is profile+preference only.
+ * Planner route style (ORS cycling graph — never driving-car).
+ *
+ * fastest → cycling-road + preference fastest
+ *   Street-biased, support-car friendly, still bike-legal only.
+ *   Autobahn / Kraftfahrstraße (motorway, motorroad) are typically absent from the
+ *   cycling graph already — no driving profile, no highway “avoid” needed.
+ * mixed → cycling-regular + recommended (cycleways / side paths OK)
+ *
+ * ORS avoid_features for cycling: steps | ferries | fords | hills.
+ * `highways` / `tollways` are driving-* only — do not send them for cycling.
+ * Street vs cycleway bias comes from profile (+ preference), not avoid_features.
+ *
+ * Note: ORS aliases preference=fastest → recommended for cycling; we still send
+ * “fastest” for the street option to express intent (API accepts it).
  */
 export type SurfacePreference = 'fastest' | 'mixed'
 
-/** ORS Directions `preference` — fastest still accepted; default API value is recommended. */
+/** ORS Directions `preference` — fastest still accepted (cycling → recommended alias). */
 export type OrsRoutePreference = 'fastest' | 'shortest' | 'recommended'
 
 export const SURFACE_PREFERENCES: readonly SurfacePreference[] = ['fastest', 'mixed'] as const
@@ -104,7 +113,8 @@ function steepnessDifficulty(hill: HillPreference | undefined): number | null {
 }
 
 function buildOrsOptions(opts: RouteRequestOptions): Record<string, unknown> | undefined {
-  // Cycling avoid_features: steps | ferries | fords | hills — not cycleways (ORS API).
+  // Cycling avoid_features only: steps | ferries | fords | hills.
+  // Never add highways/tollways here — ORS rejects them outside driving-*.
   const avoid: string[] = []
   if (opts.avoidSteps !== false) avoid.push('steps')
   if (opts.avoidFerries) avoid.push('ferries')
