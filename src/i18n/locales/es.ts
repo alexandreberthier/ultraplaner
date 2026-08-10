@@ -689,10 +689,10 @@ export default {
     routeNamePlaceholder: 'p. ej. Cruce Alpes día 1',
     orsMissing: 'Planificación de ruta temporalmente no disponible',
     orsHint: 'Inténtalo más tarde o sube un archivo GPX.',
-    surfaceTitle: 'Ruta',
+    surfaceTitle: 'Preferir',
     surface: {
-      fastest: 'Más rápida · carreteras',
-      mixed: 'Mixto · carriles',
+      fastest: 'Carretera',
+      mixed: 'Carriles',
     },
     hillTitle: 'Pendiente',
     hill: {

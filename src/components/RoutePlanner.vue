@@ -4,7 +4,7 @@ import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import maplibregl from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
-import type { LatLng, PoiCategory, RouteSurfaceSummary } from '../../shared/types'
+import type { LatLng, PoiCategory, RouteCursor, RouteSurfaceSummary } from '../../shared/types'
 import { useMapStore } from '../stores/mapStore'
 import {
   DEFAULT_POI_CATEGORIES,
@@ -34,6 +34,11 @@ import {
   hasElevationData,
   routeElevationGainLoss,
 } from '../utils/route'
+import {
+  SURFACE_COLORS,
+  SURFACE_I18N_KEYS,
+  buildSurfaceLineFeatures,
+} from '../utils/surface'
 import { buildGpxExport, downloadFile, downloadBinary } from '../services/export'
 import { poiCategoryLabel } from '../utils/poiLabels'
 import { ensureRouteEndImages, routeEndIconId } from '../utils/routeEndIcons'
@@ -94,10 +99,13 @@ let basemapRecovering = false
 let geoLocateAlive = false
 let locationWatchId: number | null = null
 let locationMarker: maplibregl.Marker | null = null
+let routeCursorMarker: maplibregl.Marker | null = null
+let routeCursorEl: HTMLDivElement | null = null
 let lastGeoPos: { lat: number; lng: number } | null = null
 
 const addressQuery = ref('')
 const addressResults = ref<GeocodeResult[]>([])
+const routeCursor = ref<RouteCursor | null>(null)
 const addressSearching = ref(false)
 const addressError = ref('')
 
@@ -336,6 +344,26 @@ function routeGeoJson() {
   }
 }
 
+function surfaceGeoJson() {
+  const features = buildSurfaceLineFeatures(
+    routeCoords.value,
+    routeSurfaceSummary.value?.segments
+  )
+  return {
+    type: 'FeatureCollection' as const,
+    features: features.map((s) => ({
+      type: 'Feature' as const,
+      geometry: { type: 'LineString' as const, coordinates: s.coordinates },
+      properties: { bucket: s.bucket, color: s.color },
+    })),
+  }
+}
+
+const surfaceLegendBuckets = computed(() => routeSurfaceSummary.value?.buckets ?? [])
+const hasSurfaceOnRoute = computed(
+  () => (routeSurfaceSummary.value?.segments?.length ?? 0) > 0
+)
+
 function previewGeoJson() {
   if (routeCoords.value.length >= 2 || waypoints.value.length < 2) return emptyGeoJson()
   return {
@@ -375,8 +403,66 @@ function updateMapSources() {
   }
   ;(map.getSource('planner-waypoints') as maplibregl.GeoJSONSource)?.setData(waypointsGeoJson())
   ;(map.getSource('planner-route') as maplibregl.GeoJSONSource)?.setData(routeGeoJson())
+  ;(map.getSource('planner-route-surface') as maplibregl.GeoJSONSource)?.setData(surfaceGeoJson())
   ;(map.getSource('planner-preview') as maplibregl.GeoJSONSource)?.setData(previewGeoJson())
   ;(map.getSource('planner-km-markers') as maplibregl.GeoJSONSource)?.setData(kmMarkerGeoJson())
+
+  const showSurface = hasSurfaceOnRoute.value
+  if (map.getLayer('planner-route-line')) {
+    map.setPaintProperty('planner-route-line', 'line-opacity', showSurface ? 0.18 : 1)
+  }
+  if (map.getLayer('planner-route-surface')) {
+    map.setLayoutProperty(
+      'planner-route-surface',
+      'visibility',
+      showSurface ? 'visible' : 'none'
+    )
+  }
+}
+
+function createBikeCursorElement(): HTMLDivElement {
+  const el = document.createElement('div')
+  el.className = 'route-bike-cursor'
+  el.innerHTML = `
+    <svg class="route-bike-icon" viewBox="0 0 64 40" aria-hidden="true">
+      <g fill="none" stroke="#2d6a4f" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="14" cy="28" r="9"/>
+        <circle cx="50" cy="28" r="9"/>
+        <path d="M14 28 L26 28 L36 12 H48"/>
+        <path d="M26 28 L36 12 L42 28"/>
+        <path d="M36 12 L30 6 H38"/>
+        <circle cx="26" cy="28" r="2.4" fill="#2d6a4f" stroke="none"/>
+      </g>
+    </svg>
+  `
+  return el
+}
+
+function updateRouteCursorMarker() {
+  if (!map) return
+  const cursor = routeCursor.value
+  if (!cursor) {
+    routeCursorMarker?.remove()
+    routeCursorMarker = null
+    routeCursorEl = null
+    return
+  }
+  if (!routeCursorMarker || !routeCursorEl) {
+    routeCursorEl = createBikeCursorElement()
+    routeCursorMarker = new maplibregl.Marker({
+      element: routeCursorEl,
+      anchor: 'center',
+    })
+      .setLngLat([cursor.lng, cursor.lat])
+      .addTo(map)
+  } else {
+    routeCursorMarker.setLngLat([cursor.lng, cursor.lat])
+  }
+}
+
+function onElevationCursor(cursor: RouteCursor | null) {
+  routeCursor.value = cursor
+  updateRouteCursorMarker()
 }
 
 function fitToContent() {
@@ -401,6 +487,7 @@ function addPlannerLayers() {
 
   map.addSource('planner-waypoints', { type: 'geojson', data: waypointsGeoJson() })
   map.addSource('planner-route', { type: 'geojson', data: routeGeoJson() })
+  map.addSource('planner-route-surface', { type: 'geojson', data: surfaceGeoJson() })
   map.addSource('planner-preview', { type: 'geojson', data: previewGeoJson() })
   map.addSource('planner-km-markers', { type: 'geojson', data: kmMarkerGeoJson() })
 
@@ -435,6 +522,22 @@ function addPlannerLayers() {
     paint: {
       'line-color': ROUTE_COLOR,
       'line-width': 4,
+      'line-opacity': hasSurfaceOnRoute.value ? 0.18 : 1,
+    },
+  })
+
+  map.addLayer({
+    id: 'planner-route-surface',
+    type: 'line',
+    source: 'planner-route-surface',
+    layout: {
+      'line-cap': 'round',
+      'line-join': 'round',
+      visibility: hasSurfaceOnRoute.value ? 'visible' : 'none',
+    },
+    paint: {
+      'line-color': ['coalesce', ['get', 'color'], ROUTE_COLOR],
+      'line-width': 5,
     },
   })
 
@@ -592,6 +695,10 @@ function destroyPlannerMap() {
   cancelStyleReady = null
   resizeObserver?.disconnect()
   resizeObserver = null
+  routeCursorMarker?.remove()
+  routeCursorMarker = null
+  routeCursorEl = null
+  routeCursor.value = null
   if (map) {
     try {
       map.off('error', onBasemapError)
@@ -769,6 +876,8 @@ async function calculateRoute() {
     routeCoords.value = []
     routeElevations.value = []
     routeSurfaceSummary.value = null
+    routeCursor.value = null
+    updateRouteCursorMarker()
     updateMapSources()
     return
   }
@@ -794,6 +903,8 @@ async function calculateRoute() {
     routeCoords.value = result.coordinates
     routeElevations.value = result.elevations
     routeSurfaceSummary.value = result.surfaceSummary
+    routeCursor.value = null
+    updateRouteCursorMarker()
     updateMapSources()
   } catch (err) {
     if (gen !== routeGeneration || isRouteAborted(err) || ac.signal.aborted) return
@@ -921,6 +1032,16 @@ onUnmounted(() => {
           {{ t('mapCanvas.basemapRetry') }}
         </button>
       </p>
+      <ul
+        v-if="surfaceLegendBuckets.length"
+        class="surface-legend"
+        :aria-label="t('elevation.surfaceTitle')"
+      >
+        <li v-for="b in surfaceLegendBuckets" :key="b.id">
+          <span class="surface-dot" :style="{ background: SURFACE_COLORS[b.id] }" />
+          <span>{{ t(SURFACE_I18N_KEYS[b.id]) }}</span>
+        </li>
+      </ul>
       <div class="basemap-toggle" role="group" :aria-label="t('mapCanvas.basemap')">
         <button
           type="button"
@@ -991,6 +1112,7 @@ onUnmounted(() => {
       v-if="showElevation"
       :points="routePoints"
       :surface-summary="routeSurfaceSummary"
+      @update:cursor="onElevationCursor"
     />
 
     <div class="planner-controls">
@@ -1201,6 +1323,59 @@ onUnmounted(() => {
   pointer-events: none;
   box-shadow: 0 1px 6px rgba(0, 0, 0, 0.1);
   z-index: 2;
+}
+
+.surface-legend {
+  position: absolute;
+  left: 0.75rem;
+  bottom: 2.85rem;
+  z-index: 2;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.2rem 0.55rem;
+  margin: 0;
+  padding: 0.3rem 0.5rem;
+  list-style: none;
+  max-width: min(92%, 20rem);
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 6px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  pointer-events: none;
+}
+
+.surface-legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.28rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #111;
+  line-height: 1.1;
+}
+
+.surface-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+:deep(.route-bike-cursor) {
+  position: relative;
+  width: 26px;
+  height: 26px;
+  pointer-events: none;
+  filter: drop-shadow(0 1px 2px rgba(45, 106, 79, 0.35));
+}
+
+:deep(.route-bike-icon) {
+  position: absolute;
+  inset: 1px;
+  width: 24px;
+  height: 24px;
+  opacity: 0.9;
+  filter: drop-shadow(0 0 1.5px rgba(255, 255, 255, 0.9));
 }
 
 .route-km-badge {

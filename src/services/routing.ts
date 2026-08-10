@@ -1,7 +1,12 @@
 import type { LatLng, RouteSurfaceSummary } from '../../shared/types'
 import { GEOCODE_BBOX } from '../config/poiCategories'
 import { tGlobal } from '../i18n'
-import { bucketOrsSurfaceSummary, type OrsSurfaceSummaryRow } from '../utils/surface'
+import {
+  bucketOrsSurfaceSummary,
+  parseOrsSurfaceValues,
+  type OrsSurfaceSummaryRow,
+  type OrsSurfaceValueRow,
+} from '../utils/surface'
 
 /** ORS cycling profiles — surface bias is baked into the profile, not a separate surface filter. */
 export type CyclingProfile =
@@ -206,6 +211,7 @@ type OrsGeoJson = {
       extras?: {
         surface?: {
           summary?: OrsSurfaceSummaryRow[]
+          values?: OrsSurfaceValueRow[]
         }
       }
     }
@@ -241,8 +247,11 @@ function parseOrsRoute(data: OrsGeoJson): CyclingRouteResult {
         ? elevRaw.map((e) => e ?? 0)
         : []
 
+  const surfaceExtras = feature?.properties?.extras?.surface
+  const surfaceSegments = parseOrsSurfaceValues(surfaceExtras?.values)
   const surfaceSummary = bucketOrsSurfaceSummary(
-    feature?.properties?.extras?.surface?.summary
+    surfaceExtras?.summary,
+    surfaceSegments
   )
 
   return {

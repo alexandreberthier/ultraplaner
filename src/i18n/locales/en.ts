@@ -689,10 +689,10 @@ export default {
     routeNamePlaceholder: 'e.g. Alps crossing day 1',
     orsMissing: 'Route planning temporarily unavailable',
     orsHint: 'Please try again later or upload a GPX file.',
-    surfaceTitle: 'Route',
+    surfaceTitle: 'Prefer',
     surface: {
-      fastest: 'Fastest · roads',
-      mixed: 'Mixed · cycleways',
+      fastest: 'Streets',
+      mixed: 'Cycleways',
     },
     hillTitle: 'Hills',
     hill: {
@@ -747,7 +747,7 @@ export default {
     invalidKey: 'Route planning temporarily unavailable',
     dailyLimit: 'Daily routing limit reached — try again later',
     serviceBusy:
-      'Routing service is busy — wait a moment and try again (avoid rapid fastest/mixed toggles).',
+      'Routing service is busy — wait a moment and try again (avoid rapid streets/cycleways toggles).',
     networkError: 'Could not reach the routing service — check your connection and retry.',
     routeCalcFailed: 'Could not calculate cycling route. Check waypoints or use GPX.',
     noRouteFound: 'No cycling route found between waypoints',

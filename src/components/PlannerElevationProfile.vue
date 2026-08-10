@@ -1,17 +1,27 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import type { RoutePoint, RouteSurfaceBucketId, RouteSurfaceSummary } from '../../shared/types'
+import type { RouteCursor, RoutePoint, RouteSurfaceBucketId, RouteSurfaceSummary } from '../../shared/types'
 import {
   buildElevationSamples,
   hasElevationData,
+  pointAtRouteKm,
   routeElevationGainLoss,
 } from '../utils/route'
 import { formatElevM, formatKmInt } from '../services/geo'
+import {
+  SURFACE_COLORS,
+  SURFACE_I18N_KEYS,
+  surfaceBarShares,
+} from '../utils/surface'
 
 const props = defineProps<{
   points: RoutePoint[]
   surfaceSummary?: RouteSurfaceSummary | null
+}>()
+
+const emit = defineEmits<{
+  'update:cursor': [cursor: RouteCursor | null]
 }>()
 
 const { t, locale } = useI18n()
@@ -19,31 +29,17 @@ const plotRef = ref<HTMLElement | null>(null)
 const plotSize = ref({ width: 640, height: 120 })
 const profileOpen = ref(true)
 const hoverKm = ref<number | null>(null)
+const scrubbing = ref(false)
 
 const padding = { left: 40, right: 12, top: 10, bottom: 22 }
 const MIN_TICK_PX = 48
-
-const SURFACE_I18N: Record<RouteSurfaceBucketId, string> = {
-  asphalt: 'elevation.surfaceAsphalt',
-  cobble: 'elevation.surfaceCobble',
-  gravel: 'elevation.surfaceGravel',
-  unpaved: 'elevation.surfaceUnpaved',
-  unknown: 'elevation.surfaceUnknown',
-}
-
-const SURFACE_BAR_COLOR: Record<RouteSurfaceBucketId, string> = {
-  asphalt: '#333',
-  cobble: '#d97706',
-  gravel: '#b8860b',
-  unpaved: '#8b5e3c',
-  unknown: '#9ca3af',
-}
 
 const samples = computed(() => buildElevationSamples(props.points, 400))
 const hasData = computed(() => hasElevationData(props.points))
 const totalKm = computed(() => props.points.at(-1)?.distanceFromStart ?? 0)
 const surfaceBuckets = computed(() => props.surfaceSummary?.buckets ?? [])
 const hasSurface = computed(() => surfaceBuckets.value.length > 0)
+const surfaceBar = computed(() => surfaceBarShares(props.surfaceSummary))
 
 const stats = computed(() => {
   const pts = samples.value
@@ -170,11 +166,31 @@ const hoverSample = computed(() => {
 })
 
 function surfaceLabel(id: RouteSurfaceBucketId) {
-  return t(SURFACE_I18N[id])
+  return t(SURFACE_I18N_KEYS[id])
 }
 
 function toggleProfile() {
   profileOpen.value = !profileOpen.value
+}
+
+function clearCursor() {
+  hoverKm.value = null
+  emit('update:cursor', null)
+}
+
+function updateCursor(km: number) {
+  hoverKm.value = km
+  const pt = pointAtRouteKm(props.points, km)
+  if (!pt) {
+    emit('update:cursor', null)
+    return
+  }
+  emit('update:cursor', {
+    km: pt.distanceFromStart ?? km,
+    lat: pt.lat,
+    lng: pt.lng,
+    elevation: pt.elevation,
+  })
 }
 
 function kmFromEvent(e: PointerEvent) {
@@ -187,12 +203,26 @@ function kmFromEvent(e: PointerEvent) {
   return minKm + tNorm * (maxKm - minKm)
 }
 
+function onPointerDown(e: PointerEvent) {
+  if (!plotRef.value || !hasData.value || e.button !== 0) return
+  scrubbing.value = true
+  plotRef.value.setPointerCapture(e.pointerId)
+  updateCursor(kmFromEvent(e))
+}
+
 function onPointerMove(e: PointerEvent) {
-  hoverKm.value = kmFromEvent(e)
+  if (!plotRef.value || !hasData.value) return
+  updateCursor(kmFromEvent(e))
+}
+
+function onPointerUp(e: PointerEvent) {
+  if (!scrubbing.value) return
+  scrubbing.value = false
+  plotRef.value?.releasePointerCapture(e.pointerId)
 }
 
 function onPointerLeave() {
-  hoverKm.value = null
+  if (!scrubbing.value) clearCursor()
 }
 
 let resizeObserver: ResizeObserver | null = null
@@ -219,15 +249,21 @@ onMounted(async () => {
 
 watch(profileOpen, async (open) => {
   if (!open) {
-    hoverKm.value = null
+    clearCursor()
     return
   }
   await nextTick()
   bindPlotObserver()
 })
 
+watch(
+  () => props.points,
+  () => clearCursor()
+)
+
 onUnmounted(() => {
   resizeObserver?.disconnect()
+  emit('update:cursor', null)
 })
 </script>
 
@@ -264,20 +300,30 @@ onUnmounted(() => {
             <span class="surface-title">{{ t('elevation.surfaceTitle') }}</span>
             <div class="surface-stack" role="img" :aria-label="t('elevation.surfaceTitle')">
               <span
-                v-for="b in surfaceBuckets"
-                :key="b.id"
+                v-for="(b, i) in surfaceBar"
+                :key="`${b.id}-${i}`"
                 class="surface-seg"
-                :style="{ width: `${b.percent}%`, background: SURFACE_BAR_COLOR[b.id] }"
-                :title="`${surfaceLabel(b.id)} ${b.percent}% · ${b.km.toFixed(1)} km`"
+                :style="{ width: `${b.percent}%`, background: SURFACE_COLORS[b.id] }"
+                :title="surfaceLabel(b.id)"
               />
             </div>
           </div>
+          <ul class="surface-list">
+            <li v-for="b in surfaceBuckets" :key="`l-${b.id}`" class="surface-item">
+              <span class="surface-swatch" :style="{ background: SURFACE_COLORS[b.id] }" />
+              <span class="surface-name">{{ surfaceLabel(b.id) }}</span>
+            </li>
+          </ul>
         </div>
 
         <div
           ref="plotRef"
           class="plot"
+          :class="{ scrubbing }"
+          @pointerdown="onPointerDown"
           @pointermove="onPointerMove"
+          @pointerup="onPointerUp"
+          @pointercancel="onPointerUp"
           @pointerleave="onPointerLeave"
         >
           <svg
@@ -465,11 +511,45 @@ onUnmounted(() => {
   min-width: 2px;
 }
 
+.surface-list {
+  list-style: none;
+  margin: 0.2rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.15rem 0.55rem;
+}
+
+.surface-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  line-height: 1.1;
+}
+
+.surface-swatch {
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.surface-name {
+  font-weight: 600;
+}
+
 .plot {
   position: relative;
   height: 110px;
   margin: 0 0.35rem;
   touch-action: none;
+  cursor: crosshair;
+}
+
+.plot.scrubbing {
+  cursor: grabbing;
 }
 
 .plot svg {

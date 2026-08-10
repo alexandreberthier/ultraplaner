@@ -13,25 +13,14 @@ import { formatDuration, hoursForDistanceKm } from '../utils/eta'
 import { formatElevM, formatKmInt } from '../services/geo'
 import { gradeToColor, colorblindMode } from '../config/mapStyle'
 import type { RouteSurfaceBucketId } from '../../shared/types'
+import {
+  SURFACE_COLORS,
+  SURFACE_I18N_KEYS,
+  surfaceBarShares,
+} from '../utils/surface'
 
 const ELEV_OPEN_KEY = 'onroute-elevation-open-v2'
 const MIN_TICK_PX = 48
-
-const SURFACE_I18N: Record<RouteSurfaceBucketId, string> = {
-  asphalt: 'elevation.surfaceAsphalt',
-  cobble: 'elevation.surfaceCobble',
-  gravel: 'elevation.surfaceGravel',
-  unpaved: 'elevation.surfaceUnpaved',
-  unknown: 'elevation.surfaceUnknown',
-}
-
-const SURFACE_BAR_COLOR: Record<RouteSurfaceBucketId, string> = {
-  asphalt: '#333',
-  cobble: '#d97706',
-  gravel: '#b8860b',
-  unpaved: '#8b5e3c',
-  unknown: '#9ca3af',
-}
 
 const store = useMapStore()
 const { t, locale } = useI18n()
@@ -51,9 +40,10 @@ const hasData = computed(() => hasElevationData(store.routePoints))
 const totalKm = computed(() => store.totalKm)
 const surfaceBuckets = computed(() => store.surfaceSummary?.buckets ?? [])
 const hasSurface = computed(() => surfaceBuckets.value.length > 0)
+const surfaceBar = computed(() => surfaceBarShares(store.surfaceSummary))
 
 function surfaceLabel(id: RouteSurfaceBucketId) {
-  return t(SURFACE_I18N[id])
+  return t(SURFACE_I18N_KEYS[id])
 }
 
 const stats = computed(() => {
@@ -533,20 +523,19 @@ onUnmounted(() => {
             <span class="surface-title">{{ t('elevation.surfaceTitle') }}</span>
             <div class="surface-stack" role="img" :aria-label="t('elevation.surfaceTitle')">
               <span
-                v-for="b in surfaceBuckets"
-                :key="b.id"
+                v-for="(b, i) in surfaceBar"
+                :key="`${b.id}-${i}`"
                 class="surface-seg"
-                :style="{ width: `${b.percent}%`, background: SURFACE_BAR_COLOR[b.id] }"
-                :title="`${surfaceLabel(b.id)} ${b.percent}% · ${b.km.toFixed(1)} km`"
+                :style="{ width: `${b.percent}%`, background: SURFACE_COLORS[b.id] }"
+                :title="surfaceLabel(b.id)"
               />
             </div>
           </div>
           <ul class="surface-list">
             <li v-for="b in surfaceBuckets" :key="`l-${b.id}`" class="surface-item">
-              <span class="surface-swatch" :style="{ background: SURFACE_BAR_COLOR[b.id] }" />
+              <span class="surface-swatch" :style="{ background: SURFACE_COLORS[b.id] }" />
               <span class="surface-name">{{ surfaceLabel(b.id) }}</span>
               <strong class="surface-pct">{{ b.percent }}%</strong>
-              <span class="surface-km">{{ b.km.toFixed(1) }} km</span>
             </li>
           </ul>
         </div>
@@ -894,7 +883,7 @@ onUnmounted(() => {
 .surface-swatch {
   width: 0.5rem;
   height: 0.5rem;
-  border-radius: 1px;
+  border-radius: 50%;
   flex-shrink: 0;
   align-self: center;
 }
@@ -906,11 +895,6 @@ onUnmounted(() => {
 .surface-pct {
   font-weight: 800;
   font-size: 0.73rem;
-}
-
-.surface-km {
-  color: var(--text-muted);
-  font-size: 0.68rem;
 }
 
 .header-stats {

@@ -24,6 +24,11 @@ import { useRidePosition } from '../composables/useRidePosition'
 import { distanceAlongRouteKm } from '../services/poiFilter'
 import { buildKmMarkers, buildGradeSegments, detectClimbs, hasElevationData } from '../utils/route'
 import {
+  SURFACE_COLORS,
+  SURFACE_I18N_KEYS,
+  buildSurfaceLineFeatures,
+} from '../utils/surface'
+import {
   controlPointIconId,
   ensureControlPointImages,
 } from '../utils/controlPointIcons'
@@ -615,6 +620,27 @@ function gradeGeoJson() {
   }
 }
 
+function hasSurfaceSegments(): boolean {
+  return (store.surfaceSummary?.segments?.length ?? 0) > 0
+}
+
+function surfaceGeoJson() {
+  const features = buildSurfaceLineFeatures(
+    store.routeCoords,
+    store.surfaceSummary?.segments
+  )
+  return {
+    type: 'FeatureCollection' as const,
+    features: features.map((s) => ({
+      type: 'Feature' as const,
+      geometry: { type: 'LineString' as const, coordinates: s.coordinates },
+      properties: { bucket: s.bucket, color: s.color },
+    })),
+  }
+}
+
+const surfaceLegendBuckets = computed(() => store.surfaceSummary?.buckets ?? [])
+
 function climbsGeoJson() {
   const climbs = detectClimbs(store.routePoints)
   return {
@@ -853,6 +879,7 @@ watch(
     store.mapPois,
     store.routeCoords,
     store.routePoints,
+    store.surfaceSummary,
     store.isNearbyMap,
     store.poiRadiusM,
     store.poisEpoch,
@@ -943,6 +970,7 @@ function updateSources() {
   }
   ;(map.getSource('route') as maplibregl.GeoJSONSource)?.setData(routeGeoJson())
   ;(map.getSource('route-grades') as maplibregl.GeoJSONSource)?.setData(gradeGeoJson())
+  ;(map.getSource('route-surface') as maplibregl.GeoJSONSource)?.setData(surfaceGeoJson())
   ;(map.getSource('climbs') as maplibregl.GeoJSONSource)?.setData(climbsGeoJson())
   ;(map.getSource('route-ends') as maplibregl.GeoJSONSource)?.setData(endPointsGeoJson())
   ;(map.getSource('km-markers') as maplibregl.GeoJSONSource)?.setData(kmMarkerGeoJson())
@@ -956,18 +984,30 @@ function updateSources() {
   const canvas = map.getCanvas()
   canvas.style.cursor = store.controlPointPlaceKind ? 'crosshair' : ''
 
-  const hasGrades = !store.isNearbyMap && hasElevationData(store.routePoints)
+  const showSurface = !store.isNearbyMap && hasSurfaceSegments()
+  const hasGrades = !store.isNearbyMap && !showSurface && hasElevationData(store.routePoints)
   if (map.getLayer('route-line')) {
-    map.setPaintProperty('route-line', 'line-opacity', hasGrades ? 0.15 : 1)
+    map.setPaintProperty('route-line', 'line-opacity', showSurface || hasGrades ? 0.15 : 1)
+  }
+  if (map.getLayer('route-surface')) {
+    map.setLayoutProperty('route-surface', 'visibility', showSurface ? 'visible' : 'none')
   }
   if (map.getLayer('route-grades')) {
     map.setLayoutProperty('route-grades', 'visibility', hasGrades ? 'visible' : 'none')
   }
   if (map.getLayer('climbs-dot')) {
-    map.setLayoutProperty('climbs-dot', 'visibility', hasGrades ? 'visible' : 'none')
+    map.setLayoutProperty(
+      'climbs-dot',
+      'visibility',
+      !store.isNearbyMap && hasElevationData(store.routePoints) ? 'visible' : 'none'
+    )
   }
   if (map.getLayer('climbs-label')) {
-    map.setLayoutProperty('climbs-label', 'visibility', hasGrades ? 'visible' : 'none')
+    map.setLayoutProperty(
+      'climbs-label',
+      'visibility',
+      !store.isNearbyMap && hasElevationData(store.routePoints) ? 'visible' : 'none'
+    )
   }
   const nearbyVis =
     store.isNearbyMap || store.gpsEnrichFocus ? 'visible' : 'none'
@@ -1001,6 +1041,7 @@ function addLayers() {
 
   map.addSource('route', { type: 'geojson', data: routeGeoJson() })
   map.addSource('route-grades', { type: 'geojson', data: gradeGeoJson() })
+  map.addSource('route-surface', { type: 'geojson', data: surfaceGeoJson() })
   map.addSource('climbs', { type: 'geojson', data: climbsGeoJson() })
   map.addSource('route-ends', { type: 'geojson', data: endPointsGeoJson() })
   map.addSource('km-markers', { type: 'geojson', data: kmMarkerGeoJson() })
@@ -1081,7 +1122,27 @@ function addLayers() {
     paint: {
       'line-color': ROUTE_COLOR,
       'line-width': ['interpolate', ['linear'], ['zoom'], 8, 4, 14, 7],
-      'line-opacity': hasElevationData(store.routePoints) ? 0.15 : 1,
+      'line-opacity':
+        hasSurfaceSegments() || hasElevationData(store.routePoints) ? 0.15 : 1,
+    },
+  })
+
+  const showSurfaceOnInit = hasSurfaceSegments()
+  const showGradesOnInit =
+    !showSurfaceOnInit && hasElevationData(store.routePoints)
+
+  map.addLayer({
+    id: 'route-surface',
+    type: 'line',
+    source: 'route-surface',
+    layout: {
+      'line-cap': 'round',
+      'line-join': 'round',
+      visibility: showSurfaceOnInit ? 'visible' : 'none',
+    },
+    paint: {
+      'line-color': ['coalesce', ['get', 'color'], ROUTE_COLOR],
+      'line-width': ['interpolate', ['linear'], ['zoom'], 8, 5, 14, 9],
     },
   })
 
@@ -1092,7 +1153,7 @@ function addLayers() {
     layout: {
       'line-cap': 'round',
       'line-join': 'round',
-      visibility: hasElevationData(store.routePoints) ? 'visible' : 'none',
+      visibility: showGradesOnInit ? 'visible' : 'none',
     },
     paint: {
       'line-color': ['coalesce', ['get', 'color'], ROUTE_COLOR],
@@ -1474,6 +1535,17 @@ onUnmounted(() => {
       </button>
     </p>
 
+    <ul
+      v-if="surfaceLegendBuckets.length && !rideMode && !store.isNearbyMap"
+      class="surface-legend"
+      :aria-label="t('elevation.surfaceTitle')"
+    >
+      <li v-for="b in surfaceLegendBuckets" :key="b.id">
+        <span class="surface-dot" :style="{ background: SURFACE_COLORS[b.id] }" />
+        <span>{{ t(SURFACE_I18N_KEYS[b.id]) }}</span>
+      </li>
+    </ul>
+
     <div v-show="!rideMode" class="basemap-toggle" role="group" :aria-label="t('mapCanvas.basemap')">
       <button
         type="button"
@@ -1845,5 +1917,45 @@ onUnmounted(() => {
   height: 24px;
   opacity: 0.9;
   filter: drop-shadow(0 0 1.5px rgba(255, 255, 255, 0.9));
+}
+
+.surface-legend {
+  position: absolute;
+  left: 10px;
+  bottom: 10px;
+  z-index: 2;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.2rem 0.55rem;
+  margin: 0;
+  padding: 0.3rem 0.5rem;
+  list-style: none;
+  max-width: min(92%, 22rem);
+  background: color-mix(in srgb, var(--surface, #fff) 92%, transparent);
+  border: 1px solid var(--border, rgba(0, 0, 0, 0.1));
+  border-radius: 6px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  pointer-events: none;
+}
+
+.surface-legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.28rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--text, #111);
+  line-height: 1.1;
+}
+
+.surface-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.map-canvas-wrap.ride-mode .surface-legend {
+  display: none;
 }
 </style>

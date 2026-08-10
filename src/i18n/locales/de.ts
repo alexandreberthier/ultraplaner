@@ -691,10 +691,10 @@ export default {
     routeNamePlaceholder: 'z. B. Alpenüberquerung Tag 1',
     orsMissing: 'Routenplanung vorübergehend nicht verfügbar',
     orsHint: 'Bitte später erneut versuchen oder eine GPX-Datei hochladen.',
-    surfaceTitle: 'Route',
+    surfaceTitle: 'Bevorzugen',
     surface: {
-      fastest: 'Schnellste · Straßen',
-      mixed: 'Gemischt · Radwege',
+      fastest: 'Straße',
+      mixed: 'Radwege',
     },
     hillTitle: 'Steigung',
     hill: {
@@ -749,7 +749,7 @@ export default {
     invalidKey: 'Routenplanung vorübergehend nicht verfügbar',
     dailyLimit: 'Tageslimit der Routenplanung erreicht — bitte später erneut versuchen',
     serviceBusy:
-      'Routen-Service gerade überlastet — bitte kurz warten und erneut versuchen (Schnellste/Gemischt nicht rasch umschalten).',
+      'Routen-Service gerade überlastet — bitte kurz warten und erneut versuchen (Straße/Radwege nicht rasch umschalten).',
     networkError:
       'Keine Verbindung zum Routen-Service — Netz prüfen und erneut versuchen.',
     routeCalcFailed: 'Radroute konnte nicht berechnet werden. Bitte Wegpunkte prüfen oder GPX nutzen.',

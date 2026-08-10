@@ -688,10 +688,10 @@
     routeNamePlaceholder: 'p. ex. Traversée des Alpes jour 1',
     orsMissing: 'Planification d’itinéraire temporairement indisponible',
     orsHint: 'Réessayez plus tard ou importez un fichier GPX.',
-    surfaceTitle: 'Itinéraire',
+    surfaceTitle: 'Préférer',
     surface: {
-      fastest: 'Plus rapide · routes',
-      mixed: 'Mixte · pistes',
+      fastest: 'Route',
+      mixed: 'Pistes',
     },
     hillTitle: 'Pente',
     hill: {

@@ -60,11 +60,20 @@ export interface RouteSurfaceBucket {
   km: number
 }
 
+/** Contiguous vertex range along routeCoords with one surface bucket. */
+export interface RouteSurfaceSegment {
+  startIdx: number
+  endIdx: number
+  id: RouteSurfaceBucketId
+}
+
 /** Aggregated road-surface summary from ORS (drawn routes only). */
 export interface RouteSurfaceSummary {
   buckets: RouteSurfaceBucket[]
   /** Total distance covered by surface extras (km) */
   totalKm: number
+  /** Along-route index ranges for map coloring (ORS extras.values) */
+  segments?: RouteSurfaceSegment[]
 }
 
 export interface Poi {
