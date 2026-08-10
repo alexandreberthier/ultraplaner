@@ -82,7 +82,7 @@ const routeCoords = ref<[number, number][]>([])
 const routeElevations = ref<number[]>([])
 const routeSurfaceSummary = ref<RouteSurfaceSummary | null>(null)
 const routeName = ref('')
-const surfacePreference = ref<SurfacePreference>('mixed')
+const surfacePreference = ref<SurfacePreference>('shortest')
 const hillPreference = ref<HillPreference>('balanced')
 const radiusM = ref(DEFAULT_POI_RADIUS_M)
 const selected = ref<PoiCategory[]>([...DEFAULT_POI_CATEGORIES])
@@ -851,7 +851,7 @@ function abortPendingRoute() {
 }
 
 function scheduleAutoRoute() {
-  // Cancel prior debounce + in-flight ORS so fastest/mixed toggles don't stack requests.
+  // Cancel prior debounce + in-flight ORS so shortest/streets toggles don't stack requests.
   abortPendingRoute()
 
   if (waypoints.value.length < 2) {

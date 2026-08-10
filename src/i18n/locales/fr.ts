@@ -688,10 +688,10 @@
     routeNamePlaceholder: 'p. ex. Traversée des Alpes jour 1',
     orsMissing: 'Planification d’itinéraire temporairement indisponible',
     orsHint: 'Réessayez plus tard ou importez un fichier GPX.',
-    surfaceTitle: 'Préférer',
+    surfaceTitle: 'Itinéraire',
     surface: {
-      fastest: 'Rapide (routes · cyclable)',
-      mixed: 'Pistes',
+      shortest: 'Plus courte',
+      streets: 'Routes',
     },
     hillTitle: 'Pente',
     hill: {
@@ -746,7 +746,7 @@
     invalidKey: 'Planification temporairement indisponible',
     dailyLimit: 'Limite quotidienne de routes atteinte — réessayez plus tard',
     serviceBusy:
-      'Service d’itinéraires saturé — patientez et réessayez (évitez de basculer plus rapide/mixte rapidement).',
+      'Service d’itinéraires saturé — patientez et réessayez (évitez de basculer les options de route rapidement).',
     networkError: 'Impossible de joindre le service d’itinéraires — vérifiez le réseau et réessayez.',
     routeCalcFailed: 'Impossible de calculer la route. Vérifiez les points ou utilisez un GPX.',
     noRouteFound: 'Aucune route vélo entre les points',

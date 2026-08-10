@@ -689,10 +689,10 @@ export default {
     routeNamePlaceholder: 'p. ej. Cruce Alpes día 1',
     orsMissing: 'Planificación de ruta temporalmente no disponible',
     orsHint: 'Inténtalo más tarde o sube un archivo GPX.',
-    surfaceTitle: 'Preferir',
+    surfaceTitle: 'Ruta',
     surface: {
-      fastest: 'Rápida (carretera · ciclable)',
-      mixed: 'Carriles',
+      shortest: 'Más corta',
+      streets: 'Carretera',
     },
     hillTitle: 'Pendiente',
     hill: {
@@ -747,7 +747,7 @@ export default {
     invalidKey: 'Planificación temporalmente no disponible',
     dailyLimit: 'Límite diario de rutas alcanzado — inténtalo más tarde',
     serviceBusy:
-      'El servicio de rutas está saturado — espera un momento e inténtalo de nuevo (no cambies rápida/mixto rápidamente).',
+      'El servicio de rutas está saturado — espera un momento e inténtalo de nuevo (no cambies las opciones de ruta rápidamente).',
     networkError: 'Sin conexión al servicio de rutas — comprueba la red e inténtalo de nuevo.',
     routeCalcFailed: 'No se pudo calcular la ruta. Revisa los puntos o usa GPX.',
     noRouteFound: 'No hay ruta ciclista entre los puntos',

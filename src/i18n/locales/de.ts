@@ -691,10 +691,10 @@ export default {
     routeNamePlaceholder: 'z. B. Alpenüberquerung Tag 1',
     orsMissing: 'Routenplanung vorübergehend nicht verfügbar',
     orsHint: 'Bitte später erneut versuchen oder eine GPX-Datei hochladen.',
-    surfaceTitle: 'Bevorzugen',
+    surfaceTitle: 'Route',
     surface: {
-      fastest: 'Schnell (Straßen · radfahrbar)',
-      mixed: 'Radwege',
+      shortest: 'Kürzeste',
+      streets: 'Straßen',
     },
     hillTitle: 'Steigung',
     hill: {

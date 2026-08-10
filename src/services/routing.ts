@@ -26,32 +26,33 @@ export const CYCLING_PROFILE: CyclingProfile = 'cycling-regular'
 /**
  * Planner route style (ORS cycling graph — never driving-car).
  *
- * fastest → cycling-road + preference fastest
- *   Street-biased, support-car friendly, still bike-legal only.
+ * shortest → cycling-regular + preference shortest
+ *   Distance minimization (fewest km). Profile secondary; regular can use cycleways.
+ * streets → cycling-road + preference recommended
+ *   Street-biased, support-car friendly, still bike-legal only — may be longer km.
  *   Autobahn / Kraftfahrstraße (motorway, motorroad) are typically absent from the
  *   cycling graph already — no driving profile, no highway “avoid” needed.
- * mixed → cycling-regular + recommended (cycleways / side paths OK)
  *
  * ORS avoid_features for cycling: steps | ferries | fords | hills.
  * `highways` / `tollways` are driving-* only — do not send them for cycling.
  * Street vs cycleway bias comes from profile (+ preference), not avoid_features.
  *
- * Note: ORS aliases preference=fastest → recommended for cycling; we still send
- * “fastest” for the street option to express intent (API accepts it).
+ * Note: ORS aliases preference=fastest → recommended for cycling, so “fast” ≠ fewer km.
+ * We never send “fastest”; streets uses recommended explicitly.
  */
-export type SurfacePreference = 'fastest' | 'mixed'
+export type SurfacePreference = 'shortest' | 'streets'
 
-/** ORS Directions `preference` — fastest still accepted (cycling → recommended alias). */
+/** ORS Directions `preference`. */
 export type OrsRoutePreference = 'fastest' | 'shortest' | 'recommended'
 
-export const SURFACE_PREFERENCES: readonly SurfacePreference[] = ['fastest', 'mixed'] as const
+export const SURFACE_PREFERENCES: readonly SurfacePreference[] = ['shortest', 'streets'] as const
 
 export function cyclingProfileForSurface(surface: SurfacePreference): CyclingProfile {
-  return surface === 'fastest' ? 'cycling-road' : 'cycling-regular'
+  return surface === 'streets' ? 'cycling-road' : 'cycling-regular'
 }
 
 export function orsPreferenceForSurface(surface: SurfacePreference): OrsRoutePreference {
-  return surface === 'fastest' ? 'fastest' : 'recommended'
+  return surface === 'shortest' ? 'shortest' : 'recommended'
 }
 
 /**
@@ -66,7 +67,7 @@ export const HILL_PREFERENCES: readonly HillPreference[] = ['balanced', 'steep']
 
 export interface RouteRequestOptions {
   profile?: CyclingProfile
-  /** ORS routing preference (fastest / shortest / recommended). */
+  /** ORS routing preference (shortest / recommended / fastest). */
   preference?: OrsRoutePreference
   hillPreference?: HillPreference
   /** Default true — avoid stairways on bike routes. */
@@ -297,7 +298,7 @@ async function postOrsDirections(
 
 /**
  * Fetch a cycling route through waypoints via OpenRouteService (free tier).
- * Retries transient 503/network once with short backoff; cycling-road (fastest/streets)
+ * Retries transient 503/network once with short backoff; cycling-road (streets)
  * falls back to cycling-regular after exhausted 503 retries.
  */
 export async function fetchCyclingRoute(
