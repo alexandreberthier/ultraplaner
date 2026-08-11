@@ -293,6 +293,7 @@ export default {
     devicePc: 'GPX / FIT (PC)',
     devicePcHint: '{count} paradas · archivos para el ordenador',
     devicePcHintNearby: '{count} favoritos · GPX para el ordenador',
+    exportPcRouteOnlyHint: 'GPX y FIT sin favoritos — para el ordenador',
     exportRouteOnlySection: 'Solo ruta (sin POIs)',
     exportWithStopsSection: 'Con favoritos / puntos de control',
     gpxAll: 'GPX — solo ruta',

@@ -50,7 +50,6 @@ const {
   switchQrFormat,
   closeQrDialog,
   runQrLocalDownload,
-  printFavorites,
   closeCheatSheet,
   cheatSheetOpen,
   exportWaypoints,
@@ -514,11 +513,6 @@ async function shareMap(fromSheet = false) {
   }, 2000)
 }
 
-function onPrintFavorites() {
-  printFavorites()
-  closeMobilePanel()
-  closeExportMenu()
-}
 
 function goHome() {
   if (store.mapReady && !window.confirm(t('map.leaveConfirm'))) return
@@ -717,8 +711,131 @@ function onDocClick(e: MouseEvent) {
 
               <p v-if="store.isNearbyMap" class="export-nearby-hint">{{ t('map.exportNearbyHint') }}</p>
 
-              <template v-if="hasRealTrack()">
-                <p class="export-section">{{ t('map.exportRouteOnlySection') }}</p>
+              <!-- Fall A: Mit Favoriten/Kontrollpunkten -->
+              <template v-if="favCount > 0">
+                <!-- 1. QR / Aufs Handy -->
+                <button
+                  type="button"
+                  class="export-item featured"
+                  role="menuitem"
+                  @click="runExport(() => openQrExport('gpx'))"
+                >
+                  <span class="export-icon">▦</span>
+                  <span class="export-text">
+                    <strong>{{ t('map.qrToPhone') }}</strong>
+                    <small>{{ t('map.qrToPhoneHint') }}</small>
+                  </span>
+                </button>
+
+                <!-- 2. PC herunterladen (GPX + FIT) -->
+                <button
+                  type="button"
+                  class="export-item"
+                  role="menuitem"
+                  :aria-expanded="showPcFiles"
+                  @click="togglePcFiles"
+                >
+                  <span class="export-icon">↓</span>
+                  <span class="export-text">
+                    <strong>{{ t('map.devicePc') }}</strong>
+                    <small>
+                      {{
+                        store.isNearbyMap
+                          ? t('map.devicePcHintNearby', { count: favCount })
+                          : t('map.devicePcHint', { count: favCount })
+                      }}
+                    </small>
+                  </span>
+                </button>
+                <div v-if="showPcFiles" class="export-pc-panel" role="group" :aria-label="t('map.devicePc')">
+                  <button
+                    type="button"
+                    class="export-item nested"
+                    role="menuitem"
+                    @click="runExport(exportGpxFavorites)"
+                  >
+                    <span class="export-icon">↓</span>
+                    <span class="export-text">
+                      <strong>{{ store.isNearbyMap ? t('map.gpxFavNearby') : t('map.gpxFav') }}</strong>
+                      <small>{{ t('map.gpxFavHint', { count: favCount }) }}</small>
+                    </span>
+                  </button>
+                  <button
+                    v-if="!store.isNearbyMap"
+                    type="button"
+                    class="export-item nested"
+                    role="menuitem"
+                    @click="runExport(exportFitCourse)"
+                  >
+                    <span class="export-icon">↓</span>
+                    <span class="export-text">
+                      <strong>{{ t('map.fitCourse') }}</strong>
+                      <small>{{ t('map.fitCourseHint', { count: favCount }) }}</small>
+                    </span>
+                  </button>
+                </div>
+
+                <!-- 3. Wahoo -->
+                <template v-if="!store.isNearbyMap">
+                  <p class="export-section">{{ t('map.deviceWahoo') }}</p>
+                  <button
+                    v-if="wahooConfigured && !wahooConnected"
+                    type="button"
+                    class="export-item featured"
+                    role="menuitem"
+                    :disabled="wahooBusy"
+                    @click="runExport(() => connectWahoo())"
+                  >
+                    <span class="export-icon">☁</span>
+                    <span class="export-text">
+                      <strong>{{ t('wahoo.connect') }}</strong>
+                      <small>{{ t('wahoo.connectHint') }}</small>
+                    </span>
+                  </button>
+                  <button
+                    v-if="wahooConfigured && wahooConnected"
+                    type="button"
+                    class="export-item featured"
+                    role="menuitem"
+                    :disabled="wahooBusy"
+                    @click="runExport(() => sendToWahoo())"
+                  >
+                    <span class="export-icon">☁</span>
+                    <span class="export-text">
+                      <strong>{{ wahooBusy ? t('wahoo.sending') : t('wahoo.send') }}</strong>
+                      <small>{{ t('wahoo.sendHint', { count: favCount }) }}</small>
+                    </span>
+                  </button>
+                  <button
+                    v-if="wahooConfigured && wahooConnected"
+                    type="button"
+                    class="export-item"
+                    role="menuitem"
+                    :disabled="wahooBusy"
+                    @click="disconnectWahoo"
+                  >
+                    <span class="export-icon">✕</span>
+                    <span class="export-text">
+                      <strong>{{ t('wahoo.disconnect') }}</strong>
+                      <small>{{ t('wahoo.disconnectHint') }}</small>
+                    </span>
+                  </button>
+                  <details class="export-howto-details">
+                    <summary>{{ t('map.howToggle') }}</summary>
+                    <ol class="export-howto">
+                      <li>{{ t('map.howWahoo1') }}</li>
+                      <li>{{ t('map.howWahoo2') }}</li>
+                      <li>{{ t('map.howWahoo3') }}</li>
+                      <li>{{ t('map.howWahoo4') }}</li>
+                    </ol>
+                    <p class="export-howto-warn">{{ t('wahoo.cloudNote') }}</p>
+                  </details>
+                </template>
+              </template>
+
+              <!-- Fall B: Ohne Favoriten -->
+              <template v-else-if="hasRealTrack()">
+                <!-- 1. GPX herunterladen (direkt) -->
                 <button
                   type="button"
                   class="export-item featured"
@@ -727,22 +844,12 @@ function onDocClick(e: MouseEvent) {
                 >
                   <span class="export-icon">↓</span>
                   <span class="export-text">
-                    <strong>{{ t('map.gpxAll') }}</strong>
+                    <strong>{{ t('map.gpxFav') }}</strong>
                     <small>{{ t('map.gpxAllHint') }}</small>
                   </span>
                 </button>
-                <button
-                  type="button"
-                  class="export-item featured"
-                  role="menuitem"
-                  @click="runExport(() => void exportFitRoute())"
-                >
-                  <span class="export-icon">↓</span>
-                  <span class="export-text">
-                    <strong>{{ t('map.fitRouteOnly') }}</strong>
-                    <small>{{ t('map.fitRouteOnlyHint') }}</small>
-                  </span>
-                </button>
+
+                <!-- 2. QR / Aufs Handy (routeOnly) -->
                 <button
                   type="button"
                   class="export-item"
@@ -751,142 +858,99 @@ function onDocClick(e: MouseEvent) {
                 >
                   <span class="export-icon">▦</span>
                   <span class="export-text">
-                    <strong>{{ t('map.qrRouteOnly') }}</strong>
-                    <small>{{ t('map.qrRouteOnlyHint') }}</small>
+                    <strong>{{ t('map.qrToPhone') }}</strong>
+                    <small>{{ t('map.qrToPhoneHint') }}</small>
                   </span>
                 </button>
-                <div class="export-divider" />
-                <p class="export-section">{{ t('map.exportWithStopsSection') }}</p>
-              </template>
 
-              <button
-                type="button"
-                class="export-item"
-                :class="{ featured: favCount > 0 && !showPcFiles }"
-                role="menuitem"
-                :aria-expanded="showPcFiles"
-                @click="togglePcFiles"
-              >
-                <span class="export-icon">↓</span>
-                <span class="export-text">
-                  <strong>{{ t('map.devicePc') }}</strong>
-                  <small>
-                    {{
-                      store.isNearbyMap
-                        ? t('map.devicePcHintNearby', { count: favCount })
-                        : t('map.devicePcHint', { count: favCount })
-                    }}
-                  </small>
-                </span>
-              </button>
-              <div v-if="showPcFiles" class="export-pc-panel" role="group" :aria-label="t('map.devicePc')">
+                <!-- 3. PC herunterladen (GPX + FIT, routeOnly) -->
                 <button
-                  type="button"
-                  class="export-item nested"
-                  role="menuitem"
-                  @click="runExport(exportGpxFavorites)"
-                >
-                  <span class="export-icon">↓</span>
-                  <span class="export-text">
-                    <strong>{{ store.isNearbyMap ? t('map.gpxFavNearby') : t('map.gpxFav') }}</strong>
-                    <small>{{ t('map.gpxFavHint', { count: favCount }) }}</small>
-                  </span>
-                </button>
-                <button
-                  v-if="!store.isNearbyMap"
-                  type="button"
-                  class="export-item nested"
-                  role="menuitem"
-                  @click="runExport(exportFitCourse)"
-                >
-                  <span class="export-icon">↓</span>
-                  <span class="export-text">
-                    <strong>{{ t('map.fitCourse') }}</strong>
-                    <small>{{ t('map.fitCourseHint', { count: favCount }) }}</small>
-                  </span>
-                </button>
-              </div>
-
-              <button
-                type="button"
-                class="export-item"
-                role="menuitem"
-                @click="runExport(() => openQrExport('gpx'))"
-              >
-                <span class="export-icon">▦</span>
-                <span class="export-text">
-                  <strong>{{ t('map.qrToPhone') }}</strong>
-                  <small>{{ t('map.qrToPhoneHint') }}</small>
-                </span>
-              </button>
-
-              <template v-if="!store.isNearbyMap">
-                <p class="export-section">{{ t('map.deviceWahoo') }}</p>
-                <button
-                  v-if="wahooConfigured && !wahooConnected"
-                  type="button"
-                  class="export-item featured"
-                  role="menuitem"
-                  :disabled="wahooBusy"
-                  @click="runExport(() => connectWahoo())"
-                >
-                  <span class="export-icon">☁</span>
-                  <span class="export-text">
-                    <strong>{{ t('wahoo.connect') }}</strong>
-                    <small>{{ t('wahoo.connectHint') }}</small>
-                  </span>
-                </button>
-                <button
-                  v-if="wahooConfigured && wahooConnected"
-                  type="button"
-                  class="export-item featured"
-                  role="menuitem"
-                  :disabled="wahooBusy"
-                  @click="runExport(() => sendToWahoo())"
-                >
-                  <span class="export-icon">☁</span>
-                  <span class="export-text">
-                    <strong>{{ wahooBusy ? t('wahoo.sending') : t('wahoo.send') }}</strong>
-                    <small>{{ t('wahoo.sendHint', { count: favCount }) }}</small>
-                  </span>
-                </button>
-                <button
-                  v-if="wahooConfigured && wahooConnected"
                   type="button"
                   class="export-item"
                   role="menuitem"
-                  :disabled="wahooBusy"
-                  @click="disconnectWahoo"
+                  :aria-expanded="showPcFiles"
+                  @click="togglePcFiles"
                 >
-                  <span class="export-icon">✕</span>
+                  <span class="export-icon">↓</span>
                   <span class="export-text">
-                    <strong>{{ t('wahoo.disconnect') }}</strong>
-                    <small>{{ t('wahoo.disconnectHint') }}</small>
+                    <strong>{{ t('map.devicePc') }}</strong>
+                    <small>{{ t('map.exportPcRouteOnlyHint') }}</small>
                   </span>
                 </button>
-                <details class="export-howto-details">
-                  <summary>{{ t('map.howToggle') }}</summary>
-                  <ol class="export-howto">
-                    <li>{{ t('map.howWahoo1') }}</li>
-                    <li>{{ t('map.howWahoo2') }}</li>
-                    <li>{{ t('map.howWahoo3') }}</li>
-                    <li>{{ t('map.howWahoo4') }}</li>
-                  </ol>
-                  <p class="export-howto-warn">{{ t('wahoo.cloudNote') }}</p>
-                </details>
-              </template>
+                <div v-if="showPcFiles" class="export-pc-panel" role="group" :aria-label="t('map.devicePc')">
+                  <button
+                    type="button"
+                    class="export-item nested"
+                    role="menuitem"
+                    @click="runExport(exportGpxRoute)"
+                  >
+                    <span class="export-icon">↓</span>
+                    <span class="export-text">
+                      <strong>{{ t('map.gpxAll') }}</strong>
+                      <small>{{ t('map.gpxAllHint') }}</small>
+                    </span>
+                  </button>
+                  <button
+                    type="button"
+                    class="export-item nested"
+                    role="menuitem"
+                    @click="runExport(() => void exportFitRoute())"
+                  >
+                    <span class="export-icon">↓</span>
+                    <span class="export-text">
+                      <strong>{{ t('map.fitRouteOnly') }}</strong>
+                      <small>{{ t('map.fitRouteOnlyHint') }}</small>
+                    </span>
+                  </button>
+                </div>
 
-              <div class="export-divider" />
-              <p class="export-section">{{ t('map.print') }}</p>
-              <button type="button" class="export-item" role="menuitem" @click="runExport(printFavorites)">
-                <span class="export-icon">🖨️</span>
-                <span class="export-text">
-                  <strong>{{ t('map.cheatSheet') }}</strong>
-                  <small>
-                    {{ favCount > 0 ? t('map.cheatSheetHint', { count: favCount }) : t('map.cheatSheetEmpty') }}
-                  </small>
-                </span>
-              </button>
+                <!-- Wahoo auch ohne Favoriten anbieten -->
+                <template v-if="!store.isNearbyMap">
+                  <p class="export-section">{{ t('map.deviceWahoo') }}</p>
+                  <button
+                    v-if="wahooConfigured && !wahooConnected"
+                    type="button"
+                    class="export-item featured"
+                    role="menuitem"
+                    :disabled="wahooBusy"
+                    @click="runExport(() => connectWahoo())"
+                  >
+                    <span class="export-icon">☁</span>
+                    <span class="export-text">
+                      <strong>{{ t('wahoo.connect') }}</strong>
+                      <small>{{ t('wahoo.connectHint') }}</small>
+                    </span>
+                  </button>
+                  <button
+                    v-if="wahooConfigured && wahooConnected"
+                    type="button"
+                    class="export-item featured"
+                    role="menuitem"
+                    :disabled="wahooBusy"
+                    @click="runExport(() => sendToWahoo())"
+                  >
+                    <span class="export-icon">☁</span>
+                    <span class="export-text">
+                      <strong>{{ wahooBusy ? t('wahoo.sending') : t('wahoo.send') }}</strong>
+                      <small>{{ t('wahoo.sendHint', { count: favCount }) }}</small>
+                    </span>
+                  </button>
+                  <button
+                    v-if="wahooConfigured && wahooConnected"
+                    type="button"
+                    class="export-item"
+                    role="menuitem"
+                    :disabled="wahooBusy"
+                    @click="disconnectWahoo"
+                  >
+                    <span class="export-icon">✕</span>
+                    <span class="export-text">
+                      <strong>{{ t('wahoo.disconnect') }}</strong>
+                      <small>{{ t('wahoo.disconnectHint') }}</small>
+                    </span>
+                  </button>
+                </template>
+              </template>
             </div>
           </div>
           <button
@@ -1201,8 +1265,130 @@ function onDocClick(e: MouseEvent) {
 
           <p v-if="store.isNearbyMap" class="export-nearby-hint">{{ t('map.exportNearbyHint') }}</p>
 
-          <template v-if="hasRealTrack()">
-            <p class="export-sheet-section">{{ t('map.exportRouteOnlySection') }}</p>
+          <!-- Fall A: Mit Favoriten/Kontrollpunkten -->
+          <template v-if="favCount > 0">
+            <!-- 1. QR / Aufs Handy -->
+            <button
+              type="button"
+              class="export-sheet-btn featured"
+              @click="void openQrExport('gpx').then(() => closeMobilePanel())"
+            >
+              <span class="sheet-btn-icon">▦</span>
+              <span>
+                <strong>{{ t('map.qrToPhone') }}</strong>
+                <small>{{ t('map.qrToPhoneHint') }}</small>
+              </span>
+            </button>
+
+            <!-- 2. PC herunterladen (GPX + FIT) -->
+            <button
+              type="button"
+              class="export-sheet-btn"
+              :aria-expanded="showPcFiles"
+              @click="togglePcFiles"
+            >
+              <span class="sheet-btn-icon">↓</span>
+              <span>
+                <strong>{{ t('map.devicePc') }}</strong>
+                <small>
+                  {{
+                    store.isNearbyMap
+                      ? t('map.devicePcHintNearby', { count: favCount })
+                      : t('map.devicePcHint', { count: favCount })
+                  }}
+                </small>
+              </span>
+            </button>
+            <div v-if="showPcFiles" class="export-pc-panel sheet" role="group" :aria-label="t('map.devicePc')">
+              <button
+                type="button"
+                class="export-sheet-btn nested"
+                @click="exportGpxFavorites(); closeMobilePanel()"
+              >
+                <span class="sheet-btn-icon">↓</span>
+                <span>
+                  <strong>
+                    {{
+                      store.isNearbyMap
+                        ? t('map.gpxFavNearbyShort', { count: favCount })
+                        : t('map.gpxFavShort', { count: favCount })
+                    }}
+                  </strong>
+                  <small>{{ t('map.gpxFavHint', { count: favCount }) }}</small>
+                </span>
+              </button>
+              <button
+                v-if="!store.isNearbyMap"
+                type="button"
+                class="export-sheet-btn nested"
+                @click="void exportFitCourse().then(() => closeMobilePanel())"
+              >
+                <span class="sheet-btn-icon">↓</span>
+                <span>
+                  <strong>{{ t('map.fitCourseShort', { count: favCount }) }}</strong>
+                  <small>{{ t('map.fitCourseHint', { count: favCount }) }}</small>
+                </span>
+              </button>
+            </div>
+
+            <!-- 3. Wahoo -->
+            <template v-if="!store.isNearbyMap">
+              <p class="export-sheet-section">{{ t('map.deviceWahoo') }}</p>
+              <button
+                v-if="wahooConfigured && !wahooConnected"
+                type="button"
+                class="export-sheet-btn featured"
+                :disabled="wahooBusy"
+                @click="void connectWahoo()"
+              >
+                <span class="sheet-btn-icon">☁</span>
+                <span>
+                  <strong>{{ t('wahoo.connect') }}</strong>
+                  <small>{{ t('wahoo.connectHint') }}</small>
+                </span>
+              </button>
+              <button
+                v-if="wahooConfigured && wahooConnected"
+                type="button"
+                class="export-sheet-btn featured"
+                :disabled="wahooBusy"
+                @click="void sendToWahoo().then(() => closeMobilePanel())"
+              >
+                <span class="sheet-btn-icon">☁</span>
+                <span>
+                  <strong>{{ wahooBusy ? t('wahoo.sending') : t('wahoo.send') }}</strong>
+                  <small>{{ t('wahoo.sendHint', { count: favCount }) }}</small>
+                </span>
+              </button>
+              <button
+                v-if="wahooConfigured && wahooConnected"
+                type="button"
+                class="export-sheet-btn"
+                :disabled="wahooBusy"
+                @click="disconnectWahoo"
+              >
+                <span class="sheet-btn-icon">✕</span>
+                <span>
+                  <strong>{{ t('wahoo.disconnect') }}</strong>
+                  <small>{{ t('wahoo.disconnectHint') }}</small>
+                </span>
+              </button>
+              <details class="export-howto-details">
+                <summary>{{ t('map.howToggle') }}</summary>
+                <ol class="export-howto">
+                  <li>{{ t('map.howWahoo1') }}</li>
+                  <li>{{ t('map.howWahoo2') }}</li>
+                  <li>{{ t('map.howWahoo3') }}</li>
+                  <li>{{ t('map.howWahoo4') }}</li>
+                </ol>
+                <p class="export-howto-warn">{{ t('wahoo.cloudNote') }}</p>
+              </details>
+            </template>
+          </template>
+
+          <!-- Fall B: Ohne Favoriten -->
+          <template v-else-if="hasRealTrack()">
+            <!-- 1. GPX herunterladen (direkt) -->
             <button
               type="button"
               class="export-sheet-btn featured"
@@ -1210,21 +1396,12 @@ function onDocClick(e: MouseEvent) {
             >
               <span class="sheet-btn-icon">↓</span>
               <span>
-                <strong>{{ t('map.gpxAll') }}</strong>
+                <strong>{{ t('map.gpxFav') }}</strong>
                 <small>{{ t('map.gpxAllHint') }}</small>
               </span>
             </button>
-            <button
-              type="button"
-              class="export-sheet-btn featured"
-              @click="void exportFitRoute().then(() => closeMobilePanel())"
-            >
-              <span class="sheet-btn-icon">↓</span>
-              <span>
-                <strong>{{ t('map.fitRouteOnly') }}</strong>
-                <small>{{ t('map.fitRouteOnlyHint') }}</small>
-              </span>
-            </button>
+
+            <!-- 2. QR / Aufs Handy (routeOnly) -->
             <button
               type="button"
               class="export-sheet-btn"
@@ -1232,127 +1409,92 @@ function onDocClick(e: MouseEvent) {
             >
               <span class="sheet-btn-icon">▦</span>
               <span>
-                <strong>{{ t('map.qrRouteOnly') }}</strong>
-                <small>{{ t('map.qrRouteOnlyHint') }}</small>
+                <strong>{{ t('map.qrToPhone') }}</strong>
+                <small>{{ t('map.qrToPhoneHint') }}</small>
               </span>
             </button>
-            <p class="export-sheet-section">{{ t('map.exportWithStopsSection') }}</p>
-          </template>
 
-          <button
-            type="button"
-            class="export-sheet-btn"
-            :class="{ featured: favCount > 0 && !showPcFiles }"
-            :aria-expanded="showPcFiles"
-            @click="togglePcFiles"
-          >
-            <span class="sheet-btn-icon">↓</span>
-            <span>
-              <strong>{{ t('map.devicePc') }}</strong>
-              <small>
-                {{
-                  store.isNearbyMap
-                    ? t('map.devicePcHintNearby', { count: favCount })
-                    : t('map.devicePcHint', { count: favCount })
-                }}
-              </small>
-            </span>
-          </button>
-          <div v-if="showPcFiles" class="export-pc-panel sheet" role="group" :aria-label="t('map.devicePc')">
+            <!-- 3. PC herunterladen (GPX + FIT, routeOnly) -->
             <button
-              type="button"
-              class="export-sheet-btn nested"
-              @click="exportGpxFavorites(); closeMobilePanel()"
-            >
-              <span class="sheet-btn-icon">↓</span>
-              <span>
-                <strong>
-                  {{
-                    store.isNearbyMap
-                      ? t('map.gpxFavNearbyShort', { count: favCount })
-                      : t('map.gpxFavShort', { count: favCount })
-                  }}
-                </strong>
-                <small>{{ t('map.gpxFavHint', { count: favCount }) }}</small>
-              </span>
-            </button>
-            <button
-              v-if="!store.isNearbyMap"
-              type="button"
-              class="export-sheet-btn nested"
-              @click="void exportFitCourse().then(() => closeMobilePanel())"
-            >
-              <span class="sheet-btn-icon">↓</span>
-              <span>
-                <strong>{{ t('map.fitCourseShort', { count: favCount }) }}</strong>
-                <small>{{ t('map.fitCourseHint', { count: favCount }) }}</small>
-              </span>
-            </button>
-          </div>
-
-          <button
-            type="button"
-            class="export-sheet-btn"
-            @click="void openQrExport('gpx').then(() => closeMobilePanel())"
-          >
-            <span class="sheet-btn-icon">▦</span>
-            <span>
-              <strong>{{ t('map.qrToPhone') }}</strong>
-              <small>{{ t('map.qrToPhoneHint') }}</small>
-            </span>
-          </button>
-
-          <template v-if="!store.isNearbyMap">
-            <p class="export-sheet-section">{{ t('map.deviceWahoo') }}</p>
-            <button
-              v-if="wahooConfigured && !wahooConnected"
-              type="button"
-              class="export-sheet-btn featured"
-              :disabled="wahooBusy"
-              @click="void connectWahoo()"
-            >
-              <span class="sheet-btn-icon">☁</span>
-              <span>
-                <strong>{{ t('wahoo.connect') }}</strong>
-                <small>{{ t('wahoo.connectHint') }}</small>
-              </span>
-            </button>
-            <button
-              v-if="wahooConfigured && wahooConnected"
-              type="button"
-              class="export-sheet-btn featured"
-              :disabled="wahooBusy"
-              @click="void sendToWahoo().then(() => closeMobilePanel())"
-            >
-              <span class="sheet-btn-icon">☁</span>
-              <span>
-                <strong>{{ wahooBusy ? t('wahoo.sending') : t('wahoo.send') }}</strong>
-                <small>{{ t('wahoo.sendHint', { count: favCount }) }}</small>
-              </span>
-            </button>
-            <button
-              v-if="wahooConfigured && wahooConnected"
               type="button"
               class="export-sheet-btn"
-              :disabled="wahooBusy"
-              @click="disconnectWahoo"
+              :aria-expanded="showPcFiles"
+              @click="togglePcFiles"
             >
-              <span class="sheet-btn-icon">✕</span>
+              <span class="sheet-btn-icon">↓</span>
               <span>
-                <strong>{{ t('wahoo.disconnect') }}</strong>
-                <small>{{ t('wahoo.disconnectHint') }}</small>
+                <strong>{{ t('map.devicePc') }}</strong>
+                <small>{{ t('map.exportPcRouteOnlyHint') }}</small>
               </span>
             </button>
-            <details class="export-howto-details">
-              <summary>{{ t('map.howToggle') }}</summary>
-              <ol class="export-howto">
-                <li>{{ t('map.howWahoo1') }}</li>
-                <li>{{ t('map.howWahoo2') }}</li>
-                <li>{{ t('map.howWahoo3') }}</li>
-                <li>{{ t('map.howWahoo4') }}</li>
-              </ol>
-              <p class="export-howto-warn">{{ t('wahoo.cloudNote') }}</p>
-            </details>
+            <div v-if="showPcFiles" class="export-pc-panel sheet" role="group" :aria-label="t('map.devicePc')">
+              <button
+                type="button"
+                class="export-sheet-btn nested"
+                @click="exportGpxRoute(); closeMobilePanel()"
+              >
+                <span class="sheet-btn-icon">↓</span>
+                <span>
+                  <strong>{{ t('map.gpxAll') }}</strong>
+                  <small>{{ t('map.gpxAllHint') }}</small>
+                </span>
+              </button>
+              <button
+                type="button"
+                class="export-sheet-btn nested"
+                @click="void exportFitRoute().then(() => closeMobilePanel())"
+              >
+                <span class="sheet-btn-icon">↓</span>
+                <span>
+                  <strong>{{ t('map.fitRouteOnly') }}</strong>
+                  <small>{{ t('map.fitRouteOnlyHint') }}</small>
+                </span>
+              </button>
+            </div>
+
+            <!-- Wahoo auch ohne Favoriten anbieten -->
+            <template v-if="!store.isNearbyMap">
+              <p class="export-sheet-section">{{ t('map.deviceWahoo') }}</p>
+              <button
+                v-if="wahooConfigured && !wahooConnected"
+                type="button"
+                class="export-sheet-btn featured"
+                :disabled="wahooBusy"
+                @click="void connectWahoo()"
+              >
+                <span class="sheet-btn-icon">☁</span>
+                <span>
+                  <strong>{{ t('wahoo.connect') }}</strong>
+                  <small>{{ t('wahoo.connectHint') }}</small>
+                </span>
+              </button>
+              <button
+                v-if="wahooConfigured && wahooConnected"
+                type="button"
+                class="export-sheet-btn featured"
+                :disabled="wahooBusy"
+                @click="void sendToWahoo().then(() => closeMobilePanel())"
+              >
+                <span class="sheet-btn-icon">☁</span>
+                <span>
+                  <strong>{{ wahooBusy ? t('wahoo.sending') : t('wahoo.send') }}</strong>
+                  <small>{{ t('wahoo.sendHint', { count: favCount }) }}</small>
+                </span>
+              </button>
+              <button
+                v-if="wahooConfigured && wahooConnected"
+                type="button"
+                class="export-sheet-btn"
+                :disabled="wahooBusy"
+                @click="disconnectWahoo"
+              >
+                <span class="sheet-btn-icon">✕</span>
+                <span>
+                  <strong>{{ t('wahoo.disconnect') }}</strong>
+                  <small>{{ t('wahoo.disconnectHint') }}</small>
+                </span>
+              </button>
+            </template>
           </template>
 
           <button
@@ -1371,23 +1513,6 @@ function onDocClick(e: MouseEvent) {
                     : canNativeShare
                       ? t('map.shareHintNative')
                       : t('map.shareHintCopy')
-                }}
-              </small>
-            </span>
-          </button>
-
-          <p class="export-print-hint">
-            {{ t('map.printHint') }}
-          </p>
-          <button type="button" class="export-sheet-btn export-sheet-print" @click="onPrintFavorites">
-            <span class="sheet-btn-icon">🖨️</span>
-            <span>
-              <strong>{{ t('map.cheatSheet') }}</strong>
-              <small>
-                {{
-                  favCount > 0
-                    ? t('map.printBetterPc', { count: favCount })
-                    : t('map.printNeedFav')
                 }}
               </small>
             </span>

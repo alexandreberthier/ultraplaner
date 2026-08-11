@@ -292,6 +292,7 @@
     devicePc: 'GPX / FIT (PC)',
     devicePcHint: '{count} arrêts · fichiers pour l’ordinateur',
     devicePcHintNearby: '{count} favoris · GPX pour l’ordinateur',
+    exportPcRouteOnlyHint: 'GPX et FIT sans favoris — pour l’ordinateur',
     exportRouteOnlySection: 'Route seule (sans POIs)',
     exportWithStopsSection: 'Avec favoris / points de contrôle',
     gpxAll: 'GPX — route seule',
