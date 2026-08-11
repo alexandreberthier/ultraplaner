@@ -32,13 +32,23 @@ function goStartApp() {
         {{ t('landing.backHome') }}
       </button>
       <button type="button" class="brand" :aria-label="t('landing.backHome')" @click="goHome">
-        <img
-          class="brand-logo"
-          src="/logo-ultraplaner.png"
-          alt="UltraPlaner"
-          width="160"
-          height="53"
-        />
+        <picture>
+          <source
+            srcset="/logo-ultraplaner-64.webp 64w, /logo-ultraplaner-96.webp 96w, /logo-ultraplaner-200.webp 200w"
+            sizes="36px"
+            type="image/webp"
+          />
+          <img
+            class="brand-logo"
+            src="/logo-ultraplaner-64.png"
+            srcset="/logo-ultraplaner-64.png 64w, /logo-ultraplaner-96.png 96w, /logo-ultraplaner-200.png 200w"
+            sizes="36px"
+            alt="UltraPlaner"
+            width="64"
+            height="64"
+            decoding="async"
+          />
+        </picture>
       </button>
       <TopbarSettings force-menu />
     </header>

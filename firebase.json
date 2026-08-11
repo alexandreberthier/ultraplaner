@@ -95,19 +95,15 @@
         "headers": [{ "key": "Cache-Control", "value": "public,max-age=604800" }]
       },
       {
-        "source": "/logo-ultraplaner.png",
+        "source": "/logo-ultraplaner*.png",
         "headers": [{ "key": "Cache-Control", "value": "public,max-age=2592000" }]
       },
       {
-        "source": "/logo-ultraplaner.webp",
+        "source": "/logo-ultraplaner*.webp",
         "headers": [{ "key": "Cache-Control", "value": "public,max-age=2592000" }]
       },
       {
-        "source": "/hero-mountains.webp",
-        "headers": [{ "key": "Cache-Control", "value": "public,max-age=2592000" }]
-      },
-      {
-        "source": "/hero-mountains-1100.webp",
+        "source": "/hero-mountains*.webp",
         "headers": [{ "key": "Cache-Control", "value": "public,max-age=2592000" }]
       }
     ],

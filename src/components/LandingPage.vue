@@ -106,18 +106,18 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
         <button type="button" class="plan-brand" aria-label="UltraPlaner" @click="leavePlanMode">
           <picture>
             <source
-              srcset="/logo-ultraplaner-200.webp 200w, /logo-ultraplaner-400.webp 400w"
-              sizes="(max-width: 640px) 42vw, 180px"
+              srcset="/logo-ultraplaner-64.webp 64w, /logo-ultraplaner-96.webp 96w, /logo-ultraplaner-200.webp 200w"
+              sizes="28px"
               type="image/webp"
             />
             <img
               class="plan-brand-logo"
-              src="/logo-ultraplaner-400.png"
-              srcset="/logo-ultraplaner-200.png 200w, /logo-ultraplaner-400.png 400w"
-              sizes="(max-width: 640px) 42vw, 180px"
+              src="/logo-ultraplaner-64.png"
+              srcset="/logo-ultraplaner-64.png 64w, /logo-ultraplaner-96.png 96w, /logo-ultraplaner-200.png 200w"
+              sizes="28px"
               alt="UltraPlaner"
-              width="160"
-              height="53"
+              width="64"
+              height="64"
               decoding="async"
             />
           </picture>
@@ -152,7 +152,7 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
             <source
               media="(max-width: 640px)"
               type="image/webp"
-              srcset="/hero-mountains-800.webp 800w, /hero-mountains-1100.webp 1100w"
+              srcset="/hero-mountains-480.webp 480w, /hero-mountains-800.webp 800w"
               sizes="100vw"
             />
             <source
@@ -177,18 +177,18 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
             <button type="button" class="brand-lockup" aria-label="UltraPlaner" @click="goStart">
               <picture>
                 <source
-                  srcset="/logo-ultraplaner-200.webp 200w, /logo-ultraplaner-400.webp 400w"
-                  sizes="(max-width: 640px) 46vw, 190px"
+                  srcset="/logo-ultraplaner-64.webp 64w, /logo-ultraplaner-96.webp 96w, /logo-ultraplaner-200.webp 200w"
+                  sizes="26px"
                   type="image/webp"
                 />
                 <img
                   class="brand-logo"
-                  src="/logo-ultraplaner-400.png"
-                  srcset="/logo-ultraplaner-200.png 200w, /logo-ultraplaner-400.png 400w"
-                  sizes="(max-width: 640px) 46vw, 190px"
+                  src="/logo-ultraplaner-64.png"
+                  srcset="/logo-ultraplaner-64.png 64w, /logo-ultraplaner-96.png 96w, /logo-ultraplaner-200.png 200w"
+                  sizes="26px"
                   alt="UltraPlaner"
-                  width="200"
-                  height="66"
+                  width="64"
+                  height="64"
                   decoding="async"
                 />
               </picture>

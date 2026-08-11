@@ -42,7 +42,7 @@ await sharp(src)
   .webp({ quality: 92 })
   .toFile(join(outDir, 'logo-ultraplaner.webp'))
 
-for (const size of [200, 400]) {
+for (const size of [64, 96, 200, 400]) {
   await sharp(src)
     .resize(size, size, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } })
     .png()

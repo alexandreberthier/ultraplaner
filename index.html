@@ -46,6 +46,16 @@
     </script>
 
     <link rel="canonical" href="https://ultraplaner.com/" />
+    <!-- LCP: kick off hero image before Vue mounts (mobile prefers 480, else 800) -->
+    <link
+      rel="preload"
+      as="image"
+      type="image/webp"
+      href="/hero-mountains-800.webp"
+      imagesrcset="/hero-mountains-480.webp 480w, /hero-mountains-800.webp 800w, /hero-mountains-1100.webp 1100w"
+      imagesizes="100vw"
+      fetchpriority="high"
+    />
     <!-- Google Search: square PNG ≥48px recommended; ICO + PNG primary, SVG for modern browsers -->
     <link rel="icon" href="/favicon.ico" sizes="any" />
     <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48.png" />
