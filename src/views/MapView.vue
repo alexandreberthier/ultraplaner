@@ -835,24 +835,10 @@ function onDocClick(e: MouseEvent) {
 
               <!-- Fall B: Ohne Favoriten -->
               <template v-else-if="hasRealTrack()">
-                <!-- 1. GPX herunterladen (direkt) -->
+                <!-- 1. QR / Aufs Handy (routeOnly) -->
                 <button
                   type="button"
                   class="export-item featured"
-                  role="menuitem"
-                  @click="runExport(exportGpxRoute)"
-                >
-                  <span class="export-icon">↓</span>
-                  <span class="export-text">
-                    <strong>{{ t('map.gpxFav') }}</strong>
-                    <small>{{ t('map.gpxAllHint') }}</small>
-                  </span>
-                </button>
-
-                <!-- 2. QR / Aufs Handy (routeOnly) -->
-                <button
-                  type="button"
-                  class="export-item"
                   role="menuitem"
                   @click="runExport(() => openQrExport('gpx', { routeOnly: true }))"
                 >
@@ -863,7 +849,7 @@ function onDocClick(e: MouseEvent) {
                   </span>
                 </button>
 
-                <!-- 3. PC herunterladen (GPX + FIT, routeOnly) -->
+                <!-- 2. PC herunterladen (GPX + FIT, routeOnly) -->
                 <button
                   type="button"
                   class="export-item"
@@ -1388,23 +1374,10 @@ function onDocClick(e: MouseEvent) {
 
           <!-- Fall B: Ohne Favoriten -->
           <template v-else-if="hasRealTrack()">
-            <!-- 1. GPX herunterladen (direkt) -->
+            <!-- 1. QR / Aufs Handy (routeOnly) -->
             <button
               type="button"
               class="export-sheet-btn featured"
-              @click="exportGpxRoute(); closeMobilePanel()"
-            >
-              <span class="sheet-btn-icon">↓</span>
-              <span>
-                <strong>{{ t('map.gpxFav') }}</strong>
-                <small>{{ t('map.gpxAllHint') }}</small>
-              </span>
-            </button>
-
-            <!-- 2. QR / Aufs Handy (routeOnly) -->
-            <button
-              type="button"
-              class="export-sheet-btn"
               @click="void openQrExport('gpx', { routeOnly: true }).then(() => closeMobilePanel())"
             >
               <span class="sheet-btn-icon">▦</span>
@@ -1414,7 +1387,7 @@ function onDocClick(e: MouseEvent) {
               </span>
             </button>
 
-            <!-- 3. PC herunterladen (GPX + FIT, routeOnly) -->
+            <!-- 2. PC herunterladen (GPX + FIT, routeOnly) -->
             <button
               type="button"
               class="export-sheet-btn"
