@@ -1,5 +1,6 @@
 import type { LatLng, RouteSurfaceSummary } from '../../shared/types'
 import { tGlobal } from '../i18n'
+import { haversineM } from './geo'
 import {
   buildRouteSurfaceSummary,
   type OrsSurfaceSummaryRow,
@@ -64,6 +65,16 @@ export type HillPreference = 'balanced' | 'steep'
 
 export const HILL_PREFERENCES: readonly HillPreference[] = ['balanced', 'steep'] as const
 
+/**
+ * ORS response detail.
+ * preview — fast geometry only (simplify, no elevation/extras). First paint on long A–B.
+ * full — elevation + surface/waytype (cannot combine with geometry_simplify).
+ */
+export type RouteDetailLevel = 'preview' | 'full'
+
+/** Straight-line hop (km) above which we use two-phase routing for snappier first paint. */
+export const LONG_ROUTE_STRAIGHT_KM = 35
+
 export interface RouteRequestOptions {
   profile?: CyclingProfile
   /** ORS routing preference (shortest / recommended / fastest). */
@@ -72,6 +83,8 @@ export interface RouteRequestOptions {
   /** Default true — avoid stairways on bike routes. */
   avoidSteps?: boolean
   avoidFerries?: boolean
+  /** preview = geometry only; full = elevation + surface (default). */
+  detail?: RouteDetailLevel
   /** Cancel in-flight ORS request (profile/surface toggles). */
   signal?: AbortSignal
 }
@@ -104,6 +117,17 @@ function orsKey(): string {
 
 export function isOrsConfigured(): boolean {
   return Boolean(import.meta.env.VITE_ORS_API_KEY)
+}
+
+/** True when any consecutive waypoint hop is a long straight-line distance (e.g. Wien–Bratislava). */
+export function isLongStraightRoute(waypoints: LatLng[]): boolean {
+  if (waypoints.length < 2) return false
+  for (let i = 1; i < waypoints.length; i++) {
+    const a = waypoints[i - 1]!
+    const b = waypoints[i]!
+    if (haversineM(a, b) / 1000 >= LONG_ROUTE_STRAIGHT_KM) return true
+  }
+  return false
 }
 
 function steepnessDifficulty(hill: HillPreference | undefined): number | null {
@@ -311,17 +335,27 @@ export async function fetchCyclingRoute(
   const profile = opts.profile ?? CYCLING_PROFILE
   const signal = opts.signal
   const preference = opts.preference
+  const detail: RouteDetailLevel = opts.detail ?? 'full'
+  const preview = detail === 'preview'
 
   const coordinates = waypoints.map((w) => [w.lng, w.lat])
   // Default ORS snap radius is only 350 m — mountain/parking clicks often fail (code 2010).
   const radiuses = waypoints.map(() => 2000)
   const options = buildOrsOptions(opts)
+  // instructions default true on ORS — we never show turn-by-turn; skip for smaller/faster responses.
+  // preview: geometry_simplify + no elevation/extras (ORS cannot combine simplify with extra_info).
+  // full: elevation + surface/waytype for profile + Belag coloring.
   const body: Record<string, unknown> = {
     coordinates,
-    elevation: true,
     radiuses,
-    // surface = OSM surface tags; waytype fills untagged stretches via highway class
-    extra_info: ['surface', 'waytype'],
+    instructions: false,
+    elevation: !preview,
+    ...(preview
+      ? { geometry_simplify: true }
+      : {
+          // surface = OSM surface tags; waytype fills untagged stretches via highway class
+          extra_info: ['surface', 'waytype'],
+        }),
     ...(preference ? { preference } : {}),
     ...(options ? { options } : {}),
   }

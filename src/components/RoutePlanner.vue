@@ -39,6 +39,7 @@ import {
   fetchCyclingRoute,
   isOrsConfigured,
   isRouteAborted,
+  isLongStraightRoute,
   searchAddresses,
   SURFACE_PREFERENCES,
   HILL_PREFERENCES,
@@ -111,6 +112,10 @@ const radiusM = ref(DEFAULT_POI_RADIUS_M)
 const selected = ref<PoiCategory[]>([...DEFAULT_POI_CATEGORIES])
 const formError = ref('')
 const routing = ref(false)
+/** Long A–B hop — show clearer “lange Strecke” loading copy. */
+const routingLong = ref(false)
+/** Preview geometry is on map; elevation/surface still loading. */
+const routingEnriching = ref(false)
 const creating = ref(false)
 const exporting = ref(false)
 const showExportMenu = ref(false)
@@ -218,8 +223,23 @@ const showRoutingOptions = computed(() => waypoints.value.length >= 2 && isOrsCo
 
 const createMapLabel = computed(() => {
   if (creating.value) return t('planner.loadingPois')
-  if (routing.value) return t('planner.calculatingRoute')
+  if (routing.value) {
+    if (routingEnriching.value) return t('planner.enrichingRoute')
+    if (routingLong.value) return t('planner.calculatingRouteLong')
+    return t('planner.calculatingRoute')
+  }
   return t('planner.createMap')
+})
+
+const mapRoutingHint = computed(() => {
+  if (routingEnriching.value) return t('planner.mapHintEnriching')
+  if (routingLong.value) return t('planner.mapHintRoutingLong')
+  return t('planner.mapHintRouting')
+})
+
+const routeDrawingLabel = computed(() => {
+  if (routingLong.value) return t('planner.routeDrawingLong')
+  return t('planner.routeDrawing')
 })
 
 watch(
@@ -881,6 +901,8 @@ function destroyPlannerMap() {
   stopPlannerLocation()
   abortPendingRoute()
   routing.value = false
+  routingLong.value = false
+  routingEnriching.value = false
   if (addressTimer) clearTimeout(addressTimer)
   addressTimer = null
   cancelStyleReady?.()
@@ -1147,6 +1169,8 @@ function scheduleAutoRoute() {
     routeElevations.value = []
     routeSurfaceSummary.value = null
     routing.value = false
+    routingLong.value = false
+    routingEnriching.value = false
     updateMapSources()
     return
   }
@@ -1165,6 +1189,8 @@ async function calculateRoute() {
     routeElevations.value = []
     routeSurfaceSummary.value = null
     routeCursor.value = null
+    routingLong.value = false
+    routingEnriching.value = false
     updateRouteCursorMarker()
     updateMapSources()
     return
@@ -1176,24 +1202,53 @@ async function calculateRoute() {
   const gen = ++routeGeneration
   formError.value = ''
   routing.value = true
+  routingEnriching.value = false
   updateMapSources()
 
+  const pts: LatLng[] = waypoints.value.map((w) => ({ lat: w.lat, lng: w.lng }))
+  const longHop = isLongStraightRoute(pts)
+  routingLong.value = longHop
+
+  const commonOpts = {
+    profile: cyclingProfileForSurface(surfacePreference.value),
+    preference: orsPreferenceForSurface(surfacePreference.value),
+    hillPreference: hillPreference.value,
+    avoidSteps: true,
+    signal: ac.signal,
+  } as const
+
   try {
-    const pts: LatLng[] = waypoints.value.map((w) => ({ lat: w.lat, lng: w.lng }))
-    const result = await fetchCyclingRoute(pts, {
-      profile: cyclingProfileForSurface(surfacePreference.value),
-      preference: orsPreferenceForSurface(surfacePreference.value),
-      hillPreference: hillPreference.value,
-      avoidSteps: true,
-      signal: ac.signal,
-    })
-    if (gen !== routeGeneration || ac.signal.aborted) return
-    routeCoords.value = result.coordinates
-    routeElevations.value = result.elevations
-    routeSurfaceSummary.value = result.surfaceSummary
-    routeCursor.value = null
-    updateRouteCursorMarker()
-    updateMapSources()
+    // Long A–B (e.g. Wien–Bratislava): paint simplified geometry first, then enrich.
+    // Short hops: one full call (avoids burning a second ORS request).
+    if (longHop) {
+      const preview = await fetchCyclingRoute(pts, { ...commonOpts, detail: 'preview' })
+      if (gen !== routeGeneration || ac.signal.aborted) return
+      routeCoords.value = preview.coordinates
+      routeElevations.value = []
+      routeSurfaceSummary.value = null
+      routeCursor.value = null
+      updateRouteCursorMarker()
+      updateMapSources()
+
+      routingEnriching.value = true
+      const full = await fetchCyclingRoute(pts, { ...commonOpts, detail: 'full' })
+      if (gen !== routeGeneration || ac.signal.aborted) return
+      routeCoords.value = full.coordinates
+      routeElevations.value = full.elevations
+      routeSurfaceSummary.value = full.surfaceSummary
+      routeCursor.value = null
+      updateRouteCursorMarker()
+      updateMapSources()
+    } else {
+      const result = await fetchCyclingRoute(pts, { ...commonOpts, detail: 'full' })
+      if (gen !== routeGeneration || ac.signal.aborted) return
+      routeCoords.value = result.coordinates
+      routeElevations.value = result.elevations
+      routeSurfaceSummary.value = result.surfaceSummary
+      routeCursor.value = null
+      updateRouteCursorMarker()
+      updateMapSources()
+    }
   } catch (err) {
     if (gen !== routeGeneration || isRouteAborted(err) || ac.signal.aborted) return
     // Keep previous geometry so a failed profile switch does not blank the map.
@@ -1201,6 +1256,8 @@ async function calculateRoute() {
   } finally {
     if (gen === routeGeneration) {
       routing.value = false
+      routingLong.value = false
+      routingEnriching.value = false
       if (routeAbort === ac) routeAbort = null
     }
   }
@@ -1326,7 +1383,7 @@ onUnmounted(() => {
             <span class="badge-elev">↑{{ Math.round(elevationStats.ascentM) }} m</span>
           </template>
         </template>
-        <template v-else>{{ t('planner.routeDrawing') }}</template>
+        <template v-else>{{ routeDrawingLabel }}</template>
       </div>
       <p v-if="basemapFallbackHint" class="basemap-fallback" role="status">
         {{ basemapFallbackHint }}
@@ -1402,7 +1459,7 @@ onUnmounted(() => {
         </button>
       </div>
       <p class="map-hint">
-        <template v-if="routing">{{ t('planner.mapHintRouting') }}</template>
+        <template v-if="routing">{{ mapRoutingHint }}</template>
         <template v-else-if="canCloseLoop">{{ t('planner.mapHintLoop') }}</template>
         <template v-else>{{ t('planner.mapHintClick') }}</template>
       </p>
@@ -1561,7 +1618,7 @@ onUnmounted(() => {
             </template>
           </span>
         </div>
-        <p v-else-if="waypoints.length >= 2 && routing" class="route-km muted">{{ t('planner.routeDrawing') }}</p>
+        <p v-else-if="waypoints.length >= 2 && routing" class="route-km muted">{{ routeDrawingLabel }}</p>
 
         <ul v-if="waypoints.length" class="waypoint-list">
           <li v-for="(wp, i) in waypoints" :key="wp.id">
