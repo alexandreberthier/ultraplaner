@@ -719,6 +719,9 @@
     calculatingRoute: 'Calcul de la route…',
     createMap: 'Créer carte avec POIs',
     minCategory: 'Au moins une catégorie doit être active',
+    controlsTitle: 'Planification',
+    controlsExpand: 'Déplier la planification',
+    controlsCollapse: 'Replier la planification',
   },
   loading: {
     default: 'Chargement…',

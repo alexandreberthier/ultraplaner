@@ -720,6 +720,9 @@ export default {
     calculatingRoute: 'Calculando ruta…',
     createMap: 'Crear mapa con POIs',
     minCategory: 'Al menos una categoría debe estar activa',
+    controlsTitle: 'Planificación',
+    controlsExpand: 'Expandir planificación',
+    controlsCollapse: 'Contraer planificación',
   },
   loading: {
     default: 'Cargando…',

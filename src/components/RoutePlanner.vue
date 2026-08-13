@@ -136,6 +136,27 @@ const addressResults = ref<GeocodeResult[]>([])
 const routeCursor = ref<RouteCursor | null>(null)
 const addressSearching = ref(false)
 const addressError = ref('')
+/** Mobile bottom sheet: open until first route, then user-controlled. */
+const controlsOpen = ref(true)
+let didAutoCollapseControls = false
+
+function isMobilePlannerViewport(): boolean {
+  return typeof window !== 'undefined' && window.matchMedia('(max-width: 899px)').matches
+}
+
+const controlsSummary = computed(() => {
+  const n = waypoints.value.length
+  const parts: string[] = [`${n} ${t('planner.waypoints')}`]
+  if (routeKm.value > 0) parts.push(`${routeKm.value.toFixed(1)} km`)
+  if (elevationStats.value) parts.push(`↑${Math.round(elevationStats.value.ascentM)} m`)
+  return parts.join(' · ')
+})
+
+async function toggleControlsSheet() {
+  controlsOpen.value = !controlsOpen.value
+  await nextTick()
+  map?.resize()
+}
 
 const emit = defineEmits<{
   'can-export-change': [value: boolean]
@@ -198,6 +219,13 @@ watch(
   },
   { immediate: true }
 )
+
+watch(routeKm, (km) => {
+  if (km <= 0 || didAutoCollapseControls || !isMobilePlannerViewport()) return
+  didAutoCollapseControls = true
+  controlsOpen.value = false
+  void nextTick(() => map?.resize())
+})
 
 function setSurfacePreference(surface: SurfacePreference) {
   if (surfacePreference.value === surface) return
@@ -979,6 +1007,9 @@ function applyStyleAndRestore(
       })
       addPlannerLayers()
       updateMapSources()
+      if (lastGeoPos) {
+        updatePlannerLocationMarker(lastGeoPos.lat, lastGeoPos.lng, null)
+      }
       restored = true
     } catch (err) {
       console.error('[planner] Overlay nach Kartenwechsel fehlgeschlagen:', err)
@@ -1411,7 +1442,23 @@ onUnmounted(() => {
       @update:cursor="onElevationCursor"
     />
 
-    <div class="planner-controls">
+    <div class="planner-controls" :class="{ 'sheet-collapsed': !controlsOpen }">
+      <button
+        type="button"
+        class="controls-sheet-toggle"
+        :aria-expanded="controlsOpen"
+        :aria-label="controlsOpen ? t('planner.controlsCollapse') : t('planner.controlsExpand')"
+        @click="toggleControlsSheet"
+      >
+        <span class="sheet-handle" aria-hidden="true" />
+        <span class="sheet-toggle-main">
+          <span class="sheet-title">{{ t('planner.controlsTitle') }}</span>
+          <span class="sheet-summary">{{ controlsSummary }}</span>
+        </span>
+        <span class="sheet-chevron" aria-hidden="true">{{ controlsOpen ? '▾' : '▴' }}</span>
+      </button>
+
+      <div class="controls-sheet-body">
       <div class="address-search">
         <label class="field-label" for="address-input">{{ t('planner.searchAddress') }}</label>
         <div class="search-wrap">
@@ -1571,6 +1618,7 @@ onUnmounted(() => {
           }}
         </button>
       </template>
+      </div>
     </div>
   </div>
 </template>
@@ -1970,6 +2018,17 @@ onUnmounted(() => {
   box-shadow: 4px 0 20px rgba(0, 0, 0, 0.05);
 }
 
+.controls-sheet-toggle {
+  display: none;
+}
+
+.controls-sheet-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  min-height: 0;
+}
+
 .address-search {
   position: relative;
 }
@@ -2336,20 +2395,153 @@ onUnmounted(() => {
 @media (max-width: 899px) {
   .route-planner {
     grid-template-columns: 1fr;
-    grid-template-rows: minmax(0, 1fr) auto auto;
+    grid-template-rows: minmax(52vh, 1fr) auto auto;
     grid-template-areas:
       'map'
       'elev'
       'controls';
   }
 
+  .planner-map-wrap {
+    min-height: 52vh;
+  }
+
+  .surface-legend {
+    left: 0.5rem;
+    bottom: 2.4rem;
+    max-width: min(78%, 14rem);
+    padding: 0.22rem 0.4rem;
+    gap: 0.12rem 0.35rem;
+  }
+
+  .surface-legend li {
+    font-size: 0.62rem;
+  }
+
+  .surface-dot,
+  .grade-legend .grade-bar {
+    width: 0.4rem;
+    height: 0.4rem;
+  }
+
+  .grade-legend .grade-bar {
+    width: 10px;
+    height: 3px;
+  }
+
+  .map-hint {
+    font-size: 0.7rem;
+    padding: 0.28rem 0.45rem;
+    max-width: calc(100% - 1.5rem);
+  }
+
+  .route-color-toggle,
+  .basemap-toggle {
+    transform: scale(0.92);
+    transform-origin: top left;
+  }
+
   .planner-controls {
-    max-height: min(52vh, 520px);
+    max-height: min(40vh, 420px);
     height: auto;
     border-right: none;
     border-top: 1px solid var(--border);
     box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.06);
-    padding: 0.85rem 1rem 1rem;
+    padding: 0;
+    gap: 0;
+    overflow: hidden;
+    border-radius: 14px 14px 0 0;
+  }
+
+  .planner-controls.sheet-collapsed {
+    max-height: none;
+  }
+
+  .planner-controls.sheet-collapsed .controls-sheet-body {
+    display: none;
+  }
+
+  .controls-sheet-toggle {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    width: 100%;
+    flex-shrink: 0;
+    padding: 0.85rem 1rem 0.65rem;
+    border: none;
+    background: var(--surface-2);
+    cursor: pointer;
+    text-align: left;
+    color: var(--text);
+    min-height: 52px;
+  }
+
+  .sheet-handle {
+    position: absolute;
+    top: 0.35rem;
+    left: 50%;
+    width: 2.25rem;
+    height: 0.28rem;
+    margin-left: -1.125rem;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--text-muted) 45%, transparent);
+    pointer-events: none;
+  }
+
+  .sheet-toggle-main {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.05rem;
+  }
+
+  .sheet-title {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .sheet-summary {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .sheet-chevron {
+    flex-shrink: 0;
+    width: 2rem;
+    height: 2rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    font-size: 1.05rem;
+    font-weight: 700;
+  }
+
+  .controls-sheet-body {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    padding: 0.75rem 1rem 1rem;
+    max-height: min(34vh, 360px);
+  }
+
+  .planner-controls:not(.sheet-collapsed) {
+    border-top-color: var(--border);
+  }
+
+  .planner-controls:not(.sheet-collapsed) .controls-sheet-toggle {
+    border-bottom: 1px solid var(--border);
   }
 }
 </style>

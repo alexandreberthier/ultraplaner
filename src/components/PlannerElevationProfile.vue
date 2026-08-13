@@ -30,6 +30,22 @@ const plotSize = ref({ width: 640, height: 120 })
 const profileOpen = ref(true)
 const hoverKm = ref<number | null>(null)
 const scrubbing = ref(false)
+const PLANNER_ELEV_OPEN_KEY = 'up-planner-elev-open'
+
+function isMobileViewport(): boolean {
+  return typeof window !== 'undefined' && window.matchMedia('(max-width: 899px)').matches
+}
+
+function loadProfileOpen(): boolean {
+  try {
+    const v = localStorage.getItem(PLANNER_ELEV_OPEN_KEY)
+    if (v === '1') return true
+    if (v === '0') return false
+  } catch {
+    /* ignore */
+  }
+  return !isMobileViewport()
+}
 
 const padding = { left: 40, right: 12, top: 10, bottom: 22 }
 const MIN_TICK_PX = 48
@@ -171,6 +187,11 @@ function surfaceLabel(id: RouteSurfaceBucketId) {
 
 function toggleProfile() {
   profileOpen.value = !profileOpen.value
+  try {
+    localStorage.setItem(PLANNER_ELEV_OPEN_KEY, profileOpen.value ? '1' : '0')
+  } catch {
+    /* ignore */
+  }
 }
 
 function clearCursor() {
@@ -243,6 +264,7 @@ function bindPlotObserver() {
 }
 
 onMounted(async () => {
+  profileOpen.value = loadProfileOpen()
   await nextTick()
   if (profileOpen.value) bindPlotObserver()
 })
@@ -620,5 +642,24 @@ onUnmounted(() => {
   padding: 0.55rem 0.85rem;
   font-size: 0.8rem;
   color: var(--text-muted);
+}
+
+@media (max-width: 899px) {
+  .plot {
+    height: 84px;
+  }
+
+  .profile-toggle {
+    min-height: 40px;
+    padding: 0.4rem 0.75rem;
+  }
+
+  .subtitle {
+    font-size: 0.78rem;
+  }
+
+  .surface-list {
+    display: none;
+  }
 }
 </style>

@@ -1,4 +1,5 @@
 /** Shared GPS / navigation-triangle marker for MapCanvas and RoutePlanner. */
+import './userLocationMarker.css'
 
 export function createUserLocationElement(): HTMLDivElement {
   const el = document.createElement('div')
@@ -6,7 +7,7 @@ export function createUserLocationElement(): HTMLDivElement {
   el.innerHTML = `
     <div class="user-location-pulse"></div>
     <div class="user-location-arrow" aria-hidden="true">
-      <svg viewBox="0 0 40 40">
+      <svg viewBox="0 0 40 40" width="28" height="28">
         <path d="M20 4 L32 30 L20 24 L8 30 Z" fill="#2563eb" stroke="#fff" stroke-width="2.5" stroke-linejoin="round"/>
       </svg>
     </div>

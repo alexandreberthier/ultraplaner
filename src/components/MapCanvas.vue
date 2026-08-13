@@ -2192,51 +2192,6 @@ onUnmounted(() => {
 </style>
 
 <style>
-/* Standort-Punkt (global, da in dynamisch erstelltem Element) */
-.user-location-marker {
-  position: relative;
-  width: 40px;
-  height: 40px;
-  pointer-events: none;
-}
-
-.user-location-pulse {
-  position: absolute;
-  inset: 6px;
-  border-radius: 50%;
-  background: rgba(37, 99, 235, 0.2);
-  border: 2px solid rgba(37, 99, 235, 0.45);
-}
-
-.user-location-arrow {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transform-origin: 50% 50%;
-  transition: transform 0.25s ease-out;
-}
-
-.user-location-arrow svg {
-  width: 28px;
-  height: 28px;
-  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.35));
-}
-
-.user-location-arrow:not(.has-heading) svg path {
-  fill: #3b82f6;
-}
-
-.user-location-dot {
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background: #3b82f6;
-  border: 3px solid #fff;
-  box-shadow: 0 0 0 2px #3b82f6, 0 2px 8px rgba(59,130,246,0.4);
-}
-
 /* Cursor-Fahrrad auf der Route (HTML-Marker) — klein, nicht dominant */
 .route-bike-cursor {
   position: relative;
