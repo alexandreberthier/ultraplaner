@@ -719,6 +719,7 @@ export default {
     loadingPois: 'Loading POIs…',
     calculatingRoute: 'Calculating route…',
     createMap: 'Create map with POIs',
+    nextStepPois: 'Next: load supply points',
     minCategory: 'At least one category must be active',
     controlsTitle: 'Planning',
     controlsExpand: 'Expand planning',

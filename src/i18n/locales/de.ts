@@ -721,6 +721,7 @@ export default {
     loadingPois: 'Lädt POIs…',
     calculatingRoute: 'Route wird berechnet…',
     createMap: 'Karte mit POIs erstellen',
+    nextStepPois: 'Als Nächstes: Versorgungspunkte laden',
     minCategory: 'Mindestens eine Kategorie muss aktiv sein',
     controlsTitle: 'Planung',
     controlsExpand: 'Planung aufklappen',

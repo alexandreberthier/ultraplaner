@@ -719,6 +719,7 @@ export default {
     loadingPois: 'Cargando POIs…',
     calculatingRoute: 'Calculando ruta…',
     createMap: 'Crear mapa con POIs',
+    nextStepPois: 'Siguiente: cargar puntos de avituallamiento',
     minCategory: 'Al menos una categoría debe estar activa',
     controlsTitle: 'Planificación',
     controlsExpand: 'Expandir planificación',

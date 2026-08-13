@@ -718,6 +718,7 @@
     loadingPois: 'Chargement POIs…',
     calculatingRoute: 'Calcul de la route…',
     createMap: 'Créer carte avec POIs',
+    nextStepPois: 'Ensuite : charger les points de ravitaillement',
     minCategory: 'Au moins une catégorie doit être active',
     controlsTitle: 'Planification',
     controlsExpand: 'Déplier la planification',

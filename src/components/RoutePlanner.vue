@@ -209,7 +209,18 @@ const canExportRoute = computed(
 
 const showPoiOptions = computed(() => waypoints.value.length >= 2)
 
+/** Route geometry ready — next step is loading POIs (sticky CTA). */
+const routeReadyForPois = computed(
+  () => waypoints.value.length >= 2 && routeCoords.value.length >= 2
+)
+
 const showRoutingOptions = computed(() => waypoints.value.length >= 2 && isOrsConfigured())
+
+const createMapLabel = computed(() => {
+  if (creating.value) return t('planner.loadingPois')
+  if (routing.value) return t('planner.calculatingRoute')
+  return t('planner.createMap')
+})
 
 watch(
   canExportRoute,
@@ -1442,7 +1453,10 @@ onUnmounted(() => {
       @update:cursor="onElevationCursor"
     />
 
-    <div class="planner-controls" :class="{ 'sheet-collapsed': !controlsOpen }">
+    <div
+      class="planner-controls"
+      :class="{ 'sheet-collapsed': !controlsOpen, 'has-poi-next': routeReadyForPois }"
+    >
       <button
         type="button"
         class="controls-sheet-toggle"
@@ -1458,7 +1472,57 @@ onUnmounted(() => {
         <span class="sheet-chevron" aria-hidden="true">{{ controlsOpen ? '▾' : '▴' }}</span>
       </button>
 
+      <!-- Sticky next step: visible with/without sheet body (mobile collapsed + desktop top) -->
+      <div v-if="routeReadyForPois" class="poi-next-step">
+        <p class="poi-next-hint">{{ t('planner.nextStepPois') }}</p>
+        <button
+          type="button"
+          class="btn-primary btn-full"
+          :disabled="!canCreate"
+          @click="createMap"
+        >
+          {{ createMapLabel }}
+        </button>
+        <p v-if="formError || store.error" class="error poi-next-error">
+          {{ formError || store.error }}
+        </p>
+      </div>
+
       <div class="controls-sheet-body">
+      <!-- POI options first once route exists — discoverability of next step -->
+      <template v-if="showPoiOptions && routeReadyForPois">
+        <fieldset class="categories">
+          <legend>{{ t('planner.poiCategories') }}</legend>
+          <div class="category-grid">
+            <button
+              v-for="cat in POI_CATEGORY_DEFS"
+              :key="cat.id"
+              type="button"
+              class="cat-chip"
+              :class="{ active: selected.includes(cat.id) }"
+              @click="toggleCategory(cat.id)"
+            >
+              <span>{{ cat.icon }}</span>
+              {{ poiCategoryLabel(cat.id) }}
+            </button>
+          </div>
+        </fieldset>
+
+        <label class="field">
+          <span class="field-label">{{ t('gpx.maxDist') }}</span>
+          <div class="radius-row">
+            <input
+              v-model.number="radiusM"
+              type="range"
+              :min="MIN_POI_RADIUS_M"
+              :max="MAX_POI_RADIUS_M"
+              step="10"
+            />
+            <span>{{ radiusM }} m</span>
+          </div>
+        </label>
+      </template>
+
       <div class="address-search">
         <label class="field-label" for="address-input">{{ t('planner.searchAddress') }}</label>
         <div class="search-wrap">
@@ -1574,7 +1638,8 @@ onUnmounted(() => {
         </fieldset>
       </template>
 
-      <template v-if="showPoiOptions">
+      <!-- POIs while route still calculating: keep options reachable without sticky CTA -->
+      <template v-if="showPoiOptions && !routeReadyForPois">
         <label class="field">
           <span class="field-label">{{ t('gpx.maxDist') }}</span>
           <div class="radius-row">
@@ -1609,13 +1674,7 @@ onUnmounted(() => {
         <p v-if="formError || store.error" class="error">{{ formError || store.error }}</p>
 
         <button type="button" class="btn-primary btn-full" :disabled="!canCreate" @click="createMap">
-          {{
-            creating
-              ? t('planner.loadingPois')
-              : routing
-                ? t('planner.calculatingRoute')
-                : t('planner.createMap')
-          }}
+          {{ createMapLabel }}
         </button>
       </template>
       </div>
@@ -2027,6 +2086,38 @@ onUnmounted(() => {
   flex-direction: column;
   gap: 0.85rem;
   min-height: 0;
+}
+
+.poi-next-step {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  flex-shrink: 0;
+  padding: 0.15rem 0 0.55rem;
+  margin: 0 0 0.15rem;
+  background: var(--surface);
+  position: sticky;
+  top: 0;
+  z-index: 4;
+}
+
+.planner-controls.has-poi-next .poi-next-step {
+  padding: 0.55rem 0 0.65rem;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 0.35rem;
+  background: color-mix(in srgb, var(--primary) 6%, var(--surface));
+}
+
+.poi-next-hint {
+  margin: 0;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--primary);
+  line-height: 1.35;
+}
+
+.poi-next-error {
+  margin-top: 0.15rem;
 }
 
 .address-search {
@@ -2460,6 +2551,25 @@ onUnmounted(() => {
 
   .planner-controls.sheet-collapsed .controls-sheet-body {
     display: none;
+  }
+
+  .planner-controls.has-poi-next .poi-next-step {
+    margin: 0;
+    border-radius: 0;
+    border-bottom: 1px solid var(--border);
+    padding: 0.65rem 1rem 0.75rem;
+    /* parent already sticky-scrolls the sheet; keep CTA under header */
+    position: relative;
+    top: auto;
+  }
+
+  .planner-controls.sheet-collapsed.has-poi-next {
+    padding-bottom: 0;
+  }
+
+  .planner-controls.sheet-collapsed.has-poi-next .poi-next-step {
+    border-bottom: none;
+    padding-bottom: calc(0.75rem + env(safe-area-inset-bottom, 0px));
   }
 
   .controls-sheet-toggle {
