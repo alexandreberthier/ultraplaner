@@ -1300,7 +1300,11 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="route-planner" @keydown.escape="closeExportMenu">
+  <div
+    class="route-planner"
+    :class="{ 'controls-expanded': controlsOpen }"
+    @keydown.escape="closeExportMenu"
+  >
     <div class="planner-map-wrap">
       <div ref="mapEl" class="planner-map" />
       <div
@@ -2492,6 +2496,20 @@ onUnmounted(() => {
     min-height: 52vh;
   }
 
+  /* Planning open: shrink map so the sheet has real scroll room */
+  .route-planner.controls-expanded {
+    grid-template-rows: minmax(22vh, 0.35fr) auto auto;
+  }
+
+  .route-planner.controls-expanded .planner-map-wrap {
+    min-height: 22vh;
+  }
+
+  .route-planner.controls-expanded :deep(.planner-elev:not(.collapsed)) {
+    max-height: 28vh;
+    overflow: auto;
+  }
+
   .surface-legend {
     left: 0.5rem;
     bottom: 2.4rem;
@@ -2528,8 +2546,8 @@ onUnmounted(() => {
   }
 
   .planner-controls {
-    /* Open sheet: more room to scroll options; map still ~40%+ */
-    max-height: min(62dvh, 580px);
+    /* Open sheet: dominant scroll area for categories / waypoints */
+    max-height: min(78dvh, 720px);
     height: auto;
     border-right: none;
     border-top: 1px solid var(--border);
@@ -2648,7 +2666,7 @@ onUnmounted(() => {
 
   .controls-sheet-body {
     flex: 1 1 auto;
-    min-height: 0;
+    min-height: 12rem;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: contain;
@@ -2657,6 +2675,9 @@ onUnmounted(() => {
   }
 
   .planner-controls:not(.sheet-collapsed) {
+    flex: 1 1 auto;
+    min-height: min(55dvh, 520px);
+    max-height: min(78dvh, 720px);
     border-top-color: var(--border);
     padding-bottom: 0;
   }
