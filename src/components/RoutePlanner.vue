@@ -136,8 +136,8 @@ const addressResults = ref<GeocodeResult[]>([])
 const routeCursor = ref<RouteCursor | null>(null)
 const addressSearching = ref(false)
 const addressError = ref('')
-/** Mobile bottom sheet: open until first route, then user-controlled. */
-const controlsOpen = ref(true)
+/** Mobile bottom sheet: collapsed by default so the map stays large. */
+const controlsOpen = ref(false)
 let didAutoCollapseControls = false
 
 function isMobilePlannerViewport(): boolean {
