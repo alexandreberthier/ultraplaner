@@ -134,6 +134,90 @@ function preferHeadingUpDefault() {
   return Boolean(props.rideMode) || store.isNearbyMap
 }
 
+const MOBILE_MAP_MQ = '(max-width: 768px)'
+
+function isMobileMapLayout() {
+  return typeof window !== 'undefined' && window.matchMedia(MOBILE_MAP_MQ).matches
+}
+
+/** Larger POI hit targets on phone / Nearby (integer icon-size keeps sprites crisp). */
+function preferLargePoiMarkers() {
+  return isMobileMapLayout() || store.isNearbyMap
+}
+
+function poiIconSize() {
+  return preferLargePoiMarkers() ? 2 : 1
+}
+
+function scalePoiRadius(base: number) {
+  return preferLargePoiMarkers() ? Math.round(base * 1.55) : base
+}
+
+function applyPoiMarkerSizes() {
+  if (!map?.isStyleLoaded()) return
+  const large = preferLargePoiMarkers()
+  const iconSize = poiIconSize()
+  if (map.getLayer('poi-unclustered-icons')) {
+    map.setLayoutProperty('poi-unclustered-icons', 'icon-size', iconSize)
+  }
+  if (map.getLayer('poi-unclustered-halo')) {
+    map.setPaintProperty('poi-unclustered-halo', 'circle-radius', scalePoiRadius(18))
+  }
+  if (map.getLayer('poi-unclustered-point')) {
+    map.setPaintProperty('poi-unclustered-point', 'circle-radius', scalePoiRadius(14))
+  }
+  if (map.getLayer('poi-clusters')) {
+    map.setPaintProperty(
+      'poi-clusters',
+      'circle-radius',
+      large
+        ? [
+            'step',
+            ['get', 'point_count'],
+            scalePoiRadius(14),
+            10,
+            scalePoiRadius(18),
+            30,
+            scalePoiRadius(22),
+          ]
+        : ['step', ['get', 'point_count'], 14, 10, 18, 30, 22]
+    )
+  }
+  if (map.getLayer('poi-cluster-count')) {
+    map.setLayoutProperty('poi-cluster-count', 'text-size', large ? 14 : 12)
+  }
+  if (map.getLayer('control-points-icon')) {
+    map.setLayoutProperty('control-points-icon', 'icon-size', large ? 0.9 : 0.55)
+  }
+  if (map.getLayer('favorites-halo')) {
+    map.setPaintProperty('favorites-halo', 'circle-radius', scalePoiRadius(20))
+  }
+  if (map.getLayer('favorites-ring')) {
+    map.setPaintProperty('favorites-ring', 'circle-radius', scalePoiRadius(15))
+  }
+  if (map.getLayer('favorites-star')) {
+    map.setLayoutProperty('favorites-star', 'text-size', large ? 18 : 14)
+  }
+}
+
+let poiSizeMq: MediaQueryList | null = null
+let onPoiSizeMqChange: (() => void) | null = null
+
+function bindPoiSizeMedia() {
+  if (typeof window === 'undefined' || poiSizeMq) return
+  poiSizeMq = window.matchMedia(MOBILE_MAP_MQ)
+  onPoiSizeMqChange = () => applyPoiMarkerSizes()
+  poiSizeMq.addEventListener('change', onPoiSizeMqChange)
+}
+
+function unbindPoiSizeMedia() {
+  if (poiSizeMq && onPoiSizeMqChange) {
+    poiSizeMq.removeEventListener('change', onPoiSizeMqChange)
+  }
+  poiSizeMq = null
+  onPoiSizeMqChange = null
+}
+
 function createBikeCursorElement(): HTMLDivElement {
   const el = document.createElement('div')
   el.className = 'route-bike-cursor'
@@ -363,9 +447,11 @@ function applyFollowCamera(force: boolean) {
     essential: true,
   }
   if (headingUp.value && heading != null) {
+    // Heading-up: travel direction at top (like Google Maps)
     cam.bearing = heading
     cam.pitch = props.rideMode ? 45 : 0
-  } else if (!headingUp.value) {
+  } else {
+    // North-up — also fallback when heading-up is on but GPS has no heading yet
     cam.bearing = 0
     cam.pitch = 0
   }
@@ -506,9 +592,32 @@ const locationBtnTitle = computed(() => {
   if (locationPending.value) return t('mapCanvas.locating')
   if (!locationActive.value) return t('mapCanvas.followOn')
   if (needsRecenter.value) return t('mapCanvas.followResume')
+  // Next tap: heading-up → north-up; north-up → stop
   if (headingUp.value) return t('mapCanvas.headingOff')
   return t('mapCanvas.locationOff')
 })
+
+/** Short visible label: Richtung (heading-up) vs Norden (north-up) vs Zentrieren */
+const locationBtnLabel = computed(() => {
+  if (needsRecenter.value) return t('mapCanvas.followResume')
+  if (!locationActive.value || locationPending.value) return ''
+  if (headingUp.value) return t('mapCanvas.headingLabel')
+  return t('mapCanvas.northLabel')
+})
+
+const locationBtnShowLabel = computed(() => Boolean(locationBtnLabel.value))
+
+/** Heading-up desired but no GPS heading → map locked north + visible hint */
+const headingFallbackActive = computed(
+  () =>
+    headingUp.value &&
+    locationActive.value &&
+    !locationPending.value &&
+    !needsRecenter.value &&
+    followActive.value &&
+    userLocation.value != null &&
+    userLocation.value.heading == null
+)
 
 const basemap = ref<BasemapId>(loadBasemapPreference())
 const basemapFallbackHint = ref('')
@@ -986,6 +1095,7 @@ function destroyMap() {
   basemapSwitchGen++
   finishBasemapSwitch()
   setCyclosmOutageHandler(null)
+  unbindPoiSizeMedia()
   resizeObserver?.disconnect()
   resizeObserver = null
   stopLocation()
@@ -1031,6 +1141,8 @@ function onWebGlContextLost(ev: Event) {
 function afterMapReady() {
   if (!map) return
   addLayers()
+  bindPoiSizeMedia()
+  applyPoiMarkerSizes()
   scheduleMapResize()
   fitBounds()
   seedNearbyLocationMarker()
@@ -1282,6 +1394,7 @@ function updateSources() {
     map.setLayoutProperty('nearby-center', 'visibility', nearbyVis)
   }
 
+  applyPoiMarkerSizes()
   updateBikeCursorMarker()
 }
 
@@ -1527,7 +1640,15 @@ function addLayers() {
     filter: ['has', 'point_count'],
     paint: {
       'circle-color': '#1f2937',
-      'circle-radius': ['step', ['get', 'point_count'], 14, 10, 18, 30, 22],
+      'circle-radius': [
+        'step',
+        ['get', 'point_count'],
+        scalePoiRadius(14),
+        10,
+        scalePoiRadius(18),
+        30,
+        scalePoiRadius(22),
+      ],
       'circle-stroke-width': 2,
       'circle-stroke-color': '#fff',
     },
@@ -1540,7 +1661,7 @@ function addLayers() {
     filter: ['has', 'point_count'],
     layout: {
       'text-field': '{point_count_abbreviated}',
-      'text-size': 12,
+      'text-size': preferLargePoiMarkers() ? 14 : 12,
       'text-font': [...MAP_LABEL_FONT],
     },
     paint: { 'text-color': '#fff' },
@@ -1552,7 +1673,7 @@ function addLayers() {
     source: 'pois',
     filter: ['!', ['has', 'point_count']],
     paint: {
-      'circle-radius': 18,
+      'circle-radius': scalePoiRadius(18),
       'circle-color': ['coalesce', ['get', 'color'], '#6b7280'],
       'circle-opacity': 0.3,
     },
@@ -1564,7 +1685,7 @@ function addLayers() {
     source: 'pois',
     filter: ['!', ['has', 'point_count']],
     paint: {
-      'circle-radius': 14,
+      'circle-radius': scalePoiRadius(14),
       'circle-color': ['coalesce', ['get', 'color'], '#6b7280'],
       'circle-stroke-width': 2.5,
       'circle-stroke-color': '#fff',
@@ -1578,8 +1699,8 @@ function addLayers() {
     filter: ['!', ['has', 'point_count']],
     layout: {
       'icon-image': ['get', 'icon'],
-      // 48px @ pixelRatio 3 → 16 CSS px at size 1 (no fractional rescale / blur)
-      'icon-size': 1,
+      // 48px @ pixelRatio 3 → 16 CSS px at size 1; mobile/Nearby uses 2 (32 CSS px, integer = crisp)
+      'icon-size': poiIconSize(),
       'icon-allow-overlap': true,
       'icon-ignore-placement': true,
       'icon-anchor': 'center',
@@ -1593,7 +1714,7 @@ function addLayers() {
     type: 'circle',
     source: 'favorites',
     paint: {
-      'circle-radius': 20,
+      'circle-radius': scalePoiRadius(20),
       'circle-color': '#f59e0b',
       'circle-opacity': 0.25,
     },
@@ -1604,7 +1725,7 @@ function addLayers() {
     type: 'circle',
     source: 'favorites',
     paint: {
-      'circle-radius': 15,
+      'circle-radius': scalePoiRadius(15),
       'circle-color': 'transparent',
       'circle-stroke-width': 3,
       'circle-stroke-color': '#f59e0b',
@@ -1617,7 +1738,7 @@ function addLayers() {
     source: 'favorites',
     layout: {
       'text-field': '★',
-      'text-size': 14,
+      'text-size': preferLargePoiMarkers() ? 18 : 14,
       'text-font': [...MAP_LABEL_FONT],
       'text-offset': [0.9, -0.9],
       'text-allow-overlap': true,
@@ -1635,7 +1756,7 @@ function addLayers() {
     type: 'circle',
     source: 'control-points',
     paint: {
-      'circle-radius': 14,
+      'circle-radius': scalePoiRadius(14),
       'circle-color': ['get', 'color'],
       'circle-opacity': 0.22,
     },
@@ -1647,7 +1768,7 @@ function addLayers() {
     source: 'control-points',
     layout: {
       'icon-image': ['get', 'icon'],
-      'icon-size': 0.55,
+      'icon-size': preferLargePoiMarkers() ? 0.9 : 0.55,
       'icon-allow-overlap': true,
       'icon-ignore-placement': true,
       'text-field': ['get', 'label'],
@@ -1898,7 +2019,7 @@ onUnmounted(() => {
       <slot name="left-controls" />
     </div>
 
-    <!-- Standort / Follow / Heading -->
+    <!-- Standort / Follow / Heading-up vs North-up -->
     <button
       type="button"
       class="location-btn"
@@ -1907,7 +2028,9 @@ onUnmounted(() => {
         following: locationActive && followActive && !userPanning,
         pending: locationPending,
         'needs-recenter': needsRecenter,
-        'with-label': needsRecenter,
+        'with-label': locationBtnShowLabel,
+        'heading-up': headingUp && !needsRecenter && locationActive,
+        'north-up': locationActive && !headingUp && !needsRecenter && !locationPending,
       }"
       :title="locationBtnTitle"
       :aria-label="locationBtnTitle"
@@ -1924,9 +2047,27 @@ onUnmounted(() => {
           fill="#2563eb"
           stroke="none"
         />
+        <text
+          v-else-if="locationActive && !headingUp && !needsRecenter && !locationPending"
+          x="12"
+          y="9.5"
+          text-anchor="middle"
+          fill="#1d4ed8"
+          font-size="7"
+          font-weight="800"
+          font-family="system-ui,sans-serif"
+        >N</text>
       </svg>
-      <span v-if="needsRecenter" class="location-btn-label">{{ t('mapCanvas.followResume') }}</span>
+      <span v-if="locationBtnShowLabel" class="location-btn-label">{{ locationBtnLabel }}</span>
     </button>
+
+    <p
+      v-if="headingFallbackActive"
+      class="heading-fallback-hint"
+      role="status"
+    >
+      {{ t('mapCanvas.headingFallback') }}
+    </p>
 
     <div v-if="locationError" class="location-error" role="alert">
       <div class="location-error-body">
@@ -2194,6 +2335,24 @@ onUnmounted(() => {
   flex-shrink: 0;
 }
 
+.heading-fallback-hint {
+  position: absolute;
+  bottom: 80px;
+  right: calc(10px + env(safe-area-inset-right, 0px));
+  z-index: 40;
+  margin: 0;
+  max-width: min(16rem, calc(100% - 24px));
+  padding: 0.45rem 0.65rem;
+  border-radius: 8px;
+  background: rgba(17, 24, 39, 0.9);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.3;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.18);
+  pointer-events: none;
+}
+
 .location-error {
   position: absolute;
   bottom: 76px;
@@ -2245,11 +2404,14 @@ onUnmounted(() => {
   }
 
   .location-btn {
-    /* Always top-right on mobile — never under bottom nav */
-    top: calc(12px + env(safe-area-inset-top, 0px));
+    /*
+      Below MapLibre NavigationControl (zoom +/- / compass) at top-right —
+      never cover zoom, style toggle, or FABs.
+    */
+    top: calc(12px + env(safe-area-inset-top, 0px) + 118px);
     bottom: auto;
     right: calc(12px + env(safe-area-inset-right, 0px));
-    z-index: 120;
+    z-index: 40;
     width: 56px;
     height: 56px;
     padding: 11px;
@@ -2270,7 +2432,16 @@ onUnmounted(() => {
     font-size: 0.95rem;
   }
 
+  .heading-fallback-hint {
+    top: calc(12px + env(safe-area-inset-top, 0px) + 186px);
+    bottom: auto;
+    right: calc(12px + env(safe-area-inset-right, 0px));
+    left: auto;
+    max-width: min(14rem, calc(100% - 80px));
+  }
+
   .map-canvas-wrap.ride-mode .location-btn {
+    /* Ride: NavigationControl hidden — keep top-right */
     top: calc(12px + env(safe-area-inset-top, 0px));
     bottom: auto;
     right: calc(12px + env(safe-area-inset-right, 0px));
@@ -2287,12 +2458,17 @@ onUnmounted(() => {
     height: auto;
   }
 
+  .map-canvas-wrap.ride-mode .heading-fallback-hint {
+    top: calc(80px + env(safe-area-inset-top, 0px));
+    bottom: auto;
+  }
+
   .map-canvas-wrap.ride-mode :deep(.maplibregl-ctrl-top-right) {
     display: none;
   }
 
   .location-error {
-    top: calc(80px + env(safe-area-inset-top, 0px));
+    top: calc(12px + env(safe-area-inset-top, 0px) + 186px);
     bottom: auto;
     right: calc(12px + env(safe-area-inset-right, 0px));
     left: calc(12px + env(safe-area-inset-left, 0px));

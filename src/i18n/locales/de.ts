@@ -593,8 +593,11 @@ export default {
     locationOn: 'Standort anzeigen',
     followOn: 'Standort folgen',
     followResume: 'Zentrieren',
-    headingOn: 'Karte in Fahrtrichtung drehen',
-    headingOff: 'Nach Norden ausrichten',
+    headingOn: 'Karte in Fahrtrichtung drehen (Heading-up)',
+    headingOff: 'Nach Norden ausrichten (North-up)',
+    headingLabel: 'Richtung',
+    northLabel: 'Norden',
+    headingFallback: 'Keine Fahrtrichtung — Karte nach Norden',
     locating: 'Standort wird ermittelt…',
     geoUnsupported: 'Standort nicht unterstützt',
     geoDenied:
