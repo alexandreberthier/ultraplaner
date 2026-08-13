@@ -858,6 +858,7 @@ export default {
     iosHint: 'Como app: Compartir → Mostrar más → “Añadir a pantalla de inicio”.',
     install: 'Instalar',
     installing: '…',
+    updating: 'Cargando nueva versión…',
     menuInstall: 'Instalar como app',
     how: 'Cómo',
     navApp: 'App',

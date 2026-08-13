@@ -27,8 +27,8 @@ export default defineConfig(({ mode }) => {
       wahooCallbackPlugin(wahooClientId),
       VitePWA({
         registerType: 'autoUpdate',
-        // Defer SW registration so it does not sit on the critical LCP path
-        injectRegister: 'script-defer',
+        // Manual register via virtual:pwa-register (visibility + forced reload)
+        injectRegister: false,
         includeAssets: [
           'favicon.ico',
           'favicon.svg',
@@ -83,12 +83,29 @@ export default defineConfig(({ mode }) => {
           // Stale shells after deploy caused white screens on /routes/import/:id (QR transfer).
           navigateFallbackDenylist: [/^\/oauth\//, /^\/routes\/import\//],
           runtimeCaching: [
+            // Never stick on a precached shell after deploy — network wins for documents
             {
               urlPattern: ({ request }) => request.mode === 'navigate',
               handler: 'NetworkFirst',
               options: {
                 cacheName: 'pages-network-first',
                 networkTimeoutSeconds: 3,
+                expiration: {
+                  maxEntries: 16,
+                  maxAgeSeconds: 24 * 60 * 60,
+                },
+              },
+            },
+            // Hashed build assets are immutable; CacheFirst is safe
+            {
+              urlPattern: ({ url }) => url.pathname.startsWith('/assets/'),
+              handler: 'CacheFirst',
+              options: {
+                cacheName: 'assets-hashed-cache-first',
+                expiration: {
+                  maxEntries: 200,
+                  maxAgeSeconds: 365 * 24 * 60 * 60,
+                },
               },
             },
           ],

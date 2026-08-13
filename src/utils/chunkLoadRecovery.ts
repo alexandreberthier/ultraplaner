@@ -18,12 +18,27 @@ export function isChunkLoadError(error: unknown): boolean {
     /error loading dynamically imported module/i.test(msg) ||
     /Importing a module script failed/i.test(msg) ||
     /Loading chunk [\w-]+ failed/i.test(msg) ||
+    /Loading CSS chunk [\w-]+ failed/i.test(msg) ||
     /ChunkLoadError/i.test(msg)
   )
 }
 
+async function activateWaitingAndUpdate(): Promise<void> {
+  if (!('serviceWorker' in navigator)) return
+  try {
+    const reg = await navigator.serviceWorker.getRegistration()
+    if (!reg) return
+    if (reg.waiting) {
+      reg.waiting.postMessage({ type: 'SKIP_WAITING' })
+    }
+    await reg.update()
+  } catch {
+    /* ignore */
+  }
+}
+
 /**
- * Soft-reload once so the next navigation gets a fresh index.html + chunk map.
+ * Hard-reload once so the next navigation gets a fresh index.html + chunk map.
  * Call after a successful app boot to clear the flag for future deploys.
  */
 export function reloadOnceOnChunkError(error: unknown): boolean {
@@ -34,7 +49,12 @@ export function reloadOnceOnChunkError(error: unknown): boolean {
   } catch {
     /* private mode / blocked storage — still try one reload */
   }
-  window.location.reload()
+
+  void (async () => {
+    await activateWaitingAndUpdate()
+    // Full navigation (vs soft reload) helps flush stale module graph on mobile
+    window.location.replace(window.location.href)
+  })()
   return true
 }
 

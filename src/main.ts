@@ -12,11 +12,13 @@ import {
   clearChunkReloadFlag,
   reloadOnceOnChunkError,
 } from './utils/chunkLoadRecovery'
+import { initPwaUpdates } from './utils/pwaUpdate'
 import './style.css'
 
 enforcePreferredHostSeo()
 initColorblindMode()
 initPwaInstallListener()
+initPwaUpdates()
 
 const app = createApp(App)
 app.use(createPinia())

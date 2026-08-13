@@ -863,6 +863,7 @@ export default {
     iosHint: 'Als App: Teilen → Mehr anzeigen → „Zum Home-Bildschirm“.',
     install: 'Installieren',
     installing: '…',
+    updating: 'Neue Version wird geladen…',
     menuInstall: 'Als App installieren',
     how: 'So geht’s',
     navApp: 'App',

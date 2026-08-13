@@ -857,6 +857,7 @@
     iosHint: 'Comme app : Partager → Afficher plus → « Sur l’écran d’accueil ».',
     install: 'Installer',
     installing: '…',
+    updating: 'Chargement de la nouvelle version…',
     menuInstall: 'Installer comme app',
     how: 'Comment',
     navApp: 'App',

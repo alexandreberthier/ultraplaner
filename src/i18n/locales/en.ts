@@ -858,6 +858,7 @@ export default {
     iosHint: 'Install as app: Share → Show More → “Add to Home Screen”.',
     install: 'Install',
     installing: '…',
+    updating: 'Loading new version…',
     menuInstall: 'Install as app',
     how: 'How to',
     navApp: 'App',
