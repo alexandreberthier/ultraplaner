@@ -5,14 +5,38 @@ export function createUserLocationElement(): HTMLDivElement {
   const el = document.createElement('div')
   el.className = 'user-location-marker'
   el.innerHTML = `
+    <div class="user-location-accuracy" aria-hidden="true"></div>
     <div class="user-location-pulse"></div>
     <div class="user-location-arrow" aria-hidden="true">
-      <svg viewBox="0 0 40 40" width="28" height="28">
-        <path d="M20 4 L32 30 L20 24 L8 30 Z" fill="#2563eb" stroke="#fff" stroke-width="2.5" stroke-linejoin="round"/>
+      <svg viewBox="0 0 40 40" width="48" height="48">
+        <path d="M20 3 L34 32 L20 25 L6 32 Z" fill="#1d4ed8" stroke="#fff" stroke-width="3" stroke-linejoin="round"/>
       </svg>
     </div>
   `
   return el
+}
+
+/** Approx. meters → CSS pixels at lat/zoom (Web Mercator). */
+export function metersToPixels(meters: number, lat: number, zoom: number): number {
+  const mPerPx =
+    (156543.03392 * Math.cos((lat * Math.PI) / 180)) / Math.pow(2, zoom)
+  if (!Number.isFinite(mPerPx) || mPerPx <= 0) return 28
+  return meters / mPerPx
+}
+
+export function setLocationAccuracyRadius(
+  markerEl: HTMLElement,
+  accuracyM: number,
+  lat: number,
+  zoom: number
+) {
+  const ring = markerEl.querySelector('.user-location-accuracy') as HTMLElement | null
+  if (!ring) return
+  const m = Math.max(Number.isFinite(accuracyM) ? accuracyM : 25, 12)
+  const radiusPx = Math.min(Math.max(metersToPixels(m, lat, zoom), 22), 160)
+  const size = Math.round(radiusPx * 2)
+  ring.style.width = `${size}px`
+  ring.style.height = `${size}px`
 }
 
 export function bearingBetween(
@@ -37,15 +61,21 @@ export function resolveGeoHeading(
   lastPos: { lat: number; lng: number } | null
 ): number | null {
   let heading =
-    pos.coords.heading != null && !Number.isNaN(pos.coords.heading)
+    pos.coords.heading != null && !Number.isNaN(pos.coords.heading) && pos.coords.heading >= 0
       ? pos.coords.heading
       : null
+
+  // Ignore noisy heading while nearly stationary
+  const speed = pos.coords.speed
+  if (heading != null && speed != null && !Number.isNaN(speed) && speed < 0.8) {
+    heading = null
+  }
 
   if (heading == null && lastPos) {
     const lat = pos.coords.latitude
     const lng = pos.coords.longitude
     const moved = Math.abs(lat - lastPos.lat) + Math.abs(lng - lastPos.lng)
-    if (moved > 0.00002) {
+    if (moved > 0.000015) {
       heading = bearingBetween(lastPos.lat, lastPos.lng, lat, lng)
     }
   }

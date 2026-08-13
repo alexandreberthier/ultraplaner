@@ -322,7 +322,7 @@ watch(
   }
 )
 
-/** Nearby maps: Umgebung-Optionen in Sidebar/Sheet auffindbar (Filter + Rescan). */
+/** Nearby maps: Fahrt-Optionen in Sidebar/Sheet auffindbar (Filter + Rescan). */
 watch(
   () => store.isNearbyMap && store.mapReady,
   (nearbyReady) => {
@@ -2017,37 +2017,38 @@ function onDocClick(e: MouseEvent) {
 
 @media (max-width: 768px) {
   .map-cp-fab {
-    width: 52px;
-    height: 52px;
+    width: 60px;
+    height: 60px;
     padding: 0;
     justify-content: center;
-    border-radius: 14px;
-    font-size: 1.25rem;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
+    border-radius: 16px;
+    font-size: 1.4rem;
+    box-shadow: 0 2px 14px rgba(0, 0, 0, 0.28);
   }
 
   .map-cp-fab-label {
     display: none;
   }
 
-  /* Umgebung: readable one-thumb rescan pill */
+  /* Fahrt: große Daumen-Pills für Rescan / Optionen */
   .map-nearby-fab,
   .map-nearby-options {
     width: auto;
-    min-width: 52px;
-    min-height: 52px;
+    min-width: 60px;
+    min-height: 60px;
     height: auto;
-    padding: 0.65rem 0.9rem;
-    gap: 0.45rem;
-    font-size: 0.92rem;
+    padding: 0.85rem 1.05rem;
+    gap: 0.5rem;
+    font-size: 1.05rem;
+    border-radius: 16px;
   }
 
   .map-nearby-fab .map-cp-fab-label,
   .map-nearby-options .map-cp-fab-label {
     display: inline;
-    font-size: 0.82rem;
-    font-weight: 700;
-    max-width: 9.5rem;
+    font-size: 0.95rem;
+    font-weight: 800;
+    max-width: 11rem;
     line-height: 1.15;
     white-space: normal;
     text-align: left;
@@ -2136,16 +2137,16 @@ function onDocClick(e: MouseEvent) {
   }
 
   .map-toolbar {
-    min-height: 56px;
+    min-height: 60px;
     padding: 0.55rem 0.75rem;
   }
 
   .tool-btn {
-    min-width: 48px;
-    min-height: 48px;
-    padding: 0.65rem 0.85rem;
-    font-size: 0.9rem;
-    border-radius: 10px;
+    min-width: 52px;
+    min-height: 52px;
+    padding: 0.7rem 0.9rem;
+    font-size: 0.92rem;
+    border-radius: 12px;
     -webkit-tap-highlight-color: transparent;
   }
 
@@ -2459,14 +2460,14 @@ function onDocClick(e: MouseEvent) {
     align-items: center;
     justify-content: center;
     gap: 0.2rem;
-    padding: 0.45rem 0.15rem;
+    padding: 0.5rem 0.15rem;
     border: none;
     background: none;
     color: var(--text-muted);
     cursor: pointer;
-    font-size: 0.68rem;
+    font-size: 0.7rem;
     line-height: 1.15;
-    min-height: 56px;
+    min-height: 60px;
     -webkit-tap-highlight-color: transparent;
   }
 

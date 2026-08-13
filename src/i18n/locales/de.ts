@@ -33,14 +33,14 @@ export default {
     heroLine1: 'Plane deine',
     heroLine2: 'Ultracycling-Route.',
     heroSub:
-      'GPX, Route oder Umgebung — Versorgung, Kontrollpunkte und Spickzettel.',
+      'GPX, Route oder Fahrt — Versorgung, Kontrollpunkte und Spickzettel.',
     uploadGpx: 'GPX hochladen',
     planRoute: 'Route planen',
-    nearby: 'Umgebung',
+    nearby: 'Fahrt',
     startCta: 'Jetzt loslegen',
     skipToContent: 'Zum Inhalt',
     appTitle: 'Route starten',
-    appIntro: 'GPX, Planung oder Umgebung — unterwegs ein Tipp genügt.',
+    appIntro: 'GPX, Planung oder Fahrt — unterwegs ein Tipp genügt.',
     discardPlan: 'Wegpunkte verwerfen und zur Startseite zurück?',
     backHome: '← Startseite',
     settingsMenu: 'Darstellung & Sprache',
@@ -50,7 +50,7 @@ export default {
     backGpx: '← GPX',
     plan: 'Planen',
     privacy:
-      'Standort nur bei „Umgebung“ und im Fahrtmodus (auf dem Gerät). Keine Tracking-Cookies — Einstellungen bleiben im Browser.',
+      'Standort nur bei „Fahrt“ und im Fahrtmodus (auf dem Gerät). Keine Tracking-Cookies — Einstellungen bleiben im Browser.',
     features: {
       title: 'Was UltraPlaner kann',
       pois: 'Versorgungspunkte entlang der Strecke',
@@ -72,8 +72,8 @@ export default {
       kind: { new: 'Neu', fix: 'Fix', bug: 'Bug' },
       items: {
         coros: 'QR-Code: Export aufs Handy',
-        nearbyFromMap: 'Umgebung direkt aus der Karte',
-        routeKeptOnNearby: 'Route bleibt beim Umgebung-Scan auf Routenkarten',
+        nearbyFromMap: 'Fahrt direkt aus der Karte',
+        routeKeptOnNearby: 'Route bleibt beim Fahrt-Scan auf Routenkarten',
         rideSupply: 'Fahrtmodus: nächste Versorgung klarer (Distanz/ETA/offen)',
         cemeteries: 'Friedhöfe als Trinkwasser-Quellen',
         wahoo: 'Wahoo: Route direkt in die Cloud senden',
@@ -81,7 +81,7 @@ export default {
     },
     how: {
       title: 'So funktioniert\'s',
-      step1: 'GPX, Route oder Umgebung',
+      step1: 'GPX, Route oder Fahrt',
       step1desc: 'GPX laden, Route zeichnen oder Standort scannen.',
       step2: 'POIs prüfen & markieren',
       step2desc: 'Filter setzen, Favoriten ★ und Kontrollpunkte tippen.',
@@ -99,17 +99,17 @@ export default {
     faq: {
       title: 'Häufige Fragen',
       q1: 'Was ist UltraPlaner?',
-      a1: 'UltraPlaner ist eine kostenlose Web-App für Ultracycling: GPX laden, Route planen oder Umgebung scannen — Versorgungspunkte, Kontrollpunkte (CP/Sleep), Höhenprofil, ETA, Filter, Favoriten, Spickzettel und Export (Wahoo-Cloud, GPX/FIT). Die POI-Daten kommen aus OpenStreetMap/Geofabrik.',
+      a1: 'UltraPlaner ist eine kostenlose Web-App für Ultracycling: GPX laden, Route planen oder Fahrt nutzen — Versorgungspunkte, Kontrollpunkte (CP/Sleep), Höhenprofil, ETA, Filter, Favoriten, Spickzettel und Export (Wahoo-Cloud, GPX/FIT). Die POI-Daten kommen aus OpenStreetMap/Geofabrik.',
       q17: 'Wie plane ich die Versorgung?',
       a17:
-        'GPX hochladen, Route zeichnen oder unter „Umgebung“ den Standort scannen. UltraPlaner sucht POIs in einstellbarer Nähe (bzw. im Umkreis). Filter setzen, ETA/Öffnungszeiten prüfen, Favoriten ★ und Kontrollpunkte (⚑ CP/Sleep) tippen — dann exportieren. Rote Bereiche im Höhenprofil = Versorgungslücken (≥ ca. 25 km ohne POI bei aktuellen Filtern). Kontrollpunkte bleiben wo du tippst; die km kommen vom nächsten Routenpunkt und landen in GPX/FIT/Spickzettel.',
+        'GPX hochladen, Route zeichnen oder unter „Fahrt“ den Standort scannen. UltraPlaner sucht POIs in einstellbarer Nähe (bzw. im Umkreis). Filter setzen, ETA/Öffnungszeiten prüfen, Favoriten ★ und Kontrollpunkte (⚑ CP/Sleep) tippen — dann exportieren. Rote Bereiche im Höhenprofil = Versorgungslücken (≥ ca. 25 km ohne POI bei aktuellen Filtern). Kontrollpunkte bleiben wo du tippst; die km kommen vom nächsten Routenpunkt und landen in GPX/FIT/Spickzettel.',
       q3: 'Welche Länder und POIs gibt es?',
       a3: '61 Geofabrik-Regionen in Europa (u. a. DACH, Iberia inkl. Inseln, UK, Skandinavien, Baltikum, Balkan, Griechenland, Frankreich als Teil-Extracts). Kategorien: Tankstellen, Supermärkte, Gastro, Trinkwasser, Getränke, Rad, Hotel, Camping. Radius zur Route, Kategorien ein/aus, Filter „offen bei ETA“; bei Bedarf alle Marker anzeigen (sonst leichte Ausdünnung).',
       q6: 'Öffnungszeiten & Höhenprofil?',
       a6: 'Öffnungszeiten kommen aus OpenStreetMap — wenn eingetragen. „Keine Angabe“ heißt nicht geschlossen: Der Filter „offen zur ETA“ blendet nur bekannte Schließzeiten aus; unbekannte POIs und Favoriten bleiben sichtbar. Trinkbrunnen/Quellen/Friedhöfe gelten als immer verfügbar. Zusätzlich: „Google Maps Navigation“ für oft aktuelle Zeiten vor Ort. Höhenprofil: Anstiege/Pässe, Klick springt zur Stelle; Rot = Versorgungslücken bei deinen Filtern.',
       q19: 'Handy & App?',
       a19:
-        'Im Browser auf dem Handy nutzbar. Als PWA zum Homescreen: Android Browser-Menü → Installieren; iPhone Teilen → Mehr anzeigen → Zum Home-Bildschirm — startet ohne Browser-Leiste, weiterhin ultraplaner.com. Standort (Umgebung/Fahrtmodus): auf dem iPhone in Safari in der Adressleiste links tippen → Website-Einstellungen → Standort → Erlauben (Geräte-Ortung allein reicht nicht). Offline: Route/POIs aus dem Cache, Basemap braucht Netz.',
+        'Im Browser auf dem Handy nutzbar. Als PWA zum Homescreen: Android Browser-Menü → Installieren; iPhone Teilen → Mehr anzeigen → Zum Home-Bildschirm — startet ohne Browser-Leiste, weiterhin ultraplaner.com. Standort (Fahrt/Fahrtmodus): auf dem iPhone in Safari in der Adressleiste links tippen → Website-Einstellungen → Standort → Erlauben (Geräte-Ortung allein reicht nicht). Offline: Route/POIs aus dem Cache, Basemap braucht Netz.',
       q13: 'Export zu Wahoo, Garmin, COROS oder Strava?',
       a13: 'Nur markierte Favoriten ★ und Kontrollpunkte (⚑) gehen als Stops mit — nicht alle POIs auf der Karte (Garmin-Limit ~200 Course Points). Wahoo: „Mit Wahoo verbinden“ → „An Wahoo senden“. Garmin Edge: FIT Course speichern → USB Massenspeicher → Ordner Garmin/NewFiles (nicht Connect — dort gehen Course Points oft verloren). COROS Dura: am Desktop „An COROS senden“ (QR scannen) bzw. GPX herunterladen → in der COROS-App öffnen und speichern → Explore → Routenbibliothek → an Dura senden (keine Cloud-API wie bei Wahoo). Strava/Komoot: GPX; Wegpunkte je nach App unterschiedlich.',
       q14: 'Speichern & teilen?',
@@ -135,9 +135,9 @@ export default {
       a12: 'Siehe „Feedback & Roadmap?“.',
       q15: 'Was bedeuten die roten Bereiche im Höhenprofil?',
       a15: 'Siehe „Wie plane ich die Versorgung?“ bzw. „Öffnungszeiten & Höhenprofil?“.',
-      q16: 'Was ist „Umgebung“?',
+      q16: 'Was ist „Fahrt“?',
       a16:
-        'Umgebung = Standort + Umkreis-POIs (Pause, ohne Route). Ein Tipp auf „Umgebung“ öffnet direkt die Karte (Standard: 5 km, Tankstellen/Supermärkte/Trinkwasser/Hotels). Radius und Kategorien danach in der Liste/Sidebar anpassen und neu laden. Kein Fahrtmodus — der braucht eine geladene Rennroute.',
+        'Fahrt = Standort + Umkreis-POIs (Pause, ohne Route). Ein Tipp auf „Fahrt“ öffnet direkt die Karte (Standard: 5 km, Tankstellen/Supermärkte/Trinkwasser/Hotels). Radius und Kategorien danach in der Liste/Sidebar anpassen und neu laden. Kein Fahrtmodus — der braucht eine geladene Rennroute.',
       q18: 'Was sind Kontrollpunkte?',
       a18: 'Siehe „Wie plane ich die Versorgung?“.',
       q20: 'Wie funktioniert „Mit Wahoo verbinden“?',
@@ -151,7 +151,7 @@ export default {
       whatBody:
         'Statt nur der Navigationslinie siehst du, wo du unterwegs tanken, einkaufen oder Wasser holen kannst: Tankstellen, Supermärkte, Trinkwasser, Gastronomie, Getränke, Rad-Service, Hotels und Campingplätze in der Nähe des Tracks. Dazu eigene Kontrollpunkte (CP/Sleep). So planst du vorab — und erkennst Lücken früh.',
       howTitle: 'So funktioniert die Suche',
-      how1: 'GPX hochladen, Route zeichnen oder unter „Umgebung“ den Standort nutzen',
+      how1: 'GPX hochladen, Route zeichnen oder unter „Fahrt“ den Standort nutzen',
       how2: 'Kategorien und Radius zur Route einstellen',
       how3: 'Punkte auf Karte und Liste prüfen, Favoriten und Kontrollpunkte setzen, ETA und Öffnungszeiten berücksichtigen',
       how4: 'Export als GPX/FIT oder Spickzettel für Garmin, Wahoo, COROS, Komoot & Co.',
@@ -218,9 +218,9 @@ export default {
   },
   nearby: {
     intro:
-      'Pause unterwegs? Umgebung nutzt deinen Standort und sucht Versorgung im Umkreis — ohne GPX. (Fahrtmodus nur mit Route.)',
+      'Unterwegs? Fahrt nutzt deinen Standort und sucht Versorgung im Umkreis — ohne GPX. (Fahrtmodus nur mit Route.)',
     introMapFirst:
-      'Standort wird geholt und die Karte öffnet sich sofort (Standard: 5 km, Tankstellen, Supermärkte, Trinkwasser, Hotels). Radius und Kategorien kannst du auf der Karte in den Umgebung-Optionen ändern.',
+      'Standort wird geholt und die Karte öffnet sich sofort (Standard: 5 km, Tankstellen, Supermärkte, Trinkwasser, Hotels). Radius und Kategorien kannst du auf der Karte in den Fahrt-Optionen ändern.',
     introMap:
       'Standort erneut holen und POIs im Umkreis neu laden. (Kein Fahrtmodus — der braucht eine Route.)',
     introMapRoute:
@@ -232,17 +232,17 @@ export default {
     loadingPois: 'POIs werden geladen…',
     search: 'Standort nutzen & suchen',
     searchMap: 'Hier suchen',
-    searchMapKeepRoute: 'Umgebung laden (Route bleibt)',
+    searchMapKeepRoute: 'Fahrt laden (Route bleibt)',
     searchRescan: 'POIs neu laden',
     searching: 'Standort & POIs werden geladen…',
-    mapName: 'Umgebung',
-    panelTitle: 'Umgebung-Optionen',
+    mapName: 'Fahrt',
+    panelTitle: 'Fahrt-Optionen',
     panelSummaryNearby: 'Umkreis {m} m',
     panelSummaryRoute: 'Hier suchen',
     panelSummaryRouteKeep: 'Route bleibt · GPS-Umkreis',
-    mapFab: 'Umgebung laden',
+    mapFab: 'POIs laden',
     mapFabRescan: 'POIs neu laden',
-    loadFailed: 'Umgebungssuche fehlgeschlagen',
+    loadFailed: 'Fahrt-Suche fehlgeschlagen',
     geoUnsupported: 'Standort nicht unterstützt',
     geoDenied:
       'Standort für ultraplaner.com blockiert. In der Adressleiste links tippen → Website-Einstellungen → Standort → Erlauben. Dann neu laden.',
@@ -284,7 +284,7 @@ export default {
     exportNameHint: 'Dateiname & Kursname auf dem Gerät (GPX/FIT)',
     exportNameHintNearby: 'Dateiname für den Favoriten-GPX',
     exportNearbyHint:
-      'Umgebung hat keinen Track — Wahoo und FIT brauchen eine echte Route. Hier: Favoriten als GPX, QR oder Spickzettel.',
+      'Fahrt hat keinen Track — Wahoo und FIT brauchen eine echte Route. Hier: Favoriten als GPX, QR oder Spickzettel.',
     files: 'Weitere Dateien',
     deviceWahoo: 'Wahoo (ELEMNT)',
     deviceGarmin: 'Garmin Edge',
@@ -373,7 +373,7 @@ export default {
     sheetPois: 'Versorgungspunkte',
     sheetExport: 'Route exportieren',
     sheetLegend: 'Legende',
-    sheetNearby: 'Umgebung-Optionen',
+    sheetNearby: 'Fahrt-Optionen',
     exportIntro: '★ Favoriten · Gerät · Schritte',
     gpxRoutePois: 'GPX — nur Route',
     gpxRoutePoisHint: 'Nur Track, ohne Wegpunkte',
@@ -423,7 +423,7 @@ export default {
       'Offline: An deinem Standort ist nichts aus der gespeicherten Route verfügbar. Route erneut offline vorbereiten oder online laden.',
     help: 'Lädt die ganze Strecke auf dieses Gerät: Kartenkacheln + POIs entlang der Route. Unterwegs ohne Internet siehst du Karte und Versorgung — anders als „Zuletzt geöffnet“ (nur zum Wiederöffnen).',
     where: 'Status hier und Hinweis oben auf der Karte.',
-    hint: 'Am besten per WLAN. Nur diese Route — nicht der Umgebung-Scan um deinen Standort.',
+    hint: 'Am besten per WLAN. Nur diese Route — nicht der Fahrt-Scan um deinen Standort.',
   },
   pois: {
     title: 'Versorgungspunkte',
@@ -592,8 +592,9 @@ export default {
     locationOff: 'Standort / Follow aus',
     locationOn: 'Standort anzeigen',
     followOn: 'Standort folgen',
-    followResume: 'Follow fortsetzen',
+    followResume: 'Zentrieren',
     headingOn: 'Karte in Fahrtrichtung drehen',
+    headingOff: 'Nach Norden ausrichten',
     locating: 'Standort wird ermittelt…',
     geoUnsupported: 'Standort nicht unterstützt',
     geoDenied:
@@ -777,7 +778,7 @@ export default {
     fitPointLimit:
       'Hinweis: {count} Stops — FIT-Export begrenzt auf {max} Course Points (Garmin-Limit).',
     fitNeedsTrack:
-      'FIT braucht eine echte Route mit Track — in der Umgebung-Ansicht nicht verfügbar.',
+      'FIT braucht eine echte Route mit Track — in der Fahrt-Ansicht nicht verfügbar.',
     fitFailed: 'FIT-Export fehlgeschlagen — bitte erneut versuchen.',
     popupBlocked: 'Popup wurde blockiert – bitte Popups für diese Seite erlauben.',
     favorite: 'Favorit',

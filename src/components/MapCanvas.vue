@@ -44,6 +44,7 @@ import { isAppleMobile, isStandalonePwa } from '../utils/geoDevice'
 import {
   createUserLocationElement,
   resolveGeoHeading,
+  setLocationAccuracyRadius,
   setLocationMarkerHeading,
 } from '../utils/userLocationMarker'
 import {
@@ -116,16 +117,22 @@ const followActive = ref(false)
 const headingUp = ref(false)
 
 let locationMarker: maplibregl.Marker | null = null
-let accuracyEl: HTMLDivElement | null = null
 let bikeCursorMarker: maplibregl.Marker | null = null
 let bikeCursorEl: HTMLDivElement | null = null
 let lastFollowPos: { lat: number; lng: number } | null = null
+/** Last stable heading — keep map/marker oriented when GPS heading drops out briefly */
+let lastStableHeading: number | null = null
 const userPanning = ref(false)
 /** Resume GPS after tab/app returns from background */
 let resumeLocationAfterVisible = false
 let locatingTimer: ReturnType<typeof setTimeout> | null = null
 /** Skip click toggle when GPS was already started on touch pointerdown */
 let startedFromPointerDown = false
+let accuracyZoomHandler: (() => void) | null = null
+
+function preferHeadingUpDefault() {
+  return Boolean(props.rideMode) || store.isNearbyMap
+}
 
 function createBikeCursorElement(): HTMLDivElement {
   const el = document.createElement('div')
@@ -172,7 +179,9 @@ function updateBikeCursorMarker() {
 function applyGeoPosition(pos: GeolocationPosition) {
   const lat = pos.coords.latitude
   const lng = pos.coords.longitude
-  const heading = resolveGeoHeading(pos, lastFollowPos)
+  let heading = resolveGeoHeading(pos, lastFollowPos)
+  if (heading != null) lastStableHeading = heading
+  else if (lastStableHeading != null) heading = lastStableHeading
 
   lastFollowPos = { lat, lng }
   userLocation.value = {
@@ -225,31 +234,20 @@ function onGeoError(err: GeolocationPositionError) {
  *   Safari then returns PERMISSION_DENIED even when Settings say Allow.
  * - Ignore Permissions API on Safari (unreliable / always "prompt").
  */
-function startLocation(opts?: { follow?: boolean; heading?: boolean }) {
+function ensureLocationWatch() {
   if (typeof window !== 'undefined' && !window.isSecureContext) {
     locationError.value = t('mapCanvas.geoInsecure')
     locationDeniedHelp.value = false
-    return
+    return false
   }
   if (!navigator.geolocation) {
     locationError.value = t('mapCanvas.geoUnsupported')
     locationDeniedHelp.value = false
-    return
+    return false
   }
+  if (locationWatchId.value != null) return true
 
-  followActive.value = opts?.follow ?? true
-  headingUp.value = opts?.heading ?? Boolean(props.rideMode)
-  userPanning.value = false
-  locationError.value = ''
-  locationDeniedHelp.value = false
-
-  if (locationWatchId.value != null) {
-    if (userLocation.value) applyFollowCamera(true)
-    locationPending.value = false
-    return
-  }
-
-  locationPending.value = true
+  locationPending.value = !userLocation.value
   if (locatingTimer) clearTimeout(locatingTimer)
   locatingTimer = setTimeout(() => {
     if (locationPending.value && !userLocation.value) {
@@ -269,10 +267,27 @@ function startLocation(opts?: { follow?: boolean; heading?: boolean }) {
     },
     {
       enableHighAccuracy: true,
-      maximumAge: apple ? 30000 : 10000,
-      timeout: apple ? 30000 : 20000,
+      // Fresh enough for riding; older maxAge made the marker look "stuck"
+      maximumAge: apple ? 5000 : 2000,
+      timeout: apple ? 30000 : 15000,
     }
   )
+  return true
+}
+
+function startLocation(opts?: { follow?: boolean; heading?: boolean }) {
+  followActive.value = opts?.follow ?? true
+  headingUp.value = opts?.heading ?? preferHeadingUpDefault()
+  userPanning.value = false
+  locationError.value = ''
+  locationDeniedHelp.value = false
+
+  if (!ensureLocationWatch()) return
+
+  if (userLocation.value) {
+    locationPending.value = false
+    applyFollowCamera(true)
+  }
 }
 
 function stopLocation(opts?: { keepError?: boolean }) {
@@ -289,16 +304,17 @@ function stopLocation(opts?: { keepError?: boolean }) {
   followActive.value = false
   headingUp.value = false
   lastFollowPos = null
+  lastStableHeading = null
+  resumeLocationAfterVisible = false
   setRideKmAlong(null)
   if (locatingTimer) {
     clearTimeout(locatingTimer)
     locatingTimer = null
   }
+  unbindAccuracyZoom()
   locationMarker?.remove()
   locationMarker = null
-  accuracyEl?.remove()
-  accuracyEl = null
-  if (map && props.rideMode) {
+  if (map && (props.rideMode || store.isNearbyMap)) {
     map.easeTo({ bearing: 0, pitch: 0, duration: 400 })
   }
 }
@@ -312,14 +328,24 @@ function onVisibilityChange() {
         navigator.geolocation.clearWatch(locationWatchId.value)
         locationWatchId.value = null
       }
-      followActive.value = false
+      // Keep last fix visible; pause follow so UI shows “Zentrieren”
+      if (followActive.value) {
+        userPanning.value = true
+        followActive.value = false
+      }
       locationPending.value = false
     }
     return
   }
-  // Do not auto-restart on iOS without a fresh tap — causes false "denied"
-  if (resumeLocationAfterVisible) {
-    resumeLocationAfterVisible = false
+  if (!resumeLocationAfterVisible) return
+  resumeLocationAfterVisible = false
+  // Non-iOS: restart watch quietly. iOS needs a fresh user gesture (Zentrieren).
+  if (!isAppleMobile() && userLocation.value) {
+    if (ensureLocationWatch()) {
+      userPanning.value = false
+      followActive.value = true
+      applyFollowCamera(true)
+    }
   }
 }
 
@@ -333,19 +359,51 @@ function applyFollowCamera(force: boolean) {
   const { lat, lng, heading } = userLocation.value
   const cam: maplibregl.EaseToOptions = {
     center: [lng, lat],
-    duration: force ? 0 : 700,
+    duration: force ? 0 : headingUp.value ? 350 : 500,
     essential: true,
   }
   if (headingUp.value && heading != null) {
     cam.bearing = heading
     cam.pitch = props.rideMode ? 45 : 0
+  } else if (!headingUp.value) {
+    cam.bearing = 0
+    cam.pitch = 0
   }
   if (!props.rideMode) {
-    cam.zoom = Math.max(map.getZoom(), 15)
+    cam.zoom = Math.max(map.getZoom(), store.isNearbyMap ? 16 : 15)
   } else if (map.getZoom() < 14) {
     cam.zoom = 15.5
   }
+  // Cancel in-flight ease so follow doesn't lag behind the rider
+  map.stop()
   map.easeTo(cam)
+}
+
+function bindAccuracyZoom() {
+  if (!map || accuracyZoomHandler) return
+  accuracyZoomHandler = () => updateLocationAccuracy()
+  map.on('zoom', accuracyZoomHandler)
+  map.on('move', accuracyZoomHandler)
+}
+
+function unbindAccuracyZoom() {
+  if (!map || !accuracyZoomHandler) {
+    accuracyZoomHandler = null
+    return
+  }
+  map.off('zoom', accuracyZoomHandler)
+  map.off('move', accuracyZoomHandler)
+  accuracyZoomHandler = null
+}
+
+function updateLocationAccuracy() {
+  if (!map || !userLocation.value || !locationMarker) return
+  setLocationAccuracyRadius(
+    locationMarker.getElement(),
+    userLocation.value.accuracy,
+    userLocation.value.lat,
+    map.getZoom()
+  )
 }
 
 function updateLocationMarker() {
@@ -362,14 +420,16 @@ function updateLocationMarker() {
     })
       .setLngLat([lng, lat])
       .addTo(map)
+    bindAccuracyZoom()
   } else {
     locationMarker.setLngLat([lng, lat])
   }
 
   setLocationMarkerHeading(locationMarker.getElement(), heading, headingUp.value)
+  updateLocationAccuracy()
 }
 
-/** Instant “you are here” on Umgebung maps before live GPS watch returns. */
+/** Instant “you are here” on Fahrt maps before live GPS watch returns. */
 function seedNearbyLocationMarker() {
   if (!map || !store.isNearbyMap) return
   if (!userLocation.value) {
@@ -396,7 +456,7 @@ function onLocationPointerDown(e: PointerEvent) {
   if (e.pointerType !== 'touch' && e.pointerType !== 'pen') return
   if (locationPending.value || locationActive.value) return
   startedFromPointerDown = true
-  startLocation({ follow: true, heading: Boolean(props.rideMode) })
+  startLocation({ follow: true, heading: preferHeadingUpDefault() })
 }
 
 function onLocationButtonClick(e?: Event) {
@@ -409,19 +469,25 @@ function onLocationButtonClick(e?: Event) {
   }
   if (locationPending.value) return
   if (!locationActive.value) {
-    startLocation({ follow: true, heading: Boolean(props.rideMode) })
+    startLocation({ follow: true, heading: preferHeadingUpDefault() })
     return
   }
-  if (!followActive.value || userPanning.value) {
+  // Watch may have been cleared in background — always restart on recenter
+  if (!followActive.value || userPanning.value || locationWatchId.value == null) {
     userPanning.value = false
     followActive.value = true
-    headingUp.value = Boolean(props.rideMode) || headingUp.value
+    if (preferHeadingUpDefault() && !headingUp.value) {
+      headingUp.value = true
+    }
+    ensureLocationWatch()
     applyFollowCamera(true)
     return
   }
-  if (props.rideMode && !headingUp.value) {
-    headingUp.value = true
+  // Heading-up → North-up (Nearby + Ride); North-up → stop
+  if (headingUp.value) {
+    headingUp.value = false
     applyFollowCamera(true)
+    updateLocationMarker()
     return
   }
   stopLocation()
@@ -430,11 +496,17 @@ function onLocationButtonClick(e?: Event) {
 const locationActive = computed(
   () => locationWatchId.value != null || userLocation.value != null || locationPending.value
 )
+const needsRecenter = computed(
+  () =>
+    locationActive.value &&
+    !locationPending.value &&
+    (userPanning.value || !followActive.value || locationWatchId.value == null)
+)
 const locationBtnTitle = computed(() => {
   if (locationPending.value) return t('mapCanvas.locating')
   if (!locationActive.value) return t('mapCanvas.followOn')
-  if (userPanning.value || !followActive.value) return t('mapCanvas.followResume')
-  if (props.rideMode && !headingUp.value) return t('mapCanvas.headingOn')
+  if (needsRecenter.value) return t('mapCanvas.followResume')
+  if (headingUp.value) return t('mapCanvas.headingOff')
   return t('mapCanvas.locationOff')
 })
 
@@ -920,10 +992,6 @@ function destroyMap() {
   bikeCursorMarker?.remove()
   bikeCursorMarker = null
   bikeCursorEl = null
-  locationMarker?.remove()
-  locationMarker = null
-  accuracyEl?.remove()
-  accuracyEl = null
   if (map) {
     try {
       map.off('error', onBasemapError)
@@ -1675,13 +1743,20 @@ function setupMapDragBehavior() {
 
   canvas.addEventListener('dragstart', (e) => e.preventDefault())
 
-  map.on('dragstart', () => {
-    canvas.classList.remove('poi-hover')
+  const pauseFollowFromUserGesture = () => {
     if (locationActive.value && followActive.value) {
       userPanning.value = true
       followActive.value = false
     }
+  }
+
+  map.on('dragstart', () => {
+    canvas.classList.remove('poi-hover')
+    pauseFollowFromUserGesture()
   })
+  // Finger-rotate / pinch should also pause follow (easeTo follow does not fire these)
+  map.on('rotatestart', pauseFollowFromUserGesture)
+  map.on('pitchstart', pauseFollowFromUserGesture)
 }
 
 function setDragPanEnabled(enabled: boolean) {
@@ -1831,23 +1906,26 @@ onUnmounted(() => {
         active: locationActive,
         following: locationActive && followActive && !userPanning,
         pending: locationPending,
+        'needs-recenter': needsRecenter,
+        'with-label': needsRecenter,
       }"
       :title="locationBtnTitle"
       :aria-label="locationBtnTitle"
       @pointerdown="onLocationPointerDown"
       @click.stop.prevent="onLocationButtonClick"
     >
-      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="12" cy="12" r="4" :fill="locationActive ? '#3b82f6' : 'currentColor'" />
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <circle cx="12" cy="12" r="4" :fill="locationActive ? '#2563eb' : 'currentColor'" />
         <path d="M12 2v3M12 19v3M2 12h3M19 12h3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
         <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.5" fill="none" />
         <path
-          v-if="headingUp"
+          v-if="headingUp && !needsRecenter"
           d="M12 5 L15 11 H9 Z"
-          fill="#3b82f6"
+          fill="#2563eb"
           stroke="none"
         />
       </svg>
+      <span v-if="needsRecenter" class="location-btn-label">{{ t('mapCanvas.followResume') }}</span>
     </button>
 
     <div v-if="locationError" class="location-error" role="alert">
@@ -1919,21 +1997,36 @@ onUnmounted(() => {
   bottom: 28px;
   right: calc(10px + env(safe-area-inset-right, 0px));
   z-index: 40;
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   border: none;
-  border-radius: 6px;
+  border-radius: 10px;
   background: #fff;
   box-shadow: 0 0 0 2px rgba(0,0,0,.1);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 7px;
+  gap: 0.35rem;
+  padding: 8px;
   color: #333;
-  transition: background 0.15s;
+  transition: background 0.15s, width 0.15s;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
+}
+
+.location-btn.with-label {
+  width: auto;
+  min-width: 44px;
+  padding: 8px 12px;
+}
+
+.location-btn-label {
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  line-height: 1;
 }
 
 .basemap-toggle {
@@ -2068,8 +2161,20 @@ onUnmounted(() => {
 
 .location-btn.following {
   background: #eff6ff;
-  color: #2563eb;
+  color: #1d4ed8;
   box-shadow: 0 0 0 2px #93c5fd;
+}
+
+.location-btn.needs-recenter {
+  background: #1d4ed8;
+  color: #fff;
+  box-shadow: 0 0 0 2px #1e40af, 0 4px 16px rgba(29, 78, 216, 0.45);
+}
+
+.location-btn.needs-recenter svg {
+  width: 1.35rem;
+  height: 1.35rem;
+  flex-shrink: 0;
 }
 
 .location-btn.pending {
@@ -2081,6 +2186,12 @@ onUnmounted(() => {
 .location-btn svg {
   width: 100%;
   height: 100%;
+}
+
+.location-btn.with-label svg {
+  width: 1.25rem;
+  height: 1.25rem;
+  flex-shrink: 0;
 }
 
 .location-error {
@@ -2139,11 +2250,24 @@ onUnmounted(() => {
     bottom: auto;
     right: calc(12px + env(safe-area-inset-right, 0px));
     z-index: 120;
-    width: 48px;
-    height: 48px;
-    padding: 9px;
-    border-radius: 12px;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
+    width: 56px;
+    height: 56px;
+    padding: 11px;
+    border-radius: 16px;
+    box-shadow: 0 2px 14px rgba(0, 0, 0, 0.28);
+  }
+
+  .location-btn.with-label {
+    width: auto;
+    min-width: 56px;
+    min-height: 56px;
+    height: auto;
+    padding: 0.75rem 1rem;
+    gap: 0.45rem;
+  }
+
+  .location-btn-label {
+    font-size: 0.95rem;
   }
 
   .map-canvas-wrap.ride-mode .location-btn {
@@ -2151,10 +2275,16 @@ onUnmounted(() => {
     bottom: auto;
     right: calc(12px + env(safe-area-inset-right, 0px));
     z-index: 120;
-    width: 52px;
-    height: 52px;
-    padding: 10px;
-    border-radius: 14px;
+    width: 56px;
+    height: 56px;
+    padding: 11px;
+    border-radius: 16px;
+  }
+
+  .map-canvas-wrap.ride-mode .location-btn.with-label {
+    width: auto;
+    min-height: 56px;
+    height: auto;
   }
 
   .map-canvas-wrap.ride-mode :deep(.maplibregl-ctrl-top-right) {
@@ -2162,7 +2292,7 @@ onUnmounted(() => {
   }
 
   .location-error {
-    top: calc(68px + env(safe-area-inset-top, 0px));
+    top: calc(80px + env(safe-area-inset-top, 0px));
     bottom: auto;
     right: calc(12px + env(safe-area-inset-right, 0px));
     left: calc(12px + env(safe-area-inset-left, 0px));
@@ -2171,7 +2301,7 @@ onUnmounted(() => {
   }
 
   .map-canvas-wrap.ride-mode .location-error {
-    top: calc(72px + env(safe-area-inset-top, 0px));
+    top: calc(80px + env(safe-area-inset-top, 0px));
     bottom: auto;
   }
 

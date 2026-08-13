@@ -456,10 +456,10 @@ onMounted(() => {
 
       <h2>8. Standortdaten</h2>
 
-      <h3>Gerätstandort (Umgebung und Fahrtmodus)</h3>
+      <h3>Gerätstandort (Fahrt und Fahrtmodus)</h3>
 
       <p>
-        Wenn Sie die Funktionen „Umgebung“ oder den Fahrtmodus nutzen, greift die Anwendung auf
+        Wenn Sie die Funktionen „Fahrt“ oder den Fahrtmodus nutzen, greift die Anwendung auf
         Ihren aktuellen Gerätstandort zu. Dazu wird die vom Browser bereitgestellte
         Geolocation-Schnittstelle verwendet.
       </p>
@@ -494,7 +494,7 @@ onMounted(() => {
         Die Verarbeitung erfolgt zur Bereitstellung der von Ihnen angeforderten Standortfunktionen
         auf Grundlage von Art. 6 Abs. 1 lit. b DSGVO. Soweit kein Vertragsverhältnis besteht, erfolgt
         sie auf Grundlage von Art. 6 Abs. 1 lit. f DSGVO. Unser berechtigtes Interesse besteht in der
-        Bereitstellung einer funktionalen Umgebungs- und Fahrtmodus-Darstellung.
+        Bereitstellung einer funktionalen Fahrt- und Fahrtmodus-Darstellung.
       </p>
 
       <p>
