@@ -1472,22 +1472,6 @@ onUnmounted(() => {
         <span class="sheet-chevron" aria-hidden="true">{{ controlsOpen ? '▾' : '▴' }}</span>
       </button>
 
-      <!-- Sticky next step: visible with/without sheet body (mobile collapsed + desktop top) -->
-      <div v-if="routeReadyForPois" class="poi-next-step">
-        <p class="poi-next-hint">{{ t('planner.nextStepPois') }}</p>
-        <button
-          type="button"
-          class="btn-primary btn-full"
-          :disabled="!canCreate"
-          @click="createMap"
-        >
-          {{ createMapLabel }}
-        </button>
-        <p v-if="formError || store.error" class="error poi-next-error">
-          {{ formError || store.error }}
-        </p>
-      </div>
-
       <div class="controls-sheet-body">
       <!-- POI options first once route exists — discoverability of next step -->
       <template v-if="showPoiOptions && routeReadyForPois">
@@ -1677,6 +1661,22 @@ onUnmounted(() => {
           {{ createMapLabel }}
         </button>
       </template>
+      </div>
+
+      <!-- Mobile: footer when sheet open; under handle when collapsed. Desktop: sticky top via CSS order. -->
+      <div v-if="routeReadyForPois" class="poi-next-step">
+        <p class="poi-next-hint">{{ t('planner.nextStepPois') }}</p>
+        <button
+          type="button"
+          class="btn-primary btn-full"
+          :disabled="!canCreate"
+          @click="createMap"
+        >
+          {{ createMapLabel }}
+        </button>
+        <p v-if="formError || store.error" class="error poi-next-error">
+          {{ formError || store.error }}
+        </p>
       </div>
     </div>
   </div>
@@ -2093,19 +2093,14 @@ onUnmounted(() => {
   flex-direction: column;
   gap: 0.45rem;
   flex-shrink: 0;
-  padding: 0.15rem 0 0.55rem;
-  margin: 0 0 0.15rem;
-  background: var(--surface);
+  order: -1;
+  padding: 0.55rem 0 0.65rem;
+  margin: 0 0 0.35rem;
+  background: color-mix(in srgb, var(--primary) 6%, var(--surface));
+  border-bottom: 1px solid var(--border);
   position: sticky;
   top: 0;
   z-index: 4;
-}
-
-.planner-controls.has-poi-next .poi-next-step {
-  padding: 0.55rem 0 0.65rem;
-  border-bottom: 1px solid var(--border);
-  margin-bottom: 0.35rem;
-  background: color-mix(in srgb, var(--primary) 6%, var(--surface));
 }
 
 .poi-next-hint {
@@ -2533,16 +2528,18 @@ onUnmounted(() => {
   }
 
   .planner-controls {
-    max-height: min(40vh, 420px);
+    /* Open sheet: more room to scroll options; map still ~40%+ */
+    max-height: min(62dvh, 580px);
     height: auto;
     border-right: none;
     border-top: 1px solid var(--border);
     box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.06);
-    /* Safari URL bar / home indicator — keep sheet above browser chrome */
-    padding: 0 0 calc(0.85rem + env(safe-area-inset-bottom, 0px));
+    padding: 0;
     gap: 0;
     overflow: hidden;
     border-radius: 14px 14px 0 0;
+    display: flex;
+    flex-direction: column;
   }
 
   .planner-controls.sheet-collapsed {
@@ -2553,23 +2550,32 @@ onUnmounted(() => {
     display: none;
   }
 
-  .planner-controls.has-poi-next .poi-next-step {
-    margin: 0;
-    border-radius: 0;
-    border-bottom: 1px solid var(--border);
-    padding: 0.65rem 1rem 0.75rem;
-    /* parent already sticky-scrolls the sheet; keep CTA under header */
+  /* Open: CTA as sticky footer under scrollable options (DOM order after body) */
+  .planner-controls:not(.sheet-collapsed) .poi-next-step {
+    order: 0;
     position: relative;
     top: auto;
+    margin: 0;
+    border-bottom: none;
+    border-top: 1px solid var(--border);
+    padding: 0.75rem 1rem calc(0.85rem + env(safe-area-inset-bottom, 0px));
+    background: color-mix(in srgb, var(--primary) 8%, var(--surface));
+    box-shadow: 0 -6px 16px rgba(0, 0, 0, 0.06);
   }
 
   .planner-controls.sheet-collapsed.has-poi-next {
     padding-bottom: 0;
   }
 
-  .planner-controls.sheet-collapsed.has-poi-next .poi-next-step {
+  /* Collapsed: CTA under handle, still discoverable */
+  .planner-controls.sheet-collapsed .poi-next-step {
+    order: 0;
+    position: relative;
+    top: auto;
+    margin: 0;
     border-bottom: none;
-    padding-bottom: calc(0.75rem + env(safe-area-inset-bottom, 0px));
+    border-top: 1px solid var(--border);
+    padding: 0.7rem 1rem calc(0.75rem + env(safe-area-inset-bottom, 0px));
   }
 
   .controls-sheet-toggle {
@@ -2641,21 +2647,23 @@ onUnmounted(() => {
   }
 
   .controls-sheet-body {
+    flex: 1 1 auto;
+    min-height: 0;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: contain;
-    padding: 0.75rem 1rem calc(1.1rem + env(safe-area-inset-bottom, 0px));
-    max-height: min(34vh, 360px);
+    padding: 0.75rem 1rem 1rem;
+    max-height: none;
   }
 
   .planner-controls:not(.sheet-collapsed) {
     border-top-color: var(--border);
-    /* Body already carries inset; avoid double-padding when open */
     padding-bottom: 0;
   }
 
   .planner-controls:not(.sheet-collapsed) .controls-sheet-toggle {
     border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
   }
 }
 </style>
