@@ -144,6 +144,7 @@ onUnmounted(() => {
   color: var(--text);
   cursor: pointer;
   font: inherit;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .menu-btn:hover,
@@ -229,6 +230,16 @@ onUnmounted(() => {
 
   .settings-menu {
     display: block;
+  }
+
+  .menu-btn {
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
+  }
+
+  .menu-icon {
+    font-size: 1.2rem;
   }
 }
 

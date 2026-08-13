@@ -414,8 +414,9 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
 }
 
 .landing.plan-fullscreen {
-  height: 100dvh;
+  /* vh fallback first; dvh accounts for Safari collapsing URL bar */
   height: 100vh;
+  height: 100dvh;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -983,6 +984,8 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
   cursor: pointer;
   white-space: nowrap;
   flex-shrink: 0;
+  min-height: 40px;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .back-btn:hover {
@@ -1035,6 +1038,8 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
   color: var(--text);
   cursor: pointer;
   white-space: nowrap;
+  min-height: 40px;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .plan-export-btn:hover:not(:disabled) {
@@ -1047,15 +1052,53 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
   cursor: not-allowed;
 }
 
-@media (max-width: 520px) {
-  .plan-export-btn {
-    padding: 0.4rem 0.5rem;
-    font-size: 0.75rem;
+@media (max-width: 768px) {
+  .plan-topbar {
+    gap: 0.5rem;
+    padding: 0.55rem 0.75rem;
+    min-height: 56px;
   }
 
   .back-btn {
-    padding: 0.4rem 0.55rem;
-    font-size: 0.78rem;
+    min-width: 48px;
+    min-height: 48px;
+    padding: 0.65rem 0.85rem;
+    font-size: 0.9rem;
+    border-radius: 10px;
+  }
+
+  .plan-export-btn {
+    min-width: 48px;
+    min-height: 48px;
+    padding: 0.65rem 0.8rem;
+    font-size: 0.88rem;
+    border-radius: 10px;
+  }
+
+  .plan-topbar-actions {
+    gap: 0.4rem;
+  }
+
+  .plan-topbar-actions :deep(.menu-btn) {
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
+  }
+
+  .plan-topbar-actions :deep(.menu-icon) {
+    font-size: 1.2rem;
+  }
+}
+
+@media (max-width: 520px) {
+  .plan-export-btn {
+    padding: 0.65rem 0.65rem;
+    font-size: 0.82rem;
+  }
+
+  .back-btn {
+    padding: 0.65rem 0.7rem;
+    font-size: 0.85rem;
   }
 }
 

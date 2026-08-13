@@ -758,12 +758,12 @@ function addPlannerLayers() {
     layout: {
       'icon-image': ['get', 'icon'],
       'icon-size': 1,
-      'icon-anchor': 'bottom',
+      'icon-anchor': 'center',
       'icon-allow-overlap': true,
       'icon-ignore-placement': true,
       'text-field': ['get', 'label'],
       'text-size': 11,
-      'text-offset': [0, -3.35],
+      'text-offset': [0, -1.85],
       'text-font': [...MAP_LABEL_FONT],
       'text-anchor': 'bottom',
       'text-allow-overlap': true,
@@ -2447,7 +2447,8 @@ onUnmounted(() => {
     border-right: none;
     border-top: 1px solid var(--border);
     box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.06);
-    padding: 0;
+    /* Safari URL bar / home indicator — keep sheet above browser chrome */
+    padding: 0 0 calc(0.85rem + env(safe-area-inset-bottom, 0px));
     gap: 0;
     overflow: hidden;
     border-radius: 14px 14px 0 0;
@@ -2468,13 +2469,14 @@ onUnmounted(() => {
     gap: 0.65rem;
     width: 100%;
     flex-shrink: 0;
-    padding: 0.85rem 1rem 0.65rem;
+    padding: 0.95rem 1rem 0.85rem;
     border: none;
     background: var(--surface-2);
     cursor: pointer;
     text-align: left;
     color: var(--text);
     min-height: 52px;
+    -webkit-tap-highlight-color: transparent;
   }
 
   .sheet-handle {
@@ -2498,7 +2500,7 @@ onUnmounted(() => {
   }
 
   .sheet-title {
-    font-size: 0.7rem;
+    font-size: 0.75rem;
     font-weight: 700;
     letter-spacing: 0.04em;
     text-transform: uppercase;
@@ -2506,7 +2508,7 @@ onUnmounted(() => {
   }
 
   .sheet-summary {
-    font-size: 0.82rem;
+    font-size: 0.9rem;
     font-weight: 600;
     color: var(--text);
     white-space: nowrap;
@@ -2516,15 +2518,15 @@ onUnmounted(() => {
 
   .sheet-chevron {
     flex-shrink: 0;
-    width: 2rem;
-    height: 2rem;
+    width: 2.5rem;
+    height: 2.5rem;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     border-radius: 8px;
     background: var(--surface);
     border: 1px solid var(--border);
-    font-size: 1.05rem;
+    font-size: 1.1rem;
     font-weight: 700;
   }
 
@@ -2532,12 +2534,14 @@ onUnmounted(() => {
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: contain;
-    padding: 0.75rem 1rem 1rem;
+    padding: 0.75rem 1rem calc(1.1rem + env(safe-area-inset-bottom, 0px));
     max-height: min(34vh, 360px);
   }
 
   .planner-controls:not(.sheet-collapsed) {
     border-top-color: var(--border);
+    /* Body already carries inset; avoid double-padding when open */
+    padding-bottom: 0;
   }
 
   .planner-controls:not(.sheet-collapsed) .controls-sheet-toggle {

@@ -1353,7 +1353,7 @@ function addLayers() {
     },
   })
 
-  // Filled A/B pins (not washed-out white discs) — tip marks the coordinate
+  // Filled A/B discs (green/red) — center marks the coordinate
   map.addLayer({
     id: 'route-ends-pins',
     type: 'symbol',
@@ -1361,12 +1361,12 @@ function addLayers() {
     layout: {
       'icon-image': ['get', 'icon'],
       'icon-size': ['interpolate', ['linear'], ['zoom'], 6, 0.85, 12, 1, 16, 1.05],
-      'icon-anchor': 'bottom',
+      'icon-anchor': 'center',
       'icon-allow-overlap': true,
       'icon-ignore-placement': true,
       'text-field': ['get', 'label'],
       'text-size': ['interpolate', ['linear'], ['zoom'], 6, 11, 12, 12, 16, 13],
-      'text-offset': [0, -3.35],
+      'text-offset': [0, -1.85],
       'text-font': [...MAP_LABEL_FONT],
       'text-anchor': 'bottom',
       'text-allow-overlap': true,

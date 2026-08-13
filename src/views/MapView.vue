@@ -2136,8 +2136,17 @@ function onDocClick(e: MouseEvent) {
   }
 
   .map-toolbar {
-    min-height: 54px;
-    padding: 0.6rem 0.75rem;
+    min-height: 56px;
+    padding: 0.55rem 0.75rem;
+  }
+
+  .tool-btn {
+    min-width: 48px;
+    min-height: 48px;
+    padding: 0.65rem 0.85rem;
+    font-size: 0.9rem;
+    border-radius: 10px;
+    -webkit-tap-highlight-color: transparent;
   }
 
   /* Export + Teilen nur über Bottom-Nav / Sheet */

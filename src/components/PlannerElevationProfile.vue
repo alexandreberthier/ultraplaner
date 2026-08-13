@@ -450,6 +450,7 @@ onUnmounted(() => {
   cursor: pointer;
   text-align: left;
   color: var(--text);
+  -webkit-tap-highlight-color: transparent;
 }
 
 .planner-elev:not(.collapsed) .profile-toggle {
@@ -650,12 +651,21 @@ onUnmounted(() => {
   }
 
   .profile-toggle {
-    min-height: 40px;
-    padding: 0.4rem 0.75rem;
+    min-height: 52px;
+    padding: 0.75rem 0.9rem;
+  }
+
+  .title {
+    font-size: 0.75rem;
   }
 
   .subtitle {
-    font-size: 0.78rem;
+    font-size: 0.9rem;
+  }
+
+  .chevron-wrap {
+    width: 2.5rem;
+    height: 2.5rem;
   }
 
   .surface-list {

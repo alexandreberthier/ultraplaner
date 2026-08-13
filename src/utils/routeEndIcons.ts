@@ -1,9 +1,12 @@
 import type { Map as MaplibreMap } from 'maplibre-gl'
 import { routeEndColor, routeStartColor } from '../config/mapStyle'
 
-/** Canvas px — displayed at half size via pixelRatio 2 (~28–32 CSS px). */
-const ICON_W = 56
-const ICON_H = 72
+/**
+ * Canvas px — displayed at half size via pixelRatio 2 (~30 CSS px diameter).
+ * Filled A/B discs (not teardrop / down-arrow pins) so Start/Ziel stay clear at a glance.
+ */
+const ICON_W = 60
+const ICON_H = 60
 
 export type RouteEndRole = 'start' | 'end' | 'both'
 
@@ -22,74 +25,66 @@ function makeCanvas(w: number, h: number): { canvas: HTMLCanvasElement; ctx: Can
   return { canvas, ctx }
 }
 
-/** Teardrop pin path; tip at bottom center. */
-function pinPath(ctx: CanvasRenderingContext2D, w: number, h: number) {
+function discPath(ctx: CanvasRenderingContext2D, w: number, h: number) {
   const cx = w / 2
-  const cy = h * 0.36
-  const r = w * 0.34
-  const tipY = h * 0.94
-  // Arc over the top (counter-clockwise), then close down to the tip
+  const cy = h / 2
+  const r = w * 0.42
   ctx.beginPath()
-  ctx.arc(cx, cy, r, Math.PI * 0.78, Math.PI * 0.22, true)
-  ctx.lineTo(cx, tipY)
+  ctx.arc(cx, cy, r, 0, Math.PI * 2)
   ctx.closePath()
 }
 
-function strokePin(
+function strokeDisc(
   ctx: CanvasRenderingContext2D,
   w: number,
   h: number,
   color: string,
   lineWidth: number
 ) {
-  pinPath(ctx, w, h)
+  discPath(ctx, w, h)
   ctx.strokeStyle = color
   ctx.lineWidth = lineWidth
-  ctx.lineJoin = 'round'
   ctx.stroke()
 }
 
-function fillPin(ctx: CanvasRenderingContext2D, w: number, h: number, color: string) {
-  pinPath(ctx, w, h)
+function fillDisc(ctx: CanvasRenderingContext2D, w: number, h: number, color: string) {
+  discPath(ctx, w, h)
   ctx.fillStyle = color
   ctx.fill()
 }
 
 function drawLetter(ctx: CanvasRenderingContext2D, w: number, h: number, letter: string) {
-  const cy = h * 0.36
   ctx.fillStyle = '#ffffff'
-  ctx.font = `bold ${Math.round(w * 0.42)}px system-ui, -apple-system, Segoe UI, sans-serif`
+  ctx.font = `bold ${Math.round(w * 0.48)}px system-ui, -apple-system, Segoe UI, sans-serif`
   ctx.textAlign = 'center'
   ctx.textBaseline = 'middle'
-  // Soft dark shadow so white letter stays readable on bright fills
   ctx.shadowColor = 'rgba(0,0,0,0.35)'
   ctx.shadowBlur = w * 0.04
   ctx.shadowOffsetY = w * 0.02
-  ctx.fillText(letter, w / 2, cy + 1)
+  ctx.fillText(letter, w / 2, h / 2 + 1)
   ctx.shadowColor = 'transparent'
   ctx.shadowBlur = 0
   ctx.shadowOffsetY = 0
 }
 
-function drawSolidPin(fill: string, letter: string): HTMLCanvasElement {
+function drawSolidDisc(fill: string, letter: string): HTMLCanvasElement {
   const { canvas, ctx } = makeCanvas(ICON_W, ICON_H)
   ctx.clearRect(0, 0, ICON_W, ICON_H)
-  // Outer dark ring first (survives fill), then fill, then white edge
-  strokePin(ctx, ICON_W, ICON_H, '#0f172a', ICON_W * 0.12)
-  fillPin(ctx, ICON_W, ICON_H, fill)
-  strokePin(ctx, ICON_W, ICON_H, '#ffffff', ICON_W * 0.055)
+  strokeDisc(ctx, ICON_W, ICON_H, '#0f172a', ICON_W * 0.1)
+  fillDisc(ctx, ICON_W, ICON_H, fill)
+  strokeDisc(ctx, ICON_W, ICON_H, '#ffffff', ICON_W * 0.05)
   drawLetter(ctx, ICON_W, ICON_H, letter)
   return canvas
 }
 
 /** Round-trip: vertical split green|red with ↺. */
-function drawBothPin(startFill: string, endFill: string): HTMLCanvasElement {
+function drawBothDisc(startFill: string, endFill: string): HTMLCanvasElement {
   const { canvas, ctx } = makeCanvas(ICON_W, ICON_H)
   ctx.clearRect(0, 0, ICON_W, ICON_H)
-  strokePin(ctx, ICON_W, ICON_H, '#0f172a', ICON_W * 0.12)
+  strokeDisc(ctx, ICON_W, ICON_H, '#0f172a', ICON_W * 0.1)
 
   ctx.save()
-  pinPath(ctx, ICON_W, ICON_H)
+  discPath(ctx, ICON_W, ICON_H)
   ctx.clip()
   const mid = ICON_W / 2
   ctx.fillStyle = startFill
@@ -98,7 +93,7 @@ function drawBothPin(startFill: string, endFill: string): HTMLCanvasElement {
   ctx.fillRect(mid, 0, mid, ICON_H)
   ctx.restore()
 
-  strokePin(ctx, ICON_W, ICON_H, '#ffffff', ICON_W * 0.055)
+  strokeDisc(ctx, ICON_W, ICON_H, '#ffffff', ICON_W * 0.05)
   drawLetter(ctx, ICON_W, ICON_H, '↺')
   return canvas
 }
@@ -111,11 +106,11 @@ function addOrReplaceImage(map: MaplibreMap, id: string, canvas: HTMLCanvasEleme
   map.addImage(id, data, { pixelRatio: 2 })
 }
 
-/** Register / refresh start·end·both pins (colors follow colorblind mode). */
+/** Register / refresh start·end·both discs (colors follow colorblind mode). */
 export function ensureRouteEndImages(map: MaplibreMap) {
   const start = routeStartColor()
   const end = routeEndColor()
-  addOrReplaceImage(map, 'route-pin-start', drawSolidPin(start, 'A'))
-  addOrReplaceImage(map, 'route-pin-end', drawSolidPin(end, 'B'))
-  addOrReplaceImage(map, 'route-pin-both', drawBothPin(start, end))
+  addOrReplaceImage(map, 'route-pin-start', drawSolidDisc(start, 'A'))
+  addOrReplaceImage(map, 'route-pin-end', drawSolidDisc(end, 'B'))
+  addOrReplaceImage(map, 'route-pin-both', drawBothDisc(start, end))
 }
