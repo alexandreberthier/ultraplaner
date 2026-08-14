@@ -35,7 +35,7 @@ export const NEARBY_DEFAULT_POI_CATEGORIES: PoiCategory[] = ['fuel', 'supermarke
 
 export const DEFAULT_POI_RADIUS_M = 500
 export const MIN_POI_RADIUS_M = 300
-export const MAX_POI_RADIUS_M = 2000
+export const MAX_POI_RADIUS_M = 5000
 /** Nearby search can look farther than corridor-along-route. */
 export const NEARBY_DEFAULT_POI_RADIUS_M = 3000
 export const NEARBY_MAX_POI_RADIUS_M = 10000

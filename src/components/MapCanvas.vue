@@ -95,6 +95,10 @@ const props = defineProps<{
   rideMode?: boolean
 }>()
 
+const emit = defineEmits<{
+  'exit-ride': []
+}>()
+
 const mapContainer = ref<HTMLDivElement | null>(null)
 const mapCanvasWrap = ref<HTMLDivElement | null>(null)
 let map: maplibregl.Map | null = null
@@ -2079,6 +2083,14 @@ onUnmounted(() => {
             <li>{{ t('mapCanvas.geoHelp3') }}</li>
           </template>
         </ol>
+        <button
+          v-if="rideMode"
+          type="button"
+          class="location-error-exit"
+          @click.stop="emit('exit-ride')"
+        >
+          {{ t('map.rideOff') }}
+        </button>
       </div>
       <button type="button" class="location-error-dismiss" :aria-label="t('common.close')" @click.stop="clearLocationError">
         ×
@@ -2365,6 +2377,20 @@ onUnmounted(() => {
   line-height: 1;
   cursor: pointer;
   padding: 0 0.1rem;
+}
+
+.location-error-exit {
+  display: inline-flex;
+  margin-top: 0.55rem;
+  border: none;
+  border-radius: 8px;
+  padding: 0.45rem 0.7rem;
+  background: #111;
+  color: #fff;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 800;
+  cursor: pointer;
 }
 
 @media (max-width: 768px) {

@@ -585,14 +585,14 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
 
 .hero-center {
   margin: 0;
-  text-align: center;
+  text-align: left;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  max-width: 40rem;
+  align-items: flex-start;
+  max-width: 34rem;
   width: 100%;
-  align-self: center;
-  padding: 0.7rem 0 1.05rem;
+  align-self: flex-start;
+  padding: 0.85rem 0 1.15rem;
 }
 
 .hero-kicker {
@@ -605,17 +605,17 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
 }
 
 .hero-title {
-  font-size: clamp(1.45rem, 3.2vw, 2.05rem);
+  font-size: clamp(1.55rem, 3.4vw, 2.35rem);
   font-weight: 800;
   color: #fff;
   margin: 0 0 0.4rem;
-  line-height: 1.16;
-  letter-spacing: -0.02em;
+  line-height: 1.12;
+  letter-spacing: -0.03em;
   text-shadow: 0 2px 18px rgba(0, 0, 0, 0.28);
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 0.05em;
+  align-items: flex-start;
+  gap: 0.02em;
 }
 
 .hero-title-route {
@@ -652,7 +652,7 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
   display: flex;
   flex-wrap: wrap;
   gap: 0.65rem;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: center;
 }
 
@@ -661,15 +661,15 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
   grid-template-columns: 1fr auto 1fr auto 1fr;
   align-items: center;
   gap: 1rem;
-  margin-top: -1.15rem;
+  margin-top: 0;
   position: relative;
   z-index: 2;
-  background: color-mix(in srgb, var(--surface) 94%, transparent);
-  backdrop-filter: blur(10px);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 1.1rem 1.5rem;
-  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.08);
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  border-radius: 0;
+  padding: 1rem 0 1.1rem;
+  box-shadow: none;
 }
 
 .stat {
@@ -729,7 +729,7 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
   flex: 1;
   padding: 0.7rem 1rem;
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: 4px;
   background: var(--surface);
   font-weight: 600;
   font-size: 0.92rem;
@@ -747,9 +747,9 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
 .hero-card {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 1.5rem;
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.05);
+  border-radius: 4px;
+  padding: 1.35rem 1.4rem;
+  box-shadow: none;
 }
 
 .hero-card[hidden] {
@@ -859,16 +859,14 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
   display: flex;
   gap: 0.9rem;
   align-items: flex-start;
-  background: var(--surface);
+  background: transparent;
   border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 1.15rem 1.2rem;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  border-radius: 4px;
+  padding: 1rem 1.05rem;
 }
 
 .feature-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.06);
+  background: var(--surface);
 }
 
 .feature-icon {
@@ -900,20 +898,20 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
   display: flex;
   gap: 0.9rem;
   align-items: flex-start;
-  background: var(--surface);
+  background: transparent;
   border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 1.15rem 1.2rem;
+  border-radius: 4px;
+  padding: 1rem 1.05rem;
 }
 
 .step-num {
-  width: 2rem;
-  height: 2rem;
-  border-radius: 50%;
-  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  width: 1.85rem;
+  height: 1.85rem;
+  border-radius: 2px;
+  background: var(--primary-dark);
   color: #fff;
   font-weight: 800;
-  font-size: 0.95rem;
+  font-size: 0.85rem;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -941,7 +939,7 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
 
 .faq-item {
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: 4px;
   background: var(--surface);
 }
 
@@ -1181,10 +1179,18 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
 
   .hero-center {
     padding: 0.55rem 0 0.85rem;
+    text-align: center;
+    align-items: center;
+    align-self: center;
   }
 
   .hero-title {
     font-size: clamp(1.35rem, 6.4vw, 1.85rem);
+    align-items: center;
+  }
+
+  .cta-row {
+    justify-content: center;
   }
 
   .hero-sub {
@@ -1208,7 +1214,7 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
   .stats-bar {
     grid-template-columns: 1fr;
     gap: 0.75rem;
-    margin-top: -1rem;
+    margin-top: 0;
   }
 
   .stat-sep {

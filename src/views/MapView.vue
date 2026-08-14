@@ -75,6 +75,7 @@ const {
 } = useWahoo()
 const mapCanvasRef = ref<{
   startLocation: (opts?: { follow?: boolean; heading?: boolean }) => void
+  stopLocation: (opts?: { keepError?: boolean }) => void
   setDragPanEnabled: (enabled: boolean) => void
 } | null>(null)
 
@@ -339,8 +340,15 @@ function enterRideMode() {
 
 function exitRideMode() {
   setRideMode(false)
+  mapCanvasRef.value?.stopLocation()
   void wakeLock.release()
   wakeLock.unbind()
+}
+
+function onRideKey(e: KeyboardEvent) {
+  if (e.key !== 'Escape' || !rideMode.value) return
+  e.preventDefault()
+  exitRideMode()
 }
 
 async function loadIfNeeded() {
@@ -353,6 +361,7 @@ async function loadIfNeeded() {
 
 onMounted(() => {
   document.addEventListener('click', onDocClick)
+  document.addEventListener('keydown', onRideKey)
   // Never start in ride cockpit — that hides toolbar/export/elevation
   if (rideMode.value) exitRideMode()
   if (store.mode === 'loading' && !store.mapReady) {
@@ -376,6 +385,7 @@ function dismissExportTip(permanent = true) {
 
 onUnmounted(() => {
   document.removeEventListener('click', onDocClick)
+  document.removeEventListener('keydown', onRideKey)
   document.documentElement.classList.remove('map-overlay-open')
   wakeLock.unbind()
 })
@@ -575,7 +585,7 @@ function onDocClick(e: MouseEvent) {
     </aside>
 
     <main class="map-main">
-      <header v-show="!rideMode" class="map-toolbar">
+      <header class="map-toolbar" :class="{ 'is-ride': rideMode }">
         <div class="toolbar-left">
           <button
             type="button"
@@ -593,10 +603,11 @@ function onDocClick(e: MouseEvent) {
             v-if="!store.isNearbyMap"
             type="button"
             class="tool-btn ride-enter"
-            :title="t('map.rideOn')"
-            @click="enterRideMode"
+            :class="{ 'is-on': rideMode }"
+            :title="rideMode ? t('map.rideOff') : t('map.rideOn')"
+            @click="rideMode ? exitRideMode() : enterRideMode()"
           >
-            {{ t('map.rideOn') }}
+            {{ rideMode ? t('map.rideOff') : t('map.rideOn') }}
           </button>
         </div>
 
@@ -947,45 +958,34 @@ function onDocClick(e: MouseEvent) {
       </Transition>
 
       <div class="map-stack">
-        <MapCanvas ref="mapCanvasRef" :key="store.mapEpoch" :ride-mode="rideMode">
+        <MapCanvas ref="mapCanvasRef" :key="store.mapEpoch" :ride-mode="rideMode" @exit-ride="exitRideMode">
           <template v-if="!rideMode" #left-controls>
-            <div class="map-cp-tools" :aria-label="t('nearby.panelTitle')">
+            <div v-if="!store.isNearbyMap" class="map-cp-tools" :aria-label="t('controls.mapFab')">
               <button
                 type="button"
-                class="map-cp-fab map-nearby-options"
-                :title="t('nearby.panelTitle')"
-                @click="openNearbyPanel"
+                class="map-cp-fab"
+                :class="{ active: cpMenuOpen || !!store.controlPointPlaceKind }"
+                :title="t('controls.mapFab')"
+                :aria-expanded="cpMenuOpen || !!store.controlPointPlaceKind"
+                @click="toggleCpMenu"
               >
-                <span aria-hidden="true">⚙</span>
-                <span class="map-cp-fab-label">{{ t('nearby.options') }}</span>
+                <span aria-hidden="true">⚑</span>
+                <span class="map-cp-fab-label">{{ t('controls.kindCp') }}</span>
               </button>
-              <template v-if="!store.isNearbyMap">
+              <div v-if="cpMenuOpen || store.controlPointPlaceKind" class="map-cp-menu" role="menu">
                 <button
+                  v-for="k in cpKinds"
+                  :key="k.id"
                   type="button"
-                  class="map-cp-fab"
-                  :class="{ active: cpMenuOpen || !!store.controlPointPlaceKind }"
-                  :title="t('controls.mapFab')"
-                  :aria-expanded="cpMenuOpen || !!store.controlPointPlaceKind"
-                  @click="toggleCpMenu"
+                  class="map-cp-kind"
+                  role="menuitem"
+                  :class="{ active: store.controlPointPlaceKind === k.id }"
+                  @click="startPlaceControlPoint(k.id)"
                 >
-                  <span aria-hidden="true">⚑</span>
-                  <span class="map-cp-fab-label">{{ t('controls.kindCp') }}</span>
+                  <span aria-hidden="true">{{ poiCategoryEmoji(k.category) }}</span>
+                  {{ t(k.labelKey) }}
                 </button>
-                <div v-if="cpMenuOpen || store.controlPointPlaceKind" class="map-cp-menu" role="menu">
-                  <button
-                    v-for="k in cpKinds"
-                    :key="k.id"
-                    type="button"
-                    class="map-cp-kind"
-                    role="menuitem"
-                    :class="{ active: store.controlPointPlaceKind === k.id }"
-                    @click="startPlaceControlPoint(k.id)"
-                  >
-                    <span aria-hidden="true">{{ poiCategoryEmoji(k.category) }}</span>
-                    {{ t(k.labelKey) }}
-                  </button>
-                </div>
-              </template>
+              </div>
             </div>
           </template>
         </MapCanvas>
@@ -2020,28 +2020,6 @@ function onDocClick(e: MouseEvent) {
     display: none;
   }
 
-  /* Fahrt: große Daumen-Pills für Optionen */
-  .map-nearby-options {
-    width: auto;
-    min-width: 60px;
-    min-height: 60px;
-    height: auto;
-    padding: 0.85rem 1.05rem;
-    gap: 0.5rem;
-    font-size: 1.05rem;
-    border-radius: 16px;
-  }
-
-  .map-nearby-options .map-cp-fab-label {
-    display: inline;
-    font-size: 0.95rem;
-    font-weight: 800;
-    max-width: 11rem;
-    line-height: 1.15;
-    white-space: normal;
-    text-align: left;
-  }
-
   .map-cp-banner {
     top: calc(12px + env(safe-area-inset-top, 0px));
     left: 50%;
@@ -2063,7 +2041,42 @@ function onDocClick(e: MouseEvent) {
   font-weight: 700;
 }
 
+.tool-btn.ride-enter.is-on {
+  background: #111;
+  border-color: #111;
+  color: #fff;
+}
+
 .ride-overlay {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 50;
+  padding: 0;
+  pointer-events: none;
+  max-width: min(22rem, calc(100% - 5rem));
+}
+
+.ride-exit {
+  pointer-events: auto;
+  min-height: 40px;
+  padding: 0.45rem 0.85rem;
+  border: none;
+  border-radius: 8px;
+  background: #111;
+  color: #fff;
+  font-weight: 800;
+  font-size: 0.88rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.28);
+  cursor: pointer;
+}
+
+.ride-nearby,
+.ride-cockpit {
   display: none;
 }
 
@@ -2219,6 +2232,10 @@ function onDocClick(e: MouseEvent) {
     font-weight: 700;
   }
 
+  .map-toolbar.is-ride {
+    display: none;
+  }
+
   .map-layout.ride-mode .map-stack {
     padding-bottom: env(safe-area-inset-bottom, 0px);
   }
@@ -2277,6 +2294,8 @@ function onDocClick(e: MouseEvent) {
 
   .ride-nearby {
     pointer-events: auto;
+    display: inline-flex;
+    align-items: center;
     min-height: 36px;
     padding: 0.35rem 0.65rem;
     border: none;
