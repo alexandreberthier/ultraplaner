@@ -2149,17 +2149,17 @@ onUnmounted(() => {
   top: calc(10px + env(safe-area-inset-top, 0px));
   right: calc(47px + env(safe-area-inset-right, 0px));
   z-index: 40;
-  width: 36px;
-  height: 36px;
+  width: 44px;
+  height: 44px;
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
   background: #fff;
   box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 6px;
+  padding: 8px;
   color: #333;
   transition: background 0.15s;
   touch-action: manipulation;
@@ -2326,7 +2326,7 @@ onUnmounted(() => {
 
 .heading-fallback-hint {
   position: absolute;
-  top: calc(52px + env(safe-area-inset-top, 0px));
+  top: calc(62px + env(safe-area-inset-top, 0px));
   right: calc(10px + env(safe-area-inset-right, 0px));
   z-index: 40;
   margin: 0;
@@ -2344,7 +2344,7 @@ onUnmounted(() => {
 
 .location-error {
   position: absolute;
-  top: calc(52px + env(safe-area-inset-top, 0px));
+  top: calc(62px + env(safe-area-inset-top, 0px));
   right: calc(10px + env(safe-area-inset-right, 0px));
   background: #fee2e2;
   color: #991b1b;
@@ -2389,21 +2389,21 @@ onUnmounted(() => {
   .map-left-stack {
     top: calc(12px + env(safe-area-inset-top, 0px));
     left: calc(10px + env(safe-area-inset-left, 0px));
-    max-width: calc(100% - 96px - env(safe-area-inset-right, 0px));
+    max-width: calc(100% - 110px - env(safe-area-inset-right, 0px));
   }
 
   .location-btn {
     top: calc(10px + env(safe-area-inset-top, 0px));
-    right: calc(47px + env(safe-area-inset-right, 0px));
-    width: 36px;
-    height: 36px;
-    padding: 6px;
-    border-radius: 6px;
+    right: calc(52px + env(safe-area-inset-right, 0px));
+    width: 48px;
+    height: 48px;
+    padding: 9px;
+    border-radius: 10px;
     box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.12);
   }
 
   .heading-fallback-hint {
-    top: calc(52px + env(safe-area-inset-top, 0px));
+    top: calc(68px + env(safe-area-inset-top, 0px));
     right: calc(10px + env(safe-area-inset-right, 0px));
     left: auto;
     max-width: min(14rem, calc(100% - 80px));
@@ -2416,7 +2416,7 @@ onUnmounted(() => {
   }
 
   .map-canvas-wrap.ride-mode .heading-fallback-hint {
-    top: calc(52px + env(safe-area-inset-top, 0px));
+    top: calc(68px + env(safe-area-inset-top, 0px));
   }
 
   .map-canvas-wrap.ride-mode :deep(.maplibregl-ctrl-top-right) {
@@ -2424,7 +2424,7 @@ onUnmounted(() => {
   }
 
   .location-error {
-    top: calc(52px + env(safe-area-inset-top, 0px));
+    top: calc(68px + env(safe-area-inset-top, 0px));
     right: calc(10px + env(safe-area-inset-right, 0px));
     left: calc(12px + env(safe-area-inset-left, 0px));
     z-index: 120;

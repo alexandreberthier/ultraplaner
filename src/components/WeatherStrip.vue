@@ -227,8 +227,8 @@ watch(
 
 .weather-chip {
   flex: 0 0 auto;
-  min-width: 5.5rem;
-  padding: 0.45rem 0.55rem;
+  min-width: 6rem;
+  padding: 0.55rem 0.65rem;
   border: 1px solid var(--border);
   border-radius: 8px;
   background: var(--surface-2);
@@ -253,13 +253,13 @@ watch(
 }
 
 .weather-chip strong {
-  font-size: 0.72rem;
+  font-size: 0.82rem;
   color: var(--text-muted);
   font-weight: 600;
 }
 
 .weather-temp {
-  font-size: 1.05rem;
+  font-size: 1.15rem;
   font-weight: 700;
   line-height: 1.2;
 }
@@ -278,7 +278,7 @@ watch(
 
 .weather-detail,
 .weather-time {
-  font-size: 0.68rem;
+  font-size: 0.78rem;
   color: var(--text-muted);
   line-height: 1.25;
 }

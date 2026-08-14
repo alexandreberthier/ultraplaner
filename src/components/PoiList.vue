@@ -320,12 +320,13 @@ header {
 
 .tabs button {
   flex: 1;
-  padding: 0.35rem 0.5rem;
+  padding: 0.5rem 0.55rem;
+  min-height: 44px;
   border: 1px solid var(--border);
   border-radius: 6px;
   background: var(--surface);
   cursor: pointer;
-  font-size: 0.8rem;
+  font-size: 0.9rem;
 }
 
 .tabs button.active {

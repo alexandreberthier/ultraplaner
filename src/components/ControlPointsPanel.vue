@@ -155,25 +155,26 @@ function kindEmoji(kind: ControlPointKind) {
 .empty,
 .place-hint {
   margin: 0;
-  font-size: 0.75rem;
+  font-size: 0.88rem;
   color: var(--muted, #6b7280);
-  line-height: 1.35;
+  line-height: 1.4;
 }
 
 .kind-row {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.35rem;
+  gap: 0.45rem;
   margin-top: 0.5rem;
 }
 
 .kind-btn {
   border: 1px solid var(--border, #d1d5db);
   background: #fff;
-  border-radius: 8px;
-  padding: 0.35rem 0.55rem;
-  font-size: 0.75rem;
-  font-weight: 600;
+  border-radius: 10px;
+  padding: 0.55rem 0.85rem;
+  min-height: 44px;
+  font-size: 0.95rem;
+  font-weight: 650;
   cursor: pointer;
 }
 

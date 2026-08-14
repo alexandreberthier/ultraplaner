@@ -30,11 +30,6 @@ import { formatDuration, formatClock, hoursForDistanceKm } from '../utils/eta'
 import { openStatusAtEta, hasOsmOpeningHours, type OpenStatus } from '../utils/openingHours'
 import { poiCategoryEmoji } from '../utils/poiLabels'
 import type { ControlPointKind, Poi, PoiCategory } from '../../shared/types'
-import {
-  DEFAULT_POI_CATEGORIES,
-  NEARBY_DEFAULT_POI_CATEGORIES,
-  NEARBY_DEFAULT_POI_RADIUS_M,
-} from '../config/poiCategories'
 
 import { getPackMeta, type OfflinePackMeta } from '../services/offlinePacks'
 
@@ -99,7 +94,6 @@ const showExportMenu = ref(false)
 const showExportTip = ref(false)
 const cpMenuOpen = ref(false)
 const nearbyPanelRef = ref<{ setOpen: (value: boolean) => void } | null>(null)
-const nearbyRescanning = ref(false)
 const packMeta = ref<OfflinePackMeta | null>(null)
 
 const hasOfflinePack = computed(
@@ -119,14 +113,6 @@ watch(
   () => {
     void refreshPackMeta()
   }
-)
-
-const nearbyFabLabel = computed(() =>
-  nearbyRescanning.value || store.poisLoading
-    ? t('nearby.searching')
-    : store.isNearbyMap
-      ? t('nearby.mapFabRescan')
-      : t('nearby.mapFab')
 )
 
 const cpKinds: { id: ControlPointKind; labelKey: string; category: 'checkpoint' | 'sleep' }[] = [
@@ -186,116 +172,6 @@ function openNearbyPanel() {
   sidebarOpen.value = true
   nearbyPanelRef.value?.setOpen(true)
   mobilePanel.value = 'none'
-}
-
-/** Umgebung map: FAB reloads GPS + POIs. Route maps: GPS enrich (keep route). */
-function onNearbyFabClick() {
-  if (store.isNearbyMap) {
-    void quickNearbyRescan()
-    return
-  }
-  void quickRouteEnrich()
-}
-
-function nearbyRescanRadius(): number {
-  if (store.isNearbyMap) {
-    return store.poiRadiusM > 0 ? store.poiRadiusM : NEARBY_DEFAULT_POI_RADIUS_M
-  }
-  // Route map: last GPS enrich radius, else nearby default (not route corridor)
-  if (store.gpsEnrichFocus?.radiusM) return store.gpsEnrichFocus.radiusM
-  return NEARBY_DEFAULT_POI_RADIUS_M
-}
-
-function nearbyRescanCategories(): PoiCategory[] {
-  if (store.activeCategories.length) return [...store.activeCategories]
-  return store.isNearbyMap
-    ? [...NEARBY_DEFAULT_POI_CATEGORIES]
-    : [...DEFAULT_POI_CATEGORIES]
-}
-
-function beginGeoRescan(): boolean {
-  if (nearbyRescanning.value || store.poisLoading) return false
-  if (typeof window !== 'undefined' && !window.isSecureContext) {
-    store.error = t('nearby.geoInsecure')
-    return false
-  }
-  if (!navigator.geolocation) {
-    store.error = t('nearby.geoUnsupported')
-    return false
-  }
-
-  store.selectedPoi = null
-  showExportMenu.value = false
-  cpMenuOpen.value = false
-  store.cancelPlaceControlPoint()
-  nearbyRescanning.value = true
-  store.error = ''
-  return true
-}
-
-function onGeoRescanError(err: GeolocationPositionError) {
-  nearbyRescanning.value = false
-  if (err.code === 1) store.error = t('nearby.geoDenied')
-  else if (err.code === 2) store.error = t('nearby.geoUnavailable')
-  else if (err.code === 3) store.error = t('nearby.geoTimeout')
-  else store.error = t('nearby.geoFailed')
-}
-
-async function quickNearbyRescan() {
-  if (!beginGeoRescan()) return
-
-  navigator.geolocation.getCurrentPosition(
-    async (pos) => {
-      try {
-        const radius = nearbyRescanRadius()
-        const cats = nearbyRescanCategories()
-        store.prepareNearbyCenter(pos.coords.latitude, pos.coords.longitude, radius, cats)
-        await store.refreshNearbyPois(radius, cats)
-        await maybeStartNearbyLocationFollow()
-      } catch (err) {
-        store.error = err instanceof Error ? err.message : t('nearby.loadFailed')
-      } finally {
-        nearbyRescanning.value = false
-      }
-    },
-    onGeoRescanError,
-    {
-      enableHighAccuracy: true,
-      maximumAge: 15_000,
-      timeout: 20_000,
-    }
-  )
-}
-
-/** Route map: enrich POIs around GPS without dropping the route. */
-async function quickRouteEnrich() {
-  if (!beginGeoRescan()) return
-
-  navigator.geolocation.getCurrentPosition(
-    async (pos) => {
-      try {
-        const radius = nearbyRescanRadius()
-        const cats = nearbyRescanCategories()
-        await store.enrichPoisAroundGps(
-          pos.coords.latitude,
-          pos.coords.longitude,
-          radius,
-          cats
-        )
-        await maybeStartNearbyLocationFollow()
-      } catch (err) {
-        store.error = err instanceof Error ? err.message : t('nearby.loadFailed')
-      } finally {
-        nearbyRescanning.value = false
-      }
-    },
-    onGeoRescanError,
-    {
-      enableHighAccuracy: true,
-      maximumAge: 15_000,
-      timeout: 20_000,
-    }
-  )
 }
 
 function onNearbyDone() {
@@ -722,15 +598,6 @@ function onDocClick(e: MouseEvent) {
           >
             {{ t('map.rideOn') }}
           </button>
-          <button
-            type="button"
-            class="tool-btn nearby-enter"
-            :title="nearbyFabLabel"
-            :disabled="nearbyRescanning || store.poisLoading"
-            @click="onNearbyFabClick"
-          >
-            {{ nearbyFabLabel }}
-          </button>
         </div>
 
         <div class="toolbar-right desktop-actions">
@@ -1085,20 +952,6 @@ function onDocClick(e: MouseEvent) {
             <div class="map-cp-tools" :aria-label="t('nearby.panelTitle')">
               <button
                 type="button"
-                class="map-cp-fab map-nearby-fab"
-                :class="{
-                  loading: nearbyRescanning || store.poisLoading,
-                }"
-                :title="nearbyFabLabel"
-                :aria-busy="nearbyRescanning || store.poisLoading"
-                :disabled="nearbyRescanning || store.poisLoading"
-                @click="onNearbyFabClick"
-              >
-                <span aria-hidden="true">◎</span>
-                <span class="map-cp-fab-label">{{ nearbyFabLabel }}</span>
-              </button>
-              <button
-                type="button"
                 class="map-cp-fab map-nearby-options"
                 :title="t('nearby.panelTitle')"
                 @click="openNearbyPanel"
@@ -1230,22 +1083,6 @@ function onDocClick(e: MouseEvent) {
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round">
             <path d="M4 11.2 12 4l8 7.2" />
             <path d="M6.5 10.2V20h4.2v-6.2h2.6V20h4.2V10.2" />
-          </svg>
-        </span>
-      </button>
-      <button
-        type="button"
-        class="nav-item nav-reload"
-        :class="{ loading: nearbyRescanning || store.poisLoading }"
-        :title="nearbyFabLabel"
-        :aria-label="nearbyFabLabel"
-        :disabled="nearbyRescanning || store.poisLoading"
-        @click="onNearbyFabClick"
-      >
-        <span class="nav-glyph" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 12a9 9 0 1 1-2.6-6.3" />
-            <path d="M21 3.8V9h-5.2" />
           </svg>
         </span>
       </button>
@@ -1385,7 +1222,6 @@ function onDocClick(e: MouseEvent) {
           <PoiList embedded />
           <EtaPlanner v-if="!store.isNearbyMap" embedded />
           <WeatherStrip v-if="!store.isNearbyMap" embedded />
-          <NearbySearchPanel embedded @done="onNearbyDone" />
           <ControlPointsPanel />
           <OfflinePackPanel @updated="refreshPackMeta" />
         </div>
@@ -2106,10 +1942,10 @@ function onDocClick(e: MouseEvent) {
 .map-cp-menu {
   display: flex;
   flex-direction: column;
-  gap: 0.3rem;
-  min-width: 8.5rem;
-  padding: 0.35rem;
-  border-radius: 10px;
+  gap: 0.4rem;
+  min-width: 12rem;
+  padding: 0.45rem;
+  border-radius: 12px;
   background: #fff;
   box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.08), 0 8px 20px rgba(0, 0, 0, 0.14);
 }
@@ -2117,15 +1953,16 @@ function onDocClick(e: MouseEvent) {
 .map-cp-kind {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: 0.55rem;
   border: none;
-  border-radius: 8px;
-  padding: 0.55rem 0.65rem;
+  border-radius: 10px;
+  padding: 0.75rem 0.9rem;
+  min-height: 48px;
   background: transparent;
   color: #111;
   font: inherit;
-  font-size: 0.85rem;
-  font-weight: 600;
+  font-size: 1.05rem;
+  font-weight: 700;
   text-align: left;
   cursor: pointer;
 }
@@ -2183,8 +2020,7 @@ function onDocClick(e: MouseEvent) {
     display: none;
   }
 
-  /* Fahrt: große Daumen-Pills für Rescan / Optionen */
-  .map-nearby-fab,
+  /* Fahrt: große Daumen-Pills für Optionen */
   .map-nearby-options {
     width: auto;
     min-width: 60px;
@@ -2196,7 +2032,6 @@ function onDocClick(e: MouseEvent) {
     border-radius: 16px;
   }
 
-  .map-nearby-fab .map-cp-fab-label,
   .map-nearby-options .map-cp-fab-label {
     display: inline;
     font-size: 0.95rem;
@@ -2205,10 +2040,6 @@ function onDocClick(e: MouseEvent) {
     line-height: 1.15;
     white-space: normal;
     text-align: left;
-  }
-
-  .map-nearby-fab.loading {
-    opacity: 0.75;
   }
 
   .map-cp-banner {
@@ -2230,13 +2061,6 @@ function onDocClick(e: MouseEvent) {
   color: #fff;
   border-color: var(--primary);
   font-weight: 700;
-}
-
-.tool-btn.nearby-enter {
-  font-weight: 700;
-  background: color-mix(in srgb, var(--primary) 14%, var(--surface));
-  border-color: color-mix(in srgb, var(--primary) 35%, var(--border));
-  color: var(--primary);
 }
 
 .ride-overlay {
@@ -2338,10 +2162,6 @@ function onDocClick(e: MouseEvent) {
   }
 
   .map-toolbar {
-    display: none;
-  }
-
-  .tool-btn.nearby-enter {
     display: none;
   }
 
@@ -2695,7 +2515,6 @@ function onDocClick(e: MouseEvent) {
   }
 
   .nav-home { color: #0f172a; }
-  .nav-reload { color: #0f766e; }
   .nav-radius { color: #9a3412; }
   .nav-cp { color: #6d28d9; }
   .nav-pois { color: #be123c; }
@@ -2705,18 +2524,6 @@ function onDocClick(e: MouseEvent) {
   .nav-item.active .nav-glyph,
   .nav-cp.active .nav-glyph {
     background: color-mix(in srgb, currentColor 14%, #fff);
-  }
-
-  .nav-reload.loading .nav-glyph {
-    opacity: 0.65;
-  }
-
-  .nav-reload.loading .nav-glyph svg {
-    animation: nav-spin 0.9s linear infinite;
-  }
-
-  @keyframes nav-spin {
-    to { transform: rotate(360deg); }
   }
 
   .nav-badge {
@@ -2736,32 +2543,33 @@ function onDocClick(e: MouseEvent) {
 
   .nav-cp-menu {
     position: absolute;
-    bottom: calc(100% + 0.4rem);
+    bottom: calc(100% + 0.5rem);
     left: 50%;
     transform: translateX(-50%);
     z-index: 120;
     display: flex;
     flex-direction: column;
-    gap: 0.25rem;
-    min-width: 9.5rem;
-    padding: 0.35rem;
-    border-radius: 12px;
+    gap: 0.4rem;
+    min-width: 14.5rem;
+    padding: 0.5rem;
+    border-radius: 14px;
     background: #fff;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.22);
   }
 
   .nav-cp-kind {
     display: flex;
     align-items: center;
-    gap: 0.4rem;
+    gap: 0.65rem;
     border: none;
-    border-radius: 8px;
-    padding: 0.55rem 0.7rem;
+    border-radius: 10px;
+    padding: 0.9rem 1rem;
+    min-height: 56px;
     background: transparent;
     color: #111;
     font: inherit;
-    font-size: 0.9rem;
-    font-weight: 650;
+    font-size: 1.15rem;
+    font-weight: 700;
     text-align: left;
     cursor: pointer;
   }
@@ -2806,13 +2614,8 @@ function onDocClick(e: MouseEvent) {
     overscroll-behavior: contain;
   }
 
-  /* Nearby form: fixed height so slider edits don't resize the sheet */
-  .mobile-sheet.nearby-open .mobile-sheet-inner {
-    height: min(90dvh, 820px);
-    max-height: min(90dvh, 820px);
-  }
-
-  /* POI sheet: content-sized so closed accordions stay compact and visible */
+  /* Nearby + POI sheets: content-sized so unused space does not swallow the map */
+  .mobile-sheet.nearby-open .mobile-sheet-inner,
   .mobile-sheet.pois-open .mobile-sheet-inner {
     height: auto;
     max-height: min(90dvh, 820px);
@@ -2888,6 +2691,7 @@ function onDocClick(e: MouseEvent) {
   .nearby-sheet {
     padding: 1rem 1.15rem 1.35rem;
     gap: 0;
+    flex: 0 0 auto;
   }
 
   .sheet-scroll :deep(.poi-list.open) {
@@ -2938,6 +2742,83 @@ function onDocClick(e: MouseEvent) {
 
   .sheet-scroll :deep(.category-filter .map-poi-status) {
     font-size: 0.92rem;
+  }
+
+  .sheet-scroll :deep(.hint),
+  .sheet-scroll :deep(.empty),
+  .sheet-scroll :deep(.pack-help),
+  .sheet-scroll :deep(.pack-where),
+  .sheet-scroll :deep(.pack-estimate),
+  .sheet-scroll :deep(.pack-details),
+  .sheet-scroll :deep(.pack-hint),
+  .sheet-scroll :deep(.eta-hint),
+  .sheet-scroll :deep(.place-hint),
+  .sheet-scroll :deep(.intro),
+  .sheet-scroll :deep(.ios-geo-hint) {
+    font-size: 0.95rem;
+    line-height: 1.45;
+  }
+
+  .sheet-scroll :deep(.kind-btn) {
+    min-height: 52px;
+    padding: 0.7rem 1.05rem;
+    font-size: 1.05rem;
+  }
+
+  .sheet-scroll :deep(.pack-btn) {
+    min-height: 52px;
+    padding: 0.75rem 1.05rem;
+    font-size: 1.02rem;
+  }
+
+  .sheet-scroll :deep(.tabs button) {
+    min-height: 48px;
+    font-size: 1rem;
+    padding: 0.55rem 0.65rem;
+  }
+
+  .sheet-scroll :deep(.name) {
+    font-size: 1.02rem;
+  }
+
+  .sheet-scroll :deep(.meta),
+  .sheet-scroll :deep(.km),
+  .sheet-scroll :deep(.note) {
+    font-size: 0.88rem;
+  }
+
+  .sheet-scroll :deep(.weather-chip strong) {
+    font-size: 0.88rem;
+  }
+
+  .sheet-scroll :deep(.weather-temp) {
+    font-size: 1.2rem;
+  }
+
+  .sheet-scroll :deep(.weather-detail),
+  .sheet-scroll :deep(.weather-time),
+  .sheet-scroll :deep(.weather-empty) {
+    font-size: 0.85rem;
+  }
+
+  .sheet-scroll :deep(.field-label) {
+    font-size: 0.88rem;
+  }
+
+  .sheet-scroll :deep(.time-select),
+  .sheet-scroll :deep(.speed-num) {
+    font-size: 1.05rem;
+    min-height: 44px;
+  }
+
+  .sheet-scroll :deep(.cat-chip) {
+    min-height: 48px;
+    padding: 0.7rem 1rem;
+    font-size: 1rem;
+  }
+
+  .sheet-scroll :deep(.filter-toggle) {
+    font-size: 0.95rem;
   }
 }
 

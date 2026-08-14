@@ -271,8 +271,8 @@ defineExpose({ openMapFirst, searchNearby })
 }
 
 .in-map .intro {
-  font-size: 0.86rem;
-  line-height: 1.4;
+  font-size: 0.95rem;
+  line-height: 1.45;
 }
 
 .load-summary {
@@ -303,8 +303,8 @@ defineExpose({ openMapFirst, searchNearby })
 
 .in-map .ios-geo-hint {
   margin: 0;
-  padding: 0.6rem 0.7rem;
-  font-size: 0.8rem;
+  padding: 0.7rem 0.8rem;
+  font-size: 0.92rem;
 }
 
 .field-label {
@@ -315,7 +315,7 @@ defineExpose({ openMapFirst, searchNearby })
 }
 
 .in-map .field-label {
-  font-size: 0.85rem;
+  font-size: 0.95rem;
   margin-bottom: 0.45rem;
 }
 
@@ -467,7 +467,7 @@ defineExpose({ openMapFirst, searchNearby })
 }
 
 .in-map .categories legend {
-  font-size: 0.85rem;
+  font-size: 0.95rem;
   margin-bottom: 0.55rem;
 }
 
@@ -496,10 +496,10 @@ defineExpose({ openMapFirst, searchNearby })
 }
 
 .in-map .cat-chip {
-  padding: 0.55rem 0.85rem;
-  min-height: 44px;
-  font-size: 0.84rem;
-  gap: 0.35rem;
+  padding: 0.7rem 1rem;
+  min-height: 48px;
+  font-size: 1rem;
+  gap: 0.4rem;
 }
 
 .cat-chip.active {

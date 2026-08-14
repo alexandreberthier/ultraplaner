@@ -283,9 +283,9 @@ defineExpose({ refresh, meta })
 .pack-details,
 .pack-hint {
   margin: 0;
-  font-size: 0.75rem;
+  font-size: 0.88rem;
   color: var(--text-muted, #6b7280);
-  line-height: 1.35;
+  line-height: 1.4;
 }
 
 .pack-help {
@@ -293,7 +293,7 @@ defineExpose({ refresh, meta })
 }
 
 .pack-details {
-  font-size: 0.7rem;
+  font-size: 0.85rem;
 }
 
 .pack-status {
@@ -347,11 +347,11 @@ defineExpose({ refresh, meta })
 
 .pack-btn {
   border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 0.45rem 0.7rem;
-  min-height: 2.5rem;
+  border-radius: 10px;
+  padding: 0.65rem 0.9rem;
+  min-height: 48px;
   font: inherit;
-  font-size: 0.8rem;
+  font-size: 0.95rem;
   font-weight: 600;
   background: var(--surface);
   color: var(--text);

@@ -238,7 +238,7 @@ function setStartMinute(m: string) {
 }
 
 .field-label {
-  font-size: 0.7rem;
+  font-size: 0.8rem;
   font-weight: 600;
   color: var(--text-muted);
   text-transform: uppercase;
@@ -297,9 +297,9 @@ function setStartMinute(m: string) {
 
 .eta-hint {
   margin: 0.45rem 0 0;
-  font-size: 0.72rem;
+  font-size: 0.85rem;
   color: var(--text-muted);
-  line-height: 1.35;
+  line-height: 1.4;
 }
 
 .eta-filter-block {
