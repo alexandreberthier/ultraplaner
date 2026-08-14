@@ -1971,6 +1971,25 @@ onUnmounted(() => {
 
 .route-planner > :deep(.planner-elev) {
   grid-area: elev;
+  border-top: 3px solid #111;
+  box-shadow: none;
+  background: #fff;
+}
+
+.route-planner > :deep(.planner-elev .profile-toggle) {
+  background: #f3efe6;
+  color: #111;
+}
+
+.route-planner > :deep(.planner-elev .title) {
+  color: #111;
+  font-weight: 800;
+}
+
+.route-planner > :deep(.planner-elev .chevron-wrap) {
+  border-radius: 0;
+  border: 2px solid #111;
+  background: #fff;
 }
 
 .planner-map {
@@ -1985,12 +2004,13 @@ onUnmounted(() => {
   bottom: 0.75rem;
   margin: 0;
   padding: 0.35rem 0.55rem;
-  background: rgba(255, 255, 255, 0.92);
-  border-radius: 6px;
+  background: #fff;
+  border-radius: 0;
+  border: 2px solid #111;
   font-size: 0.78rem;
-  color: #374151;
+  color: #111;
   pointer-events: none;
-  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 3px 3px 0 #111;
   z-index: 2;
 }
 
@@ -2006,10 +2026,10 @@ onUnmounted(() => {
   padding: 0.3rem 0.5rem;
   list-style: none;
   max-width: min(92%, 20rem);
-  background: rgba(255, 255, 255, 0.94);
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  border-radius: 6px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  background: #fff;
+  border: 2px solid #111;
+  border-radius: 0;
+  box-shadow: 3px 3px 0 #111;
   pointer-events: none;
 }
 
@@ -2046,10 +2066,11 @@ onUnmounted(() => {
   align-items: baseline;
   gap: 0.3rem;
   padding: 0.45rem 0.7rem;
-  border-radius: 10px;
-  background: rgba(17, 24, 39, 0.92);
-  color: #fff;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.22);
+  border-radius: 0;
+  background: #fff;
+  color: #111;
+  border: 2px solid #111;
+  box-shadow: 3px 3px 0 #111;
   pointer-events: none;
 }
 
@@ -2091,10 +2112,10 @@ onUnmounted(() => {
   z-index: 41;
   width: min(320px, calc(100% - 20px));
   padding: 0.65rem;
-  border-radius: 12px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.18);
+  border-radius: 0;
+  background: #fff;
+  border: 3px solid #111;
+  box-shadow: 4px 4px 0 #111;
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
@@ -2127,13 +2148,13 @@ onUnmounted(() => {
 }
 
 .export-name-field input {
-  border: 1px solid var(--border);
-  border-radius: 8px;
+  border: 2px solid #111;
+  border-radius: 0;
   padding: 0.45rem 0.55rem;
   font: inherit;
   font-weight: 500;
-  color: var(--text);
-  background: var(--bg);
+  color: #111;
+  background: #fff;
 }
 
 .export-item {
@@ -2142,13 +2163,14 @@ onUnmounted(() => {
   gap: 0.55rem;
   width: 100%;
   padding: 0.55rem 0.6rem;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: var(--surface-2, var(--bg));
+  border: 2px solid #111;
+  border-radius: 0;
+  background: #fff;
   cursor: pointer;
   text-align: left;
   font: inherit;
-  color: var(--text);
+  color: #111;
+  font-weight: 700;
 }
 
 .export-item:disabled {
@@ -2157,7 +2179,7 @@ onUnmounted(() => {
 }
 
 .export-item:not(:disabled):hover {
-  border-color: var(--primary);
+  background: #f3efe6;
 }
 
 .export-icon {
@@ -2183,20 +2205,22 @@ onUnmounted(() => {
   z-index: 3;
   display: flex;
   background: #fff;
-  border-radius: 6px;
-  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
+  border-radius: 0;
+  border: 2px solid #111;
+  box-shadow: 3px 3px 0 #111;
   overflow: hidden;
 }
 
 .route-color-toggle {
   position: absolute;
-  top: 48px;
+  top: 52px;
   left: 10px;
   z-index: 3;
   display: flex;
   background: #fff;
-  border-radius: 6px;
-  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
+  border-radius: 0;
+  border: 2px solid #111;
+  box-shadow: 3px 3px 0 #111;
   overflow: hidden;
 }
 
@@ -2211,7 +2235,7 @@ onUnmounted(() => {
 }
 
 .route-color-toggle button + button {
-  border-left: 1px solid #e5e7eb;
+  border-left: 2px solid #111;
 }
 
 .route-color-toggle button.active {
@@ -2300,7 +2324,7 @@ onUnmounted(() => {
 }
 
 .basemap-toggle button + button {
-  border-left: 1px solid #e5e7eb;
+  border-left: 2px solid #111;
 }
 
 .basemap-toggle button.active {
@@ -2321,9 +2345,10 @@ onUnmounted(() => {
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
   padding: 1rem 1.1rem 1.25rem;
-  background: var(--surface);
-  border-right: 1px solid var(--border);
-  box-shadow: 4px 0 20px rgba(0, 0, 0, 0.05);
+  background: #f3efe6;
+  border-right: 3px solid #111;
+  box-shadow: none;
+  color: #111;
 }
 
 .controls-sheet-toggle {
@@ -2345,17 +2370,17 @@ onUnmounted(() => {
   flex-shrink: 0;
   padding: 0.75rem 1.1rem 0.85rem;
   margin: 0;
-  background: color-mix(in srgb, var(--primary) 6%, var(--surface));
-  border-bottom: 1px solid var(--border);
-  border-right: 1px solid var(--border);
+  background: #fff;
+  border-bottom: 3px solid #111;
+  border-right: 3px solid #111;
   z-index: 4;
 }
 
 .poi-next-hint {
   margin: 0;
   font-size: 0.82rem;
-  font-weight: 600;
-  color: var(--primary);
+  font-weight: 700;
+  color: #111;
   line-height: 1.35;
 }
 
@@ -2380,10 +2405,10 @@ onUnmounted(() => {
   list-style: none;
   margin: 0;
   padding: 0.25rem 0;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  background: #fff;
+  border: 2px solid #111;
+  border-radius: 0;
+  box-shadow: 4px 4px 0 #111;
   max-height: 200px;
   overflow-y: auto;
 }
@@ -2415,10 +2440,10 @@ onUnmounted(() => {
 }
 
 .waypoint-panel {
-  border: 1px solid var(--border);
-  border-radius: 10px;
+  border: 2px solid #111;
+  border-radius: 0;
   padding: 0.85rem;
-  background: var(--surface-2);
+  background: #fff;
 }
 
 .panel-head {
@@ -2443,16 +2468,17 @@ onUnmounted(() => {
 
 .btn-ghost {
   padding: 0.3rem 0.55rem;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  background: var(--surface);
+  border: 2px solid #111;
+  border-radius: 0;
+  background: #fff;
   font-size: 0.75rem;
+  font-weight: 700;
+  color: #111;
   cursor: pointer;
 }
 
-.btn-ghost:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
+.btn-ghost:hover:not(:disabled) {
+  background: #f3efe6;
 }
 
 .btn-ghost:disabled {
@@ -2473,13 +2499,13 @@ onUnmounted(() => {
   align-items: flex-start;
   gap: 0.5rem;
   padding: 0.35rem 0;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 2px solid #111;
   font-size: 0.82rem;
 }
 
 .wp-label {
-  font-weight: 600;
-  color: var(--primary);
+  font-weight: 800;
+  color: #111;
   min-width: 2.5rem;
   flex-shrink: 0;
 }
@@ -2494,10 +2520,10 @@ onUnmounted(() => {
 .wp-remove {
   width: 24px;
   height: 24px;
-  border: none;
-  border-radius: 4px;
+  border: 2px solid #111;
+  border-radius: 0;
   background: #fee2e2;
-  color: #991b1b;
+  color: #111;
   cursor: pointer;
   font-size: 1rem;
   line-height: 1;
@@ -2518,9 +2544,10 @@ onUnmounted(() => {
   gap: 0.75rem;
   margin: 0.15rem 0 0.65rem;
   padding: 0.7rem 0.85rem;
-  border-radius: 12px;
-  background: color-mix(in srgb, var(--primary) 10%, var(--surface));
-  border: 1px solid color-mix(in srgb, var(--primary) 28%, var(--border));
+  border-radius: 0;
+  background: #fff;
+  border: 2px solid #111;
+  box-shadow: 3px 3px 0 #111;
 }
 
 .route-km-label {
@@ -2532,7 +2559,7 @@ onUnmounted(() => {
 .route-km-value {
   font-size: 1.55rem;
   font-weight: 800;
-  color: var(--primary-dark);
+  color: #111;
   letter-spacing: -0.03em;
   line-height: 1;
 }
@@ -2556,10 +2583,10 @@ onUnmounted(() => {
 .wp-loop {
   width: 24px;
   height: 24px;
-  border: none;
-  border-radius: 4px;
-  background: color-mix(in srgb, var(--primary) 16%, var(--surface));
-  color: var(--primary-dark);
+  border: 2px solid #111;
+  border-radius: 0;
+  background: var(--cta);
+  color: #111;
   cursor: pointer;
   font-size: 0.95rem;
   line-height: 1;
@@ -2567,31 +2594,34 @@ onUnmounted(() => {
 }
 
 .wp-loop:hover {
-  background: color-mix(in srgb, var(--primary) 28%, var(--surface));
+  background: var(--cta);
 }
 
 .field-label {
   display: block;
-  font-weight: 600;
+  font-weight: 800;
   margin-bottom: 0.45rem;
   font-size: 0.9rem;
+  color: #111;
 }
 
 .text-input,
 .select-input {
   width: 100%;
   padding: 0.55rem 0.65rem;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: var(--surface);
+  border: 2px solid #111;
+  border-radius: 0;
+  background: #fff;
   font: inherit;
+  color: #111;
 }
 
 .ors-warning {
   padding: 0.75rem;
-  border-radius: 8px;
-  background: #fff7ed;
-  border: 1px solid #fdba74;
+  border-radius: 0;
+  background: #fff;
+  border: 2px solid #111;
+  box-shadow: 3px 3px 0 #111;
   font-size: 0.85rem;
 }
 
@@ -2616,9 +2646,10 @@ onUnmounted(() => {
 }
 
 .categories legend {
-  font-weight: 600;
+  font-weight: 800;
   font-size: 0.9rem;
   margin-bottom: 0.5rem;
+  color: #111;
 }
 
 .category-grid {
@@ -2633,18 +2664,20 @@ onUnmounted(() => {
   gap: 0.4rem;
   padding: 0.55rem 0.9rem;
   min-height: 44px;
-  border-radius: 999px;
-  border: 1px solid var(--border);
-  background: var(--surface);
+  border-radius: 0;
+  border: 2px solid #111;
+  background: #fff;
+  color: #111;
   cursor: pointer;
   font-size: 0.9rem;
+  font-weight: 700;
   -webkit-tap-highlight-color: transparent;
 }
 
 .cat-chip.active {
-  background: var(--primary);
-  color: #fff;
-  border-color: var(--primary);
+  background: var(--cta);
+  color: #111;
+  border-color: #111;
 }
 
 @media (min-width: 769px) {
@@ -2662,9 +2695,10 @@ onUnmounted(() => {
 }
 
 .routing-options legend {
-  font-weight: 600;
+  font-weight: 800;
   font-size: 0.9rem;
   margin-bottom: 0.25rem;
+  color: #111;
 }
 
 .option-grid {
@@ -2678,20 +2712,20 @@ onUnmounted(() => {
   align-items: center;
   padding: 0.45rem 0.7rem;
   min-height: 40px;
-  border-radius: 8px;
-  border: 1px solid var(--border);
-  background: var(--surface);
+  border-radius: 0;
+  border: 2px solid #111;
+  background: #fff;
   cursor: pointer;
   font-size: 0.82rem;
-  font-weight: 600;
-  color: var(--text);
+  font-weight: 700;
+  color: #111;
   -webkit-tap-highlight-color: transparent;
 }
 
 .option-chip.active {
-  background: var(--primary);
-  color: #fff;
-  border-color: var(--primary);
+  background: var(--cta);
+  color: #111;
+  border-color: #111;
 }
 
 .route-elev {
@@ -2708,13 +2742,16 @@ onUnmounted(() => {
 
 .btn-primary {
   padding: 0.85rem 1.5rem;
-  background: var(--primary);
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  font-weight: 600;
+  background: var(--cta);
+  color: #111;
+  border: 3px solid #111;
+  border-radius: 0;
+  font-weight: 800;
   font-size: 1rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
   cursor: pointer;
+  box-shadow: 4px 4px 0 #111;
 }
 
 .btn-full {
@@ -2723,18 +2760,21 @@ onUnmounted(() => {
 
 .btn-cta {
   background: var(--cta);
-  color: var(--cta-text);
+  color: #111;
   font-weight: 800;
-  border: 1px solid transparent;
+  border: 3px solid #111;
 }
 
 .btn-cta:hover:not(:disabled) {
-  background: var(--cta-hover);
+  background: var(--cta);
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 #111;
 }
 
 .btn-primary:disabled {
   opacity: 0.55;
   cursor: wait;
+  box-shadow: none;
 }
 
 .btn-cta:disabled {
@@ -2834,12 +2874,12 @@ onUnmounted(() => {
     max-height: none;
     height: auto;
     border-right: none;
-    border-top: 1px solid var(--border);
-    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.06);
+    border-top: 3px solid #111;
+    box-shadow: none;
     padding: 0;
     gap: 0;
     overflow: hidden;
-    border-radius: 14px 14px 0 0;
+    border-radius: 0;
     display: flex;
     flex-direction: column;
   }
@@ -2855,10 +2895,10 @@ onUnmounted(() => {
   .poi-next-step {
     border-right: none;
     border-bottom: none;
-    border-top: 1px solid var(--border);
+    border-top: 3px solid #111;
     padding: 0.7rem 1rem calc(0.75rem + env(safe-area-inset-bottom, 0px));
-    background: color-mix(in srgb, var(--primary) 8%, var(--surface));
-    box-shadow: 0 -6px 16px rgba(0, 0, 0, 0.06);
+    background: #fff;
+    box-shadow: none;
   }
 
   .planner-controls.sheet-collapsed.has-poi-next {
@@ -2874,10 +2914,10 @@ onUnmounted(() => {
     flex-shrink: 0;
     padding: 0.95rem 1rem 0.85rem;
     border: none;
-    background: var(--surface-2);
+    background: #fff;
     cursor: pointer;
     text-align: left;
-    color: var(--text);
+    color: #111;
     min-height: 52px;
     -webkit-tap-highlight-color: transparent;
   }
@@ -2889,8 +2929,8 @@ onUnmounted(() => {
     width: 2.25rem;
     height: 0.28rem;
     margin-left: -1.125rem;
-    border-radius: 999px;
-    background: color-mix(in srgb, var(--text-muted) 45%, transparent);
+    border-radius: 0;
+    background: #111;
     pointer-events: none;
   }
 
@@ -2904,16 +2944,16 @@ onUnmounted(() => {
 
   .sheet-title {
     font-size: 0.75rem;
-    font-weight: 700;
+    font-weight: 800;
     letter-spacing: 0.04em;
     text-transform: uppercase;
-    color: var(--text-muted);
+    color: #111;
   }
 
   .sheet-summary {
     font-size: 0.9rem;
-    font-weight: 600;
-    color: var(--text);
+    font-weight: 700;
+    color: #111;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -2926,11 +2966,11 @@ onUnmounted(() => {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    border-radius: 8px;
-    background: var(--surface);
-    border: 1px solid var(--border);
+    border-radius: 0;
+    background: #fff;
+    border: 2px solid #111;
     font-size: 1.1rem;
-    font-weight: 700;
+    font-weight: 800;
   }
 
   .controls-sheet-body {
@@ -2947,12 +2987,12 @@ onUnmounted(() => {
     flex: 1 1 auto;
     min-height: 0;
     max-height: none;
-    border-top-color: var(--border);
+    border-top-color: #111;
     padding-bottom: 0;
   }
 
   .planner-controls:not(.sheet-collapsed) .controls-sheet-toggle {
-    border-bottom: 1px solid var(--border);
+    border-bottom: 2px solid #111;
     flex-shrink: 0;
   }
 }

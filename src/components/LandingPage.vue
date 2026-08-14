@@ -149,25 +149,6 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
         <button type="button" class="back-btn" @click="leavePlanMode">
           {{ t('landing.backHome') }}
         </button>
-        <button type="button" class="plan-brand" aria-label="UltraPlaner" @click="leavePlanMode">
-          <picture>
-            <source
-              srcset="/logo-ultraplaner-64.webp 64w, /logo-ultraplaner-96.webp 96w, /logo-ultraplaner-200.webp 200w"
-              sizes="28px"
-              type="image/webp"
-            />
-            <img
-              class="plan-brand-logo"
-              src="/logo-ultraplaner-64.png"
-              srcset="/logo-ultraplaner-64.png 64w, /logo-ultraplaner-96.png 96w, /logo-ultraplaner-200.png 200w"
-              sizes="28px"
-              alt="UltraPlaner"
-              width="64"
-              height="64"
-              decoding="async"
-            />
-          </picture>
-        </button>
         <div class="plan-topbar-actions">
           <button
             type="button"
@@ -178,7 +159,7 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
           >
             ↓ {{ t('map.exportRoute') }} ▾
           </button>
-          <TopbarSettings force-menu />
+          <TopbarSettings brutal />
         </div>
       </header>
       <section
@@ -1300,58 +1281,35 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
   flex-shrink: 0;
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 0.65rem 1.1rem;
-  background: var(--surface);
-  border-bottom: 1px solid var(--border);
+  justify-content: space-between;
+  gap: 0.65rem;
+  min-height: 58px;
+  padding: 0.7rem 1rem;
+  background: #fff;
+  border-bottom: 3px solid #111;
   z-index: 40;
 }
 
 .back-btn {
-  border: 1px solid color-mix(in srgb, var(--primary) 35%, var(--border));
-  background: var(--primary);
-  border-radius: 8px;
-  padding: 0.45rem 0.75rem;
-  font-size: 0.85rem;
-  font-weight: 700;
-  color: #fff;
+  border: 2px solid #111;
+  background: var(--cta);
+  border-radius: 0;
+  padding: 0.55rem 0.85rem;
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: #111;
   cursor: pointer;
   white-space: nowrap;
   flex-shrink: 0;
   min-height: 40px;
+  box-shadow: 3px 3px 0 #111;
   -webkit-tap-highlight-color: transparent;
 }
 
 .back-btn:hover {
-  background: var(--primary-dark, #1b4332);
-}
-
-.plan-brand {
-  display: flex;
-  align-items: center;
-  min-width: 0;
-  flex: 1;
-  padding: 0;
-  border: none;
-  background: transparent;
-  cursor: pointer;
-  text-align: left;
-}
-
-.plan-brand:focus-visible {
-  outline: 2px solid var(--primary);
-  outline-offset: 2px;
-  border-radius: 6px;
-}
-
-.plan-brand-logo {
-  display: block;
-  height: 1.75rem;
-  width: auto;
-  max-width: min(180px, 42vw);
-  object-fit: contain;
-  object-position: left center;
-  pointer-events: none;
+  background: var(--cta);
+  transform: translate(1px, 1px);
+  box-shadow: 2px 2px 0 #111;
 }
 
 .plan-topbar-actions {
@@ -1363,27 +1321,31 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
 }
 
 .plan-export-btn {
-  border: 1px solid var(--border);
-  background: var(--surface-2, var(--bg));
-  border-radius: 8px;
-  padding: 0.45rem 0.7rem;
-  font-size: 0.82rem;
-  font-weight: 700;
-  color: var(--text);
+  border: 2px solid #111;
+  background: var(--cta);
+  border-radius: 0;
+  padding: 0.55rem 0.85rem;
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: #111;
   cursor: pointer;
   white-space: nowrap;
   min-height: 40px;
+  box-shadow: 3px 3px 0 #111;
   -webkit-tap-highlight-color: transparent;
 }
 
 .plan-export-btn:hover:not(:disabled) {
-  border-color: var(--primary);
-  color: var(--primary);
+  background: var(--cta);
+  transform: translate(1px, 1px);
+  box-shadow: 2px 2px 0 #111;
 }
 
 .plan-export-btn:disabled {
   opacity: 0.45;
   cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
 }
 
 @media (max-width: 768px) {
@@ -1398,7 +1360,6 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
     min-height: 48px;
     padding: 0.65rem 0.85rem;
     font-size: 0.9rem;
-    border-radius: 10px;
   }
 
   .plan-export-btn {
@@ -1406,17 +1367,10 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
     min-height: 48px;
     padding: 0.65rem 0.8rem;
     font-size: 0.88rem;
-    border-radius: 10px;
   }
 
   .plan-topbar-actions {
     gap: 0.4rem;
-  }
-
-  .plan-topbar-actions :deep(.menu-btn) {
-    width: 52px;
-    height: 52px;
-    border-radius: 12px;
   }
 
   .plan-topbar-actions :deep(.menu-icon) {

@@ -569,7 +569,6 @@ function onDocClick(e: MouseEvent) {
                 · {{ t('map.poisOnMap', { count: store.mapPois.length }) }}
               </template>
             </p>
-            <TopbarSettings class="sidebar-settings" brutal />
           </div>
         </div>
       </header>
@@ -882,6 +881,7 @@ function onDocClick(e: MouseEvent) {
           >
             {{ shareCopied ? `✓ ${t('map.linkCopied')}` : `🔗 ${t('map.share')}` }}
           </button>
+          <TopbarSettings brutal />
         </div>
       </header>
 
@@ -1602,10 +1602,6 @@ function onDocClick(e: MouseEvent) {
   font-weight: 650;
 }
 
-.sidebar-settings {
-  margin-top: 0.65rem;
-}
-
 .map-main {
   display: flex;
   flex-direction: column;
@@ -1618,6 +1614,7 @@ function onDocClick(e: MouseEvent) {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
   gap: 0.65rem;
   min-height: 58px;
   padding: 0.7rem 1rem;
@@ -1630,6 +1627,7 @@ function onDocClick(e: MouseEvent) {
 .toolbar-left,
 .toolbar-right {
   display: flex;
+  align-items: center;
   gap: 0.35rem;
   flex-shrink: 0;
 }

@@ -25,26 +25,7 @@ onMounted(() => {
       <router-link class="back-btn" :to="homePath">
         {{ t('landing.backHome') }}
       </router-link>
-      <router-link class="brand" :to="homePath" :aria-label="t('landing.backHome')">
-        <picture>
-          <source
-            srcset="/logo-ultraplaner-64.webp 64w, /logo-ultraplaner-96.webp 96w, /logo-ultraplaner-200.webp 200w"
-            sizes="36px"
-            type="image/webp"
-          />
-          <img
-            class="brand-logo"
-            src="/logo-ultraplaner-64.png"
-            srcset="/logo-ultraplaner-64.png 64w, /logo-ultraplaner-96.png 96w, /logo-ultraplaner-200.png 200w"
-            sizes="36px"
-            alt="UltraPlaner"
-            width="64"
-            height="64"
-            decoding="async"
-          />
-        </picture>
-      </router-link>
-      <TopbarSettings force-menu />
+      <TopbarSettings brutal />
     </header>
 
     <div class="imprint legal-body">
@@ -112,70 +93,51 @@ onMounted(() => {
 <style scoped>
 .legal-page {
   min-height: 100%;
-  background: var(--bg);
+  background: #f3efe6;
 }
 
 .legal-top {
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
+  display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 0.75rem;
-  padding: 0.75rem 1rem;
-  border-bottom: 1px solid var(--border);
-  background: var(--surface);
+  min-height: 58px;
+  padding: 0.7rem 1rem;
+  border-bottom: 3px solid #111;
+  background: #fff;
   position: sticky;
   top: 0;
   z-index: 20;
 }
 
 .back-btn {
-  justify-self: start;
-  border: 1px solid var(--border);
-  background: var(--surface);
-  border-radius: 8px;
-  padding: 0.45rem 0.75rem;
+  border: 2px solid #111;
+  background: var(--cta);
+  border-radius: 0;
+  padding: 0.55rem 0.85rem;
   cursor: pointer;
-  font-weight: 600;
-  color: var(--text);
+  font-weight: 800;
+  color: #111;
   text-decoration: none;
+  box-shadow: 3px 3px 0 #111;
+}
+
+.back-btn:hover {
+  transform: translate(1px, 1px);
+  box-shadow: 2px 2px 0 #111;
 }
 
 .back-btn:focus-visible {
-  outline: 2px solid var(--primary);
-  outline-offset: 2px;
-}
-
-.brand {
-  justify-self: center;
-  border: none;
-  background: none;
-  padding: 0;
-  cursor: pointer;
-  border-radius: 8px;
-  text-decoration: none;
-}
-
-.brand:focus-visible {
-  outline: 2px solid var(--primary);
+  outline: 3px solid #111;
   outline-offset: 2px;
 }
 
 .legal-footer {
   margin-top: 2.5rem;
   padding-top: 1.25rem;
-  border-top: 1px solid var(--border);
+  border-top: 3px solid #111;
   font-size: 0.9rem;
-  color: var(--muted, #64748b);
-}
-
-.brand-logo {
-  display: block;
-  height: 36px;
-  width: auto;
-}
-
-.legal-top :deep(.topbar-settings) {
-  justify-self: end;
+  color: #111;
 }
 
 .legal-body {
@@ -216,13 +178,9 @@ onMounted(() => {
 }
 
 @media (max-width: 640px) {
-  .legal-top {
-    grid-template-columns: auto 1fr auto;
-  }
-
   .back-btn {
     font-size: 0.85rem;
-    padding: 0.4rem 0.55rem;
+    padding: 0.55rem 0.7rem;
   }
 
   .legal-body {

@@ -31,26 +31,7 @@ function goStartApp() {
       <button type="button" class="back-btn" @click="goHome">
         {{ t('landing.backHome') }}
       </button>
-      <button type="button" class="brand" :aria-label="t('landing.backHome')" @click="goHome">
-        <picture>
-          <source
-            srcset="/logo-ultraplaner-64.webp 64w, /logo-ultraplaner-96.webp 96w, /logo-ultraplaner-200.webp 200w"
-            sizes="36px"
-            type="image/webp"
-          />
-          <img
-            class="brand-logo"
-            src="/logo-ultraplaner-64.png"
-            srcset="/logo-ultraplaner-64.png 64w, /logo-ultraplaner-96.png 96w, /logo-ultraplaner-200.png 200w"
-            sizes="36px"
-            alt="UltraPlaner"
-            width="64"
-            height="64"
-            decoding="async"
-          />
-        </picture>
-      </button>
-      <TopbarSettings force-menu />
+      <TopbarSettings brutal />
     </header>
 
     <main class="guide-body">
@@ -104,87 +85,71 @@ function goStartApp() {
 <style scoped>
 .guide-page {
   min-height: 100%;
-  background: var(--bg);
+  background: #f3efe6;
 }
 
 .guide-top {
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
+  display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 0.75rem;
-  padding: 0.75rem 1rem;
-  border-bottom: 1px solid var(--border);
-  background: var(--surface);
+  min-height: 58px;
+  padding: 0.7rem 1rem;
+  border-bottom: 3px solid #111;
+  background: #fff;
   position: sticky;
   top: 0;
   z-index: 20;
 }
 
 .back-btn {
-  justify-self: start;
-  border: 1px solid var(--border);
-  background: var(--surface);
-  border-radius: 8px;
-  padding: 0.45rem 0.75rem;
+  border: 2px solid #111;
+  background: var(--cta);
+  border-radius: 0;
+  padding: 0.55rem 0.85rem;
   cursor: pointer;
-  font-weight: 600;
-  color: var(--text);
+  font-weight: 800;
+  color: #111;
+  box-shadow: 3px 3px 0 #111;
+}
+
+.back-btn:hover {
+  transform: translate(1px, 1px);
+  box-shadow: 2px 2px 0 #111;
 }
 
 .back-btn:focus-visible {
-  outline: 2px solid var(--primary);
+  outline: 3px solid #111;
   outline-offset: 2px;
-}
-
-.brand {
-  justify-self: center;
-  border: none;
-  background: none;
-  padding: 0;
-  cursor: pointer;
-  border-radius: 8px;
-}
-
-.brand:focus-visible {
-  outline: 2px solid var(--primary);
-  outline-offset: 2px;
-}
-
-.brand-logo {
-  display: block;
-  height: 36px;
-  width: auto;
-}
-
-.guide-top :deep(.topbar-settings) {
-  justify-self: end;
 }
 
 .guide-body {
   max-width: 44rem;
   margin: 0 auto;
   padding: 1.75rem 1.15rem 3.5rem;
-  color: var(--text);
+  color: #111;
   line-height: 1.65;
 }
 
 .guide-body h1 {
   margin: 0 0 0.75rem;
   font-size: 1.85rem;
-  color: var(--primary-dark);
+  color: #111;
   letter-spacing: -0.02em;
+  font-weight: 800;
 }
 
 .lead {
   margin: 0 0 1.5rem;
   font-size: 1.05rem;
-  color: var(--text);
+  color: #111;
 }
 
 .guide-body h2 {
   margin: 2rem 0 0.75rem;
   font-size: 1.2rem;
-  color: var(--primary-dark);
+  color: #111;
+  font-weight: 800;
 }
 
 .guide-body p,
@@ -206,43 +171,47 @@ function goStartApp() {
 }
 
 .cta-primary {
-  border: none;
-  border-radius: 10px;
-  background: var(--primary);
-  color: #fff;
-  font-weight: 700;
-  font-size: 1rem;
-  padding: 0.75rem 1.25rem;
+  border-radius: 0;
+  padding: 0.85rem 1.4rem;
+  font-size: 0.92rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
   cursor: pointer;
+  background: var(--cta);
+  color: #111;
+  border: 3px solid #111;
+  box-shadow: 5px 5px 0 #111;
+}
+
+.cta-primary:hover {
+  transform: translate(3px, 3px);
+  box-shadow: 3px 3px 0 #111;
 }
 
 .cta-primary:focus-visible {
-  outline: 2px solid var(--primary-dark);
+  outline: 3px solid #111;
   outline-offset: 2px;
 }
 
 .guide-footer {
   margin-top: 2.5rem;
   padding-top: 1.25rem;
-  border-top: 1px solid var(--border);
+  border-top: 3px solid #111;
   font-size: 0.88rem;
-  color: var(--text-muted);
+  color: #111;
 }
 
 .guide-footer a {
-  color: var(--primary);
-  text-decoration-thickness: 1px;
+  color: #111;
+  text-decoration-thickness: 2px;
   text-underline-offset: 2px;
 }
 
 @media (max-width: 640px) {
-  .guide-top {
-    grid-template-columns: auto 1fr auto;
-  }
-
   .back-btn {
     font-size: 0.85rem;
-    padding: 0.4rem 0.55rem;
+    padding: 0.55rem 0.7rem;
   }
 
   .guide-body {
