@@ -135,11 +135,11 @@ onUnmounted(() => {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 2.25rem;
-  height: 2.25rem;
+  width: 2.75rem;
+  height: 2.75rem;
   padding: 0;
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: 10px;
   background: var(--surface-2);
   color: var(--text);
   cursor: pointer;
@@ -153,8 +153,9 @@ onUnmounted(() => {
 }
 
 .menu-icon {
-  font-size: 1.05rem;
+  font-size: 1.4rem;
   line-height: 1;
+  font-weight: 700;
 }
 
 .menu-panel {
@@ -233,13 +234,13 @@ onUnmounted(() => {
   }
 
   .menu-btn {
-    width: 48px;
-    height: 48px;
-    border-radius: 10px;
+    width: 52px;
+    height: 52px;
+    border-radius: 12px;
   }
 
   .menu-icon {
-    font-size: 1.2rem;
+    font-size: 1.55rem;
   }
 }
 

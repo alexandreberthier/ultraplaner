@@ -4,7 +4,7 @@ import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import maplibregl from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
-import type { LatLng, PoiCategory, RouteCursor, RouteSurfaceSummary } from '../../shared/types'
+import type { LatLng, Poi, PoiCategory, RouteCursor, RouteSurfaceSummary } from '../../shared/types'
 import { useMapStore } from '../stores/mapStore'
 import {
   DEFAULT_POI_CATEGORIES,
@@ -29,6 +29,7 @@ import {
   whenStyleReady,
   remapOpenFreeMapGlyphRequest,
   gradeLegend,
+  poiColors,
   type BasemapId,
 } from '../config/mapStyle'
 import {
@@ -64,6 +65,8 @@ import {
 } from '../utils/surface'
 import { buildGpxExport, downloadFile, downloadBinary } from '../services/export'
 import { poiCategoryLabel } from '../utils/poiLabels'
+import { thinPoisForMap } from '../utils/poiThin'
+import { fetchPoisForRoute } from '../services/maps'
 import { ensureRouteEndImages, routeEndIconId } from '../utils/routeEndIcons'
 import { isSecureGeoContext } from '../utils/geoDevice'
 import {
@@ -118,6 +121,13 @@ const routingLong = ref(false)
 const routingEnriching = ref(false)
 const creating = ref(false)
 const exporting = ref(false)
+const previewPoisAll = ref<Poi[]>([])
+const previewingPois = ref(false)
+const ALL_POI_CATEGORIES: PoiCategory[] = POI_CATEGORY_DEFS.map((c) => c.id)
+let previewTimer: ReturnType<typeof setTimeout> | null = null
+let previewGen = 0
+let previewCorridorKey = ''
+let previewPromise: Promise<void> | null = null
 const showExportMenu = ref(false)
 const basemap = ref<BasemapId>(loadBasemapPreference())
 const basemapFallbackHint = ref('')
@@ -395,6 +405,120 @@ function toggleCategory(id: PoiCategory) {
   formError.value = ''
 }
 
+function corridorKey(): string {
+  const coords = routeCoords.value
+  if (coords.length < 2) return ''
+  const first = coords[0]!
+  const mid = coords[Math.floor(coords.length / 2)]!
+  const last = coords[coords.length - 1]!
+  return `${coords.length}:${first[0].toFixed(5)},${first[1].toFixed(5)}:${mid[0].toFixed(5)},${mid[1].toFixed(5)}:${last[0].toFixed(5)},${last[1].toFixed(5)}:${radiusM.value}`
+}
+
+function previewPoisGeoJson() {
+  const colors = poiColors()
+  const selectedSet = new Set(selected.value)
+  const filtered = previewPoisAll.value.filter((p) => selectedSet.has(p.category))
+  const thinned = thinPoisForMap(filtered)
+  return {
+    type: 'FeatureCollection' as const,
+    features: thinned.map((p) => ({
+      type: 'Feature' as const,
+      geometry: { type: 'Point' as const, coordinates: [p.lng, p.lat] },
+      properties: {
+        id: p.id,
+        color: colors[p.category] ?? '#6b7280',
+      },
+    })),
+  }
+}
+
+function applyPreviewFilterToMap() {
+  if (!map?.getSource('planner-pois')) return
+  ;(map.getSource('planner-pois') as maplibregl.GeoJSONSource).setData(previewPoisGeoJson())
+}
+
+function clearPreviewPois() {
+  previewPoisAll.value = []
+  previewCorridorKey = ''
+  previewingPois.value = false
+  if (map?.getSource('planner-pois')) {
+    ;(map.getSource('planner-pois') as maplibregl.GeoJSONSource).setData(emptyGeoJson())
+  }
+}
+
+function schedulePreviewPois() {
+  if (previewTimer) clearTimeout(previewTimer)
+  previewTimer = setTimeout(() => {
+    previewTimer = null
+    void loadPreviewPois()
+  }, 400)
+}
+
+async function loadPreviewPois() {
+  const key = corridorKey()
+  if (!key || routing.value) {
+    if (!key) clearPreviewPois()
+    return
+  }
+  if (key === previewCorridorKey) {
+    applyPreviewFilterToMap()
+    return
+  }
+
+  const gen = ++previewGen
+  previewingPois.value = true
+  const run = (async () => {
+    try {
+      const points = buildRoutePoints(routeCoords.value, routeElevations.value)
+      const { pois } = await fetchPoisForRoute(
+        routeCoords.value,
+        points,
+        radiusM.value,
+        ALL_POI_CATEGORIES
+      )
+      if (gen !== previewGen) return
+      previewPoisAll.value = pois
+      previewCorridorKey = key
+      applyPreviewFilterToMap()
+    } catch (err) {
+      if (gen !== previewGen) return
+      console.warn('[planner] POI preview failed', err)
+      previewPoisAll.value = []
+      previewCorridorKey = ''
+    } finally {
+      if (gen === previewGen) previewingPois.value = false
+    }
+  })()
+  previewPromise = run
+  await run
+  if (previewPromise === run) previewPromise = null
+}
+
+watch(
+  () => [corridorKey(), routing.value] as const,
+  () => {
+    if (routing.value || !corridorKey()) {
+      previewGen++
+      previewPromise = null
+      if (previewTimer) {
+        clearTimeout(previewTimer)
+        previewTimer = null
+      }
+      clearPreviewPois()
+      return
+    }
+    schedulePreviewPois()
+  }
+)
+
+watch(
+  selected,
+  () => {
+    applyPreviewFilterToMap()
+  },
+  { deep: true }
+)
+
 function emptyGeoJson() {
   return { type: 'FeatureCollection' as const, features: [] }
 }
@@ -551,6 +675,7 @@ function updateMapSources() {
   ;(map.getSource('planner-route-grades') as maplibregl.GeoJSONSource)?.setData(gradeGeoJson())
   ;(map.getSource('planner-preview') as maplibregl.GeoJSONSource)?.setData(previewGeoJson())
   ;(map.getSource('planner-km-markers') as maplibregl.GeoJSONSource)?.setData(kmMarkerGeoJson())
+  applyPreviewFilterToMap()
 
   const showSurface = routeColorMode.value === 'surface'
   const showGrades = routeColorMode.value === 'grade'
@@ -648,6 +773,7 @@ function addPlannerLayers() {
   map.addSource('planner-route-grades', { type: 'geojson', data: gradeGeoJson() })
   map.addSource('planner-preview', { type: 'geojson', data: previewGeoJson() })
   map.addSource('planner-km-markers', { type: 'geojson', data: kmMarkerGeoJson() })
+  map.addSource('planner-pois', { type: 'geojson', data: previewPoisGeoJson() })
 
   map.addLayer({
     id: 'planner-preview-line',
@@ -745,6 +871,29 @@ function addPlannerLayers() {
       'text-color': '#111827',
       'text-halo-color': '#fff',
       'text-halo-width': 2,
+    },
+  })
+
+  map.addLayer({
+    id: 'planner-pois-halo',
+    type: 'circle',
+    source: 'planner-pois',
+    paint: {
+      'circle-radius': 11,
+      'circle-color': ['coalesce', ['get', 'color'], '#6b7280'],
+      'circle-opacity': 0.28,
+    },
+  })
+
+  map.addLayer({
+    id: 'planner-pois',
+    type: 'circle',
+    source: 'planner-pois',
+    paint: {
+      'circle-radius': 7,
+      'circle-color': ['coalesce', ['get', 'color'], '#6b7280'],
+      'circle-stroke-width': 2,
+      'circle-stroke-color': '#fff',
     },
   })
 
@@ -903,6 +1052,13 @@ function destroyPlannerMap() {
   routing.value = false
   routingLong.value = false
   routingEnriching.value = false
+  previewGen++
+  previewPromise = null
+  if (previewTimer) {
+    clearTimeout(previewTimer)
+    previewTimer = null
+  }
+  clearPreviewPois()
   if (addressTimer) clearTimeout(addressTimer)
   addressTimer = null
   cancelStyleReady?.()
@@ -1317,13 +1473,29 @@ async function createMap() {
     }
 
     const name = routeName.value.trim() || t('planner.defaultName')
+    if (previewTimer) {
+      clearTimeout(previewTimer)
+      previewTimer = null
+      await loadPreviewPois()
+    } else if (previewPromise) {
+      await previewPromise
+    }
+
+    const key = corridorKey()
+    const selectedSet = new Set(selected.value)
+    const preloaded =
+      key && key === previewCorridorKey
+        ? previewPoisAll.value.filter((p) => selectedSet.has(p.category))
+        : undefined
+
     await store.createMapFromRoute(
       name,
       routeCoords.value,
       radiusM.value,
       [...selected.value],
       routeElevations.value.length ? routeElevations.value : undefined,
-      routeSurfaceSummary.value
+      routeSurfaceSummary.value,
+      preloaded
     )
 
     if (store.mapReady) {
@@ -1718,7 +1890,7 @@ onUnmounted(() => {
 
         <p v-if="formError || store.error" class="error">{{ formError || store.error }}</p>
 
-        <button type="button" class="btn-primary btn-full" :disabled="!canCreate" @click="createMap">
+        <button type="button" class="btn-primary btn-cta-gold btn-full" :disabled="!canCreate" @click="createMap">
           {{ createMapLabel }}
         </button>
       </template>
@@ -1726,10 +1898,12 @@ onUnmounted(() => {
 
       <!-- Mobile: footer when sheet open; under handle when collapsed. Desktop: sticky top via CSS order. -->
       <div v-if="routeReadyForPois" class="poi-next-step">
-        <p class="poi-next-hint">{{ t('planner.nextStepPois') }}</p>
+        <p class="poi-next-hint">
+          {{ previewingPois ? t('planner.previewingPois') : t('planner.nextStepPois') }}
+        </p>
         <button
           type="button"
-          class="btn-primary btn-full"
+          class="btn-primary btn-cta-gold btn-full"
           :disabled="!canCreate"
           @click="createMap"
         >
@@ -2534,9 +2708,29 @@ onUnmounted(() => {
   width: 100%;
 }
 
+.btn-cta-gold {
+  background: linear-gradient(180deg, #f8e08e 0%, #e0b429 48%, #c9940a 100%);
+  color: #1a1408;
+  font-weight: 800;
+  border: 1px solid #b8860b;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.45) inset,
+    0 6px 16px rgba(201, 148, 10, 0.42);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.28);
+}
+
+.btn-cta-gold:hover:not(:disabled) {
+  filter: brightness(1.06);
+}
+
 .btn-primary:disabled {
   opacity: 0.55;
   cursor: wait;
+}
+
+.btn-cta-gold:disabled {
+  opacity: 0.7;
+  filter: grayscale(0.12);
 }
 
 @media (max-width: 899px) {

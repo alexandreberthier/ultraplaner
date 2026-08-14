@@ -231,19 +231,6 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
           </div>
         </div>
 
-        <section class="how-section">
-          <h2>{{ t('landing.how.title') }}</h2>
-          <div class="steps">
-            <article v-for="s in steps" :key="s.key" class="step">
-              <div class="step-num" aria-hidden="true">{{ s.num }}</div>
-              <div>
-                <strong>{{ t(`landing.how.${s.key}`) }}</strong>
-                <p>{{ t(`landing.how.${s.key}desc`) }}</p>
-              </div>
-            </article>
-          </div>
-        </section>
-
         <section id="app-start" ref="appRef" class="app-section" tabindex="-1">
           <div class="section-head">
             <h2>{{ t('landing.appTitle') }}</h2>
@@ -299,6 +286,19 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
             <GpxForm v-if="tab === 'gpx'" />
           </section>
           <RecentMaps />
+        </section>
+
+        <section class="how-section">
+          <h2>{{ t('landing.how.title') }}</h2>
+          <div class="steps">
+            <article v-for="s in steps" :key="s.key" class="step">
+              <div class="step-num" aria-hidden="true">{{ s.num }}</div>
+              <div>
+                <strong>{{ t(`landing.how.${s.key}`) }}</strong>
+                <p>{{ t(`landing.how.${s.key}desc`) }}</p>
+              </div>
+            </article>
+          </div>
         </section>
 
         <section class="features-section">
@@ -444,7 +444,7 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
 .hero-band {
   position: relative;
   isolation: isolate;
-  min-height: min(58vh, 520px);
+  min-height: 0;
   display: flex;
   align-items: stretch;
   border-bottom: 1px solid color-mix(in srgb, var(--border) 80%, transparent);
@@ -494,11 +494,11 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
 .hero {
   position: relative;
   z-index: 1;
-  flex: 1;
+  flex: 0 0 auto;
   display: flex;
   flex-direction: column;
   width: 100%;
-  padding: 0 0 2.5rem;
+  padding: 0 0 1.15rem;
 }
 
 .hero-top {
@@ -539,7 +539,7 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
 }
 
 .hero-center {
-  margin: auto 0;
+  margin: 0;
   text-align: center;
   display: flex;
   flex-direction: column;
@@ -547,7 +547,7 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
   max-width: 40rem;
   width: 100%;
   align-self: center;
-  padding: 1.5rem 0 2rem;
+  padding: 0.7rem 0 1.05rem;
 }
 
 .hero-kicker {
@@ -560,11 +560,11 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
 }
 
 .hero-title {
-  font-size: clamp(1.9rem, 4.2vw, 2.85rem);
+  font-size: clamp(1.45rem, 3.2vw, 2.05rem);
   font-weight: 800;
   color: #fff;
-  margin: 0 0 0.75rem;
-  line-height: 1.12;
+  margin: 0 0 0.4rem;
+  line-height: 1.16;
   letter-spacing: -0.02em;
   text-shadow: 0 2px 18px rgba(0, 0, 0, 0.28);
   display: flex;
@@ -578,10 +578,10 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
 }
 
 .hero-sub {
-  font-size: clamp(0.95rem, 1.8vw, 1.08rem);
+  font-size: clamp(0.86rem, 1.5vw, 0.98rem);
   color: rgba(255, 255, 255, 0.9);
-  margin: 0 0 1.35rem;
-  line-height: 1.55;
+  margin: 0 0 0.85rem;
+  line-height: 1.45;
   max-width: 34rem;
 }
 
@@ -654,7 +654,7 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
 /* ── App section ── */
 .app-section {
   scroll-margin-top: 1.5rem;
-  padding-top: 2.5rem;
+  padding-top: 1.35rem;
 }
 
 .section-head {
@@ -721,7 +721,7 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
 }
 
 .how-section {
-  margin-top: 2.75rem;
+  margin-top: 3.25rem;
 }
 
 .features-section h2,
@@ -1080,13 +1080,13 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
   }
 
   .plan-topbar-actions :deep(.menu-btn) {
-    width: 48px;
-    height: 48px;
-    border-radius: 10px;
+    width: 52px;
+    height: 52px;
+    border-radius: 12px;
   }
 
   .plan-topbar-actions :deep(.menu-icon) {
-    font-size: 1.2rem;
+    font-size: 1.55rem;
   }
 }
 
@@ -1122,25 +1122,20 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
     white-space: normal;
   }
 
-  .hero-band {
-    min-height: 0;
-  }
-
   .hero {
-    padding-bottom: 1.75rem;
+    padding-bottom: 0.95rem;
   }
 
   .hero-center {
-    margin: 0;
-    padding: 1rem 0 1.25rem;
+    padding: 0.55rem 0 0.85rem;
   }
 
   .hero-title {
-    font-size: clamp(1.55rem, 7.2vw, 2.1rem);
+    font-size: clamp(1.35rem, 6.4vw, 1.85rem);
   }
 
   .hero-sub {
-    font-size: 0.92rem;
+    font-size: 0.88rem;
   }
 
   .brand-logo {
@@ -1170,48 +1165,6 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
   .features-grid,
   .steps {
     grid-template-columns: 1fr;
-  }
-
-  /* Action area first, then how-it-works */
-  .page-wrap:not(.hero-wrap) {
-    display: flex;
-    flex-direction: column;
-  }
-
-  .page-wrap:not(.hero-wrap) > .stats-bar {
-    order: 0;
-  }
-
-  .page-wrap:not(.hero-wrap) > .app-section {
-    order: 1;
-  }
-
-  .page-wrap:not(.hero-wrap) > .how-section {
-    order: 2;
-  }
-
-  .page-wrap:not(.hero-wrap) > .features-section {
-    order: 3;
-  }
-
-  .page-wrap:not(.hero-wrap) > .guide-teaser {
-    order: 4;
-  }
-
-  .page-wrap:not(.hero-wrap) > .updates-section {
-    order: 5;
-  }
-
-  .page-wrap:not(.hero-wrap) > .faq-section {
-    order: 6;
-  }
-
-  .page-wrap:not(.hero-wrap) > .feedback {
-    order: 7;
-  }
-
-  .page-wrap:not(.hero-wrap) > .site-footer {
-    order: 8;
   }
 }
 </style>

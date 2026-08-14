@@ -424,7 +424,11 @@ export const useMapStore = defineStore('map', () => {
     radiusM: number,
     categories: PoiCategory[],
     elevations?: number[],
-    opts?: { nearby?: boolean; surfaceSummary?: RouteSurfaceSummary | null }
+    opts?: {
+      nearby?: boolean
+      surfaceSummary?: RouteSurfaceSummary | null
+      preloadedPois?: Poi[]
+    }
   ) {
     validateSupportedRoute(coordinates)
     const points = buildRoutePoints(coordinates, elevations)
@@ -451,13 +455,17 @@ export const useMapStore = defineStore('map', () => {
 
     loadStatus.value = tGlobal('store.loadingPois')
     setLoadProgress(5)
-    const { pois } = await fetchPoisForRoute(
-      coordinates,
-      points,
-      radiusM,
-      categories,
-      mapFetchProgress
-    )
+    const pois =
+      opts?.preloadedPois ??
+      (
+        await fetchPoisForRoute(
+          coordinates,
+          points,
+          radiusM,
+          categories,
+          mapFetchProgress
+        )
+      ).pois
 
     for (const p of pois) {
       poiMap.value.set(p.id, normalizePoiCategory(p))
@@ -598,7 +606,8 @@ export const useMapStore = defineStore('map', () => {
     radiusM: number,
     categories: PoiCategory[],
     elevations?: number[],
-    surface?: RouteSurfaceSummary | null
+    surface?: RouteSurfaceSummary | null,
+    preloadedPois?: Poi[]
   ) {
     if (coordinates.length < 2) {
       throw new Error(tGlobal('store.routeTooFew'))
@@ -607,6 +616,7 @@ export const useMapStore = defineStore('map', () => {
     await runMapLoad(tGlobal('store.loadingPois'), async () => {
       await loadPoisForCoordinates(name, coordinates, radiusM, categories, elevations, {
         surfaceSummary: surface ?? null,
+        preloadedPois,
       })
     }, tGlobal('planner.createFailed'))
   }
