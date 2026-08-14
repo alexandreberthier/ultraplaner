@@ -31,7 +31,7 @@ import {
 } from '../services/gpx'
 import { buildRoutePoints, sanitizeRouteCoords, sanitizeRoutePoints, totalRouteKm } from '../utils/route'
 import { haversineM } from '../services/geo'
-import { thinPoisForMap } from '../utils/poiThin'
+import { thinPoisByProximity, thinPoisForMap } from '../utils/poiThin'
 import { tileIdsAlongRoute } from '../services/poiQuery'
 import { hasAnyCachedPoiTile } from '../services/offlinePacks'
 import { normalizePoiCategory, expandLegacyCategories } from '../utils/poiNormalize'
@@ -264,6 +264,9 @@ export const useMapStore = defineStore('map', () => {
 
   const mapPois = computed(() => {
     if (showAllPoisOnMap.value) return displayPois.value
+    if (isNearbyMap.value) {
+      return thinPoisByProximity(displayPois.value, favorites.value)
+    }
     const focus = gpsEnrichFocus.value
     if (!focus) return thinPoisForMap(displayPois.value)
 
@@ -444,11 +447,7 @@ export const useMapStore = defineStore('map', () => {
       throw new Error(tGlobal('store.supabaseNotConfiguredEnv'))
     }
 
-    if (opts?.nearby) {
-      showAllPoisOnMap.value = true
-    } else {
-      showAllPoisOnMap.value = false
-    }
+    showAllPoisOnMap.value = false
 
     loadStatus.value = tGlobal('store.loadingPois')
     setLoadProgress(5)
@@ -649,7 +648,7 @@ export const useMapStore = defineStore('map', () => {
     poiRadiusM.value = radiusM
     activeCategories.value = [...categories]
     visibleCategories.value = [...categories]
-    showAllPoisOnMap.value = true
+    showAllPoisOnMap.value = false
     mapEpoch.value++
     mapReady.value = true
     mode.value = 'map'
@@ -892,7 +891,7 @@ export const useMapStore = defineStore('map', () => {
       controlPoints.value = record.controlPoints ?? []
       surfaceSummary.value = record.surfaceSummary ?? null
       controlPointPlaceKind.value = null
-      showAllPoisOnMap.value = isNearbyMap.value
+      showAllPoisOnMap.value = false
 
       poiMap.value.clear()
       for (const p of record.pois) {

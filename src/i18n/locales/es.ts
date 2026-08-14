@@ -141,7 +141,7 @@ export default {
       a15: 'Marcan huecos de suministro: tramos de al menos unos 25 km sin POI con tus categorías/filtros actuales. Así ves dónde planificar más o marcar favoritos.',
       q16: '¿Qué es «En ruta»?',
       a16:
-        'En ruta = tu ubicación + POIs en un radio (p. ej. una parada, sin ruta). Un toque en «En ruta» abre el mapa al momento (por defecto: 2 km, gasolineras/supermercados). Ajusta radio y categorías después en la lista/barra lateral y vuelve a cargar. Sin modo de marcha — hace falta una ruta de carrera cargada.',
+        'En ruta = tu ubicación + POIs en un radio (p. ej. una parada, sin ruta). Un toque en «En ruta» abre el mapa al momento (por defecto: 3 km, gasolineras/supermercados/agua, filtrado). Ajusta radio y categorías después en la lista/barra lateral y vuelve a cargar. Sin modo de marcha — hace falta una ruta de carrera cargada.',
     },
     poiGuide: {
       title: 'Avituallamiento para rutas ultracycling',
@@ -220,7 +220,7 @@ export default {
     intro:
       '¿En la bici? En ruta usa tu ubicación para buscar avituallamiento en un radio — sin GPX. (Modo de marcha solo con ruta.)',
     introMapFirst:
-      'Se obtiene tu ubicación y se abre el mapa al momento (por defecto: 2 km, gasolineras, supermercados). Cambia radio y categorías en el mapa bajo opciones En ruta.',
+      'Se obtiene tu ubicación y se abre el mapa al momento (por defecto: 3 km, gasolineras, supermercados, agua — filtrado). Cambia radio y categorías en el mapa bajo opciones En ruta.',
     introMap:
       'Actualiza el GPS y vuelve a cargar los POIs en el radio. (Sin modo de marcha — hace falta una ruta.)',
     introMapRoute:
@@ -489,7 +489,7 @@ export default {
     mapPartial: 'Mapa: {shown} de {total} marcadores',
     mapAll: 'Mapa: los {count} marcadores',
     mapShowAll: 'Mostrar todos en el mapa',
-    mapThinHint: 'Por defecto: máx. 1 marcador cada 2 km por categoría.',
+    mapThinHint: 'Por defecto: filtrado para ver mejor. Marca la casilla para todos los marcadores.',
   },
   eta: {
     title: 'Planificación horaria',

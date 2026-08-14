@@ -137,7 +137,7 @@ export default {
       a15: 'Siehe „Wie plane ich die Versorgung?“ bzw. „Öffnungszeiten & Höhenprofil?“.',
       q16: 'Was ist „Fahrt“?',
       a16:
-        'Fahrt = Standort + Umkreis-POIs (Pause, ohne Route). Ein Tipp auf „Fahrt“ öffnet direkt die Karte (Standard: 2 km, Tankstellen/Supermärkte). Radius und Kategorien danach in der Liste/Sidebar anpassen und neu laden. Kein Fahrtmodus — der braucht eine geladene Rennroute.',
+        'Fahrt = Standort + Umkreis-POIs (Pause, ohne Route). Ein Tipp auf „Fahrt“ öffnet direkt die Karte (Standard: 3 km, Tankstellen/Supermärkte/Trinkwasser, ausgedünnt). Radius und Kategorien danach in der Liste/Sidebar anpassen und neu laden. Kein Fahrtmodus — der braucht eine geladene Rennroute.',
       q18: 'Was sind Kontrollpunkte?',
       a18: 'Siehe „Wie plane ich die Versorgung?“.',
       q20: 'Wie funktioniert „Mit Wahoo verbinden“?',
@@ -220,7 +220,7 @@ export default {
     intro:
       'Unterwegs? Fahrt nutzt deinen Standort und sucht Versorgung im Umkreis — ohne GPX. (Fahrtmodus nur mit Route.)',
     introMapFirst:
-      'Standort wird geholt und die Karte öffnet sich sofort (Standard: 2 km, Tankstellen, Supermärkte). Radius und Kategorien kannst du auf der Karte in den Fahrt-Optionen ändern.',
+      'Standort wird geholt und die Karte öffnet sich sofort (Standard: 3 km, Tankstellen, Supermärkte, Trinkwasser — ausgedünnt). Radius und Kategorien kannst du auf der Karte in den Fahrt-Optionen ändern.',
     introMap:
       'Standort erneut holen und POIs im Umkreis neu laden. (Kein Fahrtmodus — der braucht eine Route.)',
     introMapRoute:
@@ -421,7 +421,7 @@ export default {
     needSavedMap: 'Karte muss zuerst gespeichert sein (kurz warten).',
     noCoverageAroundGps:
       'Offline: An deinem Standort ist nichts aus der gespeicherten Route verfügbar. Route erneut offline vorbereiten oder online laden.',
-    help: 'Lädt die ganze Strecke auf dieses Gerät: Kartenkacheln + POIs entlang der Route. Unterwegs ohne Internet siehst du Karte und Versorgung — anders als „Zuletzt geöffnet“ (nur zum Wiederöffnen).',
+    help: 'Zuerst die App einmal online öffnen (am besten als PWA auf dem Homescreen). Dann per WLAN die Strecke speichern: Kartenkacheln + POIs. Unterwegs ohne Internet: Homescreen-Icon → gespeicherte Route. Anders als „Zuletzt geöffnet“ (nur Liste).',
     where: 'Status hier und Hinweis oben auf der Karte.',
     hint: 'Am besten per WLAN. Nur diese Route — nicht der Fahrt-Scan um deinen Standort.',
   },
@@ -489,7 +489,7 @@ export default {
     mapPartial: 'Karte: {shown} von {total} Markern',
     mapAll: 'Karte: alle {count} Marker',
     mapShowAll: 'Alle auf der Karte einblenden',
-    mapThinHint: 'Standard: max. 1 Marker alle 2 km pro Kategorie (übersichtlicher).',
+    mapThinHint: 'Standard: ausgedünnt für die Übersicht. Haken setzen, um alle Marker zu sehen.',
   },
   eta: {
     title: 'Zeitplanung',

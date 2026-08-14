@@ -140,7 +140,7 @@
       a15: 'Ce sont des lacunes de ravitaillement : tronçons d’au moins ~25 km sans POI avec vos catégories/filtres actuels. Utile pour anticiper ou marquer des favoris.',
       q16: 'Qu’est-ce que « Trajet » ?',
       a16:
-        'Trajet = votre position + POIs dans un rayon (pause, sans route). Un tap sur « Trajet » ouvre directement la carte (défaut : 2 km, stations/supermarchés). Ajustez rayon et catégories ensuite dans la liste/barre latérale et rechargez. Pas de mode conduite — il faut une route de course chargée.',
+        'Trajet = votre position + POIs dans un rayon (pause, sans route). Un tap sur « Trajet » ouvre directement la carte (défaut : 3 km, stations/supermarchés/eau, éclairci). Ajustez rayon et catégories ensuite dans la liste/barre latérale et rechargez. Pas de mode conduite — il faut une route de course chargée.',
     },
     poiGuide: {
       title: 'Ravitaillement pour routes ultracycling',
@@ -219,7 +219,7 @@
     intro:
       'En selle ? Trajet utilise votre position pour chercher des ravitaillements dans un rayon — sans GPX. (Mode conduite seulement avec une route.)',
     introMapFirst:
-      'La position est récupérée et la carte s’ouvre tout de suite (défaut : 2 km, stations, supermarchés). Changez rayon et catégories sur la carte sous Options Trajet.',
+      'La position est récupérée et la carte s’ouvre tout de suite (défaut : 3 km, stations, supermarchés, eau — éclairci). Changez rayon et catégories sur la carte sous Options Trajet.',
     introMap:
       'Rafraîchir le GPS et recharger les POIs dans le rayon. (Pas de mode conduite — il faut une route.)',
     introMapRoute:
@@ -488,7 +488,7 @@
     mapPartial: 'Carte : {shown} sur {total} marqueurs',
     mapAll: 'Carte : les {count} marqueurs',
     mapShowAll: 'Tout afficher sur la carte',
-    mapThinHint: 'Par défaut : max. 1 marqueur tous les 2 km par catégorie.',
+    mapThinHint: 'Par défaut : éclairci pour y voir clair. Cochez pour tous les marqueurs.',
   },
   eta: {
     title: 'Planification horaire',
