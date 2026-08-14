@@ -569,7 +569,7 @@ function onDocClick(e: MouseEvent) {
                 · {{ t('map.poisOnMap', { count: store.mapPois.length }) }}
               </template>
             </p>
-            <TopbarSettings class="sidebar-settings" />
+            <TopbarSettings class="sidebar-settings" brutal />
           </div>
         </div>
       </header>
@@ -1534,8 +1534,8 @@ function onDocClick(e: MouseEvent) {
 .sidebar {
   display: flex;
   flex-direction: column;
-  border-right: 1px solid var(--border);
-  background: var(--surface);
+  border-right: 3px solid #111;
+  background: #f3efe6;
   overflow: hidden;
   min-width: 0;
   min-height: 0;
@@ -1551,7 +1551,8 @@ function onDocClick(e: MouseEvent) {
 
 .map-header {
   padding: 1rem;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 3px solid #111;
+  background: #fff;
   flex-shrink: 0;
 }
 
@@ -1572,8 +1573,10 @@ function onDocClick(e: MouseEvent) {
 
 .map-header h1 {
   margin: 0;
-  font-size: 1rem;
+  font-size: 1.02rem;
+  font-weight: 800;
   line-height: 1.3;
+  color: #111;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1594,7 +1597,9 @@ function onDocClick(e: MouseEvent) {
 .meta {
   margin: 0.25rem 0 0;
   font-size: 0.85rem;
-  color: var(--text-muted);
+  color: #111;
+  opacity: 0.68;
+  font-weight: 650;
 }
 
 .sidebar-settings {
@@ -1616,8 +1621,8 @@ function onDocClick(e: MouseEvent) {
   gap: 0.65rem;
   min-height: 58px;
   padding: 0.7rem 1rem;
-  background: var(--surface);
-  border-bottom: 1px solid var(--border);
+  background: #fff;
+  border-bottom: 3px solid #111;
   flex-shrink: 0;
   z-index: 5;
 }
@@ -1631,35 +1636,39 @@ function onDocClick(e: MouseEvent) {
 
 .tool-btn {
   padding: 0.55rem 0.85rem;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: var(--surface-2);
-  color: var(--text);
+  border: 2px solid #111;
+  border-radius: 0;
+  background: #fff;
+  color: #111;
   cursor: pointer;
   font-size: 0.88rem;
+  font-weight: 750;
   line-height: 1.2;
   white-space: nowrap;
 }
 
 .tool-btn:hover {
-  background: var(--border);
+  background: #f3efe6;
 }
 
 .home-btn {
-  background: var(--primary);
-  border-color: var(--primary);
-  color: #fff;
-  font-weight: 700;
+  background: var(--cta);
+  border-color: #111;
+  color: #111;
+  font-weight: 800;
+  box-shadow: 3px 3px 0 #111;
 }
 
 .home-btn:hover {
-  background: var(--primary-dark, #1b4332);
-  border-color: var(--primary-dark, #1b4332);
-  color: #fff;
+  background: var(--cta);
+  border-color: #111;
+  color: #111;
+  transform: translate(1px, 1px);
+  box-shadow: 2px 2px 0 #111;
 }
 
 .share-btn {
-  color: var(--primary);
+  color: #111;
 }
 
 .sidebar-toggle {
@@ -1676,22 +1685,22 @@ function onDocClick(e: MouseEvent) {
 }
 
 .export-toggle {
-  background: var(--primary);
-  border-color: var(--primary);
-  color: #fff;
-  font-weight: 700;
-  box-shadow: 0 1px 4px rgba(45, 106, 79, 0.35);
+  background: var(--cta);
+  border-color: #111;
+  color: #111;
+  font-weight: 800;
+  box-shadow: 3px 3px 0 #111;
 }
 
 .export-toggle:hover {
-  background: var(--primary-dark);
-  border-color: var(--primary-dark);
+  background: var(--cta);
+  border-color: #111;
 }
 
 .export-toggle.active {
-  background: var(--primary-dark);
+  background: #111;
   color: #fff;
-  border-color: var(--primary-dark);
+  border-color: #111;
 }
 
 .offline-banner {
@@ -1702,21 +1711,16 @@ function onDocClick(e: MouseEvent) {
   z-index: 22;
   max-width: min(520px, calc(100% - 2rem));
   padding: 0.7rem 0.95rem;
-  background: #fff7ed;
-  border: 1px solid #fdba74;
-  border-radius: 10px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  background: #fff;
+  border: 3px solid #111;
+  border-radius: 0;
+  box-shadow: 4px 4px 0 #111;
 }
 
-.offline-banner.pack-ready-banner {
-  background: #ecfdf5;
-  border-color: #6ee7b7;
-}
-
+.offline-banner.pack-ready-banner,
 .offline-banner.pack-active-banner {
-  background: #ecfdf5;
-  border-color: #34d399;
-  box-shadow: 0 4px 18px rgba(16, 185, 129, 0.18);
+  background: #fff;
+  border-color: #111;
 }
 
 .offline-banner-text {
@@ -1752,10 +1756,10 @@ function onDocClick(e: MouseEvent) {
   gap: 0.65rem;
   max-width: min(520px, calc(100% - 2rem));
   padding: 0.65rem 0.85rem;
-  background: #fef2f2;
-  border: 1px solid #fecaca;
-  border-radius: 10px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  background: #fff;
+  border: 3px solid #111;
+  border-radius: 0;
+  box-shadow: 4px 4px 0 #111;
 }
 
 .persist-banner-text {
@@ -1789,10 +1793,10 @@ function onDocClick(e: MouseEvent) {
   gap: 0.75rem;
   max-width: min(560px, calc(100% - 2rem));
   padding: 0.75rem 0.9rem;
-  background: #ecfdf5;
-  border: 1px solid #6ee7b7;
-  border-radius: 10px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+  background: #fff;
+  border: 3px solid #111;
+  border-radius: 0;
+  box-shadow: 4px 4px 0 #111;
 }
 
 .export-tip-text {
@@ -1817,17 +1821,17 @@ function onDocClick(e: MouseEvent) {
 .export-tip-btn {
   flex-shrink: 0;
   padding: 0.5rem 0.75rem;
-  border: none;
-  border-radius: 8px;
-  background: var(--primary);
-  color: #fff;
-  font-weight: 700;
+  border: 2px solid #111;
+  border-radius: 0;
+  background: var(--cta);
+  color: #111;
+  font-weight: 800;
   font-size: 0.85rem;
   cursor: pointer;
 }
 
 .export-tip-btn:hover {
-  background: var(--primary-dark);
+  background: var(--cta);
 }
 
 .sidebar-reopen {
@@ -1840,15 +1844,15 @@ function onDocClick(e: MouseEvent) {
   align-items: center;
   gap: 0.25rem;
   padding: 0.6rem 0.5rem 0.6rem 0.35rem;
-  border: 1px solid var(--border);
+  border: 3px solid #111;
   border-left: none;
-  border-radius: 0 10px 10px 0;
-  background: var(--surface);
-  box-shadow: 2px 0 12px rgba(0, 0, 0, 0.08);
+  border-radius: 0;
+  background: #fff;
+  box-shadow: 4px 4px 0 #111;
   cursor: pointer;
   font-size: 0.8rem;
-  font-weight: 600;
-  color: var(--primary);
+  font-weight: 800;
+  color: #111;
 }
 
 .reopen-chevron {
@@ -1894,13 +1898,13 @@ function onDocClick(e: MouseEvent) {
   z-index: 40;
   margin: 0;
   padding: 0.55rem 0.9rem;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--surface) 92%, transparent);
-  border: 1px solid var(--border);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  border-radius: 0;
+  background: #fff;
+  border: 2px solid #111;
+  box-shadow: 3px 3px 0 #111;
   font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--text);
+  font-weight: 700;
+  color: #111;
   pointer-events: none;
   white-space: nowrap;
 }
@@ -1917,22 +1921,22 @@ function onDocClick(e: MouseEvent) {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  border: none;
-  border-radius: 10px;
+  border: 2px solid #111;
+  border-radius: 0;
   padding: 0.55rem 0.7rem;
   background: #fff;
   color: #111;
   font: inherit;
   font-size: 0.85rem;
-  font-weight: 700;
-  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1), 0 4px 14px rgba(0, 0, 0, 0.12);
+  font-weight: 800;
+  box-shadow: 3px 3px 0 #111;
   cursor: pointer;
 }
 
 .map-cp-fab.active {
-  background: var(--primary, #2d6a4f);
-  color: #fff;
-  box-shadow: 0 0 0 2px rgba(45, 106, 79, 0.35), 0 4px 14px rgba(0, 0, 0, 0.18);
+  background: var(--cta);
+  color: #111;
+  box-shadow: 3px 3px 0 #111;
 }
 
 .map-cp-fab-label {
@@ -1945,17 +1949,18 @@ function onDocClick(e: MouseEvent) {
   gap: 0.4rem;
   min-width: 12rem;
   padding: 0.45rem;
-  border-radius: 12px;
+  border-radius: 0;
+  border: 3px solid #111;
   background: #fff;
-  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.08), 0 8px 20px rgba(0, 0, 0, 0.14);
+  box-shadow: 4px 4px 0 #111;
 }
 
 .map-cp-kind {
   display: flex;
   align-items: center;
   gap: 0.55rem;
-  border: none;
-  border-radius: 10px;
+  border: 2px solid transparent;
+  border-radius: 0;
   padding: 0.75rem 0.9rem;
   min-height: 48px;
   background: transparent;
@@ -1969,8 +1974,9 @@ function onDocClick(e: MouseEvent) {
 
 .map-cp-kind:hover,
 .map-cp-kind.active {
-  background: #ecfdf5;
-  color: var(--primary, #2d6a4f);
+  background: var(--cta);
+  border-color: #111;
+  color: #111;
 }
 
 .map-cp-banner {
@@ -2011,9 +2017,9 @@ function onDocClick(e: MouseEvent) {
     height: 60px;
     padding: 0;
     justify-content: center;
-    border-radius: 16px;
+    border-radius: 0;
     font-size: 1.4rem;
-    box-shadow: 0 2px 14px rgba(0, 0, 0, 0.28);
+    box-shadow: 4px 4px 0 #111;
   }
 
   .map-cp-fab-label {
@@ -2035,16 +2041,18 @@ function onDocClick(e: MouseEvent) {
 }
 
 .tool-btn.ride-enter {
-  background: var(--primary);
-  color: #fff;
-  border-color: var(--primary);
-  font-weight: 700;
+  background: var(--cta);
+  color: #111;
+  border-color: #111;
+  font-weight: 800;
+  box-shadow: 3px 3px 0 #111;
 }
 
 .tool-btn.ride-enter.is-on {
   background: #111;
   border-color: #111;
   color: #fff;
+  box-shadow: 3px 3px 0 #111;
 }
 
 .ride-overlay {
@@ -2065,13 +2073,13 @@ function onDocClick(e: MouseEvent) {
   pointer-events: auto;
   min-height: 40px;
   padding: 0.45rem 0.85rem;
-  border: none;
-  border-radius: 8px;
+  border: 2px solid #111;
+  border-radius: 0;
   background: #111;
   color: #fff;
   font-weight: 800;
   font-size: 0.88rem;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.28);
+  box-shadow: 3px 3px 0 #111;
   cursor: pointer;
 }
 
@@ -2477,9 +2485,9 @@ function onDocClick(e: MouseEvent) {
     right: 0;
     z-index: 100;
     background: #fff;
-    border-top: 2px solid #94a3b8;
+    border-top: 3px solid #111;
     padding: 0.4rem 0.2rem calc(0.4rem + env(safe-area-inset-bottom, 0px));
-    box-shadow: 0 -8px 28px rgba(15, 23, 42, 0.16);
+    box-shadow: none;
   }
 
   .nav-item {
@@ -2518,11 +2526,11 @@ function onDocClick(e: MouseEvent) {
     overflow: visible;
     width: 48px;
     height: 48px;
-    border-radius: 14px;
+    border-radius: 0;
     background: #fff;
-    border: 2.5px solid currentColor;
+    border: 2.5px solid #111;
     color: inherit;
-    box-shadow: none;
+    box-shadow: 3px 3px 0 #111;
   }
 
   .nav-glyph svg {
@@ -2620,15 +2628,16 @@ function onDocClick(e: MouseEvent) {
   }
 
   .mobile-sheet-inner {
-    background: var(--surface);
+    background: #f3efe6;
     width: 100%;
     max-width: 520px;
     max-height: min(88dvh, 760px);
-    border-radius: 16px;
+    border-radius: 0;
+    border: 3px solid #111;
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    box-shadow: 0 10px 36px rgba(0, 0, 0, 0.22);
+    box-shadow: 6px 6px 0 #111;
     touch-action: pan-y;
     overscroll-behavior: contain;
   }
@@ -2850,10 +2859,10 @@ function onDocClick(e: MouseEvent) {
   position: absolute;
   top: calc(100% + 6px);
   right: 0;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.14);
+  background: #fff;
+  border: 3px solid #111;
+  border-radius: 0;
+  box-shadow: 6px 6px 0 #111;
   z-index: 200;
   min-width: 300px;
   overflow: hidden;
@@ -2898,15 +2907,15 @@ function onDocClick(e: MouseEvent) {
   width: 100%;
   box-sizing: border-box;
   padding: 0.55rem 0.65rem;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: var(--surface, #fff);
-  color: var(--text);
+  border: 2px solid #111;
+  border-radius: 0;
+  background: #f3efe6;
+  color: #111;
   font-size: 0.9rem;
 }
 
 .export-name-field input:focus {
-  outline: 2px solid var(--primary);
+  outline: 3px solid #111;
   outline-offset: 1px;
 }
 
@@ -3063,15 +3072,15 @@ function onDocClick(e: MouseEvent) {
 }
 
 .export-item:hover {
-  background: var(--surface-hover, rgba(0, 0, 0, 0.06));
+  background: #f3efe6;
 }
 
 .export-item.featured {
-  background: #f0f9ff;
+  background: var(--cta);
 }
 
 .export-item.featured:hover {
-  background: #e0f2fe;
+  background: var(--cta);
 }
 
 .export-icon {
@@ -3125,19 +3134,18 @@ function onDocClick(e: MouseEvent) {
   gap: 0.75rem;
   width: 100%;
   padding: 0.85rem 1rem;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  background: var(--surface);
+  border: 2px solid #111;
+  border-radius: 0;
+  background: #fff;
   font-size: 0.9rem;
-  color: var(--text);
+  color: #111;
   cursor: pointer;
   text-align: left;
-  transition: background 0.15s;
 }
 
 .export-sheet-btn.featured {
-  background: #eff6ff;
-  border-color: #93c5fd;
+  background: var(--cta);
+  border-color: #111;
 }
 
 .export-sheet-btn strong {
@@ -3157,11 +3165,11 @@ function onDocClick(e: MouseEvent) {
 }
 
 .export-sheet-btn:hover {
-  background: var(--surface-hover, rgba(0, 0, 0, 0.06));
+  background: #f3efe6;
 }
 
 .export-sheet-btn.featured:hover {
-  background: #dbeafe;
+  background: var(--cta);
 }
 
 .export-print-hint {
@@ -3177,5 +3185,136 @@ function onDocClick(e: MouseEvent) {
 
 .export-sheet-print {
   opacity: 0.92;
+}
+
+/* Minimal brutalism: sidebar + elevation stay readable */
+.sidebar :deep([data-sidebar-section]) {
+  border-bottom: 2px solid #111;
+}
+
+.sidebar :deep(.toggle-title) {
+  color: #111;
+  font-weight: 800;
+}
+
+.sidebar :deep(.section-toggle:hover) {
+  background: #fff;
+}
+
+.sidebar :deep(.tabs) {
+  gap: 0;
+  border: 2px solid #111;
+}
+
+.sidebar :deep(.tabs button) {
+  border: none;
+  border-right: 2px solid #111;
+  border-radius: 0;
+  background: #fff;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  font-size: 0.72rem;
+}
+
+.sidebar :deep(.tabs button:last-child) {
+  border-right: none;
+}
+
+.sidebar :deep(.tabs button.active) {
+  background: #111;
+  color: #fff;
+  border-color: #111;
+}
+
+.sidebar :deep(.poi-search input) {
+  border: 2px solid #111;
+  border-radius: 0;
+  background: #fff;
+  color: #111;
+}
+
+.sidebar :deep(.poi-search input:focus) {
+  outline: 3px solid #111;
+}
+
+.sidebar :deep(.cat-btn) {
+  border: 2px solid #111;
+  border-radius: 0;
+  background: #fff;
+}
+
+.sidebar :deep(.cat-btn.off) {
+  opacity: 0.42;
+  background: #e8e4dc;
+}
+
+.sidebar :deep(.map-poi-bar) {
+  border-radius: 0;
+  border: 2px solid #111;
+  background: #fff;
+}
+
+.sidebar :deep(.poi-list li.selected) {
+  background: var(--cta);
+}
+
+.sidebar :deep(.km) {
+  color: #111;
+}
+
+.map-layout :deep(.elevation-profile) {
+  border-top: 3px solid #111;
+  box-shadow: none;
+  background: #fff;
+}
+
+.map-layout :deep(.elevation-profile .profile-toggle) {
+  background: #f3efe6;
+}
+
+.map-layout :deep(.elevation-profile .chevron-wrap) {
+  border-radius: 0;
+  border: 2px solid #111;
+  background: #fff;
+  box-shadow: none;
+}
+
+.mobile-sheet-inner :deep(.tabs button),
+.mobile-sheet-inner :deep(.cat-btn),
+.mobile-sheet-inner :deep(.poi-search input) {
+  border-radius: 0;
+  border-color: #111;
+}
+
+.mobile-sheet-inner .sheet-header {
+  border-bottom: 3px solid #111;
+  background: #fff;
+}
+
+.mobile-sheet-inner .sheet-header h2 {
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.mobile-sheet-inner :deep(.btn-primary) {
+  border: 3px solid #111;
+  border-radius: 0;
+  background: var(--cta);
+  color: #111;
+  box-shadow: 4px 4px 0 #111;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.mobile-sheet-inner :deep(.cat-chip) {
+  border: 2px solid #111;
+  border-radius: 0;
+}
+
+.mobile-sheet-inner :deep(.cat-chip.active) {
+  background: var(--cta);
+  color: #111;
 }
 </style>
