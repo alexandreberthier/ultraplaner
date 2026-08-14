@@ -110,18 +110,18 @@ function goStart() {
 }
 
 const features = [
-  { key: 'pois', icon: '📍' },
-  { key: 'eta', icon: '🕐' },
-  { key: 'elevation', icon: '⛰️' },
-  { key: 'weather', icon: '🌤' },
-  { key: 'export', icon: '🖨️' },
-  { key: 'europe', icon: '🗺️' },
+  { key: 'pois' },
+  { key: 'eta' },
+  { key: 'elevation' },
+  { key: 'weather' },
+  { key: 'export' },
+  { key: 'europe' },
 ] as const
 
 const steps = [
-  { key: 'step1', num: '1' },
-  { key: 'step2', num: '2' },
-  { key: 'step3', num: '3' },
+  { key: 'step1', num: '01' },
+  { key: 'step2', num: '02' },
+  { key: 'step3', num: '03' },
 ] as const
 
 const faqs = ['q1', 'q17', 'q3', 'q6', 'q19', 'q13', 'q14', 'q11'] as const
@@ -239,6 +239,11 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
 
           <div class="page-wrap hero-wrap">
             <div class="hero-center">
+              <p class="hero-kicker">
+                {{ t('landing.stats.regions') }}
+                ·
+                {{ t('landing.stats.pois') }}
+              </p>
               <h1 class="hero-title">
                 <span class="hero-title-lead">{{ t('landing.heroLine1') }}</span>
                 <span class="hero-title-route">{{ t('landing.heroLine2') }}</span>
@@ -348,11 +353,8 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
           <h2>{{ t('landing.features.title') }}</h2>
           <div class="features-grid">
             <article v-for="f in features" :key="f.key" class="feature-card">
-              <div class="feature-icon" aria-hidden="true">{{ f.icon }}</div>
-              <div>
-                <strong>{{ t(`landing.features.${f.key}`) }}</strong>
-                <p>{{ t(`landing.features.${f.key}Desc`) }}</p>
-              </div>
+              <strong>{{ t(`landing.features.${f.key}`) }}</strong>
+              <p>{{ t(`landing.features.${f.key}Desc`) }}</p>
             </article>
           </div>
         </section>
@@ -454,6 +456,8 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
 
 .landing {
   min-height: 100%;
+  background: #f3efe6;
+  color: #111;
 }
 
 .landing.plan-fullscreen {
@@ -476,7 +480,7 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
 
 .page-wrap {
   width: 100%;
-  max-width: 1120px;
+  max-width: 1180px;
   margin: 0 auto;
   padding-inline: max(1.25rem, env(safe-area-inset-left, 0px));
   padding-inline-end: max(1.25rem, env(safe-area-inset-right, 0px));
@@ -487,10 +491,10 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
 .hero-band {
   position: relative;
   isolation: isolate;
-  min-height: 0;
+  min-height: min(78vh, 860px);
   display: flex;
   align-items: stretch;
-  border-bottom: 1px solid color-mix(in srgb, var(--border) 80%, transparent);
+  border-bottom: 3px solid #111;
   overflow: hidden;
 }
 
@@ -504,8 +508,9 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center center;
+  object-position: center 40%;
   display: block;
+  filter: saturate(1.05) contrast(1.08);
 }
 
 .hero-scrim {
@@ -514,9 +519,9 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
   background:
     linear-gradient(
       180deg,
-      rgba(8, 18, 14, 0.48) 0%,
-      rgba(8, 18, 14, 0.28) 42%,
-      rgba(8, 18, 14, 0.5) 100%
+      rgba(0, 0, 0, 0.42) 0%,
+      rgba(0, 0, 0, 0.12) 38%,
+      rgba(0, 0, 0, 0.78) 100%
     );
 }
 
@@ -524,7 +529,7 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
   position: relative;
   z-index: 1;
   width: 100%;
-  max-width: 1120px;
+  max-width: 1180px;
   margin: 0 auto;
   padding-inline: max(1.25rem, env(safe-area-inset-left, 0px));
   padding-inline-end: max(1.25rem, env(safe-area-inset-right, 0px));
@@ -532,31 +537,33 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
   display: flex;
   flex-direction: column;
   flex: 1;
+  justify-content: flex-end;
 }
 
 .hero {
   position: relative;
   z-index: 1;
-  flex: 0 0 auto;
+  flex: 1 1 auto;
   display: flex;
   flex-direction: column;
   width: 100%;
-  padding: 0 0 1.15rem;
+  min-height: min(78vh, 860px);
+  padding: 0 0 4.5rem;
 }
 
 .hero-top {
   position: relative;
   z-index: 20;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 0.5rem;
   width: 100%;
   box-sizing: border-box;
-  padding: max(0.55rem, env(safe-area-inset-top, 0px))
-    max(0.65rem, env(safe-area-inset-right, 0px))
+  padding: max(0.7rem, env(safe-area-inset-top, 0px))
+    max(0.75rem, env(safe-area-inset-right, 0px))
     0.25rem
-    max(0.65rem, env(safe-area-inset-left, 0px));
+    max(0.75rem, env(safe-area-inset-left, 0px));
   min-width: 0;
 }
 
@@ -566,11 +573,11 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
   gap: 0.55rem;
   min-width: 0;
   flex-shrink: 1;
-  padding: 0.3rem 0.55rem 0.3rem 0.4rem;
-  border: none;
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.9);
-  box-shadow: 0 1px 12px rgba(0, 0, 0, 0.18);
+  padding: 0.35rem 0.6rem 0.35rem 0.4rem;
+  border: 3px solid #111;
+  border-radius: 0;
+  background: #fff;
+  box-shadow: 4px 4px 0 #111;
   cursor: pointer;
   font: inherit;
 }
@@ -589,63 +596,81 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  max-width: 34rem;
+  max-width: 52rem;
   width: 100%;
   align-self: flex-start;
-  padding: 0.85rem 0 1.15rem;
+  padding: 2.5rem 0 0;
 }
 
 .hero-kicker {
-  margin: 0 0 0.65rem;
-  font-size: 0.78rem;
-  font-weight: 600;
-  letter-spacing: 0.05em;
+  margin: 0 0 0.85rem;
+  max-width: 22rem;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: color-mix(in srgb, #9fe8c2 85%, #fff);
+  color: #fff;
+  background: #111;
+  padding: 0.4rem 0.65rem;
+  line-height: 1.35;
 }
 
 .hero-title {
-  font-size: clamp(1.55rem, 3.4vw, 2.35rem);
-  font-weight: 800;
+  font-family: Impact, 'Arial Black', 'Helvetica Neue', sans-serif;
+  font-size: clamp(2.7rem, 9vw, 7rem);
+  font-weight: 900;
   color: #fff;
-  margin: 0 0 0.4rem;
-  line-height: 1.12;
-  letter-spacing: -0.03em;
-  text-shadow: 0 2px 18px rgba(0, 0, 0, 0.28);
+  margin: 0 0 0.65rem;
+  line-height: 0.84;
+  letter-spacing: -0.045em;
+  text-transform: uppercase;
+  text-shadow: none;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 0.02em;
+  gap: 0;
+}
+
+.hero-title-lead {
+  font-size: 0.38em;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  margin-bottom: 0.12em;
+  opacity: 0.92;
 }
 
 .hero-title-route {
-  white-space: nowrap;
+  white-space: normal;
 }
 
 .hero-sub {
-  font-size: clamp(0.86rem, 1.5vw, 0.98rem);
-  color: rgba(255, 255, 255, 0.9);
-  margin: 0 0 0.85rem;
-  line-height: 1.45;
-  max-width: 34rem;
+  font-size: clamp(1rem, 1.8vw, 1.2rem);
+  color: #fff;
+  margin: 0 0 1.15rem;
+  line-height: 1.3;
+  max-width: 22rem;
+  font-weight: 650;
 }
 
 .cta-primary {
-  border-radius: 10px;
-  padding: 0.7rem 1.35rem;
-  font-size: 0.95rem;
-  font-weight: 700;
+  border-radius: 0;
+  padding: 0.85rem 1.4rem;
+  font-size: 0.92rem;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
   cursor: pointer;
-  background: var(--primary);
-  color: #fff;
-  border: 1px solid var(--primary);
-  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.22);
-  transition: background 0.15s ease, transform 0.15s ease;
+  background: var(--cta);
+  color: #111;
+  border: 3px solid #111;
+  box-shadow: 6px 6px 0 #111;
+  transition: transform 0.08s ease, box-shadow 0.08s ease;
 }
 
 .cta-primary:hover {
-  background: var(--primary-dark);
-  transform: translateY(-1px);
+  background: var(--cta);
+  transform: translate(3px, 3px);
+  box-shadow: 3px 3px 0 #111;
 }
 
 .cta-row {
@@ -658,98 +683,125 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
 
 .stats-bar {
   display: grid;
-  grid-template-columns: 1fr auto 1fr auto 1fr;
-  align-items: center;
-  gap: 1rem;
-  margin-top: 0;
+  grid-template-columns: 1.35fr 1fr 1fr;
+  align-items: stretch;
+  gap: 0;
+  margin-top: -3.25rem;
+  margin-bottom: 2.75rem;
   position: relative;
-  z-index: 2;
-  background: transparent;
-  border: none;
-  border-bottom: 1px solid var(--border);
+  z-index: 3;
+  background: #fff;
+  border: 3px solid #111;
   border-radius: 0;
-  padding: 1rem 0 1.1rem;
-  box-shadow: none;
+  padding: 0;
+  box-shadow: 8px 8px 0 #111;
 }
 
 .stat {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 0.2rem;
+  align-items: flex-start;
+  gap: 0.25rem;
+  padding: 1.15rem 1.25rem 1.25rem;
+  border-right: 3px solid #111;
+  text-align: left;
+}
+
+.stat:last-child {
+  border-right: none;
+}
+
+.stat:first-child {
+  background: var(--cta);
 }
 
 .stat strong {
-  font-size: 1.2rem;
-  font-weight: 800;
-  color: var(--primary-dark);
+  font-family: Impact, 'Arial Black', 'Helvetica Neue', sans-serif;
+  font-size: clamp(1.55rem, 3.2vw, 2.45rem);
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  line-height: 0.95;
+  color: #111;
+  text-transform: uppercase;
 }
 
 .stat span {
   font-size: 0.78rem;
-  color: var(--text-muted);
+  font-weight: 700;
+  color: #111;
+  opacity: 0.7;
 }
 
 .stat-sep {
-  width: 1px;
-  height: 40px;
-  background: var(--border);
+  display: none;
 }
 
 /* ── App section ── */
 .app-section {
   scroll-margin-top: 1.5rem;
-  padding-top: 1.35rem;
+  padding-top: 0.5rem;
 }
 
 .section-head {
-  margin-bottom: 1.25rem;
+  margin-bottom: 1.1rem;
 }
 
 .section-head h2 {
-  margin: 0 0 0.35rem;
-  font-size: 1.5rem;
-  font-weight: 800;
-  color: var(--primary-dark);
+  margin: 0;
+  font-family: Impact, 'Arial Black', 'Helvetica Neue', sans-serif;
+  font-size: clamp(2.1rem, 5.5vw, 3.8rem);
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  line-height: 0.88;
+  text-transform: uppercase;
+  color: #111;
+  max-width: 10ch;
 }
 
 .section-head p {
   margin: 0;
-  color: var(--text-muted);
+  color: #111;
   font-size: 0.92rem;
 }
 
 .mode-tabs {
   display: flex;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
+  gap: 0;
+  margin-bottom: 0;
+  border: 3px solid #111;
+  border-bottom: none;
 }
 
 .mode-tabs button {
   flex: 1;
-  padding: 0.7rem 1rem;
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  background: var(--surface);
-  font-weight: 600;
-  font-size: 0.92rem;
+  padding: 0.85rem 0.7rem;
+  border: none;
+  border-right: 3px solid #111;
+  border-radius: 0;
+  background: #fff;
+  font-weight: 900;
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
   cursor: pointer;
-  color: var(--text-muted);
-  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  color: #111;
+}
+
+.mode-tabs button:last-child {
+  border-right: none;
 }
 
 .mode-tabs button.active {
-  background: var(--primary);
-  border-color: var(--primary);
+  background: #111;
   color: #fff;
 }
 
 .hero-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  padding: 1.35rem 1.4rem;
-  box-shadow: none;
+  background: #fff;
+  border: 3px solid #111;
+  border-radius: 0;
+  padding: 1.35rem 1.4rem 1.5rem;
+  box-shadow: 8px 8px 0 #111;
 }
 
 .hero-card[hidden] {
@@ -759,9 +811,76 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
 .nearby-pending {
   margin: 0;
   padding: 0.85rem 0.2rem;
-  color: var(--text-muted);
+  color: #111;
   font-size: 0.95rem;
-  font-weight: 600;
+  font-weight: 700;
+}
+
+.landing :deep(.menu-btn) {
+  border: 3px solid #111;
+  border-radius: 0;
+  background: #fff;
+  box-shadow: 4px 4px 0 #111;
+}
+
+.landing :deep(.drop-zone) {
+  border: 3px dashed #111;
+  border-radius: 0;
+  background: #f3efe6;
+}
+
+.landing :deep(.drop-zone.filled),
+.landing :deep(.drop-zone.over) {
+  border-style: solid;
+  background: #fff;
+}
+
+.landing :deep(.cat-chip) {
+  border: 2px solid #111;
+  border-radius: 0;
+}
+
+.landing :deep(.btn-primary),
+.landing :deep(.feedback-submit) {
+  border: 3px solid #111;
+  border-radius: 0;
+  box-shadow: 4px 4px 0 #111;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.landing :deep(.recent-maps),
+.landing :deep(.recent-open),
+.landing :deep(.recent-remove) {
+  border-radius: 0;
+}
+
+.landing :deep(.recent-maps) {
+  border: 3px solid #111;
+  background: #fff;
+  box-shadow: 6px 6px 0 #111;
+}
+
+.landing :deep(.feedback) {
+  border: 3px solid #111;
+  border-radius: 0;
+  background: #fff;
+  box-shadow: 6px 6px 0 #111;
+}
+
+.landing :deep(.feedback h2) {
+  font-family: Impact, 'Arial Black', 'Helvetica Neue', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: -0.03em;
+  color: #111;
+}
+
+.landing :deep(.field input),
+.landing :deep(.field textarea) {
+  border: 2px solid #111;
+  border-radius: 0;
+  background: #f3efe6;
 }
 
 /* ── Sections ── */
@@ -770,11 +889,11 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
 .guide-teaser,
 .updates-section,
 .faq-section {
-  margin-top: 4rem;
+  margin-top: 4.5rem;
 }
 
 .how-section {
-  margin-top: 3.25rem;
+  margin-top: 4rem;
 }
 
 .features-section h2,
@@ -782,26 +901,36 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
 .guide-teaser h2,
 .updates-section h2,
 .faq-section h2 {
-  font-size: 1.55rem;
-  font-weight: 800;
-  color: var(--primary-dark);
-  margin: 0 0 1.5rem;
-  letter-spacing: -0.01em;
+  font-family: Impact, 'Arial Black', 'Helvetica Neue', sans-serif;
+  font-size: clamp(2.1rem, 5.5vw, 3.8rem);
+  font-weight: 900;
+  color: #111;
+  margin: 0 0 1.35rem;
+  letter-spacing: -0.04em;
+  line-height: 0.88;
+  text-transform: uppercase;
+  max-width: 12ch;
 }
 
 .guide-teaser p {
-  margin: -0.5rem 0 1rem;
-  max-width: 40rem;
-  color: var(--text-muted);
-  line-height: 1.5;
-  font-size: 0.98rem;
+  margin: -0.4rem 0 1.1rem;
+  max-width: 36rem;
+  color: #111;
+  line-height: 1.45;
+  font-size: 1.02rem;
 }
 
 .guide-teaser-link {
-  font-weight: 700;
-  color: var(--primary);
-  text-decoration-thickness: 1px;
-  text-underline-offset: 3px;
+  display: inline-block;
+  font-weight: 900;
+  color: #111;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  text-decoration: none;
+  border: 3px solid #111;
+  padding: 0.55rem 0.9rem;
+  background: var(--cta);
+  box-shadow: 4px 4px 0 #111;
 }
 
 .updates-section h2 {
@@ -811,7 +940,7 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
 .updates-lead {
   margin: 0 0 1.1rem;
   font-size: 0.92rem;
-  color: var(--text-muted);
+  color: #111;
   line-height: 1.45;
 }
 
@@ -819,133 +948,189 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
   list-style: none;
   margin: 0;
   padding: 0;
-  border-top: 1px solid var(--border);
+  border: 3px solid #111;
+  background: #fff;
 }
 
 .updates-row {
   display: flex;
   gap: 0.75rem;
   align-items: baseline;
-  padding: 0.7rem 0;
-  border-bottom: 1px solid var(--border);
-  font-size: 0.92rem;
+  padding: 0.85rem 1rem;
+  border-bottom: 3px solid #111;
+  font-size: 0.95rem;
   line-height: 1.4;
+  font-weight: 650;
+}
+
+.updates-row:last-child {
+  border-bottom: none;
 }
 
 .updates-tag {
   flex: 0 0 auto;
-  font-size: 0.72rem;
-  font-weight: 800;
-  letter-spacing: 0.04em;
+  font-size: 0.7rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--primary-dark);
+  color: #111;
+  background: var(--cta);
+  padding: 0.15rem 0.4rem;
 }
 
 .updates-tag[data-kind='fix'] {
-  color: var(--text-muted);
+  background: #111;
+  color: #fff;
 }
 
 .updates-tag[data-kind='bug'] {
-  color: #b91c1c;
+  background: #bc4749;
+  color: #fff;
 }
 
 .features-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 1rem;
+  grid-template-columns: 1.55fr 1fr 1fr;
+  gap: 0;
+  border-top: 3px solid #111;
+  border-left: 3px solid #111;
 }
 
 .feature-card {
   display: flex;
-  gap: 0.9rem;
+  flex-direction: column;
+  gap: 0.45rem;
   align-items: flex-start;
-  background: transparent;
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  padding: 1rem 1.05rem;
+  background: #fff;
+  border: none;
+  border-right: 3px solid #111;
+  border-bottom: 3px solid #111;
+  border-radius: 0;
+  padding: 1.25rem 1.2rem 1.4rem;
+}
+
+.feature-card:first-child {
+  grid-column: 1;
+  grid-row: 1 / span 2;
+  background: #111;
+  color: #fff;
+  justify-content: flex-end;
+  min-height: 16rem;
+}
+
+.feature-card:first-child p {
+  color: rgba(255, 255, 255, 0.78);
 }
 
 .feature-card:hover {
-  background: var(--surface);
+  background: #fff;
 }
 
-.feature-icon {
-  font-size: 1.45rem;
-  flex-shrink: 0;
-  line-height: 1;
+.feature-card:first-child:hover {
+  background: #111;
 }
 
 .feature-card strong {
   display: block;
-  font-size: 0.95rem;
-  margin-bottom: 0.3rem;
+  font-size: 1.05rem;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  margin-bottom: 0;
+  text-transform: uppercase;
+}
+
+.feature-card:first-child strong {
+  font-family: Impact, 'Arial Black', 'Helvetica Neue', sans-serif;
+  font-size: clamp(1.5rem, 2.6vw, 2.2rem);
+  line-height: 0.95;
 }
 
 .feature-card p {
   margin: 0;
-  font-size: 0.83rem;
-  color: var(--text-muted);
-  line-height: 1.5;
+  font-size: 0.88rem;
+  color: #333;
+  line-height: 1.45;
 }
 
 .steps {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 1rem;
+  grid-template-columns: 1.4fr 1fr 1fr;
+  gap: 0;
+  border-top: 3px solid #111;
+  border-left: 3px solid #111;
 }
 
 .step {
   display: flex;
-  gap: 0.9rem;
+  flex-direction: column;
+  gap: 0.65rem;
   align-items: flex-start;
-  background: transparent;
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  padding: 1rem 1.05rem;
+  background: #fff;
+  border: none;
+  border-right: 3px solid #111;
+  border-bottom: 3px solid #111;
+  border-radius: 0;
+  padding: 1.2rem 1.15rem 1.4rem;
+}
+
+.step:first-child {
+  background: var(--cta);
 }
 
 .step-num {
-  width: 1.85rem;
-  height: 1.85rem;
-  border-radius: 2px;
-  background: var(--primary-dark);
-  color: #fff;
-  font-weight: 800;
-  font-size: 0.85rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
+  width: auto;
+  height: auto;
+  border-radius: 0;
+  background: none;
+  color: #111;
+  font-family: Impact, 'Arial Black', 'Helvetica Neue', sans-serif;
+  font-weight: 900;
+  font-size: clamp(2.6rem, 5vw, 4.2rem);
+  line-height: 0.8;
+  display: block;
+  letter-spacing: -0.04em;
 }
 
 .step strong {
   display: block;
-  font-size: 0.95rem;
-  margin-bottom: 0.25rem;
+  font-size: 1.05rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  margin-bottom: 0.15rem;
+  letter-spacing: -0.02em;
 }
 
 .step p {
   margin: 0;
-  font-size: 0.83rem;
-  color: var(--text-muted);
-  line-height: 1.5;
+  font-size: 0.88rem;
+  color: #111;
+  line-height: 1.45;
 }
 
 .faq-list {
   display: flex;
   flex-direction: column;
-  gap: 0.55rem;
+  gap: 0;
+  border: 3px solid #111;
+  background: #fff;
 }
 
 .faq-item {
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  background: var(--surface);
+  border: none;
+  border-bottom: 3px solid #111;
+  border-radius: 0;
+  background: #fff;
+}
+
+.faq-item:last-child {
+  border-bottom: none;
 }
 
 .faq-item:focus-within {
-  border-color: var(--primary);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 35%, transparent);
+  border-color: inherit;
+  box-shadow: none;
+  background: #fff8f0;
 }
 
 .faq-q {
@@ -954,15 +1139,15 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
   justify-content: space-between;
   align-items: center;
   gap: 1rem;
-  padding: 1rem 1.15rem;
+  padding: 1.05rem 1.15rem;
   background: none;
   border: none;
-  border-radius: 12px;
+  border-radius: 0;
   cursor: pointer;
   text-align: left;
-  font-size: 0.92rem;
-  font-weight: 600;
-  color: var(--text);
+  font-size: 1rem;
+  font-weight: 800;
+  color: #111;
 }
 
 .faq-q:focus {
@@ -970,17 +1155,18 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
 }
 
 .faq-q:focus-visible {
-  outline: 2px solid var(--primary-dark);
-  outline-offset: -4px;
-  background: color-mix(in srgb, var(--primary) 8%, var(--surface));
+  outline: 3px solid #111;
+  outline-offset: -3px;
+  background: var(--cta);
 }
 
 .faq-chevron {
-  font-size: 1.2rem;
-  color: var(--text-muted);
+  font-size: 1.4rem;
+  color: #111;
   transform: rotate(0deg);
-  transition: transform 0.2s;
+  transition: transform 0.15s;
   flex-shrink: 0;
+  font-weight: 900;
 }
 
 .faq-chevron.open {
@@ -988,10 +1174,10 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
 }
 
 .faq-a {
-  padding: 0 1.15rem 1rem;
-  font-size: 0.86rem;
-  color: var(--text-muted);
-  line-height: 1.6;
+  padding: 0 1.15rem 1.1rem;
+  font-size: 0.9rem;
+  color: #111;
+  line-height: 1.55;
 }
 
 .faq-a[hidden] {
@@ -999,18 +1185,21 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
 }
 
 .site-footer {
-  margin: 4rem 0 2.5rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid var(--border);
-  text-align: center;
+  margin: 4.5rem 0 2.5rem;
+  padding-top: 1.25rem;
+  border-top: 3px solid #111;
+  text-align: left;
   font-size: 0.78rem;
-  color: var(--text-muted);
+  font-weight: 650;
+  color: #111;
 }
 
 .site-footer a {
-  color: var(--primary);
-  text-decoration: none;
+  color: #111;
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
+
 
 /* ── Plan topbar ── */
 .plan-topbar {
@@ -1163,67 +1352,88 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
 
 @media (max-width: 960px) {
   .features-grid,
-  .steps {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+  .steps,
+  .stats-bar {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .feature-card:first-child {
+    grid-column: 1 / -1;
+    grid-row: auto;
+    min-height: 10rem;
+  }
+
+  .step:first-child {
+    grid-column: 1 / -1;
   }
 }
 
 @media (max-width: 640px) {
-  .hero-title-route {
-    white-space: normal;
+  .hero-band,
+  .hero {
+    min-height: min(72vh, 640px);
   }
 
   .hero {
-    padding-bottom: 0.95rem;
+    padding-bottom: 3.5rem;
   }
 
   .hero-center {
-    padding: 0.55rem 0 0.85rem;
-    text-align: center;
-    align-items: center;
-    align-self: center;
+    padding: 1.5rem 0 0;
+    text-align: left;
+    align-items: flex-start;
+    align-self: flex-start;
   }
 
   .hero-title {
-    font-size: clamp(1.35rem, 6.4vw, 1.85rem);
-    align-items: center;
+    font-size: clamp(2.35rem, 14vw, 3.6rem);
+    align-items: flex-start;
+  }
+
+  .hero-kicker {
+    max-width: 100%;
   }
 
   .cta-row {
-    justify-content: center;
+    justify-content: flex-start;
   }
 
   .hero-sub {
-    font-size: 0.88rem;
+    font-size: 0.95rem;
   }
 
   .brand-logo {
     height: 1.65rem;
   }
 
-  .hero-scrim {
-    background:
-      linear-gradient(
-        180deg,
-        rgba(8, 18, 14, 0.42) 0%,
-        rgba(8, 18, 14, 0.22) 50%,
-        rgba(8, 18, 14, 0.45) 100%
-      );
-  }
-
-  .stats-bar {
-    grid-template-columns: 1fr;
-    gap: 0.75rem;
-    margin-top: 0;
-  }
-
-  .stat-sep {
-    display: none;
-  }
-
+  .stats-bar,
   .features-grid,
   .steps {
     grid-template-columns: 1fr;
+  }
+
+  .stats-bar {
+    margin-top: -2rem;
+    box-shadow: 5px 5px 0 #111;
+  }
+
+  .stat {
+    border-right: none;
+    border-bottom: 3px solid #111;
+  }
+
+  .stat:last-child {
+    border-bottom: none;
+  }
+
+  .mode-tabs button {
+    font-size: 0.68rem;
+    padding: 0.8rem 0.35rem;
+  }
+
+  .hero-card {
+    padding: 1.1rem 1rem 1.25rem;
+    box-shadow: 5px 5px 0 #111;
   }
 }
 </style>

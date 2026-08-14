@@ -7,12 +7,12 @@
 :root {
   --primary: #2d6a4f;
   --primary-dark: #1b4332;
-  --bg: #efece4;
-  --surface: #f7f5ef;
-  --surface-2: #e7e2d6;
-  --text: #1c1916;
-  --text-muted: #5c564c;
-  --border: #d2cbbd;
+  --bg: #f8faf8;
+  --surface: #ffffff;
+  --surface-2: #f0f4f1;
+  --text: #1a1a1a;
+  --text-muted: #5c6b63;
+  --border: #d8e2dc;
   --danger: #bc4749;
   --cta: #ea580c;
   --cta-hover: #c2410c;
@@ -22,10 +22,9 @@
 :root[data-colorblind] {
   --primary: #0072b2;
   --primary-dark: #004c7f;
-  --bg: #eceaf0;
-  --surface: #f6f5f8;
-  --surface-2: #e4e0e8;
-  --border: #c9c2ce;
+  --bg: #f7f9fc;
+  --surface-2: #eef3f8;
+  --border: #c8d6e5;
   --danger: #d55e00;
   --cta: #e69f00;
   --cta-hover: #c68900;
