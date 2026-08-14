@@ -2138,12 +2138,12 @@ function onDocClick(e: MouseEvent) {
 .fav-hud {
   position: absolute;
   left: 0.55rem;
-  right: 4.4rem;
+  right: 0.55rem;
   bottom: 0.55rem;
   z-index: 18;
   display: flex;
   flex-direction: column;
-  gap: 0.28rem;
+  gap: 0.35rem;
   pointer-events: none;
 }
 
@@ -2151,21 +2151,22 @@ function onDocClick(e: MouseEvent) {
   pointer-events: auto;
   display: flex;
   align-items: baseline;
-  gap: 0.45rem;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.55rem;
   max-width: 100%;
-  padding: 0.4rem 0.65rem;
+  padding: 0.55rem 0.8rem;
   border: none;
-  border-radius: 10px;
-  background: rgba(255, 251, 235, 0.96);
+  border-radius: 12px;
+  background: rgba(255, 251, 235, 0.97);
   color: #111;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.16);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.18);
   cursor: pointer;
   text-align: left;
 }
 
 .fav-hud-kind {
   flex-shrink: 0;
-  font-size: 0.65rem;
+  font-size: 0.78rem;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.03em;
@@ -2174,18 +2175,20 @@ function onDocClick(e: MouseEvent) {
 
 .fav-hud-btn strong {
   flex-shrink: 0;
-  font-size: 0.95rem;
+  font-size: 1.2rem;
   font-variant-numeric: tabular-nums;
   color: #92400e;
 }
 
 .fav-hud-name {
   min-width: 0;
-  font-size: 0.82rem;
+  flex: 1 1 8rem;
+  font-size: 0.98rem;
   font-weight: 650;
   overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
 }
 
 .map-stack :deep(.map-canvas-wrap) {
@@ -2375,27 +2378,25 @@ function onDocClick(e: MouseEvent) {
 
   .ride-cockpit {
     display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    gap: 0.28rem;
+    flex-direction: column;
+    gap: 0.35rem;
     pointer-events: none;
   }
 
   .ride-primary {
     pointer-events: auto;
-    flex: 1 1 10rem;
-    min-width: 0;
+    width: 100%;
     display: grid;
     grid-template-columns: auto auto 1fr auto;
     align-items: center;
-    column-gap: 0.35rem;
-    padding: 0.32rem 0.5rem;
+    column-gap: 0.45rem;
+    padding: 0.5rem 0.7rem;
     border: none;
-    border-radius: 9px;
+    border-radius: 12px;
     background: rgba(255, 255, 255, 0.96);
     color: #111;
     text-align: left;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.16);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.18);
     cursor: pointer;
   }
 
@@ -2403,7 +2404,7 @@ function onDocClick(e: MouseEvent) {
     display: inline-flex;
     align-items: center;
     gap: 0.2rem;
-    font-size: 0.62rem;
+    font-size: 0.72rem;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.03em;
@@ -2412,7 +2413,7 @@ function onDocClick(e: MouseEvent) {
   }
 
   .ride-primary-dist {
-    font-size: 1.05rem;
+    font-size: 1.2rem;
     font-weight: 800;
     font-variant-numeric: tabular-nums;
     line-height: 1.1;
@@ -2420,7 +2421,7 @@ function onDocClick(e: MouseEvent) {
   }
 
   .ride-primary-name {
-    font-size: 0.82rem;
+    font-size: 0.95rem;
     font-weight: 650;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -2472,38 +2473,36 @@ function onDocClick(e: MouseEvent) {
 
   .ride-primary-empty {
     pointer-events: none;
-    flex: 1 1 10rem;
-    min-width: 0;
     margin: 0;
-    padding: 0.32rem 0.5rem;
-    border-radius: 9px;
+    padding: 0.5rem 0.7rem;
+    border-radius: 12px;
     background: rgba(255, 255, 255, 0.88);
     color: #4b5563;
-    font-size: 0.75rem;
+    font-size: 0.88rem;
     font-weight: 600;
   }
 
   .ride-secondary {
     pointer-events: auto;
-    flex: 1 1 10rem;
-    min-width: 0;
+    width: 100%;
     display: flex;
     align-items: baseline;
-    gap: 0.35rem;
-    padding: 0.32rem 0.5rem;
+    flex-wrap: wrap;
+    gap: 0.3rem 0.5rem;
+    padding: 0.55rem 0.75rem;
     border: none;
-    border-radius: 9px;
-    background: rgba(255, 251, 235, 0.96);
+    border-radius: 12px;
+    background: rgba(255, 251, 235, 0.97);
     color: #111;
     text-align: left;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.14);
     cursor: pointer;
   }
 
   .ride-secondary-kind {
     flex-shrink: 0;
-    font-size: 0.6rem;
-    font-weight: 700;
+    font-size: 0.75rem;
+    font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 0.03em;
     color: #92400e;
@@ -2511,18 +2510,20 @@ function onDocClick(e: MouseEvent) {
 
   .ride-secondary strong {
     flex-shrink: 0;
-    font-size: 0.92rem;
+    font-size: 1.15rem;
     font-variant-numeric: tabular-nums;
     color: #92400e;
   }
 
   .ride-secondary-name {
     min-width: 0;
-    font-size: 0.78rem;
+    flex: 1 1 7rem;
+    font-size: 0.95rem;
     font-weight: 650;
     overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
   }
 
   .ride-secondary-empty {

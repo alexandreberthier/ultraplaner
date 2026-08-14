@@ -599,16 +599,6 @@ const locationBtnTitle = computed(() => {
   return t('mapCanvas.locationOff')
 })
 
-/** Short visible label: Richtung (heading-up) vs Norden (north-up) vs Zentrieren */
-const locationBtnLabel = computed(() => {
-  if (needsRecenter.value) return t('mapCanvas.followResume')
-  if (!locationActive.value || locationPending.value) return ''
-  if (headingUp.value) return t('mapCanvas.headingLabel')
-  return t('mapCanvas.northLabel')
-})
-
-const locationBtnShowLabel = computed(() => Boolean(locationBtnLabel.value))
-
 /** Heading-up desired but no GPS heading → map locked north + visible hint */
 const headingFallbackActive = computed(
   () =>
@@ -2051,7 +2041,6 @@ onUnmounted(() => {
         following: locationActive && followActive && !userPanning,
         pending: locationPending,
         'needs-recenter': needsRecenter,
-        'with-label': locationBtnShowLabel,
         'heading-up': headingUp && !needsRecenter && locationActive,
         'north-up': locationActive && !headingUp && !needsRecenter && !locationPending,
       }"
@@ -2081,7 +2070,6 @@ onUnmounted(() => {
           font-family="system-ui,sans-serif"
         >N</text>
       </svg>
-      <span v-if="locationBtnShowLabel" class="location-btn-label">{{ locationBtnLabel }}</span>
     </button>
 
     <p
@@ -2140,7 +2128,7 @@ onUnmounted(() => {
   flex-direction: column;
   align-items: flex-start;
   gap: 0.45rem;
-  max-width: min(100% - 72px, 22rem);
+  max-width: min(100% - 96px, 22rem);
   pointer-events: none;
 }
 
@@ -2155,42 +2143,27 @@ onUnmounted(() => {
   max-width: 100%;
 }
 
-/* ── Standort-Button (rechts, separat) ── */
+/* ── Standort-Button: oben, links neben MapLibre NavigationControl (29px + 10px Rand) ── */
 .location-btn {
   position: absolute;
-  bottom: 28px;
-  right: calc(10px + env(safe-area-inset-right, 0px));
+  top: calc(10px + env(safe-area-inset-top, 0px));
+  right: calc(47px + env(safe-area-inset-right, 0px));
   z-index: 40;
-  width: 44px;
-  height: 44px;
+  width: 36px;
+  height: 36px;
   border: none;
-  border-radius: 10px;
+  border-radius: 6px;
   background: #fff;
-  box-shadow: 0 0 0 2px rgba(0,0,0,.1);
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.35rem;
-  padding: 8px;
+  padding: 6px;
   color: #333;
-  transition: background 0.15s, width 0.15s;
+  transition: background 0.15s;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
-}
-
-.location-btn.with-label {
-  width: auto;
-  min-width: 44px;
-  padding: 8px 12px;
-}
-
-.location-btn-label {
-  font-size: 0.78rem;
-  font-weight: 800;
-  letter-spacing: 0.01em;
-  white-space: nowrap;
-  line-height: 1;
 }
 
 .basemap-toggle {
@@ -2336,9 +2309,8 @@ onUnmounted(() => {
 }
 
 .location-btn.needs-recenter svg {
-  width: 1.35rem;
-  height: 1.35rem;
-  flex-shrink: 0;
+  width: 1.15rem;
+  height: 1.15rem;
 }
 
 .location-btn.pending {
@@ -2352,15 +2324,9 @@ onUnmounted(() => {
   height: 100%;
 }
 
-.location-btn.with-label svg {
-  width: 1.25rem;
-  height: 1.25rem;
-  flex-shrink: 0;
-}
-
 .heading-fallback-hint {
   position: absolute;
-  bottom: 80px;
+  top: calc(52px + env(safe-area-inset-top, 0px));
   right: calc(10px + env(safe-area-inset-right, 0px));
   z-index: 40;
   margin: 0;
@@ -2378,7 +2344,7 @@ onUnmounted(() => {
 
 .location-error {
   position: absolute;
-  bottom: 76px;
+  top: calc(52px + env(safe-area-inset-top, 0px));
   right: calc(10px + env(safe-area-inset-right, 0px));
   background: #fee2e2;
   color: #991b1b;
@@ -2423,67 +2389,34 @@ onUnmounted(() => {
   .map-left-stack {
     top: calc(12px + env(safe-area-inset-top, 0px));
     left: calc(10px + env(safe-area-inset-left, 0px));
-    max-width: calc(100% - 72px - env(safe-area-inset-right, 0px));
+    max-width: calc(100% - 96px - env(safe-area-inset-right, 0px));
   }
 
   .location-btn {
-    /*
-      Below MapLibre NavigationControl (zoom +/- / compass) at top-right —
-      never cover zoom, style toggle, or FABs.
-    */
-    top: calc(12px + env(safe-area-inset-top, 0px) + 118px);
-    bottom: auto;
-    right: calc(12px + env(safe-area-inset-right, 0px));
-    z-index: 40;
-    width: 56px;
-    height: 56px;
-    padding: 11px;
-    border-radius: 16px;
-    box-shadow: 0 2px 14px rgba(0, 0, 0, 0.28);
-  }
-
-  .location-btn.with-label {
-    width: auto;
-    min-width: 56px;
-    min-height: 56px;
-    height: auto;
-    padding: 0.75rem 1rem;
-    gap: 0.45rem;
-  }
-
-  .location-btn-label {
-    font-size: 0.95rem;
+    top: calc(10px + env(safe-area-inset-top, 0px));
+    right: calc(47px + env(safe-area-inset-right, 0px));
+    width: 36px;
+    height: 36px;
+    padding: 6px;
+    border-radius: 6px;
+    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.12);
   }
 
   .heading-fallback-hint {
-    top: calc(12px + env(safe-area-inset-top, 0px) + 186px);
-    bottom: auto;
-    right: calc(12px + env(safe-area-inset-right, 0px));
+    top: calc(52px + env(safe-area-inset-top, 0px));
+    right: calc(10px + env(safe-area-inset-right, 0px));
     left: auto;
     max-width: min(14rem, calc(100% - 80px));
   }
 
   .map-canvas-wrap.ride-mode .location-btn {
-    /* Ride: NavigationControl hidden — keep top-right */
-    top: calc(12px + env(safe-area-inset-top, 0px));
-    bottom: auto;
-    right: calc(12px + env(safe-area-inset-right, 0px));
+    /* Ride: NavigationControl hidden — occupy that corner */
+    right: calc(10px + env(safe-area-inset-right, 0px));
     z-index: 120;
-    width: 56px;
-    height: 56px;
-    padding: 11px;
-    border-radius: 16px;
-  }
-
-  .map-canvas-wrap.ride-mode .location-btn.with-label {
-    width: auto;
-    min-height: 56px;
-    height: auto;
   }
 
   .map-canvas-wrap.ride-mode .heading-fallback-hint {
-    top: calc(80px + env(safe-area-inset-top, 0px));
-    bottom: auto;
+    top: calc(52px + env(safe-area-inset-top, 0px));
   }
 
   .map-canvas-wrap.ride-mode :deep(.maplibregl-ctrl-top-right) {
@@ -2491,17 +2424,15 @@ onUnmounted(() => {
   }
 
   .location-error {
-    top: calc(12px + env(safe-area-inset-top, 0px) + 186px);
-    bottom: auto;
-    right: calc(12px + env(safe-area-inset-right, 0px));
+    top: calc(52px + env(safe-area-inset-top, 0px));
+    right: calc(10px + env(safe-area-inset-right, 0px));
     left: calc(12px + env(safe-area-inset-left, 0px));
     z-index: 120;
     max-width: none;
   }
 
   .map-canvas-wrap.ride-mode .location-error {
-    top: calc(80px + env(safe-area-inset-top, 0px));
-    bottom: auto;
+    top: calc(52px + env(safe-area-inset-top, 0px));
   }
 
   .map-canvas-wrap.ride-mode .map-left-stack {
