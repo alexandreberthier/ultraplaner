@@ -514,10 +514,16 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
   inset: 0;
   background:
     linear-gradient(
+      90deg,
+      rgba(0, 0, 0, 0.62) 0%,
+      rgba(0, 0, 0, 0.28) 42%,
+      rgba(0, 0, 0, 0.08) 100%
+    ),
+    linear-gradient(
       180deg,
-      rgba(0, 0, 0, 0.42) 0%,
-      rgba(0, 0, 0, 0.12) 38%,
-      rgba(0, 0, 0, 0.78) 100%
+      rgba(0, 0, 0, 0.4) 0%,
+      rgba(0, 0, 0, 0.18) 36%,
+      rgba(0, 0, 0, 0.82) 100%
     );
 }
 
@@ -599,39 +605,45 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
 }
 
 .hero-title {
-  font-family: Impact, 'Arial Black', 'Helvetica Neue', sans-serif;
-  font-size: clamp(2.4rem, 7.2vw, 5.4rem);
-  font-weight: 900;
+  font-family: 'Arial Black', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: clamp(2.15rem, 6.2vw, 4.4rem);
+  font-weight: 800;
   color: #fff;
-  margin: 0 0 0.55rem;
-  line-height: 0.84;
-  letter-spacing: -0.045em;
+  margin: 0 0 0.7rem;
+  line-height: 0.95;
+  letter-spacing: 0.01em;
   text-transform: uppercase;
-  text-shadow: none;
+  text-shadow: 3px 3px 0 #111;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
 }
 
 .hero-title-lead {
-  font-size: 0.38em;
-  letter-spacing: 0.04em;
-  line-height: 1;
-  margin-bottom: 0.12em;
-  opacity: 0.92;
+  font-size: 0.42em;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  line-height: 1.05;
+  margin-bottom: 0.18em;
+  opacity: 1;
+  text-shadow: 2px 2px 0 #111;
 }
 
 .hero-title-route {
   white-space: normal;
+  letter-spacing: 0.012em;
 }
 
 .hero-sub {
-  font-size: clamp(1rem, 1.8vw, 1.2rem);
+  display: inline-block;
+  font-size: clamp(0.95rem, 1.55vw, 1.08rem);
   color: #fff;
   margin: 0 0 1.15rem;
-  line-height: 1.3;
-  max-width: 22rem;
-  font-weight: 650;
+  line-height: 1.4;
+  max-width: 28rem;
+  font-weight: 700;
+  background: #111;
+  padding: 0.5rem 0.7rem;
 }
 
 .cta-primary {
@@ -1478,7 +1490,8 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
   }
 
   .hero-title {
-    font-size: clamp(2.15rem, 12vw, 3.3rem);
+    font-size: clamp(1.85rem, 10.5vw, 2.85rem);
+    letter-spacing: 0.015em;
   }
 
   .cta-row {
@@ -1486,7 +1499,8 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
   }
 
   .hero-sub {
-    font-size: 0.95rem;
+    font-size: 0.92rem;
+    max-width: 100%;
   }
 
   .brand-logo {
