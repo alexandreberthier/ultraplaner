@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref } from 'vue'
+import { nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import ColorModeToggle from './ColorModeToggle.vue'
 import LanguagePicker from './LanguagePicker.vue'
@@ -17,6 +17,9 @@ withDefaults(
 const { t } = useI18n()
 const open = ref(false)
 const root = ref<HTMLElement | null>(null)
+const menuBtn = ref<HTMLElement | null>(null)
+const panel = ref<HTMLElement | null>(null)
+const panelStyle = ref<Record<string, string>>({})
 const { installing, canNativeInstall, showInstallEntry, install, openGuide } = usePwaInstall()
 
 function toggle() {
@@ -25,6 +28,20 @@ function toggle() {
 
 function close() {
   open.value = false
+}
+
+function repositionPanel() {
+  if (!open.value) return
+  const btn = menuBtn.value
+  if (!btn) return
+  const r = btn.getBoundingClientRect()
+  const gap = 8
+  const margin = 8
+  panelStyle.value = {
+    top: `${Math.round(r.bottom + gap)}px`,
+    right: `${Math.round(Math.max(margin, window.innerWidth - r.right))}px`,
+    maxHeight: `${Math.round(Math.max(140, window.innerHeight - r.bottom - gap - margin))}px`,
+  }
 }
 
 function onInstallClick() {
@@ -42,22 +59,34 @@ function onPanelInteract(e: MouseEvent) {
 }
 
 function onDocClick(e: MouseEvent) {
-  if (!open.value || !root.value) return
-  if (!root.value.contains(e.target as Node)) close()
+  if (!open.value) return
+  const node = e.target as Node
+  if (root.value?.contains(node) || panel.value?.contains(node)) return
+  close()
 }
 
 function onKey(e: KeyboardEvent) {
   if (e.key === 'Escape') close()
 }
 
+watch(open, async (isOpen) => {
+  if (!isOpen) return
+  await nextTick()
+  repositionPanel()
+})
+
 onMounted(() => {
   document.addEventListener('click', onDocClick)
   document.addEventListener('keydown', onKey)
+  window.addEventListener('resize', repositionPanel)
+  window.addEventListener('scroll', repositionPanel, true)
 })
 
 onUnmounted(() => {
   document.removeEventListener('click', onDocClick)
   document.removeEventListener('keydown', onKey)
+  window.removeEventListener('resize', repositionPanel)
+  window.removeEventListener('scroll', repositionPanel, true)
 })
 </script>
 
@@ -70,6 +99,7 @@ onUnmounted(() => {
 
     <div class="settings-menu">
       <button
+        ref="menuBtn"
         type="button"
         class="menu-btn"
         :aria-expanded="open"
@@ -79,33 +109,37 @@ onUnmounted(() => {
       >
         <span class="menu-icon" aria-hidden="true">☰</span>
       </button>
-      <div
-        v-if="open"
-        class="menu-panel"
-        role="dialog"
-        :aria-label="t('landing.settingsMenu')"
-        @click="onPanelInteract"
-      >
-        <p class="menu-title">{{ t('landing.settingsMenu') }}</p>
-        <div class="menu-row">
-          <span class="menu-label">{{ t('mapCanvas.colorsShort') }}</span>
-          <ColorModeToggle />
+      <Teleport to="body">
+        <div
+          v-if="open"
+          ref="panel"
+          class="menu-panel topbar-settings-menu-panel"
+          role="dialog"
+          :aria-label="t('landing.settingsMenu')"
+          :style="panelStyle"
+          @click="onPanelInteract"
+        >
+          <p class="menu-title">{{ t('landing.settingsMenu') }}</p>
+          <div class="menu-row">
+            <span class="menu-label">{{ t('mapCanvas.colorsShort') }}</span>
+            <ColorModeToggle />
+          </div>
+          <div class="menu-row">
+            <span class="menu-label">{{ t('lang.label') }}</span>
+            <LanguagePicker />
+          </div>
+          <div v-if="showInstallEntry" class="menu-install">
+            <button
+              type="button"
+              class="pwa-install-btn"
+              :disabled="installing"
+              @click.stop="onInstallClick"
+            >
+              {{ installing ? t('pwa.installing') : t('pwa.menuInstall') }}
+            </button>
+          </div>
         </div>
-        <div class="menu-row">
-          <span class="menu-label">{{ t('lang.label') }}</span>
-          <LanguagePicker />
-        </div>
-        <div v-if="showInstallEntry" class="menu-install">
-          <button
-            type="button"
-            class="pwa-install-btn"
-            :disabled="installing"
-            @click.stop="onInstallClick"
-          >
-            {{ installing ? t('pwa.installing') : t('pwa.menuInstall') }}
-          </button>
-        </div>
-      </div>
+      </Teleport>
     </div>
 
     <!-- Guide dialog must stay mounted when the menu closes -->
@@ -158,72 +192,6 @@ onUnmounted(() => {
   font-weight: 700;
 }
 
-.menu-panel {
-  position: absolute;
-  top: calc(100% + 0.35rem);
-  right: 0;
-  z-index: 80;
-  display: flex;
-  flex-direction: column;
-  gap: 0.85rem;
-  min-width: 16rem;
-  padding: 0.9rem;
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  background: var(--surface);
-  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.12);
-}
-
-.menu-title {
-  margin: 0;
-  font-size: 0.88rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: var(--text-muted);
-}
-
-.menu-row {
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-  align-items: flex-start;
-}
-
-.menu-label {
-  font-size: 0.92rem;
-  font-weight: 600;
-  color: var(--text-muted);
-}
-
-.menu-install {
-  padding-top: 0.15rem;
-}
-
-.pwa-install-btn {
-  width: 100%;
-  border: 1px solid var(--border, #e5e7eb);
-  border-radius: 8px;
-  padding: 0.55rem 0.75rem;
-  background: var(--surface-2, #f3f4f6);
-  color: var(--text, #111);
-  font: inherit;
-  font-size: 0.85rem;
-  font-weight: 700;
-  text-align: left;
-  cursor: pointer;
-}
-
-.pwa-install-btn:hover:not(:disabled) {
-  border-color: color-mix(in srgb, var(--primary, #2d6a4f) 45%, var(--border, #e5e7eb));
-  background: var(--surface, #fff);
-}
-
-.pwa-install-btn:disabled {
-  opacity: 0.7;
-  cursor: wait;
-}
-
 @media (max-width: 720px) {
   .settings-inline {
     display: none;
@@ -250,5 +218,74 @@ onUnmounted(() => {
 
 .force-menu .settings-menu {
   display: block;
+}
+</style>
+
+<style>
+/* Teleported to body so landing overflow/stacking cannot clip the panel. */
+.topbar-settings-menu-panel {
+  position: fixed;
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  min-width: 16rem;
+  max-width: calc(100vw - 16px);
+  overflow-y: auto;
+  padding: 0.9rem;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.12);
+}
+
+.topbar-settings-menu-panel .menu-title {
+  margin: 0;
+  font-size: 0.88rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+}
+
+.topbar-settings-menu-panel .menu-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  align-items: flex-start;
+}
+
+.topbar-settings-menu-panel .menu-label {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.topbar-settings-menu-panel .menu-install {
+  padding-top: 0.15rem;
+}
+
+.topbar-settings-menu-panel .pwa-install-btn {
+  width: 100%;
+  border: 1px solid var(--border, #e5e7eb);
+  border-radius: 8px;
+  padding: 0.55rem 0.75rem;
+  background: var(--surface-2, #f3f4f6);
+  color: var(--text, #111);
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+}
+
+.topbar-settings-menu-panel .pwa-install-btn:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--primary, #2d6a4f) 45%, var(--border, #e5e7eb));
+  background: var(--surface, #fff);
+}
+
+.topbar-settings-menu-panel .pwa-install-btn:disabled {
+  opacity: 0.7;
+  cursor: wait;
 }
 </style>

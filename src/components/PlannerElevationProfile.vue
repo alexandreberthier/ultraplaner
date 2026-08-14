@@ -197,9 +197,24 @@ function updateCursor(km: number) {
 function kmFromEvent(e: PointerEvent) {
   const el = plotRef.value
   if (!el) return 0
-  const rect = el.getBoundingClientRect()
-  const x = e.clientX - rect.left
   const { minKm, maxKm } = bounds.value
+  const svg = el.querySelector('svg')
+  let x: number
+  if (svg instanceof SVGSVGElement) {
+    const ctm = svg.getScreenCTM()
+    if (ctm) {
+      const pt = svg.createSVGPoint()
+      pt.x = e.clientX
+      pt.y = e.clientY
+      x = pt.matrixTransform(ctm.inverse()).x
+    } else {
+      x = e.clientX - el.getBoundingClientRect().left
+    }
+  } else {
+    const rect = el.getBoundingClientRect()
+    const scaleX = chartWidth.value > 0 && rect.width > 0 ? rect.width / chartWidth.value : 1
+    x = (e.clientX - rect.left) / scaleX
+  }
   const tNorm = Math.min(1, Math.max(0, (x - padding.left) / Math.max(innerW.value, 1)))
   return minKm + tNorm * (maxKm - minKm)
 }

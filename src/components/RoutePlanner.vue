@@ -74,6 +74,7 @@ import {
   resolveGeoHeading,
   setLocationMarkerHeading,
 } from '../utils/userLocationMarker'
+import { createRouteBikeCursorElement } from '../utils/routeBikeCursor'
 import { useRouteColorMode } from '../composables/useRouteColorMode'
 import PlannerElevationProfile from './PlannerElevationProfile.vue'
 
@@ -194,9 +195,9 @@ async function toggleControlsSheet() {
 watch(elevOpen, async (open) => {
   if (open && isMobilePlannerViewport() && controlsOpen.value) {
     controlsOpen.value = false
-    await nextTick()
-    map?.resize()
   }
+  await nextTick()
+  map?.resize()
 })
 
 const emit = defineEmits<{
@@ -728,24 +729,6 @@ function updateMapSources() {
   }
 }
 
-function createBikeCursorElement(): HTMLDivElement {
-  const el = document.createElement('div')
-  el.className = 'route-bike-cursor'
-  el.innerHTML = `
-    <svg class="route-bike-icon" viewBox="0 0 64 40" aria-hidden="true">
-      <g fill="none" stroke="#2d6a4f" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="14" cy="28" r="9"/>
-        <circle cx="50" cy="28" r="9"/>
-        <path d="M14 28 L26 28 L36 12 H48"/>
-        <path d="M26 28 L36 12 L42 28"/>
-        <path d="M36 12 L30 6 H38"/>
-        <circle cx="26" cy="28" r="2.4" fill="#2d6a4f" stroke="none"/>
-      </g>
-    </svg>
-  `
-  return el
-}
-
 function updateRouteCursorMarker() {
   if (!map) return
   const cursor = routeCursor.value
@@ -756,10 +739,11 @@ function updateRouteCursorMarker() {
     return
   }
   if (!routeCursorMarker || !routeCursorEl) {
-    routeCursorEl = createBikeCursorElement()
+    routeCursorEl = createRouteBikeCursorElement()
     routeCursorMarker = new maplibregl.Marker({
       element: routeCursorEl,
       anchor: 'center',
+      offset: [0, 0],
     })
       .setLngLat([cursor.lng, cursor.lat])
       .addTo(map)
@@ -1557,7 +1541,11 @@ onUnmounted(() => {
 <template>
   <div
     class="route-planner"
-    :class="{ 'controls-expanded': controlsOpen }"
+    :class="{
+      'controls-expanded': controlsOpen,
+      'elev-expanded': elevOpen,
+      'has-poi-cta': routeReadyForPois,
+    }"
     @keydown.escape="closeExportMenu"
   >
     <div class="planner-map-wrap">
@@ -1920,29 +1908,34 @@ onUnmounted(() => {
 
         <p v-if="formError || store.error" class="error">{{ formError || store.error }}</p>
 
-        <button type="button" class="btn-primary btn-cta btn-full" :disabled="!canCreate" @click="createMap">
-          {{ createMapLabel }}
-        </button>
-      </template>
-      </div>
-
-      <!-- Mobile: footer when sheet open; under handle when collapsed. Desktop: sticky top via CSS order. -->
-      <div v-if="routeReadyForPois" class="poi-next-step">
-        <p v-if="previewingPois" class="poi-next-hint">
-          {{ t('planner.previewingPois') }}
-        </p>
         <button
+          v-if="!routeReadyForPois"
           type="button"
-          class="btn-primary btn-cta btn-full"
+          class="btn-primary btn-cta btn-full poi-create-in-form"
           :disabled="!canCreate"
           @click="createMap"
         >
           {{ createMapLabel }}
         </button>
-        <p v-if="formError || store.error" class="error poi-next-error">
-          {{ formError || store.error }}
-        </p>
+      </template>
       </div>
+    </div>
+
+    <div v-if="routeReadyForPois" class="poi-next-step">
+      <p v-if="previewingPois" class="poi-next-hint">
+        {{ t('planner.previewingPois') }}
+      </p>
+      <button
+        type="button"
+        class="btn-primary btn-cta btn-full"
+        :disabled="!canCreate"
+        @click="createMap"
+      >
+        {{ createMapLabel }}
+      </button>
+      <p v-if="formError || store.error" class="error poi-next-error">
+        {{ formError || store.error }}
+      </p>
     </div>
   </div>
 </template>
@@ -1959,6 +1952,14 @@ onUnmounted(() => {
     'controls map'
     'controls elev';
   background: var(--bg);
+}
+
+.route-planner.has-poi-cta {
+  grid-template-rows: max-content minmax(0, 1fr) auto;
+  grid-template-areas:
+    'cta map'
+    'controls map'
+    'controls elev';
 }
 
 .planner-map-wrap {
@@ -2034,23 +2035,6 @@ onUnmounted(() => {
   height: 4px;
   border-radius: 2px;
   flex-shrink: 0;
-}
-
-:deep(.route-bike-cursor) {
-  position: relative;
-  width: 26px;
-  height: 26px;
-  pointer-events: none;
-  filter: drop-shadow(0 1px 2px rgba(45, 106, 79, 0.35));
-}
-
-:deep(.route-bike-icon) {
-  position: absolute;
-  inset: 1px;
-  width: 24px;
-  height: 24px;
-  opacity: 0.9;
-  filter: drop-shadow(0 0 1.5px rgba(255, 255, 255, 0.9));
 }
 
 .route-km-badge {
@@ -2354,17 +2338,16 @@ onUnmounted(() => {
 }
 
 .poi-next-step {
+  grid-area: cta;
   display: flex;
   flex-direction: column;
   gap: 0.45rem;
   flex-shrink: 0;
-  order: -1;
-  padding: 0.55rem 0 0.65rem;
-  margin: 0 0 0.35rem;
+  padding: 0.75rem 1.1rem 0.85rem;
+  margin: 0;
   background: color-mix(in srgb, var(--primary) 6%, var(--surface));
   border-bottom: 1px solid var(--border);
-  position: sticky;
-  top: 0;
+  border-right: 1px solid var(--border);
   z-index: 4;
 }
 
@@ -2761,24 +2744,49 @@ onUnmounted(() => {
 @media (max-width: 899px) {
   .route-planner {
     grid-template-columns: 1fr;
-    grid-template-rows: minmax(52vh, 1fr) auto auto;
+    grid-template-rows: minmax(0, 1fr) auto auto;
     grid-template-areas:
       'map'
       'elev'
       'controls';
   }
 
+  .route-planner.has-poi-cta {
+    grid-template-rows: minmax(0, 1fr) auto auto auto;
+    grid-template-areas:
+      'map'
+      'elev'
+      'controls'
+      'cta';
+  }
+
   .planner-map-wrap {
-    min-height: 52vh;
+    min-height: 18vh;
   }
 
   /* Planning open: shrink map so the sheet has real scroll room */
   .route-planner.controls-expanded {
-    grid-template-rows: minmax(22vh, 0.35fr) auto auto;
+    grid-template-rows: minmax(18vh, 0.32fr) auto minmax(0, 1fr);
+  }
+
+  .route-planner.controls-expanded.has-poi-cta {
+    grid-template-rows: minmax(18vh, 0.32fr) auto minmax(0, 1fr) auto;
   }
 
   .route-planner.controls-expanded .planner-map-wrap {
-    min-height: 22vh;
+    min-height: 18vh;
+  }
+
+  .route-planner.elev-expanded {
+    grid-template-rows: minmax(18vh, 1fr) auto auto;
+  }
+
+  .route-planner.elev-expanded.has-poi-cta {
+    grid-template-rows: minmax(18vh, 1fr) auto auto auto;
+  }
+
+  .route-planner.elev-expanded .planner-map-wrap {
+    min-height: 18vh;
   }
 
   .route-planner.controls-expanded :deep(.planner-elev:not(.collapsed)) {
@@ -2822,8 +2830,8 @@ onUnmounted(() => {
   }
 
   .planner-controls {
-    /* Open sheet: dominant scroll area for categories / waypoints */
-    max-height: min(78dvh, 720px);
+    /* Open sheet: fill remaining space above the pinned CTA */
+    max-height: none;
     height: auto;
     border-right: none;
     border-top: 1px solid var(--border);
@@ -2844,32 +2852,17 @@ onUnmounted(() => {
     display: none;
   }
 
-  /* Open: CTA as sticky footer under scrollable options (DOM order after body) */
-  .planner-controls:not(.sheet-collapsed) .poi-next-step {
-    order: 0;
-    position: relative;
-    top: auto;
-    margin: 0;
+  .poi-next-step {
+    border-right: none;
     border-bottom: none;
     border-top: 1px solid var(--border);
-    padding: 0.75rem 1rem calc(0.85rem + env(safe-area-inset-bottom, 0px));
+    padding: 0.7rem 1rem calc(0.75rem + env(safe-area-inset-bottom, 0px));
     background: color-mix(in srgb, var(--primary) 8%, var(--surface));
     box-shadow: 0 -6px 16px rgba(0, 0, 0, 0.06);
   }
 
   .planner-controls.sheet-collapsed.has-poi-next {
     padding-bottom: 0;
-  }
-
-  /* Collapsed: CTA under handle, still discoverable */
-  .planner-controls.sheet-collapsed .poi-next-step {
-    order: 0;
-    position: relative;
-    top: auto;
-    margin: 0;
-    border-bottom: none;
-    border-top: 1px solid var(--border);
-    padding: 0.7rem 1rem calc(0.75rem + env(safe-area-inset-bottom, 0px));
   }
 
   .controls-sheet-toggle {
@@ -2952,8 +2945,8 @@ onUnmounted(() => {
 
   .planner-controls:not(.sheet-collapsed) {
     flex: 1 1 auto;
-    min-height: min(55dvh, 520px);
-    max-height: min(78dvh, 720px);
+    min-height: 0;
+    max-height: none;
     border-top-color: var(--border);
     padding-bottom: 0;
   }

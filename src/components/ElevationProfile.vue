@@ -100,8 +100,23 @@ function yForElev(elev: number) {
 
 function kmFromClientX(clientX: number): number {
   if (!plotRef.value) return 0
-  const rect = plotRef.value.getBoundingClientRect()
-  const x = clientX - rect.left
+  const svg = plotRef.value.querySelector('svg')
+  let x: number
+  if (svg instanceof SVGSVGElement) {
+    const ctm = svg.getScreenCTM()
+    if (ctm) {
+      const pt = svg.createSVGPoint()
+      pt.x = clientX
+      pt.y = 0
+      x = pt.matrixTransform(ctm.inverse()).x
+    } else {
+      x = clientX - plotRef.value.getBoundingClientRect().left
+    }
+  } else {
+    const rect = plotRef.value.getBoundingClientRect()
+    const scaleX = chartWidth.value > 0 && rect.width > 0 ? rect.width / chartWidth.value : 1
+    x = (clientX - rect.left) / scaleX
+  }
   const ratio = (x - padding.left) / innerW.value
   return (
     bounds.value.minKm +

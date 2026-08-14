@@ -47,6 +47,7 @@ import {
   setLocationAccuracyRadius,
   setLocationMarkerHeading,
 } from '../utils/userLocationMarker'
+import { createRouteBikeCursorElement } from '../utils/routeBikeCursor'
 import {
   ensureCyclosmOfflineProtocol,
   setActiveOfflinePackMapId,
@@ -218,24 +219,6 @@ function unbindPoiSizeMedia() {
   onPoiSizeMqChange = null
 }
 
-function createBikeCursorElement(): HTMLDivElement {
-  const el = document.createElement('div')
-  el.className = 'route-bike-cursor'
-  el.innerHTML = `
-    <svg class="route-bike-icon" viewBox="0 0 64 40" aria-hidden="true">
-      <g fill="none" stroke="#2d6a4f" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="14" cy="28" r="9"/>
-        <circle cx="50" cy="28" r="9"/>
-        <path d="M14 28 L26 28 L36 12 H48"/>
-        <path d="M26 28 L36 12 L42 28"/>
-        <path d="M36 12 L30 6 H38"/>
-        <circle cx="26" cy="28" r="2.4" fill="#2d6a4f" stroke="none"/>
-      </g>
-    </svg>
-  `
-  return el
-}
-
 function updateBikeCursorMarker() {
   if (!map) return
   const cursor = store.routeCursor
@@ -248,10 +231,11 @@ function updateBikeCursorMarker() {
   }
 
   if (!bikeCursorMarker || !bikeCursorEl) {
-    bikeCursorEl = createBikeCursorElement()
+    bikeCursorEl = createRouteBikeCursorElement()
     bikeCursorMarker = new maplibregl.Marker({
       element: bikeCursorEl,
       anchor: 'center',
+      offset: [0, 0],
     })
       .setLngLat([cursor.lng, cursor.lat])
       .addTo(map)
@@ -2450,24 +2434,6 @@ onUnmounted(() => {
 </style>
 
 <style>
-/* Cursor-Fahrrad auf der Route (HTML-Marker) — klein, nicht dominant */
-.route-bike-cursor {
-  position: relative;
-  width: 26px;
-  height: 26px;
-  pointer-events: none;
-  filter: drop-shadow(0 1px 2px rgba(45, 106, 79, 0.35));
-}
-
-.route-bike-icon {
-  position: absolute;
-  inset: 1px;
-  width: 24px;
-  height: 24px;
-  opacity: 0.9;
-  filter: drop-shadow(0 0 1.5px rgba(255, 255, 255, 0.9));
-}
-
 .surface-legend {
   position: absolute;
   left: 10px;
