@@ -22,6 +22,7 @@ import TopbarSettings from '../components/TopbarSettings.vue'
 import { localeHomePath, type AppLocale } from '../i18n'
 import { useRideMode } from '../composables/useRideMode'
 import { useRidePosition } from '../composables/useRidePosition'
+import { useLocationUi } from '../composables/useLocationUi'
 import { useWakeLock } from '../composables/useWakeLock'
 import { useWahoo } from '../composables/useWahoo'
 import { formatKm, haversineM } from '../services/geo'
@@ -68,6 +69,13 @@ const showPcFiles = ref(false)
 const { isOnline } = useOnline()
 const { rideMode, setRideMode } = useRideMode()
 const { rideKmAlong, rideLatLng } = useRidePosition()
+const {
+  pending: locPending,
+  active: locActive,
+  following: locFollowing,
+  needsRecenter: locNeedsRecenter,
+  headingUp: locHeadingUp,
+} = useLocationUi()
 const wakeLock = useWakeLock()
 const {
   configured: wahooConfigured,
@@ -80,6 +88,8 @@ const {
 const mapCanvasRef = ref<{
   startLocation: (opts?: { follow?: boolean; heading?: boolean }) => void
   setDragPanEnabled: (enabled: boolean) => void
+  onLocationPointerDown: (e: PointerEvent) => void
+  onLocationButtonClick: (e?: Event) => void
 } | null>(null)
 
 const SUPPLY_CATEGORIES = new Set<PoiCategory>([
@@ -127,6 +137,22 @@ const nearbyFabLabel = computed(() =>
       ? t('nearby.mapFabRescan')
       : t('nearby.mapFab')
 )
+
+const navLocationTitle = computed(() => {
+  if (locPending.value) return t('mapCanvas.locating')
+  if (!locActive.value) return t('mapCanvas.followOn')
+  if (locNeedsRecenter.value) return t('mapCanvas.followResume')
+  if (locHeadingUp.value) return t('mapCanvas.headingOff')
+  return t('mapCanvas.locationOff')
+})
+
+function onNavLocationPointerDown(e: PointerEvent) {
+  mapCanvasRef.value?.onLocationPointerDown(e)
+}
+
+function onNavLocationClick(e: Event) {
+  mapCanvasRef.value?.onLocationButtonClick(e)
+}
 
 const cpKinds: { id: ControlPointKind; labelKey: string; category: 'checkpoint' | 'sleep' }[] = [
   { id: 'cp', labelKey: 'controls.kindCp', category: 'checkpoint' },
@@ -420,7 +446,7 @@ const favoriteHudStops = computed((): RideNextStop[] => {
     return [...favs]
       .map((p) => rideStopMeta(p, haversineM(origin, { lat: p.lat, lng: p.lng }) / 1000))
       .sort((a, b) => a.remainingKm - b.remainingKm)
-      .slice(0, 3)
+      .slice(0, 2)
   }
 
   const km = rideKmAlong.value ?? 0
@@ -435,7 +461,7 @@ const favoriteHudStops = computed((): RideNextStop[] => {
       if (aAhead !== bAhead) return aAhead - bAhead
       return Math.abs(a.remaining) - Math.abs(b.remaining)
     })
-    .slice(0, 3)
+    .slice(0, 2)
     .map((x) => x.stop)
 })
 
@@ -650,7 +676,7 @@ function onDocClick(e: MouseEvent) {
   <div
     v-if="store.mapReady"
     class="map-layout"
-    :class="{ 'sidebar-closed': !sidebarOpen, 'ride-mode': rideMode }"
+    :class="{ 'sidebar-closed': !sidebarOpen, 'ride-mode': rideMode, 'nearby-map': store.isNearbyMap }"
   >
     <aside class="sidebar" :class="{ collapsed: !sidebarOpen }" :aria-hidden="!sidebarOpen">
       <header class="map-header">
@@ -1211,33 +1237,121 @@ function onDocClick(e: MouseEvent) {
         v-if="!store.isNearbyMap"
         type="button"
         class="nav-item nav-ride"
+        :title="t('map.rideOn')"
+        :aria-label="t('map.rideOn')"
         @click="enterRideMode"
       >
-        <span class="nav-icon">🚴</span>
-        <span>{{ t('map.rideOn') }}</span>
-      </button>
-      <button type="button" class="nav-item" @click="goHome">
-        <span class="nav-icon">🏠</span>
-        <span>{{ t('map.navStart') }}</span>
+        <span class="nav-glyph" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="6.5" cy="17.5" r="3.5" />
+            <circle cx="17.5" cy="17.5" r="3.5" />
+            <path d="M12 17.5V11l4-3 2 3.5" />
+            <path d="M6.5 17.5 10 8h4" />
+          </svg>
+        </span>
       </button>
       <button
         type="button"
-        class="nav-item"
+        class="nav-item nav-home"
+        :title="t('map.navStart')"
+        :aria-label="t('map.navStart')"
+        @click="goHome"
+      >
+        <span class="nav-glyph" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 11.5 12 4l8 7.5" />
+            <path d="M6.5 10.5V20h11v-9.5" />
+          </svg>
+        </span>
+      </button>
+      <button
+        v-if="store.isNearbyMap"
+        type="button"
+        class="nav-item nav-reload"
+        :class="{ loading: nearbyRescanning || store.poisLoading }"
+        :title="nearbyFabLabel"
+        :aria-label="nearbyFabLabel"
+        :disabled="nearbyRescanning || store.poisLoading"
+        @click="onNearbyFabClick"
+      >
+        <span class="nav-glyph" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 12a8 8 0 1 1-2.2-5.5" />
+            <path d="M20 4v6h-6" />
+          </svg>
+        </span>
+      </button>
+      <button
+        v-if="store.isNearbyMap"
+        type="button"
+        class="nav-item nav-radius"
+        :class="{ active: mobilePanel === 'nearby' }"
+        :title="t('nearby.panelTitle')"
+        :aria-label="t('nearby.panelTitle')"
+        @click="openNearbyPanel"
+      >
+        <span class="nav-glyph" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3" />
+            <circle cx="12" cy="12" r="8" stroke-dasharray="3 3" />
+            <path d="M4 8h3M17 8h3M4 16h3M17 16h3" />
+          </svg>
+        </span>
+      </button>
+      <button
+        v-if="store.isNearbyMap"
+        type="button"
+        class="nav-item nav-locate"
+        :class="{
+          pending: locPending,
+          following: locFollowing,
+          'needs-recenter': locNeedsRecenter,
+        }"
+        :title="navLocationTitle"
+        :aria-label="navLocationTitle"
+        @pointerdown="onNavLocationPointerDown"
+        @click.stop.prevent="onNavLocationClick"
+      >
+        <span class="nav-glyph" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="12" r="4" fill="currentColor" />
+            <path d="M12 2v3M12 19v3M2 12h3M19 12h3" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+            <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6" />
+          </svg>
+        </span>
+      </button>
+      <button
+        type="button"
+        class="nav-item nav-pois"
         :class="{ active: mobilePanel === 'pois' }"
+        :title="t('map.navPois', { count: store.displayPois.length })"
+        :aria-label="t('map.navPois', { count: store.displayPois.length })"
         @click="openMobilePanel('pois')"
       >
-        <span class="nav-icon">📍</span>
-        <span>{{ t('map.navPois', { count: store.displayPois.length }) }}</span>
+        <span class="nav-glyph" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 21s7-6.2 7-11.2A7 7 0 0 0 5 9.8C5 14.8 12 21 12 21z" />
+            <circle cx="12" cy="9.8" r="2.2" />
+          </svg>
+          <span v-if="store.displayPois.length" class="nav-badge">{{ store.displayPois.length }}</span>
+        </span>
       </button>
       <button
         v-if="!store.isNearbyMap"
         type="button"
         class="nav-item nav-export"
         :class="{ active: mobilePanel === 'export' }"
+        :title="t('map.navExport')"
+        :aria-label="t('map.navExport')"
         @click="openMobilePanel('export')"
       >
-        <span class="nav-icon">↓</span>
-        <span>{{ t('map.navExport') }}</span>
+        <span class="nav-glyph" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 4v12" />
+            <path d="M7 11l5 5 5-5" />
+            <path d="M5 20h14" />
+          </svg>
+        </span>
       </button>
     </nav>
 
@@ -2270,7 +2384,7 @@ function onDocClick(e: MouseEvent) {
 
   .export-tip {
     top: auto;
-    bottom: calc(56px + env(safe-area-inset-bottom, 0px));
+    bottom: calc(72px + env(safe-area-inset-bottom, 0px));
     left: 0.75rem;
     right: 0.75rem;
     transform: none;
@@ -2279,7 +2393,7 @@ function onDocClick(e: MouseEvent) {
 
   .offline-banner {
     top: auto;
-    bottom: calc(56px + env(safe-area-inset-bottom, 0px));
+    bottom: calc(72px + env(safe-area-inset-bottom, 0px));
     left: 0.75rem;
     right: 0.75rem;
     transform: none;
@@ -2287,7 +2401,15 @@ function onDocClick(e: MouseEvent) {
   }
 
   .map-stack {
-    padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px));
+    padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .map-layout.nearby-map :deep(.location-btn) {
+    display: none;
+  }
+
+  .map-layout.nearby-map :deep(.map-left-stack .map-cp-tools) {
+    display: none;
   }
 
   .mobile-only {
@@ -2298,11 +2420,6 @@ function onDocClick(e: MouseEvent) {
     background: var(--primary);
     color: #fff;
     border-color: var(--primary);
-    font-weight: 700;
-  }
-
-  .nav-ride {
-    color: var(--primary);
     font-weight: 700;
   }
 
@@ -2322,7 +2439,7 @@ function onDocClick(e: MouseEvent) {
   .fav-hud {
     left: 0.45rem;
     right: 0.45rem;
-    bottom: calc(0.45rem + 56px + env(safe-area-inset-bottom, 0px));
+    bottom: calc(0.45rem + 72px + env(safe-area-inset-bottom, 0px));
   }
 
   .map-layout.ride-mode .ride-overlay {
@@ -2553,38 +2670,90 @@ function onDocClick(e: MouseEvent) {
   .nav-item {
     flex: 1;
     display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 0.2rem;
-    padding: 0.5rem 0.15rem;
+    padding: 0.35rem 0.1rem;
     border: none;
     background: none;
-    color: var(--text-muted);
     cursor: pointer;
-    font-size: 0.7rem;
-    line-height: 1.15;
-    min-height: 60px;
+    min-height: 68px;
     -webkit-tap-highlight-color: transparent;
   }
 
-  .nav-item.active {
-    color: var(--primary);
-    font-weight: 600;
+  .nav-glyph {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 52px;
+    height: 52px;
+    border-radius: 16px;
+    color: #fff;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.18);
+  }
+
+  .nav-glyph svg {
+    width: 1.7rem;
+    height: 1.7rem;
+  }
+
+  .nav-home .nav-glyph { background: #475569; }
+  .nav-reload .nav-glyph { background: #0f766e; }
+  .nav-radius .nav-glyph { background: #d97706; }
+  .nav-locate .nav-glyph { background: #2563eb; }
+  .nav-pois .nav-glyph { background: #e11d48; }
+  .nav-ride .nav-glyph { background: var(--primary, #2d6a4f); }
+  .nav-export .nav-glyph { background: #1d4ed8; }
+
+  .nav-item.active .nav-glyph {
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.95), 0 2px 10px rgba(0, 0, 0, 0.22);
+    filter: brightness(1.08);
+  }
+
+  .nav-locate.following .nav-glyph {
+    box-shadow: 0 0 0 3px #93c5fd, 0 2px 10px rgba(37, 99, 235, 0.35);
+  }
+
+  .nav-locate.needs-recenter .nav-glyph {
+    background: #1d4ed8;
+    box-shadow: 0 0 0 3px #1e40af, 0 4px 14px rgba(29, 78, 216, 0.45);
+  }
+
+  .nav-locate.pending .nav-glyph,
+  .nav-reload.loading .nav-glyph {
+    opacity: 0.75;
+  }
+
+  .nav-reload.loading .nav-glyph svg {
+    animation: nav-spin 0.9s linear infinite;
+  }
+
+  @keyframes nav-spin {
+    to { transform: rotate(360deg); }
+  }
+
+  .nav-badge {
+    position: absolute;
+    top: -0.2rem;
+    right: -0.25rem;
+    min-width: 1.35rem;
+    padding: 0.08rem 0.28rem;
+    border-radius: 999px;
+    background: #fff;
+    color: #9f1239;
+    font-size: 0.62rem;
+    font-weight: 800;
+    line-height: 1.2;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
   }
 
   .nav-export {
-    color: var(--primary);
-    font-weight: 700;
+    color: inherit;
+    font-weight: inherit;
   }
 
   .nav-export.active {
-    background: color-mix(in srgb, var(--primary) 12%, transparent);
-  }
-
-  .nav-icon {
-    font-size: 1.35rem;
-    line-height: 1;
+    background: none;
   }
 
   .mobile-sheet {
@@ -2598,7 +2767,7 @@ function onDocClick(e: MouseEvent) {
     padding:
       env(safe-area-inset-top, 0px)
       max(0.75rem, env(safe-area-inset-right, 0px))
-      calc(56px + 0.5rem + env(safe-area-inset-bottom, 0px))
+      calc(72px + 0.5rem + env(safe-area-inset-bottom, 0px))
       max(0.75rem, env(safe-area-inset-left, 0px));
     touch-action: none;
   }
