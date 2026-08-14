@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onUnmounted, ref, watch } from 'vue'
+import { computed, nextTick, onUnmounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useMapStore } from '../stores/mapStore'
 import { formatDistance, formatKm } from '../services/geo'
@@ -13,31 +13,32 @@ const isFavorite = computed(() =>
   store.selectedPoi ? store.favorites.has(store.selectedPoi.id) : false
 )
 
+const displayName = computed(() =>
+  store.selectedPoi ? store.favoriteLabel(store.selectedPoi) : ''
+)
+
 const customNameDraft = ref('')
-const noteDraft = ref('')
-const editOpen = ref(false)
+const renameOpen = ref(false)
+const renameInput = ref<HTMLInputElement | null>(null)
 
 function loadFavoriteMetaDrafts(id: string) {
   const meta = store.favoriteMeta.get(id)
   customNameDraft.value = meta?.customName ?? ''
-  noteDraft.value = meta?.note ?? ''
 }
 
-function persistFavMeta() {
+function persistFavName() {
   if (!store.selectedPoi || !isFavorite.value) return
   store.updateFavoriteMeta(store.selectedPoi.id, {
     customName: customNameDraft.value,
-    note: noteDraft.value,
   })
 }
 
 watch(
   () => store.selectedPoi?.id,
   (id) => {
-    editOpen.value = false
+    renameOpen.value = false
     if (!id || !store.selectedPoi) {
       customNameDraft.value = ''
-      noteDraft.value = ''
       return
     }
     loadFavoriteMetaDrafts(id)
@@ -50,19 +51,43 @@ function onToggleFavorite() {
   store.toggleFavorite(store.selectedPoi.id)
   if (wasFav) {
     customNameDraft.value = ''
-    noteDraft.value = ''
-    editOpen.value = false
+    renameOpen.value = false
     return
   }
   loadFavoriteMetaDrafts(store.selectedPoi.id)
 }
 
-function onToggleEdit() {
-  if (!editOpen.value && store.selectedPoi && !isFavorite.value) {
-    store.toggleFavorite(store.selectedPoi.id)
-    loadFavoriteMetaDrafts(store.selectedPoi.id)
+async function toggleRename() {
+  if (renameOpen.value) {
+    saveRename()
+    return
   }
-  editOpen.value = !editOpen.value
+  if (store.selectedPoi) {
+    loadFavoriteMetaDrafts(store.selectedPoi.id)
+    if (!customNameDraft.value) customNameDraft.value = store.selectedPoi.name
+  }
+  renameOpen.value = true
+  await nextTick()
+  renameInput.value?.focus()
+  renameInput.value?.select()
+}
+
+function saveRename() {
+  if (!store.selectedPoi) {
+    renameOpen.value = false
+    return
+  }
+  const name = customNameDraft.value.trim()
+  const original = store.selectedPoi.name
+  if (name && name !== original && !isFavorite.value) {
+    store.toggleFavorite(store.selectedPoi.id)
+  }
+  if (isFavorite.value || (name && name !== original)) {
+    store.updateFavoriteMeta(store.selectedPoi.id, {
+      customName: name === original ? '' : name,
+    })
+  }
+  renameOpen.value = false
 }
 
 const selectedEta = computed(() => {
@@ -72,7 +97,8 @@ const selectedEta = computed(() => {
 })
 
 function onClose() {
-  persistFavMeta()
+  if (renameOpen.value) saveRename()
+  else persistFavName()
   store.closePoiDetail()
 }
 
@@ -99,7 +125,8 @@ const googleNavHref = computed(() => {
 })
 
 function onNavigate() {
-  persistFavMeta()
+  if (renameOpen.value) saveRename()
+  else persistFavName()
   onClose()
 }
 </script>
@@ -121,7 +148,27 @@ function onNavigate() {
       @wheel.stop
     >
       <header class="sheet-top">
-        <h3>{{ store.selectedPoi.name }}</h3>
+        <input
+          v-if="renameOpen"
+          ref="renameInput"
+          v-model="customNameDraft"
+          class="rename-input"
+          type="text"
+          maxlength="40"
+          :aria-label="t('detail.renamePoi')"
+          @keydown.enter.prevent="saveRename"
+          @keydown.escape.stop="saveRename"
+        />
+        <h3 v-else>{{ displayName }}</h3>
+        <button
+          type="button"
+          class="icon-btn"
+          :aria-label="renameOpen ? t('detail.favApply') : t('detail.renamePoi')"
+          :title="renameOpen ? t('detail.favApply') : t('detail.renamePoi')"
+          @click="toggleRename"
+        >
+          {{ renameOpen ? '✓' : '✎' }}
+        </button>
         <button type="button" class="close" :aria-label="t('detail.close')" @click="onClose()">
           ×
         </button>
@@ -137,42 +184,6 @@ function onNavigate() {
           <span class="fav-star" aria-hidden="true">{{ isFavorite ? '★' : '☆' }}</span>
           {{ isFavorite ? t('detail.removeFavorite') : t('detail.addFavorite') }}
         </button>
-
-        <div class="fav-edit-wrap">
-          <button
-            type="button"
-            class="edit-toggle"
-            :aria-expanded="editOpen"
-            @click="onToggleEdit"
-          >
-            <span>{{ t('detail.editPoi') }}</span>
-            <span class="edit-chevron" aria-hidden="true">{{ editOpen ? '▾' : '▸' }}</span>
-          </button>
-          <div v-if="editOpen" class="fav-fields">
-            <label class="fav-field">
-              <span>{{ t('detail.favCustomName') }}</span>
-              <input
-                v-model="customNameDraft"
-                type="text"
-                maxlength="40"
-                :placeholder="store.selectedPoi.name"
-                @change="persistFavMeta"
-                @blur="persistFavMeta"
-              />
-            </label>
-            <label class="fav-field">
-              <span>{{ t('detail.favNote') }}</span>
-              <textarea
-                v-model="noteDraft"
-                rows="2"
-                maxlength="80"
-                :placeholder="t('detail.favNoteHint')"
-                @change="persistFavMeta"
-                @blur="persistFavMeta"
-              />
-            </label>
-          </div>
-        </div>
 
         <a
           class="nav-btn"
@@ -245,34 +256,52 @@ function onNavigate() {
   flex-shrink: 0;
   display: flex;
   align-items: flex-start;
-  gap: 0.5rem;
+  gap: 0.35rem;
   padding: 0.85rem 1rem 0.65rem 1.25rem;
   border-bottom: 1px solid var(--border);
   background: var(--surface);
   z-index: 2;
 }
 
-.sheet-top h3 {
+.sheet-top h3,
+.rename-input {
   flex: 1;
   min-width: 0;
   margin: 0;
   font-size: 1.15rem;
+  font-weight: 700;
   line-height: 1.3;
-  padding-right: 0.25rem;
+  padding-right: 0.15rem;
 }
 
+.rename-input {
+  font: inherit;
+  font-weight: 700;
+  color: var(--text);
+  padding: 0.35rem 0.5rem;
+  border: 1px solid #f59e0b;
+  border-radius: 8px;
+  background: #fffbeb;
+}
+
+.icon-btn,
 .close {
   flex-shrink: 0;
   width: 44px;
   height: 44px;
-  margin: -0.35rem -0.25rem 0 0;
+  margin: -0.35rem 0 0;
   border: none;
   border-radius: 10px;
   background: var(--surface-2);
-  font-size: 1.6rem;
+  font-size: 1.25rem;
   line-height: 1;
   cursor: pointer;
   color: var(--text);
+}
+
+.close {
+  margin-right: -0.25rem;
+  font-size: 1.6rem;
 }
 
 .sheet-scroll {
@@ -284,32 +313,6 @@ function onNavigate() {
   touch-action: pan-y;
   padding: 0.75rem 1.25rem 1.25rem;
   font-size: 1.02rem;
-}
-
-.fav-fields {
-  display: flex;
-  flex-direction: column;
-  gap: 0.55rem;
-}
-
-.fav-field {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-  font-size: 0.82rem;
-  color: var(--text-muted);
-}
-
-.fav-field input,
-.fav-field textarea {
-  font: inherit;
-  font-size: 1rem;
-  color: var(--text);
-  padding: 0.55rem 0.65rem;
-  border: 1px solid #f59e0b;
-  border-radius: 8px;
-  background: #fffbeb;
-  resize: vertical;
 }
 
 dl {
@@ -379,7 +382,6 @@ dd {
   color: #fff;
   font-size: 1.08rem;
   font-weight: 800;
-  box-shadow: 0 4px 14px rgba(245, 158, 11, 0.38);
 }
 
 .fav-star {
@@ -391,36 +393,6 @@ dd {
   background: #dc2626;
   border-color: #b91c1c;
   color: #fff;
-  box-shadow: 0 4px 14px rgba(220, 38, 38, 0.35);
-}
-
-.fav-edit-wrap {
-  display: flex;
-  flex-direction: column;
-  gap: 0.55rem;
-}
-
-.edit-toggle {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
-  padding: 0.7rem 0.85rem;
-  min-height: 46px;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  background: var(--surface-2);
-  cursor: pointer;
-  font: inherit;
-  font-size: 1.02rem;
-  font-weight: 700;
-  color: var(--text);
-}
-
-.edit-chevron {
-  color: var(--text-muted);
-  font-size: 0.95em;
 }
 
 .nav-btn {
@@ -447,14 +419,23 @@ dd {
     padding: 1rem 1rem 0.8rem 1.2rem;
   }
 
-  .sheet-top h3 {
+  .sheet-top h3,
+  .rename-input {
     font-size: 1.5rem;
   }
 
+  .icon-btn,
   .close {
     width: 52px;
     height: 52px;
+  }
+
+  .close {
     font-size: 2rem;
+  }
+
+  .icon-btn {
+    font-size: 1.45rem;
   }
 
   .actions {
@@ -485,22 +466,6 @@ dd {
     min-height: 56px;
     font-size: 1.18rem;
     border-radius: 14px;
-  }
-
-  .edit-toggle {
-    min-height: 52px;
-    font-size: 1.12rem;
-    border-radius: 14px;
-  }
-
-  .fav-field {
-    font-size: 1rem;
-  }
-
-  .fav-field input,
-  .fav-field textarea {
-    font-size: 1.15rem;
-    min-height: 48px;
   }
 }
 </style>

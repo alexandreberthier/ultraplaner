@@ -56,7 +56,7 @@ import {
 const store = useMapStore()
 const { t } = useI18n()
 const { colorblindMode, toggleColorblindMode } = useColorblindMode()
-const { setRideKmAlong } = useRidePosition()
+const { setRideKmAlong, setRideLatLng } = useRidePosition()
 
 const {
   effectiveMode: routeColorMode,
@@ -281,7 +281,8 @@ function applyGeoPosition(pos: GeolocationPosition) {
     clearTimeout(locatingTimer)
     locatingTimer = null
   }
-  if (props.rideMode && store.routePoints.length >= 2) {
+  setRideLatLng(lat, lng)
+  if (store.routePoints.length >= 2) {
     setRideKmAlong(distanceAlongRouteKm({ lat, lng }, store.routePoints))
   }
   updateLocationMarker()
@@ -528,6 +529,7 @@ function seedNearbyLocationMarker() {
       heading: null,
       speed: null,
     }
+    setRideLatLng(c[1], c[0])
   }
   updateLocationMarker()
 }

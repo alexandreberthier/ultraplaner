@@ -657,6 +657,7 @@
     routeKm: 'km route',
     etaFromStart: '({duration} depuis le départ)',
     etaFromStartShort: '{duration} depuis le départ',
+    renamePoi: 'Renommer',
     addFavorite: 'Marquer favori',
     removeFavorite: 'Retirer favori',
     editPoi: 'Modifier le POI',

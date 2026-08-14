@@ -24,7 +24,7 @@ import { useRideMode } from '../composables/useRideMode'
 import { useRidePosition } from '../composables/useRidePosition'
 import { useWakeLock } from '../composables/useWakeLock'
 import { useWahoo } from '../composables/useWahoo'
-import { formatKm } from '../services/geo'
+import { formatKm, haversineM } from '../services/geo'
 import { formatDuration, formatClock, hoursForDistanceKm } from '../utils/eta'
 import { openStatusAtEta, hasOsmOpeningHours, type OpenStatus } from '../utils/openingHours'
 import { poiCategoryEmoji } from '../utils/poiLabels'
@@ -67,7 +67,7 @@ const {
 const showPcFiles = ref(false)
 const { isOnline } = useOnline()
 const { rideMode, setRideMode } = useRideMode()
-const { rideKmAlong } = useRidePosition()
+const { rideKmAlong, rideLatLng } = useRidePosition()
 const wakeLock = useWakeLock()
 const {
   configured: wahooConfigured,
@@ -405,6 +405,40 @@ const nextFavorite = computed((): RideNextStop | null => {
   return rideStopMeta(poi, (poi.distanceAlongRouteKm ?? 0) - km)
 })
 
+/** Planning / Fahrt: compact distances to the nearest favorites. */
+const favoriteHudStops = computed((): RideNextStop[] => {
+  const favs = store.favoritePois
+  if (!favs.length) return []
+
+  if (store.isNearbyMap) {
+    const origin = rideLatLng.value
+      ? rideLatLng.value
+      : store.routeCoords[0]
+        ? { lat: store.routeCoords[0][1], lng: store.routeCoords[0][0] }
+        : null
+    if (!origin) return []
+    return [...favs]
+      .map((p) => rideStopMeta(p, haversineM(origin, { lat: p.lat, lng: p.lng }) / 1000))
+      .sort((a, b) => a.remainingKm - b.remainingKm)
+      .slice(0, 3)
+  }
+
+  const km = rideKmAlong.value ?? 0
+  return [...favs]
+    .map((p) => {
+      const remaining = (p.distanceAlongRouteKm ?? 0) - km
+      return { stop: rideStopMeta(p, Math.max(0, remaining)), remaining }
+    })
+    .sort((a, b) => {
+      const aAhead = a.remaining > -0.05 ? 0 : 1
+      const bAhead = b.remaining > -0.05 ? 0 : 1
+      if (aAhead !== bAhead) return aAhead - bAhead
+      return Math.abs(a.remaining) - Math.abs(b.remaining)
+    })
+    .slice(0, 3)
+    .map((x) => x.stop)
+})
+
 function rideOpenLabel(stop: RideNextStop): string | null {
   if (stop.openStatus === 'open') return t('map.rideOpenNow')
   if (stop.openStatus === 'closed') return t('map.rideClosedNow')
@@ -688,7 +722,7 @@ function onDocClick(e: MouseEvent) {
         </div>
 
         <div class="toolbar-right desktop-actions">
-          <div class="export-wrap">
+          <div v-if="!store.isNearbyMap" class="export-wrap">
             <button
               type="button"
               class="tool-btn export-toggle"
@@ -1106,6 +1140,23 @@ function onDocClick(e: MouseEvent) {
           </button>
         </div>
 
+        <div
+          v-if="!rideMode && favoriteHudStops.length"
+          class="fav-hud"
+        >
+          <button
+            v-for="stop in favoriteHudStops"
+            :key="stop.poi.id"
+            type="button"
+            class="fav-hud-btn"
+            @click="store.selectPoi(stop.poi, true)"
+          >
+            <span class="fav-hud-kind">★ {{ t('map.rideNextFav') }}</span>
+            <strong>{{ formatKm(stop.remainingKm) }}</strong>
+            <span class="fav-hud-name">{{ store.favoriteLabel(stop.poi) }}</span>
+          </button>
+        </div>
+
         <div v-if="rideMode" class="ride-overlay" :aria-label="t('map.rideOn')">
           <div class="ride-top-row">
             <button type="button" class="ride-exit" @click="exitRideMode">
@@ -1128,20 +1179,14 @@ function onDocClick(e: MouseEvent) {
                 {{ t('map.rideNextSupply') }}
               </span>
               <strong class="ride-primary-dist">{{ formatKm(nextSupply.remainingKm) }}</strong>
-              <div class="ride-primary-meta">
-                <span class="ride-eta">
-                  {{ t('map.rideEtaIn', { duration: nextSupply.durationLabel }) }}
-                  <template v-if="nextSupply.clockLabel"> · {{ nextSupply.clockLabel }}</template>
-                </span>
-                <span
-                  v-if="rideOpenLabel(nextSupply)"
-                  class="ride-open"
-                  :class="`ride-open--${nextSupply.openStatus}`"
-                >
-                  {{ rideOpenLabel(nextSupply) }}
-                </span>
-              </div>
               <span class="ride-primary-name">{{ nextSupply.poi.name }}</span>
+              <span
+                v-if="rideOpenLabel(nextSupply)"
+                class="ride-open ride-open-sm"
+                :class="`ride-open--${nextSupply.openStatus}`"
+              >
+                {{ rideOpenLabel(nextSupply) }}
+              </span>
             </button>
             <p v-else class="ride-primary-empty">{{ t('map.rideNoSupply') }}</p>
 
@@ -1153,22 +1198,8 @@ function onDocClick(e: MouseEvent) {
             >
               <span class="ride-secondary-kind">{{ t('map.rideNextFav') }}</span>
               <strong>{{ formatKm(nextFavorite.remainingKm) }}</strong>
-              <span class="ride-secondary-eta">
-                {{ t('map.rideEtaIn', { duration: nextFavorite.durationLabel }) }}
-              </span>
-              <span
-                v-if="rideOpenLabel(nextFavorite)"
-                class="ride-open ride-open-sm"
-                :class="`ride-open--${nextFavorite.openStatus}`"
-              >
-                {{ rideOpenLabel(nextFavorite) }}
-              </span>
               <span class="ride-secondary-name">{{ store.favoriteLabel(nextFavorite.poi) }}</span>
             </button>
-            <p v-else-if="rideFavorites.length" class="ride-secondary-empty">
-              {{ t('map.rideNoFavAhead') }}
-            </p>
-            <p v-else class="ride-secondary-empty">{{ t('map.rideNoFavs') }}</p>
           </div>
         </div>
       </div>
@@ -1199,6 +1230,7 @@ function onDocClick(e: MouseEvent) {
         <span>{{ t('map.navPois', { count: store.displayPois.length }) }}</span>
       </button>
       <button
+        v-if="!store.isNearbyMap"
         type="button"
         class="nav-item nav-export"
         :class="{ active: mobilePanel === 'export' }"
@@ -2103,6 +2135,59 @@ function onDocClick(e: MouseEvent) {
   display: none;
 }
 
+.fav-hud {
+  position: absolute;
+  left: 0.55rem;
+  right: 4.4rem;
+  bottom: 0.55rem;
+  z-index: 18;
+  display: flex;
+  flex-direction: column;
+  gap: 0.28rem;
+  pointer-events: none;
+}
+
+.fav-hud-btn {
+  pointer-events: auto;
+  display: flex;
+  align-items: baseline;
+  gap: 0.45rem;
+  max-width: 100%;
+  padding: 0.4rem 0.65rem;
+  border: none;
+  border-radius: 10px;
+  background: rgba(255, 251, 235, 0.96);
+  color: #111;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.16);
+  cursor: pointer;
+  text-align: left;
+}
+
+.fav-hud-kind {
+  flex-shrink: 0;
+  font-size: 0.65rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: #92400e;
+}
+
+.fav-hud-btn strong {
+  flex-shrink: 0;
+  font-size: 0.95rem;
+  font-variant-numeric: tabular-nums;
+  color: #92400e;
+}
+
+.fav-hud-name {
+  min-width: 0;
+  font-size: 0.82rem;
+  font-weight: 650;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .map-stack :deep(.map-canvas-wrap) {
   flex: 1;
   min-height: 180px;
@@ -2224,22 +2309,31 @@ function onDocClick(e: MouseEvent) {
 
   .map-layout.ride-mode .export-tip,
   .map-layout.ride-mode .offline-banner {
-    bottom: calc(168px + env(safe-area-inset-bottom, 0px));
+    bottom: calc(108px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .map-layout.ride-mode .fav-hud {
+    display: none;
+  }
+
+  .fav-hud {
+    left: 0.45rem;
+    right: 0.45rem;
+    bottom: calc(0.45rem + 56px + env(safe-area-inset-bottom, 0px));
   }
 
   .map-layout.ride-mode .ride-overlay {
     display: flex;
     flex-direction: column;
-    gap: 0.4rem;
+    gap: 0.25rem;
     position: absolute;
     left: 0;
     right: 0;
     bottom: 0;
     z-index: 20;
-    padding: 0.45rem 0.55rem calc(0.5rem + env(safe-area-inset-bottom, 0px));
-    padding-right: 4.25rem;
+    padding: 0.3rem 0.45rem calc(0.35rem + env(safe-area-inset-bottom, 0px));
     pointer-events: none;
-    background: linear-gradient(to top, rgba(0, 0, 0, 0.48), transparent 70%);
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.22), transparent);
   }
 
   .ride-exit {
@@ -2281,45 +2375,56 @@ function onDocClick(e: MouseEvent) {
 
   .ride-cockpit {
     display: flex;
-    flex-direction: column;
-    gap: 0.35rem;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 0.28rem;
     pointer-events: none;
   }
 
   .ride-primary {
     pointer-events: auto;
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    gap: 0.12rem;
-    padding: 0.7rem 0.85rem;
+    flex: 1 1 10rem;
+    min-width: 0;
+    display: grid;
+    grid-template-columns: auto auto 1fr auto;
+    align-items: center;
+    column-gap: 0.35rem;
+    padding: 0.32rem 0.5rem;
     border: none;
-    border-radius: 12px;
-    background: rgba(255, 255, 255, 0.97);
+    border-radius: 9px;
+    background: rgba(255, 255, 255, 0.96);
     color: #111;
     text-align: left;
-    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.22);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.16);
     cursor: pointer;
   }
 
   .ride-primary-kind {
     display: inline-flex;
     align-items: center;
-    gap: 0.3rem;
-    font-size: 0.68rem;
+    gap: 0.2rem;
+    font-size: 0.62rem;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.03em;
     color: #4b5563;
+    white-space: nowrap;
   }
 
   .ride-primary-dist {
-    font-size: 1.85rem;
+    font-size: 1.05rem;
     font-weight: 800;
     font-variant-numeric: tabular-nums;
-    line-height: 1.05;
-    letter-spacing: -0.02em;
+    line-height: 1.1;
     color: var(--primary, #2d6a4f);
+  }
+
+  .ride-primary-name {
+    font-size: 0.82rem;
+    font-weight: 650;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .ride-primary-meta {
@@ -2361,53 +2466,43 @@ function onDocClick(e: MouseEvent) {
   }
 
   .ride-open-sm {
-    font-size: 0.65rem;
-    padding: 0.08rem 0.3rem;
-  }
-
-  .ride-primary-name {
-    font-size: 0.92rem;
-    font-weight: 650;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    font-size: 0.62rem;
+    padding: 0.06rem 0.28rem;
   }
 
   .ride-primary-empty {
     pointer-events: none;
+    flex: 1 1 10rem;
+    min-width: 0;
     margin: 0;
-    padding: 0.7rem 0.85rem;
-    border-radius: 12px;
+    padding: 0.32rem 0.5rem;
+    border-radius: 9px;
     background: rgba(255, 255, 255, 0.88);
     color: #4b5563;
-    font-size: 0.85rem;
+    font-size: 0.75rem;
     font-weight: 600;
   }
 
   .ride-secondary {
     pointer-events: auto;
-    width: 100%;
-    display: grid;
-    grid-template-columns: auto auto auto 1fr;
-    grid-template-areas:
-      'kind dist eta open'
-      'name name name name';
-    column-gap: 0.45rem;
-    row-gap: 0.1rem;
+    flex: 1 1 10rem;
+    min-width: 0;
+    display: flex;
     align-items: baseline;
-    padding: 0.45rem 0.65rem;
+    gap: 0.35rem;
+    padding: 0.32rem 0.5rem;
     border: none;
-    border-radius: 10px;
+    border-radius: 9px;
     background: rgba(255, 251, 235, 0.96);
     color: #111;
     text-align: left;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.14);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
     cursor: pointer;
   }
 
   .ride-secondary-kind {
-    grid-area: kind;
-    font-size: 0.62rem;
+    flex-shrink: 0;
+    font-size: 0.6rem;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.03em;
@@ -2415,26 +2510,14 @@ function onDocClick(e: MouseEvent) {
   }
 
   .ride-secondary strong {
-    grid-area: dist;
-    font-size: 1rem;
+    flex-shrink: 0;
+    font-size: 0.92rem;
     font-variant-numeric: tabular-nums;
     color: #92400e;
   }
 
-  .ride-secondary-eta {
-    grid-area: eta;
-    font-size: 0.72rem;
-    font-weight: 650;
-    color: #78350f;
-  }
-
-  .ride-secondary .ride-open {
-    grid-area: open;
-    justify-self: end;
-  }
-
   .ride-secondary-name {
-    grid-area: name;
+    min-width: 0;
     font-size: 0.78rem;
     font-weight: 650;
     overflow: hidden;

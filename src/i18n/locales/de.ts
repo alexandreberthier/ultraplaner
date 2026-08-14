@@ -660,6 +660,7 @@ export default {
     routeKm: 'Routen-km',
     etaFromStart: '({duration} ab Start)',
     etaFromStartShort: '{duration} ab Start',
+    renamePoi: 'Namen ändern',
     addFavorite: 'Als Favorit markieren',
     removeFavorite: 'Favorit entfernen',
     editPoi: 'POI bearbeiten',
