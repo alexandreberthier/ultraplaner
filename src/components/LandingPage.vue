@@ -239,15 +239,7 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
 
           <div class="page-wrap hero-wrap">
             <div class="hero-center">
-              <p class="hero-kicker">
-                {{ t('landing.stats.regions') }}
-                ·
-                {{ t('landing.stats.pois') }}
-              </p>
-              <h1 class="hero-title">
-                <span class="hero-title-lead">{{ t('landing.heroLine1') }}</span>
-                <span class="hero-title-route">{{ t('landing.heroLine2') }}</span>
-              </h1>
+              <h1 class="hero-title">{{ t('landing.hero') }}</h1>
               <p class="hero-sub">{{ t('landing.heroSub') }}</p>
               <div class="cta-row">
                 <button type="button" class="cta-primary" @click="scrollToApp">
@@ -458,6 +450,7 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
   min-height: 100%;
   background: #f3efe6;
   color: #111;
+  --display: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
 .landing.plan-fullscreen {
@@ -491,7 +484,7 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
 .hero-band {
   position: relative;
   isolation: isolate;
-  min-height: min(78vh, 860px);
+  min-height: min(56vh, 620px);
   display: flex;
   align-items: stretch;
   border-bottom: 3px solid #111;
@@ -547,8 +540,8 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
   display: flex;
   flex-direction: column;
   width: 100%;
-  min-height: min(78vh, 860px);
-  padding: 0 0 4.5rem;
+  min-height: min(56vh, 620px);
+  padding: 0 0 5.25rem;
 }
 
 .hero-top {
@@ -596,51 +589,23 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  max-width: 52rem;
+  max-width: min(100%, 58rem);
   width: 100%;
   align-self: flex-start;
-  padding: 2.5rem 0 0;
-}
-
-.hero-kicker {
-  margin: 0 0 0.85rem;
-  max-width: 22rem;
-  font-size: 0.68rem;
-  font-weight: 800;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: #fff;
-  background: #111;
-  padding: 0.4rem 0.65rem;
-  line-height: 1.35;
+  padding: 1.75rem 0 0;
 }
 
 .hero-title {
-  font-family: Impact, 'Arial Black', 'Helvetica Neue', sans-serif;
-  font-size: clamp(2.7rem, 9vw, 7rem);
-  font-weight: 900;
+  font-family: var(--display);
+  font-size: clamp(1.7rem, 3.9vw, 2.95rem);
+  font-weight: 800;
   color: #fff;
-  margin: 0 0 0.65rem;
-  line-height: 0.84;
-  letter-spacing: -0.045em;
+  margin: 0 0 0.7rem;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
   text-transform: uppercase;
   text-shadow: none;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0;
-}
-
-.hero-title-lead {
-  font-size: 0.38em;
-  letter-spacing: 0.04em;
-  line-height: 1;
-  margin-bottom: 0.12em;
-  opacity: 0.92;
-}
-
-.hero-title-route {
-  white-space: normal;
+  white-space: nowrap;
 }
 
 .hero-sub {
@@ -656,14 +621,14 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
   border-radius: 0;
   padding: 0.85rem 1.4rem;
   font-size: 0.92rem;
-  font-weight: 900;
-  letter-spacing: 0.06em;
+  font-weight: 800;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
   cursor: pointer;
   background: var(--cta);
   color: #111;
   border: 3px solid #111;
-  box-shadow: 6px 6px 0 #111;
+  box-shadow: 5px 5px 0 #111;
   transition: transform 0.08s ease, box-shadow 0.08s ease;
 }
 
@@ -686,15 +651,15 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
   grid-template-columns: 1.35fr 1fr 1fr;
   align-items: stretch;
   gap: 0;
-  margin-top: -3.25rem;
-  margin-bottom: 2.75rem;
+  margin-top: -2.75rem;
+  margin-bottom: 4.25rem;
   position: relative;
   z-index: 3;
   background: #fff;
   border: 3px solid #111;
   border-radius: 0;
   padding: 0;
-  box-shadow: 8px 8px 0 #111;
+  box-shadow: 5px 5px 0 #111;
 }
 
 .stat {
@@ -716,11 +681,11 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
 }
 
 .stat strong {
-  font-family: Impact, 'Arial Black', 'Helvetica Neue', sans-serif;
-  font-size: clamp(1.55rem, 3.2vw, 2.45rem);
-  font-weight: 900;
-  letter-spacing: -0.03em;
-  line-height: 0.95;
+  font-family: var(--display);
+  font-size: clamp(1.2rem, 2.4vw, 1.75rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
   color: #111;
   text-transform: uppercase;
 }
@@ -748,14 +713,14 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
 
 .section-head h2 {
   margin: 0;
-  font-family: Impact, 'Arial Black', 'Helvetica Neue', sans-serif;
-  font-size: clamp(2.1rem, 5.5vw, 3.8rem);
-  font-weight: 900;
-  letter-spacing: -0.04em;
-  line-height: 0.88;
+  font-family: var(--display);
+  font-size: clamp(1.55rem, 2.8vw, 2.35rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
   text-transform: uppercase;
   color: #111;
-  max-width: 10ch;
+  white-space: nowrap;
 }
 
 .section-head p {
@@ -779,7 +744,7 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
   border-right: 3px solid #111;
   border-radius: 0;
   background: #fff;
-  font-weight: 900;
+  font-weight: 800;
   font-size: 0.78rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -801,7 +766,7 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
   border: 3px solid #111;
   border-radius: 0;
   padding: 1.35rem 1.4rem 1.5rem;
-  box-shadow: 8px 8px 0 #111;
+  box-shadow: 5px 5px 0 #111;
 }
 
 .hero-card[hidden] {
@@ -845,7 +810,7 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
   border: 3px solid #111;
   border-radius: 0;
   box-shadow: 4px 4px 0 #111;
-  font-weight: 900;
+  font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
@@ -857,23 +822,27 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
 }
 
 .landing :deep(.recent-maps) {
+  margin-top: 2.25rem;
   border: 3px solid #111;
   background: #fff;
-  box-shadow: 6px 6px 0 #111;
+  box-shadow: 5px 5px 0 #111;
 }
 
 .landing :deep(.feedback) {
+  margin-top: 6.5rem;
   border: 3px solid #111;
   border-radius: 0;
   background: #fff;
-  box-shadow: 6px 6px 0 #111;
+  box-shadow: 5px 5px 0 #111;
 }
 
 .landing :deep(.feedback h2) {
-  font-family: Impact, 'Arial Black', 'Helvetica Neue', sans-serif;
+  font-family: var(--display);
+  font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.02em;
   color: #111;
+  white-space: nowrap;
 }
 
 .landing :deep(.field input),
@@ -889,11 +858,11 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
 .guide-teaser,
 .updates-section,
 .faq-section {
-  margin-top: 4.5rem;
+  margin-top: 6.5rem;
 }
 
 .how-section {
-  margin-top: 4rem;
+  margin-top: 6.25rem;
 }
 
 .features-section h2,
@@ -901,15 +870,15 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
 .guide-teaser h2,
 .updates-section h2,
 .faq-section h2 {
-  font-family: Impact, 'Arial Black', 'Helvetica Neue', sans-serif;
-  font-size: clamp(2.1rem, 5.5vw, 3.8rem);
-  font-weight: 900;
+  font-family: var(--display);
+  font-size: clamp(1.55rem, 2.8vw, 2.35rem);
+  font-weight: 800;
   color: #111;
-  margin: 0 0 1.35rem;
-  letter-spacing: -0.04em;
-  line-height: 0.88;
+  margin: 0 0 1.5rem;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
   text-transform: uppercase;
-  max-width: 12ch;
+  white-space: nowrap;
 }
 
 .guide-teaser p {
@@ -922,7 +891,7 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
 
 .guide-teaser-link {
   display: inline-block;
-  font-weight: 900;
+  font-weight: 800;
   color: #111;
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -970,7 +939,7 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
 .updates-tag {
   flex: 0 0 auto;
   font-size: 0.7rem;
-  font-weight: 900;
+  font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: #111;
@@ -1033,7 +1002,7 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
 .feature-card strong {
   display: block;
   font-size: 1.05rem;
-  font-weight: 900;
+  font-weight: 800;
   letter-spacing: -0.02em;
   line-height: 1.15;
   margin-bottom: 0;
@@ -1041,9 +1010,10 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
 }
 
 .feature-card:first-child strong {
-  font-family: Impact, 'Arial Black', 'Helvetica Neue', sans-serif;
-  font-size: clamp(1.5rem, 2.6vw, 2.2rem);
-  line-height: 0.95;
+  font-family: var(--display);
+  font-size: clamp(1.25rem, 2.2vw, 1.75rem);
+  font-weight: 800;
+  line-height: 1.12;
 }
 
 .feature-card p {
@@ -1084,18 +1054,18 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
   border-radius: 0;
   background: none;
   color: #111;
-  font-family: Impact, 'Arial Black', 'Helvetica Neue', sans-serif;
-  font-weight: 900;
-  font-size: clamp(2.6rem, 5vw, 4.2rem);
-  line-height: 0.8;
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: clamp(2.1rem, 4vw, 3.2rem);
+  line-height: 0.9;
   display: block;
-  letter-spacing: -0.04em;
+  letter-spacing: -0.03em;
 }
 
 .step strong {
   display: block;
   font-size: 1.05rem;
-  font-weight: 900;
+  font-weight: 800;
   text-transform: uppercase;
   margin-bottom: 0.15rem;
   letter-spacing: -0.02em;
@@ -1166,7 +1136,7 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
   transform: rotate(0deg);
   transition: transform 0.15s;
   flex-shrink: 0;
-  font-weight: 900;
+  font-weight: 800;
 }
 
 .faq-chevron.open {
@@ -1185,7 +1155,7 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
 }
 
 .site-footer {
-  margin: 4.5rem 0 2.5rem;
+  margin: 6.5rem 0 2.5rem;
   padding-top: 1.25rem;
   border-top: 3px solid #111;
   text-align: left;
@@ -1351,6 +1321,17 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
 
 
 @media (max-width: 960px) {
+  .hero-title,
+  .section-head h2,
+  .features-section h2,
+  .how-section h2,
+  .guide-teaser h2,
+  .updates-section h2,
+  .faq-section h2,
+  .landing :deep(.feedback h2) {
+    white-space: normal;
+  }
+
   .features-grid,
   .steps,
   .stats-bar {
@@ -1371,11 +1352,11 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
 @media (max-width: 640px) {
   .hero-band,
   .hero {
-    min-height: min(72vh, 640px);
+    min-height: min(58vh, 520px);
   }
 
   .hero {
-    padding-bottom: 3.5rem;
+    padding-bottom: 4rem;
   }
 
   .hero-center {
@@ -1386,12 +1367,8 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
   }
 
   .hero-title {
-    font-size: clamp(2.35rem, 14vw, 3.6rem);
-    align-items: flex-start;
-  }
-
-  .hero-kicker {
-    max-width: 100%;
+    font-size: clamp(1.7rem, 8.5vw, 2.4rem);
+    white-space: normal;
   }
 
   .cta-row {
@@ -1413,7 +1390,8 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
   }
 
   .stats-bar {
-    margin-top: -2rem;
+    margin-top: -1.75rem;
+    margin-bottom: 3.25rem;
     box-shadow: 5px 5px 0 #111;
   }
 
@@ -1434,6 +1412,14 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
   .hero-card {
     padding: 1.1rem 1rem 1.25rem;
     box-shadow: 5px 5px 0 #111;
+  }
+
+  .features-section,
+  .how-section,
+  .guide-teaser,
+  .updates-section,
+  .faq-section {
+    margin-top: 4.75rem;
   }
 }
 </style>
