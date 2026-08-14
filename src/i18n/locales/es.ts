@@ -141,7 +141,7 @@ export default {
       a15: 'Marcan huecos de suministro: tramos de al menos unos 25 km sin POI con tus categorías/filtros actuales. Así ves dónde planificar más o marcar favoritos.',
       q16: '¿Qué es «En ruta»?',
       a16:
-        'En ruta = tu ubicación + POIs en un radio (p. ej. una parada, sin ruta). Un toque en «En ruta» abre el mapa al momento (por defecto: 5 km, gasolineras/supermercados/agua/hoteles). Ajusta radio y categorías después en la lista/barra lateral y vuelve a cargar. Sin modo de marcha — hace falta una ruta de carrera cargada.',
+        'En ruta = tu ubicación + POIs en un radio (p. ej. una parada, sin ruta). Un toque en «En ruta» abre el mapa al momento (por defecto: 2 km, gasolineras/supermercados). Ajusta radio y categorías después en la lista/barra lateral y vuelve a cargar. Sin modo de marcha — hace falta una ruta de carrera cargada.',
     },
     poiGuide: {
       title: 'Avituallamiento para rutas ultracycling',
@@ -220,7 +220,7 @@ export default {
     intro:
       '¿En la bici? En ruta usa tu ubicación para buscar avituallamiento en un radio — sin GPX. (Modo de marcha solo con ruta.)',
     introMapFirst:
-      'Se obtiene tu ubicación y se abre el mapa al momento (por defecto: 5 km, gasolineras, supermercados, agua, hoteles). Cambia radio y categorías en el mapa bajo opciones En ruta.',
+      'Se obtiene tu ubicación y se abre el mapa al momento (por defecto: 2 km, gasolineras, supermercados). Cambia radio y categorías en el mapa bajo opciones En ruta.',
     introMap:
       'Actualiza el GPS y vuelve a cargar los POIs en el radio. (Sin modo de marcha — hace falta una ruta.)',
     introMapRoute:

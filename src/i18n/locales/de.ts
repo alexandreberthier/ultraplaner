@@ -137,7 +137,7 @@ export default {
       a15: 'Siehe „Wie plane ich die Versorgung?“ bzw. „Öffnungszeiten & Höhenprofil?“.',
       q16: 'Was ist „Fahrt“?',
       a16:
-        'Fahrt = Standort + Umkreis-POIs (Pause, ohne Route). Ein Tipp auf „Fahrt“ öffnet direkt die Karte (Standard: 5 km, Tankstellen/Supermärkte/Trinkwasser/Hotels). Radius und Kategorien danach in der Liste/Sidebar anpassen und neu laden. Kein Fahrtmodus — der braucht eine geladene Rennroute.',
+        'Fahrt = Standort + Umkreis-POIs (Pause, ohne Route). Ein Tipp auf „Fahrt“ öffnet direkt die Karte (Standard: 2 km, Tankstellen/Supermärkte). Radius und Kategorien danach in der Liste/Sidebar anpassen und neu laden. Kein Fahrtmodus — der braucht eine geladene Rennroute.',
       q18: 'Was sind Kontrollpunkte?',
       a18: 'Siehe „Wie plane ich die Versorgung?“.',
       q20: 'Wie funktioniert „Mit Wahoo verbinden“?',
@@ -220,7 +220,7 @@ export default {
     intro:
       'Unterwegs? Fahrt nutzt deinen Standort und sucht Versorgung im Umkreis — ohne GPX. (Fahrtmodus nur mit Route.)',
     introMapFirst:
-      'Standort wird geholt und die Karte öffnet sich sofort (Standard: 5 km, Tankstellen, Supermärkte, Trinkwasser, Hotels). Radius und Kategorien kannst du auf der Karte in den Fahrt-Optionen ändern.',
+      'Standort wird geholt und die Karte öffnet sich sofort (Standard: 2 km, Tankstellen, Supermärkte). Radius und Kategorien kannst du auf der Karte in den Fahrt-Optionen ändern.',
     introMap:
       'Standort erneut holen und POIs im Umkreis neu laden. (Kein Fahrtmodus — der braucht eine Route.)',
     introMapRoute:
