@@ -33,14 +33,15 @@ const { colorblindMode, toggleColorblindMode } = useColorblindMode()
 .color-toggle {
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
-  padding: 0.35rem 0.55rem;
+  gap: 0.45rem;
+  padding: 0.5rem 0.7rem;
+  min-height: 2.5rem;
   border: 1px solid var(--border);
   border-radius: 10px;
   background: var(--surface-2);
   color: var(--text-muted);
   font: inherit;
-  font-size: 0.72rem;
+  font-size: 0.85rem;
   font-weight: 700;
   letter-spacing: 0.03em;
   cursor: pointer;
@@ -52,8 +53,10 @@ const { colorblindMode, toggleColorblindMode } = useColorblindMode()
 }
 
 .color-toggle.compact {
-  padding: 0.28rem 0.4rem;
+  padding: 0.4rem 0.55rem;
+  min-height: 2.25rem;
   border-radius: 8px;
+  font-size: 0.8rem;
 }
 
 .color-toggle:hover {
@@ -76,8 +79,8 @@ const { colorblindMode, toggleColorblindMode } = useColorblindMode()
 }
 
 .swatch {
-  width: 0.55rem;
-  height: 0.55rem;
+  width: 0.7rem;
+  height: 0.7rem;
   border-radius: 50%;
   border: 1px solid rgba(0, 0, 0, 0.12);
 }

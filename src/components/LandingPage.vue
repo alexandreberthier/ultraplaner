@@ -127,9 +127,7 @@ const steps = [
 const faqs = ['q1', 'q17', 'q3', 'q6', 'q19', 'q13', 'q14', 'q11'] as const
 const updates = [
   { key: 'coros', kind: 'new' },
-  { key: 'nearbyFromMap', kind: 'new' },
-  { key: 'routeKeptOnNearby', kind: 'fix' },
-  { key: 'rideSupply', kind: 'new' },
+  { key: 'mobileUx', kind: 'new' },
   { key: 'cemeteries', kind: 'new' },
   { key: 'wahoo', kind: 'new' },
 ] as const
@@ -277,7 +275,6 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
         <section id="app-start" ref="appRef" class="app-section" tabindex="-1">
           <div class="section-head">
             <h2>{{ t('landing.appTitle') }}</h2>
-            <p>{{ t('landing.appIntro') }}</p>
           </div>
 
           <div class="mode-tabs" role="tablist" aria-label="App-Modus">
@@ -548,6 +545,8 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
 }
 
 .hero-top {
+  position: relative;
+  z-index: 20;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -1024,7 +1023,7 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
   padding: 0.65rem 1.1rem;
   background: var(--surface);
   border-bottom: 1px solid var(--border);
-  z-index: 5;
+  z-index: 40;
 }
 
 .back-btn {

@@ -166,11 +166,13 @@ async function createMap() {
         <input
           v-model.number="radiusM"
           type="range"
+          class="radius-slider"
           :min="MIN_POI_RADIUS_M"
           :max="MAX_POI_RADIUS_M"
           step="10"
+          :aria-valuetext="`${radiusM} m`"
         />
-        <span>{{ radiusM }} m</span>
+        <span class="radius-value">{{ radiusM }}&nbsp;m</span>
       </div>
     </label>
 

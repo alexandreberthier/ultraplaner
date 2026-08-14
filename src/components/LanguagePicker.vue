@@ -99,15 +99,16 @@ function pick(code: AppLocale) {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.35rem;
-  min-width: 2.5rem;
-  padding: 0.35rem 0.5rem;
+  gap: 0.4rem;
+  min-width: 2.85rem;
+  min-height: 2.5rem;
+  padding: 0.45rem 0.6rem;
   border: 1px solid transparent;
-  border-radius: 7px;
+  border-radius: 8px;
   background: transparent;
   color: var(--text-muted);
   font: inherit;
-  font-size: 0.72rem;
+  font-size: 0.82rem;
   font-weight: 700;
   letter-spacing: 0.03em;
   cursor: pointer;
@@ -119,9 +120,10 @@ function pick(code: AppLocale) {
 }
 
 .lang-picker.compact .lang-btn {
-  min-width: 2.1rem;
-  padding: 0.28rem 0.35rem;
-  border-radius: 6px;
+  min-width: 2.5rem;
+  min-height: 2.25rem;
+  padding: 0.35rem 0.45rem;
+  border-radius: 7px;
 }
 
 .lang-btn:hover:not(.active) {
@@ -138,8 +140,8 @@ function pick(code: AppLocale) {
 }
 
 .lang-picker.compact :deep(.locale-flag) {
-  width: 1.2rem;
-  height: 0.8rem;
+  width: 1.4rem;
+  height: 0.95rem;
 }
 
 .lang-code {

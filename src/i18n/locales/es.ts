@@ -72,9 +72,7 @@ export default {
       kind: { new: 'Nuevo', fix: 'Fix', bug: 'Bug' },
       items: {
         coros: 'Código QR: exportar al móvil',
-        nearbyFromMap: 'En ruta directamente desde el mapa',
-        routeKeptOnNearby: 'La ruta se mantiene al escanear «En ruta» en mapas de ruta',
-        rideSupply: 'Modo marcha: próximo avituallamiento más claro (distancia/ETA/abierto)',
+        mobileUx: 'Móvil: controles más grandes, paneles más claros, solo una sección abierta',
         cemeteries: 'Cementerios como fuentes de agua potable',
         wahoo: 'Wahoo: enviar la ruta a la nube',
       },
@@ -124,7 +122,7 @@ export default {
         'Los puntos de control son marcadores propios en el mapa — p. ej. CP (paradas obligatorias) o Sleep (lugares para dormir). Los colocas con el botón ⚑ junto al mapa; el punto se queda donde tocas (también fuera de la línea) y el km sale del punto de ruta más cercano. Van junto con los favoritos en GPX, FIT (Garmin course points) y la chuleta.',
       q19: '¿Móvil y app?',
       a19:
-        'Usable en el navegador del móvil. Como PWA en la pantalla de inicio: Android menú del navegador → Instalar; iPhone Compartir → Mostrar más → Añadir a pantalla de inicio — arranca sin barra del navegador, sigue en ultraplaner.com. Ubicación (En ruta / modo marcha): en iPhone toca a la izquierda de la barra de dirección de Safari → Ajustes del sitio → Ubicación → Permitir (los Servicios de ubicación del sistema no bastan). Offline: ruta/POIs del caché, mapa base necesita red.',
+        'Usable en el navegador del móvil — barra inferior, botones más grandes, una sección a la vez. Como PWA en la pantalla de inicio: Android menú del navegador → Instalar; iPhone Compartir → Mostrar más → Añadir a pantalla de inicio — arranca sin barra del navegador, sigue en ultraplaner.com. Ubicación (En ruta / modo marcha): en iPhone toca a la izquierda de la barra de dirección de Safari → Ajustes del sitio → Ubicación → Permitir (los Servicios de ubicación del sistema no bastan). Offline: ruta/POIs del caché, mapa base necesita red.',
       q10: 'Privacidad y ubicación',
       a10: 'Ubicación solo en «En ruta» y modo marcha. Sin cookies de seguimiento. Ajustes y caché offline locales. Ver política de privacidad.',
       q11: '¿Feedback y roadmap?',
@@ -136,7 +134,7 @@ export default {
       q20: '¿Cómo funciona «Conectar Wahoo»?',
       a20: 'No hace falta cuenta UltraPlaner. Inicias sesión una vez en Wahoo; el enlace queda solo en este navegador/dispositivo (tokens locales). Luego usa «Enviar a Wahoo». «Desconectar Wahoo» borra los tokens aquí — en otro móvil o tras borrar caché, vuelve a conectar. La ruta aparece en la app Wahoo y en el ELEMNT (no en la app ELEMNT antigua).',
       q14: '¿Guardar y compartir?',
-      a14: '« Recientes » = reabrir la ruta (local). « Llevar ruta offline » = mapa + POIs sin internet a lo largo del track. Enlace ~180 días online.',
+      a14: '« Recientes » = reabrir rutas GPX y planificadas (local) — los mapas En ruta no se guardan. « Llevar ruta offline » = mapa + POIs sin internet a lo largo del track. Enlace ~180 días online.',
       q15: '¿Qué significan las zonas rojas del perfil?',
       a15: 'Marcan huecos de suministro: tramos de al menos unos 25 km sin POI con tus categorías/filtros actuales. Así ves dónde planificar más o marcar favoritos.',
       q16: '¿Qué es «En ruta»?',
@@ -259,7 +257,7 @@ export default {
   },
   recent: {
     title: 'Recientes',
-    hint: 'Ruta y POIs para reabrir rápido (solo este navegador). Sin red: lista/chuleta — el mapa necesita « Llevar ruta offline ».',
+    hint: 'Rutas GPX y planificadas para reabrir rápido (solo este navegador). En ruta no aparece aquí. Sin red: lista/chuleta — el mapa necesita « Llevar ruta offline ».',
     open: 'Abrir',
     remove: 'Eliminar',
     removeTitle: 'Eliminar «{name}» del dispositivo',

@@ -26,26 +26,11 @@ const emit = defineEmits<{
 
 const { t, locale } = useI18n()
 const plotRef = ref<HTMLElement | null>(null)
-const plotSize = ref({ width: 640, height: 120 })
-const profileOpen = ref(true)
+const plotSize = ref({ width: 640, height: 160 })
+const profileOpen = defineModel<boolean>('open', { default: true })
 const hoverKm = ref<number | null>(null)
 const scrubbing = ref(false)
 const PLANNER_ELEV_OPEN_KEY = 'up-planner-elev-open'
-
-function isMobileViewport(): boolean {
-  return typeof window !== 'undefined' && window.matchMedia('(max-width: 899px)').matches
-}
-
-function loadProfileOpen(): boolean {
-  try {
-    const v = localStorage.getItem(PLANNER_ELEV_OPEN_KEY)
-    if (v === '1') return true
-    if (v === '0') return false
-  } catch {
-    /* ignore */
-  }
-  return !isMobileViewport()
-}
 
 const padding = { left: 40, right: 12, top: 10, bottom: 22 }
 const MIN_TICK_PX = 48
@@ -187,11 +172,6 @@ function surfaceLabel(id: RouteSurfaceBucketId) {
 
 function toggleProfile() {
   profileOpen.value = !profileOpen.value
-  try {
-    localStorage.setItem(PLANNER_ELEV_OPEN_KEY, profileOpen.value ? '1' : '0')
-  } catch {
-    /* ignore */
-  }
 }
 
 function clearCursor() {
@@ -264,12 +244,16 @@ function bindPlotObserver() {
 }
 
 onMounted(async () => {
-  profileOpen.value = loadProfileOpen()
   await nextTick()
   if (profileOpen.value) bindPlotObserver()
 })
 
 watch(profileOpen, async (open) => {
+  try {
+    localStorage.setItem(PLANNER_ELEV_OPEN_KEY, open ? '1' : '0')
+  } catch {
+    /* ignore */
+  }
   if (!open) {
     clearCursor()
     return
@@ -647,7 +631,7 @@ onUnmounted(() => {
 
 @media (max-width: 899px) {
   .plot {
-    height: 84px;
+    height: 168px;
   }
 
   .profile-toggle {

@@ -72,9 +72,7 @@ export default {
       kind: { new: 'Neu', fix: 'Fix', bug: 'Bug' },
       items: {
         coros: 'QR-Code: Export aufs Handy',
-        nearbyFromMap: 'Fahrt direkt aus der Karte',
-        routeKeptOnNearby: 'Route bleibt beim Fahrt-Scan auf Routenkarten',
-        rideSupply: 'Fahrtmodus: nächste Versorgung klarer (Distanz/ETA/offen)',
+        mobileUx: 'Handy: größere Bedienung, klarere Sheets, nur eine offene Sektion',
         cemeteries: 'Friedhöfe als Trinkwasser-Quellen',
         wahoo: 'Wahoo: Route direkt in die Cloud senden',
       },
@@ -109,11 +107,11 @@ export default {
       a6: 'Öffnungszeiten kommen aus OpenStreetMap — wenn eingetragen. „Keine Angabe“ heißt nicht geschlossen: Der Filter „offen zur ETA“ blendet nur bekannte Schließzeiten aus; unbekannte POIs und Favoriten bleiben sichtbar. Trinkbrunnen/Quellen/Friedhöfe gelten als immer verfügbar. Zusätzlich: „Google Maps Navigation“ für oft aktuelle Zeiten vor Ort. Höhenprofil: Anstiege/Pässe, Klick springt zur Stelle; Rot = Versorgungslücken bei deinen Filtern.',
       q19: 'Handy & App?',
       a19:
-        'Im Browser auf dem Handy nutzbar. Als PWA zum Homescreen: Android Browser-Menü → Installieren; iPhone Teilen → Mehr anzeigen → Zum Home-Bildschirm — startet ohne Browser-Leiste, weiterhin ultraplaner.com. Standort (Fahrt/Fahrtmodus): auf dem iPhone in Safari in der Adressleiste links tippen → Website-Einstellungen → Standort → Erlauben (Geräte-Ortung allein reicht nicht). Offline: Route/POIs aus dem Cache, Basemap braucht Netz.',
+        'Im Browser auf dem Handy nutzbar — Bottom-Nav, größere Buttons, Akkordeons einzeln. Als PWA zum Homescreen: Android Browser-Menü → Installieren; iPhone Teilen → Mehr anzeigen → Zum Home-Bildschirm — startet ohne Browser-Leiste, weiterhin ultraplaner.com. Standort (Fahrt/Fahrtmodus): auf dem iPhone in Safari in der Adressleiste links tippen → Website-Einstellungen → Standort → Erlauben (Geräte-Ortung allein reicht nicht). Offline: Route/POIs aus dem Cache, Basemap braucht Netz.',
       q13: 'Export zu Wahoo, Garmin, COROS oder Strava?',
       a13: 'Nur markierte Favoriten ★ und Kontrollpunkte (⚑) gehen als Stops mit — nicht alle POIs auf der Karte (Garmin-Limit ~200 Course Points). Wahoo: „Mit Wahoo verbinden“ → „An Wahoo senden“. Garmin Edge: FIT Course speichern → USB Massenspeicher → Ordner Garmin/NewFiles (nicht Connect — dort gehen Course Points oft verloren). COROS Dura: am Desktop „An COROS senden“ (QR scannen) bzw. GPX herunterladen → in der COROS-App öffnen und speichern → Explore → Routenbibliothek → an Dura senden (keine Cloud-API wie bei Wahoo). Strava/Komoot: GPX; Wegpunkte je nach App unterschiedlich.',
       q14: 'Speichern & teilen?',
-      a14: '„Zuletzt geöffnet“ = Route schnell wiederfinden (lokal). „Route offline mitnehmen“ = Karte + POIs ohne Netz entlang der Strecke. Teilen-Link ~180 Tage online.',
+      a14: '„Zuletzt geöffnet“ = GPX- und Planungs-Routen schnell wiederfinden (lokal) — Fahrt-Karten werden nicht gespeichert. „Route offline mitnehmen“ = Karte + POIs ohne Netz entlang der Strecke. Teilen-Link ~180 Tage online.',
       q11: 'Feedback & Roadmap?',
       a11: 'Ideen gern über das Formular unten — geht direkt an mich (Alex). Wahoo-Cloud-Push ist live; Garmin bleibt vorerst FIT/USB (Connect-API nur nach Partner-Zugang). COROS-Cloud-API ist beantragt und geplant, sobald Partner-Zugang möglich ist — bis dahin QR/GPX. Öffnungszeiten verbessern wir laufend über OSM und Hinweise in der App.',
       // Legacy keys kept for safety (not shown on landing)
@@ -259,7 +257,7 @@ export default {
   },
   recent: {
     title: 'Zuletzt geöffnet',
-    hint: 'Route & POIs zum schnellen Wiederöffnen (nur dieser Browser). Ohne Netz: Liste/Spickzettel — die Karte braucht „Route offline mitnehmen“.',
+    hint: 'GPX- und Planungs-Routen zum schnellen Wiederöffnen (nur dieser Browser). Fahrt erscheint hier nicht. Ohne Netz: Liste/Spickzettel — die Karte braucht „Route offline mitnehmen“.',
     open: 'Öffnen',
     remove: 'Entfernen',
     removeTitle: '„{name}“ vom Gerät entfernen',

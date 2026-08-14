@@ -2050,13 +2050,13 @@ onUnmounted(() => {
       @click.stop.prevent="onLocationButtonClick"
     >
       <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-        <circle cx="12" cy="12" r="4" :fill="locationActive ? '#2563eb' : 'currentColor'" />
+        <circle cx="12" cy="12" r="4" fill="currentColor" />
         <path d="M12 2v3M12 19v3M2 12h3M19 12h3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
         <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.5" fill="none" />
         <path
           v-if="headingUp && !needsRecenter"
           d="M12 5 L15 11 H9 Z"
-          fill="#2563eb"
+          fill="currentColor"
           stroke="none"
         />
         <text
@@ -2296,21 +2296,19 @@ onUnmounted(() => {
   background: #f0f0f0;
 }
 
-.location-btn.following {
-  background: #eff6ff;
-  color: #1d4ed8;
-  box-shadow: 0 0 0 2px #93c5fd;
-}
-
-.location-btn.needs-recenter {
-  background: #1d4ed8;
-  color: #fff;
-  box-shadow: 0 0 0 2px #1e40af, 0 4px 16px rgba(29, 78, 216, 0.45);
+.location-btn.following,
+.location-btn.needs-recenter,
+.location-btn.heading-up,
+.location-btn.north-up,
+.location-btn.active {
+  background: #fff;
+  color: #333;
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.12);
 }
 
 .location-btn.needs-recenter svg {
-  width: 1.15rem;
-  height: 1.15rem;
+  width: 100%;
+  height: 100%;
 }
 
 .location-btn.pending {

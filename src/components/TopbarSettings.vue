@@ -162,12 +162,12 @@ onUnmounted(() => {
   position: absolute;
   top: calc(100% + 0.35rem);
   right: 0;
-  z-index: 40;
+  z-index: 80;
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
-  min-width: 13.5rem;
-  padding: 0.75rem;
+  gap: 0.85rem;
+  min-width: 16rem;
+  padding: 0.9rem;
   border: 1px solid var(--border);
   border-radius: 12px;
   background: var(--surface);
@@ -176,7 +176,7 @@ onUnmounted(() => {
 
 .menu-title {
   margin: 0;
-  font-size: 0.78rem;
+  font-size: 0.88rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -191,7 +191,7 @@ onUnmounted(() => {
 }
 
 .menu-label {
-  font-size: 0.8rem;
+  font-size: 0.92rem;
   font-weight: 600;
   color: var(--text-muted);
 }

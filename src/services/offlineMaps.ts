@@ -117,6 +117,11 @@ export async function getOfflineMap(id: string): Promise<SavedMapRecord | null> 
   }
 }
 
+export function isNearbySavedMap(record: SavedMapRecord): boolean {
+  const lastKm = record.routePoints.at(-1)?.distanceFromStart ?? 0
+  return record.routeCoords.length === 1 || (record.routeCoords.length <= 2 && lastKm < 0.05)
+}
+
 export async function listOfflineMaps(): Promise<
   { id: string; name: string; cachedAt: number; totalKm: number; poiCount: number }[]
 > {
@@ -126,6 +131,7 @@ export async function listOfflineMaps(): Promise<
       idbReq(store.getAll() as IDBRequest<OfflineMapEntry[]>)
     )
     return (all ?? [])
+      .filter((e) => !isNearbySavedMap(e.record))
       .map((e) => {
         const pts = e.record.routePoints
         const totalKm = pts[pts.length - 1]?.distanceFromStart ?? 0

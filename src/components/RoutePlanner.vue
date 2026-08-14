@@ -151,6 +151,20 @@ const addressResults = ref<GeocodeResult[]>([])
 const routeCursor = ref<RouteCursor | null>(null)
 const addressSearching = ref(false)
 const addressError = ref('')
+const PLANNER_ELEV_OPEN_KEY = 'up-planner-elev-open'
+
+function loadPlannerElevOpen(): boolean {
+  try {
+    const v = localStorage.getItem(PLANNER_ELEV_OPEN_KEY)
+    if (v === '1') return true
+    if (v === '0') return false
+  } catch {
+    /* ignore */
+  }
+  return !isMobilePlannerViewport()
+}
+
+const elevOpen = ref(loadPlannerElevOpen())
 /** Mobile bottom sheet: collapsed by default so the map stays large. */
 const controlsOpen = ref(false)
 let didAutoCollapseControls = false
@@ -168,10 +182,22 @@ const controlsSummary = computed(() => {
 })
 
 async function toggleControlsSheet() {
-  controlsOpen.value = !controlsOpen.value
+  const next = !controlsOpen.value
+  controlsOpen.value = next
+  if (next && isMobilePlannerViewport() && elevOpen.value) {
+    elevOpen.value = false
+  }
   await nextTick()
   map?.resize()
 }
+
+watch(elevOpen, async (open) => {
+  if (open && isMobilePlannerViewport() && controlsOpen.value) {
+    controlsOpen.value = false
+    await nextTick()
+    map?.resize()
+  }
+})
 
 const emit = defineEmits<{
   'can-export-change': [value: boolean]
@@ -1681,6 +1707,7 @@ onUnmounted(() => {
 
     <PlannerElevationProfile
       v-if="showElevation"
+      v-model:open="elevOpen"
       :points="routePoints"
       :surface-summary="routeSurfaceSummary"
       @update:cursor="onElevationCursor"
@@ -1731,11 +1758,13 @@ onUnmounted(() => {
             <input
               v-model.number="radiusM"
               type="range"
+              class="radius-slider"
               :min="MIN_POI_RADIUS_M"
               :max="MAX_POI_RADIUS_M"
               step="10"
+              :aria-valuetext="`${radiusM} m`"
             />
-            <span>{{ radiusM }} m</span>
+            <span class="radius-value">{{ radiusM }}&nbsp;m</span>
           </div>
         </label>
       </template>
@@ -1862,11 +1891,13 @@ onUnmounted(() => {
             <input
               v-model.number="radiusM"
               type="range"
+              class="radius-slider"
               :min="MIN_POI_RADIUS_M"
               :max="MAX_POI_RADIUS_M"
               step="10"
+              :aria-valuetext="`${radiusM} m`"
             />
-            <span>{{ radiusM }} m</span>
+            <span class="radius-value">{{ radiusM }}&nbsp;m</span>
           </div>
         </label>
 
@@ -1897,8 +1928,8 @@ onUnmounted(() => {
 
       <!-- Mobile: footer when sheet open; under handle when collapsed. Desktop: sticky top via CSS order. -->
       <div v-if="routeReadyForPois" class="poi-next-step">
-        <p class="poi-next-hint">
-          {{ previewingPois ? t('planner.previewingPois') : t('planner.nextStepPois') }}
+        <p v-if="previewingPois" class="poi-next-hint">
+          {{ t('planner.previewingPois') }}
         </p>
         <button
           type="button"
@@ -2751,7 +2782,7 @@ onUnmounted(() => {
   }
 
   .route-planner.controls-expanded :deep(.planner-elev:not(.collapsed)) {
-    max-height: 28vh;
+    max-height: 42vh;
     overflow: auto;
   }
 

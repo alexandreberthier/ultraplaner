@@ -72,9 +72,7 @@ export default {
       kind: { new: 'New', fix: 'Fix', bug: 'Bug' },
       items: {
         coros: 'QR code: export to your phone',
-        nearbyFromMap: 'Ride search right from the map',
-        routeKeptOnNearby: 'Route stays on route maps during a Ride scan',
-        rideSupply: 'Ride mode: clearer next supply (distance/ETA/open)',
+        mobileUx: 'Mobile: larger controls, clearer sheets, only one section open',
         cemeteries: 'Cemeteries as drinking-water sources',
         wahoo: 'Wahoo: send route straight to the cloud',
       },
@@ -124,7 +122,7 @@ export default {
         'Control points are your own markers on the map — e.g. CP (mandatory stops) or Sleep (sleep spots). You place them via the ⚑ button next to the map; the point stays where you tap (even off the line), and the km value comes from the nearest route point. They appear together with favorites in GPX, FIT (Garmin course points) and the cheat sheet.',
       q19: 'Mobile & app?',
       a19:
-        'Usable in the mobile browser. As a PWA on the home screen: Android browser menu → Install; iPhone Share → Show More → Add to Home Screen — launches without browser chrome, still ultraplaner.com. Location (Ride / ride mode): on iPhone tap left in the Safari address bar → Website Settings → Location → Allow (device Location Services alone are not enough). Offline: route/POIs from cache, basemap needs network.',
+        'Usable in the mobile browser — bottom nav, larger buttons, one accordion at a time. As a PWA on the home screen: Android browser menu → Install; iPhone Share → Show More → Add to Home Screen — launches without browser chrome, still ultraplaner.com. Location (Ride / ride mode): on iPhone tap left in the Safari address bar → Website Settings → Location → Allow (device Location Services alone are not enough). Offline: route/POIs from cache, basemap needs network.',
       q10: 'Privacy & location',
       a10: 'Location only for Ride and ride mode. No tracking cookies. Settings and offline cache stay local. Map tiles may see your IP technically — see privacy policy.',
       q11: 'Feedback & roadmap?',
@@ -136,7 +134,7 @@ export default {
       q20: 'How does “Connect Wahoo” work?',
       a20: 'No UltraPlaner account needed. You sign in to Wahoo once; the link stays in this browser/device only (tokens stored locally). Then use “Send to Wahoo”. “Disconnect Wahoo” clears tokens here — on another phone or after clearing cache, just connect again. The route appears in the Wahoo app and on the ELEMNT (not the legacy ELEMNT app).',
       q14: 'Save & share?',
-      a14: '“Recently opened” = reopen route quickly (local). “Take route offline” = map + POIs without internet along the route. Share link ~180 days online.',
+      a14: '“Recently opened” = reopen GPX and planned routes quickly (local) — Ride maps are not saved. “Take route offline” = map + POIs without internet along the route. Share link ~180 days online.',
       q15: 'What do the red zones on the elevation profile mean?',
       a15: 'Red markings show supply gaps: stretches of at least about 25 km without a POI under your current categories/filters. That helps you spot where to plan extra or mark favorites.',
       q16: 'What is “Ride”?',
@@ -259,7 +257,7 @@ export default {
   },
   recent: {
     title: 'Recently opened',
-    hint: 'Route & POIs to reopen quickly (this browser only). Offline: list/cheat sheet — the map needs “Take route offline”.',
+    hint: 'GPX and planned routes to reopen quickly (this browser only). Ride maps are not listed. Offline: list/cheat sheet — the map needs “Take route offline”.',
     open: 'Open',
     remove: 'Remove',
     removeTitle: 'Remove "{name}" from device',

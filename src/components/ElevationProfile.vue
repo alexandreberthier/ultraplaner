@@ -1167,7 +1167,7 @@ onUnmounted(() => {
   }
 
   .plot-area {
-    height: clamp(120px, 18vh, 150px);
+    height: clamp(180px, 28vh, 260px);
     padding-inline: 0.35rem;
   }
 

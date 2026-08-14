@@ -856,6 +856,7 @@ export const useMapStore = defineStore('map', () => {
   }
 
   async function persistMapInBackground() {
+    if (isNearbyMap.value) return
     if (!isSupabaseConfigured()) {
       persistWarning.value = tGlobal('store.saveFailedUser')
       return
@@ -1033,7 +1034,7 @@ export const useMapStore = defineStore('map', () => {
   }
 
   async function persistFavoritesUpdate() {
-    if (!savedMapId.value) return
+    if (!savedMapId.value || isNearbyMap.value) return
     const meta = favoriteMetaRecord()
     const record = {
       id: savedMapId.value,

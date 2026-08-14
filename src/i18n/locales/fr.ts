@@ -71,9 +71,7 @@
       kind: { new: 'Nouveau', fix: 'Fix', bug: 'Bug' },
       items: {
         coros: 'Code QR : export sur le téléphone',
-        nearbyFromMap: 'Trajet directement depuis la carte',
-        routeKeptOnNearby: 'La route reste visible lors d’un scan Trajet sur les cartes de route',
-        rideSupply: 'Mode route : prochain ravitaillement plus clair (distance/ETA/ouvert)',
+        mobileUx: 'Mobile : commandes plus grandes, feuilles plus claires, une seule section ouverte',
         cemeteries: 'Cimetières comme sources d’eau potable',
         wahoo: 'Wahoo : envoyer la route vers le cloud',
       },
@@ -123,7 +121,7 @@
         'Les points de contrôle sont vos propres marqueurs sur la carte — p. ex. CP (arrêts obligatoires) ou Sleep (lieux de sommeil). Vous les placez via le bouton ⚑ à côté de la carte ; le point reste où vous touchez (même hors de la ligne), et le km vient du point de route le plus proche. Ils figurent avec les favoris dans GPX, FIT (Garmin course points) et l’aide-mémoire.',
       q19: 'Mobile & app ?',
       a19:
-        "Utilisable dans le navigateur mobile. En PWA sur l'écran d'accueil : Android menu navigateur → Installer ; iPhone Partager → Afficher plus → Sur l'écran d'accueil — démarre sans barre du navigateur, toujours ultraplaner.com. Position (Trajet / mode route) : sur iPhone toucher à gauche dans la barre d’adresse Safari → Réglages du site → Position → Autoriser (les services de localisation système ne suffisent pas). Hors ligne : route/POIs du cache, fond de carte nécessite le réseau.",
+        "Utilisable dans le navigateur mobile — barre du bas, boutons plus grands, une section à la fois. En PWA sur l'écran d'accueil : Android menu navigateur → Installer ; iPhone Partager → Afficher plus → Sur l'écran d'accueil — démarre sans barre du navigateur, toujours ultraplaner.com. Position (Trajet / mode route) : sur iPhone toucher à gauche dans la barre d’adresse Safari → Réglages du site → Position → Autoriser (les services de localisation système ne suffisent pas). Hors ligne : route/POIs du cache, fond de carte nécessite le réseau.",
       q10: 'Confidentialité et position',
       a10: "Position pour « Trajet » et mode route. Pas de cookies de suivi. Réglages et cache hors ligne locaux. Voir politique de confidentialité.",
       q11: 'Feedback & roadmap ?',
@@ -135,7 +133,7 @@
       q20: 'Comment fonctionne « Connecter Wahoo » ?',
       a20: 'Pas de compte UltraPlaner. Vous vous connectez une fois à Wahoo ; le lien reste sur ce navigateur/appareil uniquement (jetons locaux). Puis « Envoyer à Wahoo ». « Déconnecter Wahoo » efface les jetons ici — sur un autre téléphone ou après vidage du cache, reconnectez-vous. La route apparaît dans l’app Wahoo et sur l’ELEMNT (pas l’ancienne app ELEMNT).',
       q14: 'Enregistrer & partager ?',
-      a14: '« Récents » = rouvrir la route (local). « Emporter la route offline » = carte + POIs sans internet le long du tracé. Lien ~180 jours en ligne.',
+      a14: '« Récents » = rouvrir les routes GPX et planifiées (local) — les cartes Trajet ne sont pas enregistrées. « Emporter la route offline » = carte + POIs sans internet le long du tracé. Lien ~180 jours en ligne.',
       q15: 'Que signifient les zones rouges du profil ?',
       a15: 'Ce sont des lacunes de ravitaillement : tronçons d’au moins ~25 km sans POI avec vos catégories/filtres actuels. Utile pour anticiper ou marquer des favoris.',
       q16: 'Qu’est-ce que « Trajet » ?',
@@ -258,7 +256,7 @@
   },
   recent: {
     title: 'Récents',
-    hint: 'Route et POIs pour rouvrir vite (ce navigateur seulement). Hors ligne : liste/mémo — la carte demande « Emporter la route offline ».',
+    hint: 'Routes GPX et planifiées pour rouvrir vite (ce navigateur seulement). Trajet n’apparaît pas ici. Hors ligne : liste/mémo — la carte demande « Emporter la route offline ».',
     open: 'Ouvrir',
     remove: 'Supprimer',
     removeTitle: 'Retirer «{name}» de l\'appareil',
