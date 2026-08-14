@@ -48,11 +48,6 @@ import {
   defaultStartTimeHHmm,
   etaAtKm,
 } from '../utils/eta'
-import {
-  DEFAULT_ETA_HOURS_BUFFER_MIN,
-  openStatusAtEta,
-  type OpenStatus,
-} from '../utils/openingHours'
 import { tGlobal } from '../i18n'
 
 export type AppMode = 'landing' | 'loading' | 'map'
@@ -63,6 +58,24 @@ const ETA_START_KEY = 'onroute-start-time'
 const ETA_FILTER_OPEN_KEY = 'onroute-filter-open-eta'
 const ETA_BUFFER_KEY = 'onroute-eta-buffer-min'
 const ETA_BUFFER_OPTIONS = [0, 15, 30] as const
+/** Keep in sync with `utils/openingHours` — not imported so landing skips that package. */
+const DEFAULT_ETA_HOURS_BUFFER_MIN = 15
+type OpenStatus = 'open' | 'closed' | 'unknown'
+
+type OpeningHoursApi = typeof import('../utils/openingHours')
+let openingHoursApi: OpeningHoursApi | null = null
+let openingHoursLoading: Promise<OpeningHoursApi> | null = null
+
+function loadOpeningHoursApi(): Promise<OpeningHoursApi> {
+  if (openingHoursApi) return Promise.resolve(openingHoursApi)
+  if (!openingHoursLoading) {
+    openingHoursLoading = import('../utils/openingHours').then((mod) => {
+      openingHoursApi = mod
+      return mod
+    })
+  }
+  return openingHoursLoading
+}
 
 function loadSpeed(): number {
   try {
@@ -156,6 +169,7 @@ export const useMapStore = defineStore('map', () => {
   const gpsFocusTick = ref(0)
   /** Bumped after POI set mutations so MapCanvas refreshes GeoJSON without map remount. */
   const poisEpoch = ref(0)
+  const openingHoursReady = ref(false)
 
   let loadTimer: ReturnType<typeof setInterval> | null = null
 
@@ -174,15 +188,25 @@ export const useMapStore = defineStore('map', () => {
   )
 
   function poiOpenStatusAtEta(poi: Poi, forFilter = false): OpenStatus {
+    void openingHoursReady.value
+    if (!openingHoursApi) {
+      if (!openingHoursLoading) {
+        void loadOpeningHoursApi().then(() => {
+          openingHoursReady.value = true
+          poisEpoch.value++
+        })
+      }
+      return 'unknown'
+    }
     // Nearby maps have no route ETA — evaluate "open now" instead of fake distance-based ETA.
     if (isNearbyMap.value) {
-      return openStatusAtEta(poi, new Date(), { bufferMinutes: 0 })
+      return openingHoursApi.openStatusAtEta(poi, new Date(), { bufferMinutes: 0 })
     }
     const eta = etaAtRouteKm(poi.distanceAlongRouteKm ?? 0)
     if (!eta.arrival) return 'unknown'
     const buffer =
       forFilter && hideClosedAtEta.value ? etaHoursBufferMinutes.value : 0
-    return openStatusAtEta(poi, eta.arrival, { bufferMinutes: buffer })
+    return openingHoursApi.openStatusAtEta(poi, eta.arrival, { bufferMinutes: buffer })
   }
 
   function isPoiVisibleAtEta(poi: Poi): boolean {

@@ -20,7 +20,6 @@ import {
 
 /** MapLibre only when user opens „Route planen“ — keeps landing light. */
 const RoutePlanner = defineAsyncComponent(() => import('../components/RoutePlanner.vue'))
-/** Ride form is not the default tab — keep it off the landing critical path. */
 const NearbyForm = defineAsyncComponent(() => import('../components/NearbyForm.vue'))
 
 const { t, locale } = useI18n()

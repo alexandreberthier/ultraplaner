@@ -77,6 +77,12 @@ function toggleCategory(id: PoiCategory) {
 }
 
 function geoErrorMessage(code: number): string {
+  if (code === 1) {
+    if (isAppleMobile()) {
+      return t(isStandalonePwa() ? 'nearby.geoDeniedApp' : 'nearby.geoDenied')
+    }
+    return t('nearby.geoDenied')
+  }
   return t(nearbyGeoErrorI18nKey(code))
 }
 

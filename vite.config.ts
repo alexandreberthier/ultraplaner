@@ -120,5 +120,17 @@ export default defineConfig(({ mode }) => {
         '@': resolve(__dirname, 'src'),
       },
     },
+    build: {
+      rolldownOptions: {
+        output: {
+          codeSplitting: {
+            groups: [
+              { name: 'opening-hours', test: /node_modules[\\/]opening_hours/ },
+              { name: 'maplibre', test: /node_modules[\\/]maplibre-gl/ },
+            ],
+          },
+        },
+      },
+    },
   }
 })

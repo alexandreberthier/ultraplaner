@@ -1,5 +1,3 @@
-import { isAppleMobile, isStandalonePwa } from './geoDevice'
-
 export const NEARBY_GEO_OPTIONS: PositionOptions = {
   enableHighAccuracy: true,
   maximumAge: 30_000,
@@ -13,12 +11,7 @@ export function nearbyGeoBlockedReason(): 'insecure' | 'unsupported' | null {
 }
 
 export function nearbyGeoErrorI18nKey(code: number): string {
-  if (code === 1) {
-    if (isAppleMobile()) {
-      return isStandalonePwa() ? 'nearby.geoDeniedApp' : 'nearby.geoDenied'
-    }
-    return 'nearby.geoDenied'
-  }
+  if (code === 1) return 'nearby.geoDenied'
   if (code === 2) return 'nearby.geoUnavailable'
   if (code === 3) return 'nearby.geoTimeout'
   return 'nearby.geoFailed'
