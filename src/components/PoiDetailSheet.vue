@@ -12,7 +12,6 @@ import {
 } from '../services/googlePlaces'
 import {
   hasOsmOpeningHours,
-  isShopLikeWithoutHours,
   nextChangeLabel,
   prettifyOpeningHours,
   type OpenStatus,
@@ -102,37 +101,31 @@ const etaOpenStatus = computed((): OpenStatus => {
   return store.poiOpenStatusAtEta(poi)
 })
 
+const alwaysAvailable = computed(() =>
+  store.selectedPoi ? isAlwaysAvailableWater(store.selectedPoi) : false
+)
+
+/** Only show hours when they add a real signal — skip OSM “no data” noise. */
+const showHoursBox = computed(() => alwaysAvailable.value || hasOsm.value)
+
 const etaOpenLabel = computed(() => {
   const poi = store.selectedPoi
-  if (!poi) return t('detail.hoursMissing')
-  if (isAlwaysAvailableWater(poi)) return t('detail.hoursAlways')
-  if (!hasOsm.value) {
-    if (isShopLikeWithoutHours(poi)) return t('detail.hoursShopUnknown')
-    return t('detail.hoursMissing')
-  }
+  if (!poi) return ''
+  if (alwaysAvailable.value) return t('detail.hoursAlways')
+  if (!hasOsm.value) return ''
   if (store.isNearbyMap) {
     if (etaOpenStatus.value === 'open') return t('detail.openNow')
     if (etaOpenStatus.value === 'closed') return t('detail.closedNow')
-    return t('detail.hoursAtEtaUnknown')
+    return ''
   }
   if (!selectedEta.value?.arrival) return t('detail.hoursNoEta')
   if (etaOpenStatus.value === 'open') return t('detail.hoursAtEtaOpen')
   if (etaOpenStatus.value === 'closed') return t('detail.hoursAtEtaClosed')
-  return t('detail.hoursAtEtaUnknown')
-})
-
-const showHoursUnknownHint = computed(() => {
-  const poi = store.selectedPoi
-  if (!poi || isAlwaysAvailableWater(poi)) return false
-  if (!hasOsm.value) return true
-  return etaOpenStatus.value === 'unknown'
+  return ''
 })
 
 const hoursStatusClass = computed(() => {
-  const poi = store.selectedPoi
-  if (!poi) return 'unknown'
-  if (isAlwaysAvailableWater(poi)) return 'open'
-  // No OSM data → unknown (never style as closed)
+  if (alwaysAvailable.value) return 'open'
   if (!hasOsm.value) return 'unknown'
   return etaOpenStatus.value
 })
@@ -215,6 +208,27 @@ function onNavigate() {
         </button>
       </header>
 
+      <div class="actions" :class="{ 'nearby-nav': store.isNearbyMap }">
+        <button
+          type="button"
+          class="fav-btn"
+          :class="{ active: isFavorite }"
+          @click="onToggleFavorite"
+        >
+          <span class="fav-star" aria-hidden="true">{{ isFavorite ? '★' : '☆' }}</span>
+          {{ isFavorite ? t('detail.removeFavorite') : t('detail.addFavorite') }}
+        </button>
+        <a
+          class="nav-btn"
+          :href="googleNavHref"
+          target="_blank"
+          rel="noopener noreferrer"
+          @click="onNavigate"
+        >
+          {{ t('detail.navigate') }}
+        </a>
+      </div>
+
       <div class="sheet-scroll">
       <dl>
         <dt>{{ t('detail.category') }}</dt>
@@ -285,44 +299,21 @@ function onNavigate() {
         </template>
       </div>
 
-      <div class="hours-box osm-hours" :class="`status-${hoursStatusClass}`">
-        <p class="open-now">
-          <span class="hours-source">{{ t('detail.hoursOsm') }}</span>
-          {{ etaOpenLabel }}
-        </p>
+      <div v-if="showHoursBox" class="hours-box osm-hours" :class="`status-${hoursStatusClass}`">
+        <p v-if="etaOpenLabel" class="open-now">{{ etaOpenLabel }}</p>
         <p v-if="osmNextChange && hasOsm && etaOpenStatus !== 'unknown'" class="hours-next">{{ osmNextChange }}</p>
         <p v-if="osmPretty" class="hours-raw">{{ osmPretty }}</p>
-        <p v-if="showHoursUnknownHint" class="hours-hint">{{ t('detail.hoursUnknownHint') }}</p>
       </div>
 
-      <div class="actions" :class="{ 'nearby-nav': store.isNearbyMap }">
-        <a
-          class="nav-btn nav-btn-primary"
-          :href="googleNavHref"
-          target="_blank"
-          rel="noopener noreferrer"
-          @click="onNavigate"
-        >
-          {{ t('detail.navigate') }}
-        </a>
-        <button
-          type="button"
-          class="fav-btn"
-          :class="{ active: isFavorite }"
-          @click="onToggleFavorite"
-        >
-          {{ isFavorite ? t('detail.removeFavorite') : t('detail.addFavorite') }}
-        </button>
-        <button
-          v-if="isGooglePlacesConfigured() && !hasOsm"
-          type="button"
-          class="hours-btn"
-          :disabled="hoursLoading"
-          @click="loadOpeningHours"
-        >
-          {{ hoursLoading ? t('detail.hoursLoading') : t('detail.hoursLoad') }}
-        </button>
-      </div>
+      <button
+        v-if="isGooglePlacesConfigured() && !hasOsm && !alwaysAvailable"
+        type="button"
+        class="hours-btn"
+        :disabled="hoursLoading"
+        @click="loadOpeningHours"
+      >
+        {{ hoursLoading ? t('detail.hoursLoading') : t('detail.hoursLoad') }}
+      </button>
 
       <p v-if="hoursError" class="hours-error">{{ hoursError }}</p>
       <div v-if="hoursResult" class="hours-box">
@@ -344,22 +335,25 @@ function onNavigate() {
   position: fixed;
   inset: 0;
   z-index: 500;
-  background: rgba(0, 0, 0, 0.35);
+  background: rgba(0, 0, 0, 0.4);
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: center;
+  padding: max(0.75rem, env(safe-area-inset-top, 0px)) 0.75rem
+    max(0.75rem, env(safe-area-inset-bottom, 0px));
 }
 
 .sheet {
   background: var(--surface);
   width: 100%;
   max-width: 480px;
-  max-height: min(92dvh, 92vh);
+  max-height: min(88dvh, 88vh);
   display: flex;
   flex-direction: column;
-  border-radius: 16px 16px 0 0;
+  border-radius: 16px;
   position: relative;
   overflow: hidden;
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.28);
 }
 
 .sheet-top {
@@ -377,7 +371,7 @@ function onNavigate() {
   flex: 1;
   min-width: 0;
   margin: 0;
-  font-size: 1.05rem;
+  font-size: 1.15rem;
   line-height: 1.3;
   padding-right: 0.25rem;
 }
@@ -401,7 +395,8 @@ function onNavigate() {
   min-height: 0;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  padding: 0.75rem 1.25rem calc(1.25rem + env(safe-area-inset-bottom, 0px));
+  padding: 0.75rem 1.25rem 1.25rem;
+  font-size: 1.02rem;
 }
 
 .fav-edit {
@@ -422,12 +417,12 @@ function onNavigate() {
 }
 
 .fav-view-label {
-  font-size: 0.75rem;
+  font-size: 0.82rem;
   color: var(--text-muted);
 }
 
 .fav-view-value {
-  font-size: 0.9rem;
+  font-size: 1rem;
   color: var(--text);
   line-height: 1.35;
   white-space: pre-wrap;
@@ -449,7 +444,7 @@ function onNavigate() {
   background: var(--surface);
   cursor: pointer;
   font: inherit;
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   font-weight: 600;
   color: var(--text);
 }
@@ -480,14 +475,14 @@ function onNavigate() {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
-  font-size: 0.75rem;
+  font-size: 0.82rem;
   color: var(--text-muted);
 }
 
 .fav-field input,
 .fav-field textarea {
   font: inherit;
-  font-size: 0.9rem;
+  font-size: 1rem;
   color: var(--text);
   padding: 0.45rem 0.55rem;
   border: 1px solid var(--border);
@@ -501,13 +496,14 @@ dl {
 }
 
 dt {
-  font-size: 0.75rem;
+  font-size: 0.82rem;
   color: var(--text-muted);
   margin-top: 0.5rem;
 }
 
 dd {
   margin: 0.15rem 0 0;
+  font-size: 1.05rem;
 }
 
 .eta-sub {
@@ -517,9 +513,13 @@ dd {
 }
 
 .actions {
+  flex-shrink: 0;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.55rem;
+  padding: 0.85rem 1.25rem 0.75rem;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
 }
 
 .actions.nearby-nav {
@@ -530,67 +530,61 @@ dd {
 .hours-btn,
 .nav-btn {
   width: 100%;
-  padding: 0.65rem;
-  min-height: 44px;
+  padding: 0.75rem 0.85rem;
+  min-height: 48px;
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: 10px;
   background: var(--surface-2);
   cursor: pointer;
   text-align: center;
   text-decoration: none;
   color: inherit;
   font: inherit;
+  font-size: 1.02rem;
+  font-weight: 600;
 }
 
-.nav-btn-primary {
-  order: -1;
-  padding: 0.85rem 1rem;
-  min-height: 48px;
-  border-color: var(--primary);
-  background: var(--primary);
-  color: #fff;
-  font-weight: 700;
-  font-size: 1.05rem;
-  box-shadow: 0 4px 14px color-mix(in srgb, var(--primary) 35%, transparent);
-}
-
-.actions.nearby-nav .nav-btn-primary {
-  padding: 1rem 1.1rem;
+.fav-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
   min-height: 52px;
-  font-size: 1.1rem;
+  border-color: #f59e0b;
+  background: #f59e0b;
+  color: #fff;
+  font-size: 1.08rem;
+  font-weight: 800;
+  box-shadow: 0 4px 14px rgba(245, 158, 11, 0.38);
+}
+
+.fav-star {
+  font-size: 1.35em;
+  line-height: 1;
 }
 
 .fav-btn.active {
   background: #fffbeb;
   border-color: #f59e0b;
   color: #b45309;
+  box-shadow: none;
+}
+
+.nav-btn {
+  padding: 0.7rem 0.85rem;
+  min-height: 46px;
+  border-color: var(--primary);
+  background: var(--surface);
+  color: var(--primary);
+  font-weight: 700;
+}
+
+.hours-btn {
+  margin-top: 0.25rem;
+  min-height: 44px;
+  font-size: 0.92rem;
   font-weight: 600;
-}
-
-.fav-hint {
-  padding: 0.75rem;
-  background: #eff6ff;
-  border: 1px solid #93c5fd;
-  border-radius: 8px;
-}
-
-.fav-hint p {
-  margin: 0 0 0.5rem;
-  font-size: 0.82rem;
-  color: #1e40af;
-  line-height: 1.35;
-}
-
-.print-btn {
-  width: 100%;
-  padding: 0.55rem;
-  border: 1px solid #93c5fd;
-  border-radius: 8px;
-  background: #fff;
-  color: #1d4ed8;
-  font-weight: 600;
-  font-size: 0.85rem;
-  cursor: pointer;
+  color: var(--text-muted);
 }
 
 .hours-btn:disabled {
@@ -601,7 +595,7 @@ dd {
 .hours-error {
   margin: 0.75rem 0 0;
   color: #b42318;
-  font-size: 0.85rem;
+  font-size: 0.9rem;
 }
 
 .hours-box {
@@ -609,7 +603,7 @@ dd {
   padding: 0.75rem;
   background: var(--surface-2);
   border-radius: 8px;
-  font-size: 0.85rem;
+  font-size: 0.95rem;
   border: 1px solid var(--border);
 }
 
@@ -640,24 +634,10 @@ dd {
   font-weight: 600;
 }
 
-.hours-source {
-  display: inline-block;
-  margin-right: 0.35rem;
-  padding: 0.1rem 0.35rem;
-  border-radius: 4px;
-  background: rgba(0, 0, 0, 0.06);
-  font-size: 0.68rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  vertical-align: middle;
-}
-
 .hours-next,
-.hours-raw,
-.hours-hint {
+.hours-raw {
   margin: 0.35rem 0 0;
-  font-size: 0.8rem;
+  font-size: 0.88rem;
   color: var(--text-muted);
   line-height: 1.35;
   white-space: pre-wrap;
@@ -665,17 +645,35 @@ dd {
 
 .hours-muted {
   margin: 0.75rem 0 0;
-  font-size: 0.8rem;
+  font-size: 0.88rem;
   color: var(--text-muted);
 }
 
 @media (max-width: 768px) {
-  .print-hint-desktop {
-    display: none;
+  .sheet-top h3 {
+    font-size: 1.22rem;
   }
 
-  .fav-hint:has(.print-hint-desktop) p {
-    margin-bottom: 0;
+  .sheet-scroll {
+    font-size: 1.08rem;
+  }
+
+  dt {
+    font-size: 0.9rem;
+  }
+
+  dd {
+    font-size: 1.12rem;
+  }
+
+  .fav-btn {
+    min-height: 54px;
+    font-size: 1.12rem;
+  }
+
+  .nav-btn {
+    min-height: 48px;
+    font-size: 1.05rem;
   }
 }
 </style>

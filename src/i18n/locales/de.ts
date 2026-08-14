@@ -644,7 +644,7 @@ export default {
     hoursAtEtaUnknown: 'Zur ETA keine Angabe (unbekannt)',
     hoursNoEta: 'Startzeit setzen für „offen zur ETA“',
     hoursMissing: 'Keine Angabe — keine Öffnungszeiten in OSM',
-    hoursAlways: 'Immer verfügbar (Trinkbrunnen/Quelle/Friedhof)',
+    hoursAlways: 'Immer verfügbar',
     hoursShopUnknown:
       'Keine Angabe (ohne OSM-Zeiten) — Laden/Service nachts eher unsicher',
     hoursUnknownHint:
@@ -660,8 +660,8 @@ export default {
     routeKm: 'Routen-km',
     etaFromStart: '({duration} ab Start)',
     etaFromStartShort: '{duration} ab Start',
-    addFavorite: '☆ Als Favorit markieren',
-    removeFavorite: '★ Favorit entfernen',
+    addFavorite: 'Als Favorit markieren',
+    removeFavorite: 'Favorit entfernen',
     favCustomName: 'Eigener Name (Spickzettel)',
     favNote: 'Notiz',
     favNoteHint: 'z. B. links abbiegen, 24h, barrierefrei…',
