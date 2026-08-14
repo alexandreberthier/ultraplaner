@@ -41,7 +41,7 @@ function kindEmoji(kind: ControlPointKind) {
       <span class="toggle-summary">
         {{ count > 0 ? t('controls.summary', { count }) : t('controls.emptyShort') }}
       </span>
-      <span class="chevron" aria-hidden="true">{{ open ? '▾' : '▸' }}</span>
+      <span class="chevron" aria-hidden="true">{{ open ? '▴' : '▾' }}</span>
     </button>
 
     <div v-show="open" class="section-body">
@@ -139,9 +139,12 @@ function kindEmoji(kind: ControlPointKind) {
 }
 
 .chevron {
-  color: var(--muted, #6b7280);
-  font-size: 0.75rem;
+  color: var(--text, #111);
+  font-size: 1.15rem;
+  font-weight: 800;
   flex-shrink: 0;
+  width: 1.5rem;
+  text-align: center;
 }
 
 .section-body {

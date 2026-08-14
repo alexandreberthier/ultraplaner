@@ -42,7 +42,7 @@ defineExpose({ setOpen })
     >
       <span class="toggle-title">{{ t('nearby.panelTitle') }}</span>
       <span class="toggle-summary">{{ summary }}</span>
-      <span class="chevron" aria-hidden="true">{{ open ? '▾' : '▸' }}</span>
+      <span class="chevron" aria-hidden="true">{{ open ? '▴' : '▾' }}</span>
     </button>
 
     <div v-show="open" class="section-body">
@@ -61,7 +61,8 @@ defineExpose({ setOpen })
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.65rem 0.85rem;
+  padding: 0.85rem 1rem;
+  min-height: 52px;
   border: none;
   background: transparent;
   cursor: pointer;
@@ -90,9 +91,12 @@ defineExpose({ setOpen })
 }
 
 .chevron {
-  color: var(--muted, #6b7280);
-  font-size: 0.75rem;
+  color: var(--text, #111);
+  font-size: 1.15rem;
+  font-weight: 800;
   flex-shrink: 0;
+  width: 1.5rem;
+  text-align: center;
 }
 
 .section-body {

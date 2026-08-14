@@ -120,7 +120,7 @@ watch(
     >
       <span class="toggle-title">{{ t('weather.title') }}</span>
       <span class="toggle-summary" :class="{ 'has-rain': maxRain >= 35 }">{{ summary }}</span>
-      <span class="chevron" aria-hidden="true">{{ open ? '▾' : '▸' }}</span>
+      <span class="chevron" aria-hidden="true">{{ open ? '▴' : '▾' }}</span>
     </button>
 
     <div v-show="open" class="section-body">
@@ -201,9 +201,12 @@ watch(
 }
 
 .chevron {
-  color: var(--text-muted);
-  font-size: 0.75rem;
+  color: var(--text);
+  font-size: 1.15rem;
+  font-weight: 800;
   flex-shrink: 0;
+  width: 1.5rem;
+  text-align: center;
 }
 
 .section-body {

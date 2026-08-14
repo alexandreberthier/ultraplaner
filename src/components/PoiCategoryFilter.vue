@@ -59,7 +59,7 @@ function toggleCat(id: PoiCategory) {
     >
       <span class="toggle-title">{{ t('categories.title') }}</span>
       <span class="toggle-summary">{{ summary }}</span>
-      <span class="chevron" aria-hidden="true">{{ open ? '▾' : '▸' }}</span>
+      <span class="chevron" aria-hidden="true">{{ open ? '▴' : '▾' }}</span>
     </button>
 
     <div v-show="open" class="section-body">
@@ -151,8 +151,9 @@ function toggleCat(id: PoiCategory) {
 }
 
 .chevron {
-  color: var(--text-muted);
-  font-size: 0.95rem;
+  color: var(--text);
+  font-size: 1.15rem;
+  font-weight: 800;
   flex-shrink: 0;
   width: 1.5rem;
   height: 1.5rem;

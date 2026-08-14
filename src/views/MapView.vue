@@ -22,6 +22,7 @@ import TopbarSettings from '../components/TopbarSettings.vue'
 import { localeHomePath, type AppLocale } from '../i18n'
 import { useRideMode } from '../composables/useRideMode'
 import { useRidePosition } from '../composables/useRidePosition'
+import { setActiveSidebarSection } from '../composables/useSidebarSection'
 import { useWakeLock } from '../composables/useWakeLock'
 import { useWahoo } from '../composables/useWahoo'
 import { formatKm, haversineM } from '../services/geo'
@@ -322,11 +323,14 @@ watch(
   }
 )
 
-/** Nearby maps: Fahrt-Optionen in Sidebar/Sheet auffindbar (Filter + Rescan). */
+/** Nearby maps: Fahrt-Optionen in der Desktop-Sidebar auffindbar. */
 watch(
   () => store.isNearbyMap && store.mapReady,
   (nearbyReady) => {
     if (!nearbyReady) return
+    if (typeof window !== 'undefined' && window.matchMedia('(max-width: 768px)').matches) {
+      return
+    }
     void nextTick(() => {
       nearbyPanelRef.value?.setOpen(true)
     })
@@ -583,6 +587,13 @@ function openMobilePanel(panel: 'pois' | 'export' | 'nearby') {
   mobilePanel.value = mobilePanel.value === panel ? 'none' : panel
   if (mobilePanel.value !== 'none') showExportMenu.value = false
   if (mobilePanel.value !== 'export') showPcFiles.value = false
+  if (mobilePanel.value === 'pois') {
+    setActiveSidebarSection('pois')
+    void nextTick(() => {
+      const scroller = document.querySelector('.mobile-sheet .sheet-scroll')
+      if (scroller instanceof HTMLElement) scroller.scrollTop = 0
+    })
+  }
   syncMapDragPan()
 }
 
@@ -1341,7 +1352,7 @@ function onDocClick(e: MouseEvent) {
     <div
       v-if="mobilePanel !== 'none'"
       class="mobile-sheet"
-      :class="{ 'nearby-open': mobilePanel === 'nearby' }"
+      :class="{ 'nearby-open': mobilePanel === 'nearby', 'pois-open': mobilePanel === 'pois' }"
       @click.self="closeMobilePanel"
       @touchmove.self.prevent
       @wheel.self.prevent
@@ -2796,16 +2807,17 @@ function onDocClick(e: MouseEvent) {
   }
 
   /* Fixed height while open — slider/value edits must not resize the sheet */
-  .mobile-sheet.nearby-open .mobile-sheet-inner {
-    height: min(82dvh, 640px);
-    max-height: min(82dvh, 640px);
+  .mobile-sheet.nearby-open .mobile-sheet-inner,
+  .mobile-sheet.pois-open .mobile-sheet-inner {
+    height: min(90dvh, 820px);
+    max-height: min(90dvh, 820px);
   }
 
   .sheet-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 1rem 1.15rem;
+    padding: 1.15rem 1.2rem 1rem;
     border-bottom: 1px solid var(--border);
     flex-shrink: 0;
   }
@@ -2844,8 +2856,27 @@ function onDocClick(e: MouseEvent) {
     scrollbar-gutter: stable;
   }
 
-  .sheet-scroll :deep([data-sidebar-section]) {
-    scroll-margin-top: 0.35rem;
+  .sheet-scroll :deep(.section-toggle) {
+    min-height: 60px;
+    padding: 1rem 1.15rem;
+    gap: 0.65rem;
+  }
+
+  .sheet-scroll :deep(.toggle-title) {
+    font-size: 0.88rem;
+  }
+
+  .sheet-scroll :deep(.toggle-summary) {
+    font-size: 1rem;
+  }
+
+  .sheet-scroll :deep(.chevron) {
+    font-size: 1.45rem;
+    font-weight: 800;
+    line-height: 1;
+    color: #111;
+    width: 1.75rem;
+    text-align: center;
   }
 
   .nearby-sheet {

@@ -40,6 +40,11 @@ function scrollSectionIntoView(id: string) {
   })
 }
 
+export function setActiveSidebarSection(id: string | null) {
+  activeSectionId.value = id
+  saveActive(id)
+}
+
 /**
  * Accordion for sidebar sections (Desktop + Mobile-Sheet).
  * Only one section open at a time — opening one closes the previous.

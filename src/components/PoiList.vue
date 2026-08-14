@@ -83,7 +83,7 @@ function hoursBadge(poi: Poi): { status: OpenStatus; label: string } | null {
     >
       <span class="toggle-title">{{ t('pois.title') }}</span>
       <span class="toggle-summary">{{ summary }}</span>
-      <span class="chevron" aria-hidden="true">{{ open ? '▾' : '▸' }}</span>
+      <span class="chevron" aria-hidden="true">{{ open ? '▴' : '▾' }}</span>
     </button>
 
     <div v-show="open" class="poi-body">
@@ -280,9 +280,12 @@ function hoursBadge(poi: Poi): { status: OpenStatus; label: string } | null {
 }
 
 .chevron {
-  color: var(--text-muted);
-  font-size: 0.75rem;
+  color: var(--text);
+  font-size: 1.15rem;
+  font-weight: 800;
   flex-shrink: 0;
+  width: 1.5rem;
+  text-align: center;
 }
 
 .poi-body {
@@ -519,8 +522,8 @@ li.favorite {
 
 @media (max-width: 768px) {
   .section-toggle {
-    padding: 0.85rem 1.1rem;
-    min-height: 52px;
+    padding: 1rem 1.15rem;
+    min-height: 60px;
   }
 
   .toggle-title {
@@ -529,6 +532,14 @@ li.favorite {
 
   .toggle-summary {
     font-size: 1rem;
+  }
+
+  .chevron {
+    font-size: 1.45rem;
+    font-weight: 800;
+    color: var(--text);
+    width: 1.75rem;
+    text-align: center;
   }
 
   .tabs button {
