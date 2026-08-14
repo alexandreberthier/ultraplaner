@@ -224,10 +224,17 @@ function hoursBadge(poi: Poi): { status: OpenStatus; label: string } | null {
 .poi-list.embedded.open {
   flex: none;
   min-height: auto;
+  max-height: min(42vh, 360px);
 }
 
 .poi-list.embedded .poi-body {
   overflow: visible;
+}
+
+.poi-list.embedded.open .poi-body {
+  overflow-y: auto;
+  max-height: min(34vh, 300px);
+  -webkit-overflow-scrolling: touch;
 }
 
 .poi-list.embedded ul {

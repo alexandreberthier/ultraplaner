@@ -588,7 +588,7 @@ function openMobilePanel(panel: 'pois' | 'export' | 'nearby') {
   if (mobilePanel.value !== 'none') showExportMenu.value = false
   if (mobilePanel.value !== 'export') showPcFiles.value = false
   if (mobilePanel.value === 'pois') {
-    setActiveSidebarSection('pois')
+    setActiveSidebarSection('categories')
     void nextTick(() => {
       const scroller = document.querySelector('.mobile-sheet .sheet-scroll')
       if (scroller instanceof HTMLElement) scroller.scrollTop = 0
@@ -688,10 +688,10 @@ function onDocClick(e: MouseEvent) {
         </div>
       </header>
       <div class="sidebar-body">
+        <PoiCategoryFilter />
         <PoiList />
         <EtaPlanner v-if="!store.isNearbyMap" />
-        <WeatherStrip />
-        <PoiCategoryFilter />
+        <WeatherStrip v-if="!store.isNearbyMap" />
         <NearbySearchPanel ref="nearbyPanelRef" @done="onNearbyDone" />
         <ControlPointsPanel />
         <OfflinePackPanel @updated="refreshPackMeta" />
@@ -1381,10 +1381,10 @@ function onDocClick(e: MouseEvent) {
           <NearbyForm in-map @done="onNearbyDone" />
         </div>
         <div v-else-if="mobilePanel === 'pois'" class="sheet-scroll">
+          <PoiCategoryFilter embedded />
           <PoiList embedded />
           <EtaPlanner v-if="!store.isNearbyMap" embedded />
-          <WeatherStrip embedded />
-          <PoiCategoryFilter embedded />
+          <WeatherStrip v-if="!store.isNearbyMap" embedded />
           <NearbySearchPanel embedded @done="onNearbyDone" />
           <ControlPointsPanel />
           <OfflinePackPanel @updated="refreshPackMeta" />
@@ -2806,10 +2806,15 @@ function onDocClick(e: MouseEvent) {
     overscroll-behavior: contain;
   }
 
-  /* Fixed height while open — slider/value edits must not resize the sheet */
-  .mobile-sheet.nearby-open .mobile-sheet-inner,
-  .mobile-sheet.pois-open .mobile-sheet-inner {
+  /* Nearby form: fixed height so slider edits don't resize the sheet */
+  .mobile-sheet.nearby-open .mobile-sheet-inner {
     height: min(90dvh, 820px);
+    max-height: min(90dvh, 820px);
+  }
+
+  /* POI sheet: content-sized so closed accordions stay compact and visible */
+  .mobile-sheet.pois-open .mobile-sheet-inner {
+    height: auto;
     max-height: min(90dvh, 820px);
   }
 
@@ -2839,9 +2844,10 @@ function onDocClick(e: MouseEvent) {
     min-height: 52px;
   }
 
-  .mobile-sheet-inner :deep(.poi-list) {
-    flex: 1;
-    min-height: 0;
+  .mobile-sheet-inner :deep(.poi-list),
+  .mobile-sheet-inner :deep(.poi-list.open) {
+    flex: 0 0 auto;
+    min-height: auto;
   }
 
   .sheet-scroll {
@@ -2885,16 +2891,53 @@ function onDocClick(e: MouseEvent) {
   }
 
   .sheet-scroll :deep(.poi-list.open) {
-    flex: none;
+    flex: 0 0 auto;
     min-height: 0;
+    max-height: min(42vh, 360px);
   }
 
-  .sheet-scroll :deep(.poi-list.open .poi-body),
+  .sheet-scroll :deep(.poi-list.open .poi-body) {
+    overflow-y: auto;
+    max-height: min(34vh, 300px);
+    min-height: 0;
+    flex: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
   .sheet-scroll :deep(.poi-list.open .poi-body ul) {
     overflow: visible;
     max-height: none;
     min-height: 0;
     flex: none;
+  }
+
+  .sheet-scroll :deep(.category-filter .hint) {
+    font-size: 0.92rem;
+    line-height: 1.4;
+  }
+
+  .sheet-scroll :deep(.category-filter .cat-btn) {
+    min-height: 52px;
+    padding: 0.75rem 0.8rem;
+    font-size: 1.02rem;
+    gap: 0.55rem;
+  }
+
+  .sheet-scroll :deep(.category-filter .icon) {
+    font-size: 1.25rem;
+  }
+
+  .sheet-scroll :deep(.category-filter .count) {
+    font-size: 0.88rem;
+  }
+
+  .sheet-scroll :deep(.category-filter .map-poi-toggle) {
+    min-height: 48px;
+    font-size: 0.95rem;
+  }
+
+  .sheet-scroll :deep(.category-filter .map-poi-status) {
+    font-size: 0.92rem;
   }
 }
 

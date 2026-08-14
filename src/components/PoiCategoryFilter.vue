@@ -186,9 +186,9 @@ function toggleCat(id: PoiCategory) {
 
 .hint {
   margin: 0 0 0.5rem;
-  font-size: 0.72rem;
+  font-size: 0.8rem;
   color: var(--text-muted);
-  line-height: 1.3;
+  line-height: 1.35;
 }
 
 .map-poi-bar {
@@ -201,7 +201,7 @@ function toggleCat(id: PoiCategory) {
 
 .map-poi-status {
   margin: 0;
-  font-size: 0.78rem;
+  font-size: 0.88rem;
   font-weight: 700;
   color: var(--text);
   line-height: 1.35;
@@ -210,10 +210,10 @@ function toggleCat(id: PoiCategory) {
 .map-poi-toggle {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: 0.45rem;
   margin: 0.4rem 0 0;
   min-height: 44px;
-  font-size: 0.76rem;
+  font-size: 0.88rem;
   font-weight: 600;
   cursor: pointer;
   line-height: 1.35;
@@ -245,15 +245,15 @@ ul {
 .cat-btn {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: 0.5rem;
   width: 100%;
-  padding: 0.55rem 0.6rem;
-  min-height: 44px;
+  padding: 0.65rem 0.7rem;
+  min-height: 48px;
   border: 1px solid var(--border);
   border-radius: 8px;
   background: var(--surface);
   cursor: pointer;
-  font-size: 0.82rem;
+  font-size: 0.95rem;
   text-align: left;
   transition: opacity 0.15s, background 0.15s;
 }
@@ -268,15 +268,15 @@ ul {
 }
 
 .swatch {
-  width: 11px;
-  height: 11px;
+  width: 12px;
+  height: 12px;
   border-radius: 50%;
   flex-shrink: 0;
 }
 
 .icon {
   flex-shrink: 0;
-  font-size: 1.05rem;
+  font-size: 1.15rem;
   line-height: 1;
 }
 
@@ -289,9 +289,9 @@ ul {
 }
 
 .count {
-  font-size: 0.7rem;
+  font-size: 0.82rem;
   color: var(--text-muted);
-  min-width: 1.2rem;
+  min-width: 1.4rem;
   text-align: right;
 }
 
