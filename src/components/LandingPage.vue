@@ -234,12 +234,15 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
                 />
               </picture>
             </button>
-            <TopbarSettings />
+            <TopbarSettings brutal />
           </div>
 
           <div class="page-wrap hero-wrap">
             <div class="hero-center">
-              <h1 class="hero-title">{{ t('landing.hero') }}</h1>
+              <h1 class="hero-title">
+                <span class="hero-title-lead">{{ t('landing.heroLine1') }}</span>
+                <span class="hero-title-route">{{ t('landing.heroLine2') }}</span>
+              </h1>
               <p class="hero-sub">{{ t('landing.heroSub') }}</p>
               <div class="cta-row">
                 <button type="button" class="cta-primary" @click="scrollToApp">
@@ -484,7 +487,7 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
 .hero-band {
   position: relative;
   isolation: isolate;
-  min-height: min(56vh, 620px);
+  min-height: min(48vh, 520px);
   display: flex;
   align-items: stretch;
   border-bottom: 3px solid #111;
@@ -540,8 +543,8 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
   display: flex;
   flex-direction: column;
   width: 100%;
-  min-height: min(56vh, 620px);
-  padding: 0 0 5.25rem;
+  min-height: min(48vh, 520px);
+  padding: 0 0 4.25rem;
 }
 
 .hero-top {
@@ -553,9 +556,9 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
   gap: 0.5rem;
   width: 100%;
   box-sizing: border-box;
-  padding: max(0.7rem, env(safe-area-inset-top, 0px))
+  padding: max(0.45rem, env(safe-area-inset-top, 0px))
     max(0.75rem, env(safe-area-inset-right, 0px))
-    0.25rem
+    0.15rem
     max(0.75rem, env(safe-area-inset-left, 0px));
   min-width: 0;
 }
@@ -592,20 +595,34 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
   max-width: min(100%, 58rem);
   width: 100%;
   align-self: flex-start;
-  padding: 1.75rem 0 0;
+  padding: 0.85rem 0 0;
 }
 
 .hero-title {
-  font-family: var(--display);
-  font-size: clamp(1.7rem, 3.9vw, 2.95rem);
-  font-weight: 800;
+  font-family: Impact, 'Arial Black', 'Helvetica Neue', sans-serif;
+  font-size: clamp(2.4rem, 7.2vw, 5.4rem);
+  font-weight: 900;
   color: #fff;
-  margin: 0 0 0.7rem;
-  line-height: 1.05;
-  letter-spacing: -0.02em;
+  margin: 0 0 0.55rem;
+  line-height: 0.84;
+  letter-spacing: -0.045em;
   text-transform: uppercase;
   text-shadow: none;
-  white-space: nowrap;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.hero-title-lead {
+  font-size: 0.38em;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  margin-bottom: 0.12em;
+  opacity: 0.92;
+}
+
+.hero-title-route {
+  white-space: normal;
 }
 
 .hero-sub {
@@ -1321,7 +1338,6 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
 
 
 @media (max-width: 960px) {
-  .hero-title,
   .section-head h2,
   .features-section h2,
   .how-section h2,
@@ -1352,23 +1368,22 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
 @media (max-width: 640px) {
   .hero-band,
   .hero {
-    min-height: min(58vh, 520px);
+    min-height: min(46vh, 440px);
   }
 
   .hero {
-    padding-bottom: 4rem;
+    padding-bottom: 3.5rem;
   }
 
   .hero-center {
-    padding: 1.5rem 0 0;
+    padding: 0.6rem 0 0;
     text-align: left;
     align-items: flex-start;
     align-self: flex-start;
   }
 
   .hero-title {
-    font-size: clamp(1.7rem, 8.5vw, 2.4rem);
-    white-space: normal;
+    font-size: clamp(2.15rem, 12vw, 3.3rem);
   }
 
   .cta-row {

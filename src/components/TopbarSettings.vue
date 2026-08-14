@@ -10,8 +10,10 @@ withDefaults(
   defineProps<{
     /** Always use the compact menu (e.g. crowded plan topbar). */
     forceMenu?: boolean
+    /** Hard neo-brutalist chrome (landing hero). */
+    brutal?: boolean
   }>(),
-  { forceMenu: false }
+  { forceMenu: false, brutal: false }
 )
 
 const { t } = useI18n()
@@ -91,7 +93,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div ref="root" class="topbar-settings" :class="{ 'force-menu': forceMenu }">
+  <div ref="root" class="topbar-settings" :class="{ 'force-menu': forceMenu, brutal }">
     <div class="settings-inline" aria-hidden="false">
       <ColorModeToggle compact />
       <LanguagePicker compact />
@@ -114,6 +116,7 @@ onUnmounted(() => {
           v-if="open"
           ref="panel"
           class="menu-panel topbar-settings-menu-panel"
+          :class="{ 'brutal-panel': brutal }"
           role="dialog"
           :aria-label="t('landing.settingsMenu')"
           :style="panelStyle"
@@ -219,6 +222,74 @@ onUnmounted(() => {
 .force-menu .settings-menu {
   display: block;
 }
+
+.brutal .settings-inline {
+  gap: 0.7rem;
+}
+
+.brutal :deep(.color-toggle),
+.brutal :deep(.lang-picker) {
+  border: 3px solid #111;
+  border-radius: 0;
+  background: #fff;
+  color: #111;
+  box-shadow: 4px 4px 0 #111;
+}
+
+.brutal :deep(.color-toggle) {
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.brutal :deep(.color-toggle:hover) {
+  background: #fff;
+  border-color: #111;
+  color: #111;
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 #111;
+}
+
+.brutal :deep(.color-toggle.active) {
+  background: #111;
+  border-color: #111;
+  color: #fff;
+  box-shadow: 4px 4px 0 #111;
+}
+
+.brutal :deep(.lang-btn) {
+  border-radius: 0;
+  color: #111;
+  transition: background 0.08s ease, color 0.08s ease;
+}
+
+.brutal :deep(.lang-btn:hover:not(.active)) {
+  background: #f3efe6;
+  border-color: transparent;
+  color: #111;
+}
+
+.brutal :deep(.lang-btn.active) {
+  background: #111;
+  border-color: #111;
+  color: #fff;
+  box-shadow: none;
+}
+
+.brutal .menu-btn {
+  border: 3px solid #111;
+  border-radius: 0;
+  background: #fff;
+  color: #111;
+  box-shadow: 4px 4px 0 #111;
+}
+
+.brutal .menu-btn:hover,
+.brutal .menu-btn[aria-expanded='true'] {
+  border-color: #111;
+  background: #111;
+  color: #fff;
+}
 </style>
 
 <style>
@@ -287,5 +358,87 @@ onUnmounted(() => {
 .topbar-settings-menu-panel .pwa-install-btn:disabled {
   opacity: 0.7;
   cursor: wait;
+}
+
+.topbar-settings-menu-panel.brutal-panel {
+  border: 3px solid #111;
+  border-radius: 0;
+  background: #f3efe6;
+  box-shadow: 6px 6px 0 #111;
+}
+
+.topbar-settings-menu-panel.brutal-panel .menu-title {
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  color: #111;
+}
+
+.topbar-settings-menu-panel.brutal-panel .menu-label {
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #111;
+}
+
+.topbar-settings-menu-panel.brutal-panel .color-toggle,
+.topbar-settings-menu-panel.brutal-panel .lang-picker {
+  border: 3px solid #111;
+  border-radius: 0;
+  background: #fff;
+  color: #111;
+  box-shadow: 4px 4px 0 #111;
+}
+
+.topbar-settings-menu-panel.brutal-panel .color-toggle {
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.topbar-settings-menu-panel.brutal-panel .color-toggle:hover {
+  background: #fff;
+  border-color: #111;
+  color: #111;
+}
+
+.topbar-settings-menu-panel.brutal-panel .color-toggle.active {
+  background: #111;
+  border-color: #111;
+  color: #fff;
+  box-shadow: 4px 4px 0 #111;
+}
+
+.topbar-settings-menu-panel.brutal-panel .lang-btn {
+  border-radius: 0;
+  color: #111;
+}
+
+.topbar-settings-menu-panel.brutal-panel .lang-btn:hover:not(.active) {
+  background: #f3efe6;
+  border-color: transparent;
+  color: #111;
+}
+
+.topbar-settings-menu-panel.brutal-panel .lang-btn.active {
+  background: #111;
+  border-color: #111;
+  color: #fff;
+  box-shadow: none;
+}
+
+.topbar-settings-menu-panel.brutal-panel .pwa-install-btn {
+  border: 3px solid #111;
+  border-radius: 0;
+  background: var(--cta);
+  color: #111;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  box-shadow: 4px 4px 0 #111;
+}
+
+.topbar-settings-menu-panel.brutal-panel .pwa-install-btn:hover:not(:disabled) {
+  border-color: #111;
+  background: var(--cta);
 }
 </style>
