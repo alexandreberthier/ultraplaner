@@ -660,6 +660,7 @@ export default {
     etaFromStartShort: '{duration} desde salida',
     addFavorite: 'Marcar favorito',
     removeFavorite: 'Quitar favorito',
+    editPoi: 'Editar POI',
     favCustomName: 'Nombre propio (chuleta)',
     favNote: 'Nota',
     favNoteHint: 'p. ej. girar a la izquierda, 24h…',

@@ -662,6 +662,7 @@ export default {
     etaFromStartShort: '{duration} ab Start',
     addFavorite: 'Als Favorit markieren',
     removeFavorite: 'Favorit entfernen',
+    editPoi: 'POI bearbeiten',
     favCustomName: 'Eigener Name (Spickzettel)',
     favNote: 'Notiz',
     favNoteHint: 'z. B. links abbiegen, 24h, barrierefrei…',

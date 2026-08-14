@@ -15,6 +15,7 @@ const isFavorite = computed(() =>
 
 const customNameDraft = ref('')
 const noteDraft = ref('')
+const editOpen = ref(false)
 
 function loadFavoriteMetaDrafts(id: string) {
   const meta = store.favoriteMeta.get(id)
@@ -33,6 +34,7 @@ function persistFavMeta() {
 watch(
   () => store.selectedPoi?.id,
   (id) => {
+    editOpen.value = false
     if (!id || !store.selectedPoi) {
       customNameDraft.value = ''
       noteDraft.value = ''
@@ -49,9 +51,18 @@ function onToggleFavorite() {
   if (wasFav) {
     customNameDraft.value = ''
     noteDraft.value = ''
+    editOpen.value = false
     return
   }
   loadFavoriteMetaDrafts(store.selectedPoi.id)
+}
+
+function onToggleEdit() {
+  if (!editOpen.value && store.selectedPoi && !isFavorite.value) {
+    store.toggleFavorite(store.selectedPoi.id)
+    loadFavoriteMetaDrafts(store.selectedPoi.id)
+  }
+  editOpen.value = !editOpen.value
 }
 
 const selectedEta = computed(() => {
@@ -127,29 +138,40 @@ function onNavigate() {
           {{ isFavorite ? t('detail.removeFavorite') : t('detail.addFavorite') }}
         </button>
 
-        <div v-if="isFavorite" class="fav-fields">
-          <label class="fav-field">
-            <span>{{ t('detail.favCustomName') }}</span>
-            <input
-              v-model="customNameDraft"
-              type="text"
-              maxlength="40"
-              :placeholder="store.selectedPoi.name"
-              @change="persistFavMeta"
-              @blur="persistFavMeta"
-            />
-          </label>
-          <label class="fav-field">
-            <span>{{ t('detail.favNote') }}</span>
-            <textarea
-              v-model="noteDraft"
-              rows="2"
-              maxlength="80"
-              :placeholder="t('detail.favNoteHint')"
-              @change="persistFavMeta"
-              @blur="persistFavMeta"
-            />
-          </label>
+        <div class="fav-edit-wrap">
+          <button
+            type="button"
+            class="edit-toggle"
+            :aria-expanded="editOpen"
+            @click="onToggleEdit"
+          >
+            <span>{{ t('detail.editPoi') }}</span>
+            <span class="edit-chevron" aria-hidden="true">{{ editOpen ? '▾' : '▸' }}</span>
+          </button>
+          <div v-if="editOpen" class="fav-fields">
+            <label class="fav-field">
+              <span>{{ t('detail.favCustomName') }}</span>
+              <input
+                v-model="customNameDraft"
+                type="text"
+                maxlength="40"
+                :placeholder="store.selectedPoi.name"
+                @change="persistFavMeta"
+                @blur="persistFavMeta"
+              />
+            </label>
+            <label class="fav-field">
+              <span>{{ t('detail.favNote') }}</span>
+              <textarea
+                v-model="noteDraft"
+                rows="2"
+                maxlength="80"
+                :placeholder="t('detail.favNoteHint')"
+                @change="persistFavMeta"
+                @blur="persistFavMeta"
+              />
+            </label>
+          </div>
         </div>
 
         <a
@@ -366,10 +388,39 @@ dd {
 }
 
 .fav-btn.active {
-  background: #fffbeb;
-  border-color: #f59e0b;
-  color: #b45309;
-  box-shadow: none;
+  background: #dc2626;
+  border-color: #b91c1c;
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(220, 38, 38, 0.35);
+}
+
+.fav-edit-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.edit-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.7rem 0.85rem;
+  min-height: 46px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface-2);
+  cursor: pointer;
+  font: inherit;
+  font-size: 1.02rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.edit-chevron {
+  color: var(--text-muted);
+  font-size: 0.95em;
 }
 
 .nav-btn {
@@ -433,6 +484,12 @@ dd {
   .nav-btn {
     min-height: 56px;
     font-size: 1.18rem;
+    border-radius: 14px;
+  }
+
+  .edit-toggle {
+    min-height: 52px;
+    font-size: 1.12rem;
     border-radius: 14px;
   }
 

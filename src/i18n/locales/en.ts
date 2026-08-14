@@ -660,6 +660,7 @@ export default {
     etaFromStartShort: '{duration} from start',
     addFavorite: 'Mark as favorite',
     removeFavorite: 'Remove favorite',
+    editPoi: 'Edit POI',
     favCustomName: 'Custom name (cheat sheet)',
     favNote: 'Note',
     favNoteHint: 'e.g. turn left, 24h, accessible…',

@@ -659,6 +659,7 @@
     etaFromStartShort: '{duration} depuis le départ',
     addFavorite: 'Marquer favori',
     removeFavorite: 'Retirer favori',
+    editPoi: 'Modifier le POI',
     favCustomName: 'Nom perso (pense-bête)',
     favNote: 'Note',
     favNoteHint: 'ex. tourner à gauche, 24h…',
