@@ -805,44 +805,139 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
   box-shadow: 4px 4px 0 #111;
 }
 
-.landing :deep(.drop-zone) {
-  border: 3px dashed #111;
-  border-radius: 0;
-  background: #f3efe6;
+.landing :deep(.hero-card .field-label),
+.landing :deep(.hero-card legend) {
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-size: 0.78rem;
+  color: #111;
 }
 
-.landing :deep(.drop-zone.filled),
-.landing :deep(.drop-zone.over) {
-  border-style: solid;
-  background: #fff;
-}
-
-.landing :deep(.cat-chip) {
+.landing :deep(.hero-card .cat-chip) {
   border: 2px solid #111;
   border-radius: 0;
+  background: #fff;
+  color: #111;
+  font-weight: 700;
 }
 
-.landing :deep(.btn-primary),
+.landing :deep(.hero-card .cat-chip.active) {
+  background: var(--cta);
+  color: #111;
+  border-color: #111;
+}
+
+.landing :deep(.hero-card .btn-primary),
 .landing :deep(.feedback-submit) {
   border: 3px solid #111;
   border-radius: 0;
+  background: var(--cta);
+  color: #111;
   box-shadow: 4px 4px 0 #111;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
 
-.landing :deep(.recent-maps),
-.landing :deep(.recent-open),
-.landing :deep(.recent-remove) {
+.landing :deep(.hero-card .btn-primary:disabled) {
+  background: #e8e4dc;
+  color: #111;
+  box-shadow: none;
+  opacity: 1;
+}
+
+.landing :deep(.hero-card .radius-value) {
   border-radius: 0;
+  border: 2px solid #111;
+  background: #fff;
+  color: #111;
+  box-shadow: 3px 3px 0 #111;
+}
+
+.landing :deep(.hero-card .radius-slider)::-webkit-slider-runnable-track,
+.landing :deep(.hero-card .radius-row input[type='range'])::-webkit-slider-runnable-track {
+  border-radius: 0;
+  background: #d8d2c6;
+  border: 2px solid #111;
+}
+
+.landing :deep(.hero-card .radius-slider)::-moz-range-track,
+.landing :deep(.hero-card .radius-row input[type='range'])::-moz-range-track {
+  border-radius: 0;
+  background: #d8d2c6;
+  border: 2px solid #111;
+}
+
+.landing :deep(.hero-card .radius-slider)::-webkit-slider-thumb,
+.landing :deep(.hero-card .radius-row input[type='range'])::-webkit-slider-thumb {
+  border-radius: 0;
+  border: 3px solid #111;
+  background: var(--cta);
+  box-shadow: 3px 3px 0 #111;
+}
+
+.landing :deep(.hero-card .radius-slider)::-moz-range-thumb,
+.landing :deep(.hero-card .radius-row input[type='range'])::-moz-range-thumb {
+  border-radius: 0;
+  border: 3px solid #111;
+  background: var(--cta);
+  box-shadow: 3px 3px 0 #111;
+}
+
+.landing :deep(.hero-card .load-summary),
+.landing :deep(.hero-card .ios-geo-hint) {
+  border-radius: 0;
+  border: 2px solid #111;
+  background: #f3efe6;
+  color: #111;
 }
 
 .landing :deep(.recent-maps) {
   margin-top: 2.25rem;
   border: 3px solid #111;
+  border-radius: 0;
   background: #fff;
   box-shadow: 5px 5px 0 #111;
+}
+
+.landing :deep(.recent-head h2) {
+  font-size: 0.92rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #111;
+}
+
+.landing :deep(.recent-head p) {
+  color: #111;
+  opacity: 0.65;
+}
+
+.landing :deep(.recent-open),
+.landing :deep(.recent-remove) {
+  border: 2px solid #111;
+  border-radius: 0;
+}
+
+.landing :deep(.recent-open) {
+  background: #f3efe6;
+}
+
+.landing :deep(.recent-open:hover) {
+  background: #fff;
+  border-color: #111;
+}
+
+.landing :deep(.recent-meta) {
+  color: #111;
+  opacity: 0.62;
+}
+
+.landing :deep(.recent-remove:hover) {
+  background: #111;
+  color: #fff;
+  border-color: #111;
 }
 
 .landing :deep(.feedback) {

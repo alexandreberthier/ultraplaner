@@ -205,14 +205,18 @@ async function createMap() {
 .gpx-form {
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: 1.45rem;
 }
 
-.field-label {
+.field-label,
+.categories legend {
   display: block;
-  font-weight: 600;
-  margin-bottom: 0.5rem;
-  font-size: 0.9rem;
+  font-weight: 800;
+  margin-bottom: 0.55rem;
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #111;
 }
 
 .drop-zone {
@@ -222,35 +226,33 @@ async function createMap() {
   align-items: center;
   justify-content: center;
   gap: 0.2rem;
-  min-height: 11rem;
-  padding: 1.5rem 1.1rem;
-  background: var(--surface-2);
-  border: 2px dashed var(--border);
-  border-radius: 12px;
+  min-height: 10.5rem;
+  padding: 1.45rem 1.1rem;
+  background: #f3efe6;
+  border: 3px dashed #111;
+  border-radius: 0;
   cursor: pointer;
   text-align: center;
-  transition:
-    border-color 0.15s,
-    background 0.15s,
-    box-shadow 0.15s;
+  color: #111;
 }
 
-.drop-zone:hover,
+.drop-zone:hover {
+  background: #fff;
+}
+
 .drop-zone:focus-visible {
-  border-color: var(--primary);
-  outline: none;
+  outline: 3px solid #111;
+  outline-offset: 3px;
 }
 
 .drop-zone.over {
-  border-color: var(--primary);
-  background: #e8f5e9;
+  border-style: solid;
+  background: var(--cta);
 }
 
 .drop-zone.filled {
   border-style: solid;
-  border-color: var(--primary);
-  background: #ecfdf5;
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--primary) 25%, transparent);
+  background: #fff;
 }
 
 .file-input {
@@ -262,9 +264,9 @@ async function createMap() {
 }
 
 .drop-icon {
-  font-size: 1.75rem;
-  font-weight: 700;
-  color: var(--primary);
+  font-size: 1.7rem;
+  font-weight: 800;
+  color: #111;
   line-height: 1;
   margin-bottom: 0.35rem;
 }
@@ -272,52 +274,59 @@ async function createMap() {
 .drop-title {
   margin: 0;
   font-size: 1.05rem;
-  font-weight: 700;
-  color: var(--text);
+  font-weight: 800;
+  color: #111;
+  line-height: 1.3;
 }
 
 .drop-limit {
-  margin: 0.35rem 0 0;
-  color: var(--text-muted);
-  font-size: 0.8rem;
+  margin: 0.4rem 0 0;
+  color: #111;
+  opacity: 0.62;
+  font-size: 0.82rem;
+  font-weight: 650;
 }
 
 .drop-check {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 2.25rem;
-  height: 2.25rem;
-  margin-bottom: 0.35rem;
-  border-radius: 999px;
-  background: var(--primary);
-  color: #fff;
-  font-size: 1.15rem;
-  font-weight: 700;
+  width: 2.15rem;
+  height: 2.15rem;
+  margin-bottom: 0.4rem;
+  border-radius: 0;
+  border: 3px solid #111;
+  background: var(--cta);
+  color: #111;
+  font-size: 1.1rem;
+  font-weight: 800;
 }
 
 .drop-status {
   margin: 0;
-  font-size: 0.8rem;
-  font-weight: 700;
+  font-size: 0.72rem;
+  font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: var(--primary);
+  letter-spacing: 0.08em;
+  color: #111;
 }
 
 .drop-filename {
-  margin: 0.2rem 0 0;
+  margin: 0.25rem 0 0;
   max-width: 100%;
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: var(--text);
+  font-size: 1.08rem;
+  font-weight: 800;
+  color: #111;
   word-break: break-word;
+  line-height: 1.3;
 }
 
 .drop-meta {
-  margin: 0.15rem 0 0;
-  font-size: 0.85rem;
-  color: var(--text-muted);
+  margin: 0.2rem 0 0;
+  font-size: 0.82rem;
+  font-weight: 650;
+  color: #111;
+  opacity: 0.62;
 }
 
 .drop-actions {
@@ -325,106 +334,202 @@ async function createMap() {
   flex-wrap: wrap;
   align-items: center;
   justify-content: center;
-  gap: 0.65rem;
-  margin-top: 0.75rem;
+  gap: 0.55rem;
+  margin-top: 0.85rem;
 }
 
 .drop-change {
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--primary);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #111;
   text-decoration: underline;
-  text-underline-offset: 2px;
+  text-underline-offset: 3px;
 }
 
 .drop-clear {
-  border: none;
-  background: none;
-  padding: 0;
-  font-size: 0.85rem;
-  color: var(--text-muted);
+  border: 2px solid #111;
+  border-radius: 0;
+  background: #fff;
+  padding: 0.35rem 0.65rem;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #111;
   cursor: pointer;
-  text-decoration: underline;
-  text-underline-offset: 2px;
 }
 
 .drop-clear:hover {
-  color: #b91c1c;
+  background: #111;
+  color: #fff;
 }
 
 .radius-row {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 0.85rem;
 }
 
 .radius-row input[type='range'] {
   flex: 1;
+  accent-color: #111;
+}
+
+.radius-slider::-webkit-slider-runnable-track,
+.radius-row input[type='range']::-webkit-slider-runnable-track {
+  height: 8px;
+  border-radius: 0;
+  background: #d8d2c6;
+  border: 2px solid #111;
+  box-sizing: border-box;
+}
+
+.radius-slider::-moz-range-track,
+.radius-row input[type='range']::-moz-range-track {
+  height: 8px;
+  border-radius: 0;
+  background: #d8d2c6;
+  border: 2px solid #111;
+}
+
+.radius-slider::-webkit-slider-thumb,
+.radius-row input[type='range']::-webkit-slider-thumb {
+  width: 26px;
+  height: 26px;
+  margin-top: -11px;
+  border-radius: 0;
+  border: 3px solid #111;
+  background: var(--cta);
+  box-shadow: 3px 3px 0 #111;
+}
+
+.radius-slider::-moz-range-thumb,
+.radius-row input[type='range']::-moz-range-thumb {
+  width: 26px;
+  height: 26px;
+  border-radius: 0;
+  border: 3px solid #111;
+  background: var(--cta);
+  box-shadow: 3px 3px 0 #111;
+}
+
+.radius-value {
+  border-radius: 0;
+  border: 2px solid #111;
+  background: #fff;
+  color: #111;
+  box-shadow: 3px 3px 0 #111;
+  font-weight: 800;
 }
 
 .categories {
   border: none;
   padding: 0;
-}
-
-.categories legend {
-  font-weight: 600;
-  font-size: 0.9rem;
-  margin-bottom: 0.5rem;
+  margin: 0;
 }
 
 .category-grid {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
+  gap: 0.45rem;
 }
 
 .cat-chip {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  padding: 0.55rem 0.9rem;
+  padding: 0.5rem 0.8rem;
   min-height: 44px;
-  border-radius: 999px;
-  border: 1px solid var(--border);
-  background: var(--surface);
+  border-radius: 0;
+  border: 2px solid #111;
+  background: #fff;
+  color: #111;
   cursor: pointer;
-  font-size: 0.9rem;
+  font-size: 0.88rem;
+  font-weight: 700;
   -webkit-tap-highlight-color: transparent;
 }
 
+.cat-chip:hover {
+  background: #f3efe6;
+}
+
+.cat-chip:focus-visible {
+  outline: 3px solid #111;
+  outline-offset: 2px;
+}
+
 .cat-chip.active {
-  background: var(--primary);
-  color: #fff;
-  border-color: var(--primary);
+  background: var(--cta);
+  color: #111;
+  border-color: #111;
+  font-weight: 800;
 }
 
 @media (min-width: 769px) {
   .cat-chip {
-    padding: 0.4rem 0.75rem;
+    padding: 0.4rem 0.7rem;
     min-height: 0;
-    font-size: 0.85rem;
+    font-size: 0.84rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .radius-slider::-webkit-slider-thumb,
+  .radius-row input[type='range']::-webkit-slider-thumb {
+    width: 40px;
+    height: 40px;
+    margin-top: -18px;
+  }
+
+  .radius-slider::-moz-range-thumb,
+  .radius-row input[type='range']::-moz-range-thumb {
+    width: 40px;
+    height: 40px;
   }
 }
 
 .error {
-  color: var(--danger);
+  margin: 0;
+  padding: 0.55rem 0.7rem;
+  border: 2px solid #111;
+  background: #fff;
+  color: #9f1239;
   font-size: 0.9rem;
+  font-weight: 700;
 }
 
 .btn-primary {
-  padding: 0.85rem 1.5rem;
-  background: var(--primary);
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  font-weight: 600;
-  font-size: 1rem;
+  padding: 0.9rem 1.35rem;
+  background: var(--cta);
+  color: #111;
+  border: 3px solid #111;
+  border-radius: 0;
+  box-shadow: 4px 4px 0 #111;
+  font-weight: 800;
+  font-size: 0.92rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
   cursor: pointer;
 }
 
+.btn-primary:hover:not(:disabled) {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 #111;
+}
+
+.btn-primary:focus-visible {
+  outline: 3px solid #111;
+  outline-offset: 3px;
+}
+
 .btn-primary:disabled {
-  opacity: 0.6;
+  opacity: 1;
+  background: #e8e4dc;
+  color: #111;
+  box-shadow: none;
   cursor: not-allowed;
 }
 </style>
