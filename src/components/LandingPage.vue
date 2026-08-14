@@ -1,19 +1,31 @@
 <script setup lang="ts">
-import { defineAsyncComponent, nextTick, ref } from 'vue'
+import { defineAsyncComponent, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import GpxForm from '../components/GpxForm.vue'
-import NearbyForm from '../components/NearbyForm.vue'
 import RecentMaps from '../components/RecentMaps.vue'
 import TopbarSettings from '../components/TopbarSettings.vue'
 import FeedbackForm from '../components/FeedbackForm.vue'
 import { localeHomePath, poisAlongRoutePath, type AppLocale } from '../i18n'
 import { useRouter } from 'vue-router'
+import { useMapStore } from '../stores/mapStore'
+import {
+  NEARBY_DEFAULT_POI_CATEGORIES,
+  NEARBY_DEFAULT_POI_RADIUS_M,
+} from '../config/poiCategories'
+import {
+  nearbyGeoBlockedReason,
+  nearbyGeoErrorI18nKey,
+  NEARBY_GEO_OPTIONS,
+} from '../utils/nearbyGeo'
 
 /** MapLibre only when user opens „Route planen“ — keeps landing light. */
 const RoutePlanner = defineAsyncComponent(() => import('../components/RoutePlanner.vue'))
+/** Ride form is not the default tab — keep it off the landing critical path. */
+const NearbyForm = defineAsyncComponent(() => import('../components/NearbyForm.vue'))
 
 const { t, locale } = useI18n()
 const router = useRouter()
+const store = useMapStore()
 const tab = ref<'gpx' | 'plan' | 'nearby'>('gpx')
 const appRef = ref<HTMLElement | null>(null)
 const plannerRef = ref<{
@@ -21,19 +33,56 @@ const plannerRef = ref<{
   toggleExportMenu: () => void
   closeExportMenu: () => void
 } | null>(null)
-const nearbyFormRef = ref<{ openMapFirst: () => void } | null>(null)
 const plannerCanExport = ref(false)
+const nearbyPending = ref(false)
 
 function scrollToApp() {
   appRef.value?.scrollIntoView({ behavior: 'smooth' })
 }
 
-/** Umgebung: GPS → Karte sofort (Defaults), Form bleibt Fallback bei Geo-Fehler. */
+/** GPS in the click handler (iOS gesture). Form loads only if geo fails. */
 function startNearbyMapFirst() {
   tab.value = 'nearby'
-  void nextTick(() => {
-    nearbyFormRef.value?.openMapFirst()
-  })
+  nearbyPending.value = true
+  store.error = ''
+
+  const blocked = nearbyGeoBlockedReason()
+  if (blocked === 'insecure') {
+    store.error = t('nearby.geoInsecure')
+    nearbyPending.value = false
+    return
+  }
+  if (blocked === 'unsupported') {
+    store.error = t('nearby.geoUnsupported')
+    nearbyPending.value = false
+    return
+  }
+
+  navigator.geolocation.getCurrentPosition(
+    async (pos) => {
+      try {
+        store.prepareNearbyCenter(
+          pos.coords.latitude,
+          pos.coords.longitude,
+          NEARBY_DEFAULT_POI_RADIUS_M,
+          [...NEARBY_DEFAULT_POI_CATEGORIES]
+        )
+        await router.push('/map/view')
+        await store.refreshNearbyPois(
+          NEARBY_DEFAULT_POI_RADIUS_M,
+          [...NEARBY_DEFAULT_POI_CATEGORIES]
+        )
+      } catch (err) {
+        store.error = err instanceof Error ? err.message : t('store.unknownError')
+        nearbyPending.value = false
+      }
+    },
+    (err) => {
+      store.error = t(nearbyGeoErrorI18nKey(err.code))
+      nearbyPending.value = false
+    },
+    NEARBY_GEO_OPTIONS
+  )
 }
 
 function leavePlanMode() {
@@ -150,22 +199,17 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
         <div class="hero-media">
           <picture>
             <source
-              media="(max-width: 640px)"
-              type="image/webp"
-              srcset="/hero-mountains-480.webp 480w, /hero-mountains-800.webp 800w"
-              sizes="100vw"
-            />
-            <source
+              media="(min-width: 641px)"
               type="image/webp"
               srcset="/hero-mountains-800.webp 800w, /hero-mountains-1100.webp 1100w, /hero-mountains.webp 1536w"
               sizes="100vw"
             />
             <img
               class="hero-photo"
-              src="/hero-mountains-800.webp"
+              src="/hero-mountains-480.webp"
               :alt="t('seo.heroImageAlt')"
-              width="800"
-              height="533"
+              width="480"
+              height="320"
               fetchpriority="high"
             />
           </picture>
@@ -282,7 +326,10 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
             role="tabpanel"
             :aria-labelledby="tab === 'nearby' ? 'tab-nearby' : 'tab-gpx'"
           >
-            <NearbyForm v-show="tab === 'nearby'" ref="nearbyFormRef" />
+            <p v-if="tab === 'nearby' && nearbyPending" class="nearby-pending">
+              {{ t('nearby.searching') }}
+            </p>
+            <NearbyForm v-else-if="tab === 'nearby'" />
             <GpxForm v-if="tab === 'gpx'" />
           </section>
           <RecentMaps />
@@ -709,6 +756,14 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
 
 .hero-card[hidden] {
   display: none;
+}
+
+.nearby-pending {
+  margin: 0;
+  padding: 0.85rem 0.2rem;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  font-weight: 600;
 }
 
 /* ── Sections ── */

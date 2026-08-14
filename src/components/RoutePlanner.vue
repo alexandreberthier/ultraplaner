@@ -1890,7 +1890,7 @@ onUnmounted(() => {
 
         <p v-if="formError || store.error" class="error">{{ formError || store.error }}</p>
 
-        <button type="button" class="btn-primary btn-cta-gold btn-full" :disabled="!canCreate" @click="createMap">
+        <button type="button" class="btn-primary btn-cta btn-full" :disabled="!canCreate" @click="createMap">
           {{ createMapLabel }}
         </button>
       </template>
@@ -1903,7 +1903,7 @@ onUnmounted(() => {
         </p>
         <button
           type="button"
-          class="btn-primary btn-cta-gold btn-full"
+          class="btn-primary btn-cta btn-full"
           :disabled="!canCreate"
           @click="createMap"
         >
@@ -2708,17 +2708,15 @@ onUnmounted(() => {
   width: 100%;
 }
 
-.btn-cta-gold {
-  background: linear-gradient(180deg, #f8e08e 0%, #e0b429 48%, #c9940a 100%);
-  color: #1a1408;
+.btn-cta {
+  background: var(--cta);
+  color: var(--cta-text);
   font-weight: 800;
-  border: 1px solid #b8860b;
-  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.45) inset;
-  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.28);
+  border: 1px solid transparent;
 }
 
-.btn-cta-gold:hover:not(:disabled) {
-  filter: brightness(1.06);
+.btn-cta:hover:not(:disabled) {
+  background: var(--cta-hover);
 }
 
 .btn-primary:disabled {
@@ -2726,9 +2724,8 @@ onUnmounted(() => {
   cursor: wait;
 }
 
-.btn-cta-gold:disabled {
+.btn-cta:disabled {
   opacity: 0.7;
-  filter: grayscale(0.12);
 }
 
 @media (max-width: 899px) {

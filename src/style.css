@@ -14,6 +14,9 @@
   --text-muted: #5c6b63;
   --border: #d8e2dc;
   --danger: #bc4749;
+  --cta: #ea580c;
+  --cta-hover: #c2410c;
+  --cta-text: #fff;
 }
 
 :root[data-colorblind] {
@@ -23,6 +26,9 @@
   --surface-2: #eef3f8;
   --border: #c8d6e5;
   --danger: #d55e00;
+  --cta: #e69f00;
+  --cta-hover: #c68900;
+  --cta-text: #1a1408;
 }
 
 html,

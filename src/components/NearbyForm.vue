@@ -13,6 +13,7 @@ import {
 } from '../config/poiCategories'
 import { poiCategoryLabel } from '../utils/poiLabels'
 import { isAppleMobile, isStandalonePwa } from '../utils/geoDevice'
+import { nearbyGeoBlockedReason, nearbyGeoErrorI18nKey, NEARBY_GEO_OPTIONS } from '../utils/nearbyGeo'
 
 const props = defineProps<{
   /** Embedded in MapView — stay on map, no Landing navigation. */
@@ -76,15 +77,7 @@ function toggleCategory(id: PoiCategory) {
 }
 
 function geoErrorMessage(code: number): string {
-  if (code === 1) {
-    if (isAppleMobile()) {
-      return t(isStandalonePwa() ? 'nearby.geoDeniedApp' : 'nearby.geoDenied')
-    }
-    return t('nearby.geoDenied')
-  }
-  if (code === 2) return t('nearby.geoUnavailable')
-  if (code === 3) return t('nearby.geoTimeout')
-  return t('nearby.geoFailed')
+  return t(nearbyGeoErrorI18nKey(code))
 }
 
 function keepRouteOnScan(): boolean {
@@ -95,11 +88,12 @@ function ensureGeoReady(): boolean {
   formError.value = ''
   store.error = ''
 
-  if (typeof window !== 'undefined' && !window.isSecureContext) {
+  const blocked = nearbyGeoBlockedReason()
+  if (blocked === 'insecure') {
     formError.value = t('nearby.geoInsecure')
     return false
   }
-  if (!navigator.geolocation) {
+  if (blocked === 'unsupported') {
     formError.value = t('nearby.geoUnsupported')
     return false
   }
@@ -132,11 +126,7 @@ function openMapFirst() {
       creating.value = false
       formError.value = geoErrorMessage(err.code)
     },
-    {
-      enableHighAccuracy: true,
-      maximumAge: 30_000,
-      timeout: 20_000,
-    }
+    NEARBY_GEO_OPTIONS
   )
 }
 
@@ -186,11 +176,7 @@ function searchNearby() {
       creating.value = false
       formError.value = geoErrorMessage(err.code)
     },
-    {
-      enableHighAccuracy: true,
-      maximumAge: 30_000,
-      timeout: 20_000,
-    }
+    NEARBY_GEO_OPTIONS
   )
 }
 
