@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref, watch, computed, nextTick, watchEffect } from 'vue'
+import { onMounted, onUnmounted, ref, watch, computed, nextTick } from 'vue'
 import { useI18n } from 'vue-i18n'
 import maplibregl from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
@@ -26,7 +26,6 @@ import {
 } from '../config/mapStyle'
 import { useColorblindMode } from '../composables/useColorblindMode'
 import { useRidePosition } from '../composables/useRidePosition'
-import { useLocationUi } from '../composables/useLocationUi'
 import { useRouteColorMode } from '../composables/useRouteColorMode'
 import { distanceAlongRouteKm } from '../services/poiFilter'
 import { buildKmMarkers, buildGradeSegments, detectClimbs, hasElevationData } from '../utils/route'
@@ -58,7 +57,6 @@ const store = useMapStore()
 const { t } = useI18n()
 const { colorblindMode, toggleColorblindMode } = useColorblindMode()
 const { setRideKmAlong, setRideLatLng } = useRidePosition()
-const locUi = useLocationUi()
 
 const {
   effectiveMode: routeColorMode,
@@ -599,15 +597,6 @@ const locationBtnTitle = computed(() => {
   // Next tap: heading-up → north-up; north-up → stop
   if (headingUp.value) return t('mapCanvas.headingOff')
   return t('mapCanvas.locationOff')
-})
-
-watchEffect(() => {
-  locUi.pending.value = locationPending.value
-  locUi.active.value = locationActive.value
-  locUi.following.value =
-    locationActive.value && followActive.value && !userPanning.value && !locationPending.value
-  locUi.needsRecenter.value = needsRecenter.value
-  locUi.headingUp.value = headingUp.value
 })
 
 /** Heading-up desired but no GPS heading → map locked north + visible hint */
@@ -1914,8 +1903,6 @@ defineExpose({
   startLocation,
   stopLocation,
   setDragPanEnabled,
-  onLocationPointerDown,
-  onLocationButtonClick,
 })
 
 onMounted(() => {

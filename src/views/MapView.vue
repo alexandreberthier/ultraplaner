@@ -22,7 +22,6 @@ import TopbarSettings from '../components/TopbarSettings.vue'
 import { localeHomePath, type AppLocale } from '../i18n'
 import { useRideMode } from '../composables/useRideMode'
 import { useRidePosition } from '../composables/useRidePosition'
-import { useLocationUi } from '../composables/useLocationUi'
 import { useWakeLock } from '../composables/useWakeLock'
 import { useWahoo } from '../composables/useWahoo'
 import { formatKm, haversineM } from '../services/geo'
@@ -69,13 +68,6 @@ const showPcFiles = ref(false)
 const { isOnline } = useOnline()
 const { rideMode, setRideMode } = useRideMode()
 const { rideKmAlong, rideLatLng } = useRidePosition()
-const {
-  pending: locPending,
-  active: locActive,
-  following: locFollowing,
-  needsRecenter: locNeedsRecenter,
-  headingUp: locHeadingUp,
-} = useLocationUi()
 const wakeLock = useWakeLock()
 const {
   configured: wahooConfigured,
@@ -88,8 +80,6 @@ const {
 const mapCanvasRef = ref<{
   startLocation: (opts?: { follow?: boolean; heading?: boolean }) => void
   setDragPanEnabled: (enabled: boolean) => void
-  onLocationPointerDown: (e: PointerEvent) => void
-  onLocationButtonClick: (e?: Event) => void
 } | null>(null)
 
 const SUPPLY_CATEGORIES = new Set<PoiCategory>([
@@ -137,22 +127,6 @@ const nearbyFabLabel = computed(() =>
       ? t('nearby.mapFabRescan')
       : t('nearby.mapFab')
 )
-
-const navLocationTitle = computed(() => {
-  if (locPending.value) return t('mapCanvas.locating')
-  if (!locActive.value) return t('mapCanvas.followOn')
-  if (locNeedsRecenter.value) return t('mapCanvas.followResume')
-  if (locHeadingUp.value) return t('mapCanvas.headingOff')
-  return t('mapCanvas.locationOff')
-})
-
-function onNavLocationPointerDown(e: PointerEvent) {
-  mapCanvasRef.value?.onLocationPointerDown(e)
-}
-
-function onNavLocationClick(e: Event) {
-  mapCanvasRef.value?.onLocationButtonClick(e)
-}
 
 const cpKinds: { id: ControlPointKind; labelKey: string; category: 'checkpoint' | 'sleep' }[] = [
   { id: 'cp', labelKey: 'controls.kindCp', category: 'checkpoint' },
@@ -605,6 +579,7 @@ function syncMapDragPan() {
 }
 
 function openMobilePanel(panel: 'pois' | 'export' | 'nearby') {
+  cpMenuOpen.value = false
   mobilePanel.value = mobilePanel.value === panel ? 'none' : panel
   if (mobilePanel.value !== 'none') showExportMenu.value = false
   if (mobilePanel.value !== 'export') showPcFiles.value = false
@@ -1231,25 +1206,8 @@ function onDocClick(e: MouseEvent) {
       </div>
     </main>
 
-    <!-- Mobile bottom nav -->
+    <!-- Mobile bottom nav — same order in Fahrt + Planung -->
     <nav v-show="!rideMode" class="mobile-nav" :aria-label="t('map.mobileNav')">
-      <button
-        v-if="!store.isNearbyMap"
-        type="button"
-        class="nav-item nav-ride"
-        :title="t('map.rideOn')"
-        :aria-label="t('map.rideOn')"
-        @click="enterRideMode"
-      >
-        <span class="nav-glyph" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="6.5" cy="17.5" r="3.5" />
-            <circle cx="17.5" cy="17.5" r="3.5" />
-            <path d="M12 17.5V11l4-3 2 3.5" />
-            <path d="M6.5 17.5 10 8h4" />
-          </svg>
-        </span>
-      </button>
       <button
         type="button"
         class="nav-item nav-home"
@@ -1258,14 +1216,13 @@ function onDocClick(e: MouseEvent) {
         @click="goHome"
       >
         <span class="nav-glyph" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M4 11.5 12 4l8 7.5" />
-            <path d="M6.5 10.5V20h11v-9.5" />
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 11.2 12 4l8 7.2" />
+            <path d="M6.5 10.2V20h4.2v-6.2h2.6V20h4.2V10.2" />
           </svg>
         </span>
       </button>
       <button
-        v-if="store.isNearbyMap"
         type="button"
         class="nav-item nav-reload"
         :class="{ loading: nearbyRescanning || store.poisLoading }"
@@ -1275,14 +1232,13 @@ function onDocClick(e: MouseEvent) {
         @click="onNearbyFabClick"
       >
         <span class="nav-glyph" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M20 12a8 8 0 1 1-2.2-5.5" />
-            <path d="M20 4v6h-6" />
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12a9 9 0 1 1-2.6-6.3" />
+            <path d="M21 3.8V9h-5.2" />
           </svg>
         </span>
       </button>
       <button
-        v-if="store.isNearbyMap"
         type="button"
         class="nav-item nav-radius"
         :class="{ active: mobilePanel === 'nearby' }"
@@ -1291,35 +1247,45 @@ function onDocClick(e: MouseEvent) {
         @click="openNearbyPanel"
       >
         <span class="nav-glyph" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="3" />
-            <circle cx="12" cy="12" r="8" stroke-dasharray="3 3" />
-            <path d="M4 8h3M17 8h3M4 16h3M17 16h3" />
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 21v-7M4 8V3" />
+            <path d="M12 21v-9M12 6V3" />
+            <path d="M20 21v-5M20 10V3" />
+            <path d="M2 14h4M10 6h4M18 16h4" />
           </svg>
         </span>
       </button>
-      <button
-        v-if="store.isNearbyMap"
-        type="button"
-        class="nav-item nav-locate"
-        :class="{
-          pending: locPending,
-          following: locFollowing,
-          'needs-recenter': locNeedsRecenter,
-        }"
-        :title="navLocationTitle"
-        :aria-label="navLocationTitle"
-        @pointerdown="onNavLocationPointerDown"
-        @click.stop.prevent="onNavLocationClick"
-      >
-        <span class="nav-glyph" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none">
-            <circle cx="12" cy="12" r="4" fill="currentColor" />
-            <path d="M12 2v3M12 19v3M2 12h3M19 12h3" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-            <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6" />
-          </svg>
-        </span>
-      </button>
+      <div v-if="!store.isNearbyMap" class="nav-cp-wrap">
+        <button
+          type="button"
+          class="nav-item nav-cp"
+          :class="{ active: cpMenuOpen || !!store.controlPointPlaceKind }"
+          :title="t('controls.mapFab')"
+          :aria-label="t('controls.mapFab')"
+          :aria-expanded="cpMenuOpen || !!store.controlPointPlaceKind"
+          @click="toggleCpMenu"
+        >
+          <span class="nav-glyph" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M5 22V3.8s.9 1 3.6 1 4.6-1.8 7.3-1.8 3.6.9 3.6.9v11.4s-.9-.9-3.6-.9-4.6 1.8-7.3 1.8-3.6-.9-3.6-.9" />
+            </svg>
+          </span>
+        </button>
+        <div v-if="cpMenuOpen || store.controlPointPlaceKind" class="nav-cp-menu" role="menu">
+          <button
+            v-for="k in cpKinds"
+            :key="k.id"
+            type="button"
+            class="nav-cp-kind"
+            role="menuitem"
+            :class="{ active: store.controlPointPlaceKind === k.id }"
+            @click="startPlaceControlPoint(k.id)"
+          >
+            <span aria-hidden="true">{{ poiCategoryEmoji(k.category) }}</span>
+            {{ t(k.labelKey) }}
+          </button>
+        </div>
+      </div>
       <button
         type="button"
         class="nav-item nav-pois"
@@ -1329,11 +1295,28 @@ function onDocClick(e: MouseEvent) {
         @click="openMobilePanel('pois')"
       >
         <span class="nav-glyph" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 21s7-6.2 7-11.2A7 7 0 0 0 5 9.8C5 14.8 12 21 12 21z" />
-            <circle cx="12" cy="9.8" r="2.2" />
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-6.4 8-12.2A8 8 0 1 0 4 9.8C4 15.6 12 22 12 22z" />
+            <circle cx="12" cy="9.8" r="2.4" />
           </svg>
           <span v-if="store.displayPois.length" class="nav-badge">{{ store.displayPois.length }}</span>
+        </span>
+      </button>
+      <button
+        v-if="!store.isNearbyMap"
+        type="button"
+        class="nav-item nav-ride"
+        :title="t('map.rideOn')"
+        :aria-label="t('map.rideOn')"
+        @click="enterRideMode"
+      >
+        <span class="nav-glyph" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="5.5" cy="17.5" r="3.2" />
+            <circle cx="18.5" cy="17.5" r="3.2" />
+            <circle cx="15" cy="5.2" r="1.15" fill="currentColor" stroke="none" />
+            <path d="M12 17.5V14l-3-3 4-3 2 3h2" />
+          </svg>
         </span>
       </button>
       <button
@@ -1346,10 +1329,10 @@ function onDocClick(e: MouseEvent) {
         @click="openMobilePanel('export')"
       >
         <span class="nav-glyph" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 4v12" />
-            <path d="M7 11l5 5 5-5" />
-            <path d="M5 20h14" />
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 3v12" />
+            <path d="m7 11 5 5 5-5" />
+            <path d="M5 21h14" />
           </svg>
         </span>
       </button>
@@ -2343,26 +2326,12 @@ function onDocClick(e: MouseEvent) {
     display: none;
   }
 
-  .map-toolbar .toolbar-left .tool-btn:first-child {
+  .map-toolbar {
     display: none;
   }
 
   .tool-btn.nearby-enter {
     display: none;
-  }
-
-  .map-toolbar {
-    min-height: 60px;
-    padding: 0.55rem 0.75rem;
-  }
-
-  .tool-btn {
-    min-width: 52px;
-    min-height: 52px;
-    padding: 0.7rem 0.9rem;
-    font-size: 0.92rem;
-    border-radius: 12px;
-    -webkit-tap-highlight-color: transparent;
   }
 
   /* Export + Teilen nur über Bottom-Nav / Sheet */
@@ -2404,11 +2373,7 @@ function onDocClick(e: MouseEvent) {
     padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px));
   }
 
-  .map-layout.nearby-map :deep(.location-btn) {
-    display: none;
-  }
-
-  .map-layout.nearby-map :deep(.map-left-stack .map-cp-tools) {
+  .map-layout :deep(.map-left-stack .map-cp-tools) {
     display: none;
   }
 
@@ -2672,12 +2637,27 @@ function onDocClick(e: MouseEvent) {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 0.35rem 0.1rem;
+    padding: 0.3rem 0.05rem;
     border: none;
     background: none;
     cursor: pointer;
-    min-height: 68px;
+    min-height: 62px;
+    color: #64748b;
     -webkit-tap-highlight-color: transparent;
+  }
+
+  .nav-cp-wrap {
+    flex: 1;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 62px;
+  }
+
+  .nav-cp-wrap .nav-item {
+    flex: none;
+    width: 100%;
   }
 
   .nav-glyph {
@@ -2685,43 +2665,36 @@ function onDocClick(e: MouseEvent) {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 52px;
-    height: 52px;
-    border-radius: 16px;
-    color: #fff;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.18);
+    width: 44px;
+    height: 44px;
+    border-radius: 13px;
+    background: #fff;
+    border: 2px solid currentColor;
+    color: inherit;
+    box-shadow: none;
   }
 
   .nav-glyph svg {
-    width: 1.7rem;
-    height: 1.7rem;
+    width: 1.45rem;
+    height: 1.45rem;
+    shape-rendering: geometricPrecision;
   }
 
-  .nav-home .nav-glyph { background: #475569; }
-  .nav-reload .nav-glyph { background: #0f766e; }
-  .nav-radius .nav-glyph { background: #d97706; }
-  .nav-locate .nav-glyph { background: #2563eb; }
-  .nav-pois .nav-glyph { background: #e11d48; }
-  .nav-ride .nav-glyph { background: var(--primary, #2d6a4f); }
-  .nav-export .nav-glyph { background: #1d4ed8; }
+  .nav-home { color: #475569; }
+  .nav-reload { color: #0f766e; }
+  .nav-radius { color: #c2410c; }
+  .nav-cp { color: #7c3aed; }
+  .nav-pois { color: #e11d48; }
+  .nav-ride { color: var(--primary, #2d6a4f); }
+  .nav-export { color: #2563eb; }
 
-  .nav-item.active .nav-glyph {
-    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.95), 0 2px 10px rgba(0, 0, 0, 0.22);
-    filter: brightness(1.08);
+  .nav-item.active .nav-glyph,
+  .nav-cp.active .nav-glyph {
+    background: color-mix(in srgb, currentColor 14%, #fff);
   }
 
-  .nav-locate.following .nav-glyph {
-    box-shadow: 0 0 0 3px #93c5fd, 0 2px 10px rgba(37, 99, 235, 0.35);
-  }
-
-  .nav-locate.needs-recenter .nav-glyph {
-    background: #1d4ed8;
-    box-shadow: 0 0 0 3px #1e40af, 0 4px 14px rgba(29, 78, 216, 0.45);
-  }
-
-  .nav-locate.pending .nav-glyph,
   .nav-reload.loading .nav-glyph {
-    opacity: 0.75;
+    opacity: 0.65;
   }
 
   .nav-reload.loading .nav-glyph svg {
@@ -2734,22 +2707,54 @@ function onDocClick(e: MouseEvent) {
 
   .nav-badge {
     position: absolute;
-    top: -0.2rem;
-    right: -0.25rem;
-    min-width: 1.35rem;
-    padding: 0.08rem 0.28rem;
+    top: -0.28rem;
+    right: -0.32rem;
+    min-width: 1.2rem;
+    padding: 0.06rem 0.24rem;
     border-radius: 999px;
-    background: #fff;
-    color: #9f1239;
-    font-size: 0.62rem;
+    background: currentColor;
+    color: #fff;
+    font-size: 0.58rem;
     font-weight: 800;
     line-height: 1.2;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
   }
 
-  .nav-export {
-    color: inherit;
-    font-weight: inherit;
+  .nav-cp-menu {
+    position: absolute;
+    bottom: calc(100% + 0.4rem);
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 120;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    min-width: 9.5rem;
+    padding: 0.35rem;
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+  }
+
+  .nav-cp-kind {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    border: none;
+    border-radius: 8px;
+    padding: 0.55rem 0.7rem;
+    background: transparent;
+    color: #111;
+    font: inherit;
+    font-size: 0.9rem;
+    font-weight: 650;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .nav-cp-kind.active,
+  .nav-cp-kind:hover {
+    background: #f5f3ff;
+    color: #6d28d9;
   }
 
   .nav-export.active {
