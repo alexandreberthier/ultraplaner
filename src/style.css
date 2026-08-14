@@ -83,3 +83,14 @@ a {
 .maplibregl-canvas-container {
   touch-action: none;
 }
+
+html.map-overlay-open,
+html.map-overlay-open body {
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+html.map-overlay-open .maplibregl-canvas,
+html.map-overlay-open .maplibregl-canvas-container {
+  pointer-events: none !important;
+}

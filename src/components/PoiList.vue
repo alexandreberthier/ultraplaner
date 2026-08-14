@@ -222,8 +222,19 @@ function hoursBadge(poi: Poi): { status: OpenStatus; label: string } | null {
 }
 
 .poi-list.embedded.open {
-  flex: 1 1 auto;
-  min-height: min(48vh, 380px);
+  flex: none;
+  min-height: auto;
+}
+
+.poi-list.embedded .poi-body {
+  overflow: visible;
+}
+
+.poi-list.embedded ul {
+  overflow: visible;
+  max-height: none;
+  min-height: 0;
+  flex: none;
 }
 
 .section-toggle {
@@ -504,5 +515,56 @@ li.favorite {
   margin: 0.5rem 0 0;
   padding-left: 1.2rem;
   line-height: 1.5;
+}
+
+@media (max-width: 768px) {
+  .section-toggle {
+    padding: 0.85rem 1.1rem;
+    min-height: 52px;
+  }
+
+  .toggle-title {
+    font-size: 0.88rem;
+  }
+
+  .toggle-summary {
+    font-size: 1rem;
+  }
+
+  .tabs button {
+    min-height: 48px;
+    padding: 0.55rem 0.65rem;
+    font-size: 1rem;
+    border-radius: 10px;
+  }
+
+  .poi-search input {
+    min-height: 52px;
+    font-size: 1.1rem;
+    padding: 0.7rem 2.4rem 0.7rem 2.3rem;
+  }
+
+  li {
+    padding: 0.95rem 1.1rem;
+    min-height: 64px;
+  }
+
+  .km {
+    font-size: 1rem;
+  }
+
+  .name {
+    font-size: 1.18rem;
+  }
+
+  .note,
+  .meta {
+    font-size: 1rem;
+    margin-top: 0.2rem;
+  }
+
+  .empty {
+    font-size: 1.05rem;
+  }
 }
 </style>

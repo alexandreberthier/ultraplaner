@@ -1143,6 +1143,7 @@ function afterMapReady() {
   addLayers()
   bindPoiSizeMedia()
   applyPoiMarkerSizes()
+  applyMapInteraction()
   scheduleMapResize()
   fitBounds()
   seedNearbyLocationMarker()
@@ -1880,10 +1881,30 @@ function setupMapDragBehavior() {
   map.on('pitchstart', pauseFollowFromUserGesture)
 }
 
-function setDragPanEnabled(enabled: boolean) {
+let mapInteractionWanted = true
+
+function applyMapInteraction() {
   if (!map) return
-  if (enabled) map.dragPan.enable()
-  else map.dragPan.disable()
+  const handlers = [
+    map.dragPan,
+    map.scrollZoom,
+    map.boxZoom,
+    map.dragRotate,
+    map.keyboard,
+    map.doubleClickZoom,
+    map.touchZoomRotate,
+    map.touchPitch,
+  ]
+  for (const handler of handlers) {
+    if (!handler) continue
+    if (mapInteractionWanted) handler.enable()
+    else handler.disable()
+  }
+}
+
+function setDragPanEnabled(enabled: boolean) {
+  mapInteractionWanted = enabled
+  applyMapInteraction()
 }
 
 defineExpose({

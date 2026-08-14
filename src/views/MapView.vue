@@ -462,6 +462,7 @@ function dismissExportTip(permanent = true) {
 
 onUnmounted(() => {
   document.removeEventListener('click', onDocClick)
+  document.documentElement.classList.remove('map-overlay-open')
   wakeLock.unbind()
 })
 
@@ -538,7 +539,9 @@ function toggleSidebar() {
 }
 
 function syncMapDragPan() {
-  mapCanvasRef.value?.setDragPanEnabled(mobilePanel.value === 'none')
+  const overlayOpen = mobilePanel.value !== 'none' || Boolean(store.selectedPoi)
+  document.documentElement.classList.toggle('map-overlay-open', overlayOpen)
+  mapCanvasRef.value?.setDragPanEnabled(!overlayOpen)
 }
 
 function openMobilePanel(panel: 'pois' | 'export' | 'nearby') {
@@ -557,6 +560,13 @@ function closeMobilePanel() {
 watch(mobilePanel, () => {
   syncMapDragPan()
 })
+
+watch(
+  () => store.selectedPoi,
+  () => {
+    syncMapDragPan()
+  }
+)
 
 watch(mapCanvasRef, (canvas) => {
   if (canvas) syncMapDragPan()
@@ -1204,11 +1214,14 @@ function onDocClick(e: MouseEvent) {
       class="mobile-sheet"
       :class="{ 'nearby-open': mobilePanel === 'nearby' }"
       @click.self="closeMobilePanel"
+      @touchmove.self.prevent
+      @wheel.self.prevent
     >
       <div
         class="mobile-sheet-inner"
         @touchmove.stop
         @pointerdown.stop
+        @wheel.stop
       >
         <header class="sheet-header">
           <h2>
@@ -2510,7 +2523,7 @@ function onDocClick(e: MouseEvent) {
     background: var(--surface);
     width: 100%;
     max-width: 520px;
-    max-height: min(78dvh, 580px);
+    max-height: min(88dvh, 760px);
     border-radius: 16px;
     overflow: hidden;
     display: flex;
@@ -2530,26 +2543,26 @@ function onDocClick(e: MouseEvent) {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0.85rem 1.1rem;
+    padding: 1rem 1.15rem;
     border-bottom: 1px solid var(--border);
     flex-shrink: 0;
   }
 
   .sheet-header h2 {
     margin: 0;
-    font-size: 1.05rem;
+    font-size: 1.28rem;
   }
 
   .sheet-close {
     border: none;
     background: none;
-    font-size: 1.5rem;
+    font-size: 2rem;
     line-height: 1;
     color: var(--text-muted);
     cursor: pointer;
     padding: 0.25rem 0.4rem;
-    min-width: 44px;
-    min-height: 44px;
+    min-width: 52px;
+    min-height: 52px;
   }
 
   .mobile-sheet-inner :deep(.poi-list) {
@@ -2579,15 +2592,16 @@ function onDocClick(e: MouseEvent) {
   }
 
   .sheet-scroll :deep(.poi-list.open) {
-    flex: 1 1 auto;
-    min-height: min(48vh, 380px);
+    flex: none;
+    min-height: 0;
   }
 
+  .sheet-scroll :deep(.poi-list.open .poi-body),
   .sheet-scroll :deep(.poi-list.open .poi-body ul) {
-    flex: 1 1 auto;
-    min-height: min(38vh, 300px);
-    max-height: min(56vh, 480px);
-    overflow-y: auto;
+    overflow: visible;
+    max-height: none;
+    min-height: 0;
+    flex: none;
   }
 }
 
