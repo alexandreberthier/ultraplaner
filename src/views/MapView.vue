@@ -2626,10 +2626,10 @@ function onDocClick(e: MouseEvent) {
     left: 0;
     right: 0;
     z-index: 100;
-    background: var(--surface);
-    border-top: 1px solid var(--border);
-    padding: 0.2rem 0.15rem calc(0.2rem + env(safe-area-inset-bottom, 0px));
-    box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.08);
+    background: #fff;
+    border-top: 2px solid #94a3b8;
+    padding: 0.4rem 0.2rem calc(0.4rem + env(safe-area-inset-bottom, 0px));
+    box-shadow: 0 -8px 28px rgba(15, 23, 42, 0.16);
   }
 
   .nav-item {
@@ -2641,8 +2641,8 @@ function onDocClick(e: MouseEvent) {
     border: none;
     background: none;
     cursor: pointer;
-    min-height: 62px;
-    color: #64748b;
+    min-height: 64px;
+    overflow: visible;
     -webkit-tap-highlight-color: transparent;
   }
 
@@ -2652,7 +2652,7 @@ function onDocClick(e: MouseEvent) {
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height: 62px;
+    min-height: 64px;
   }
 
   .nav-cp-wrap .nav-item {
@@ -2665,28 +2665,31 @@ function onDocClick(e: MouseEvent) {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 44px;
-    height: 44px;
-    border-radius: 13px;
+    overflow: visible;
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
     background: #fff;
-    border: 2px solid currentColor;
+    border: 2.5px solid currentColor;
     color: inherit;
     box-shadow: none;
   }
 
   .nav-glyph svg {
-    width: 1.45rem;
-    height: 1.45rem;
+    width: 1.55rem;
+    height: 1.55rem;
+    stroke-width: 2.4;
+    overflow: visible;
     shape-rendering: geometricPrecision;
   }
 
-  .nav-home { color: #475569; }
+  .nav-home { color: #0f172a; }
   .nav-reload { color: #0f766e; }
-  .nav-radius { color: #c2410c; }
-  .nav-cp { color: #7c3aed; }
-  .nav-pois { color: #e11d48; }
-  .nav-ride { color: var(--primary, #2d6a4f); }
-  .nav-export { color: #2563eb; }
+  .nav-radius { color: #9a3412; }
+  .nav-cp { color: #6d28d9; }
+  .nav-pois { color: #be123c; }
+  .nav-ride { color: #166534; }
+  .nav-export { color: #1d4ed8; }
 
   .nav-item.active .nav-glyph,
   .nav-cp.active .nav-glyph {
@@ -2707,16 +2710,17 @@ function onDocClick(e: MouseEvent) {
 
   .nav-badge {
     position: absolute;
-    top: -0.28rem;
-    right: -0.32rem;
-    min-width: 1.2rem;
-    padding: 0.06rem 0.24rem;
+    top: -0.35rem;
+    right: -0.45rem;
+    min-width: 1.45rem;
+    padding: 0.12rem 0.32rem;
     border-radius: 999px;
-    background: currentColor;
+    background: #be123c;
     color: #fff;
-    font-size: 0.58rem;
+    font-size: 0.68rem;
     font-weight: 800;
-    line-height: 1.2;
+    line-height: 1.15;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
   }
 
   .nav-cp-menu {

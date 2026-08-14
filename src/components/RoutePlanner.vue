@@ -1762,7 +1762,6 @@ onUnmounted(() => {
         </div>
         <p v-if="addressSearching" class="search-status">{{ t('planner.searching') }}</p>
         <p v-else-if="addressError" class="search-error">{{ addressError }}</p>
-        <p v-else class="search-hint">{{ t('planner.searchHint') }}</p>
       </div>
 
       <div class="waypoint-panel">
