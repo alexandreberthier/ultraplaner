@@ -52,15 +52,8 @@
       as="image"
       type="image/webp"
       href="/hero-mountains-480.webp"
-      media="(max-width: 640px)"
-      fetchpriority="high"
-    />
-    <link
-      rel="preload"
-      as="image"
-      type="image/webp"
-      href="/hero-mountains-800.webp"
-      media="(min-width: 641px)"
+      imagesrcset="/hero-mountains-480.webp 480w, /hero-mountains-800.webp 800w"
+      imagesizes="(max-width: 640px) 100vw, 800px"
       fetchpriority="high"
     />
     <!-- Google Search: square PNG ≥48px recommended; ICO + PNG primary, SVG for modern browsers -->

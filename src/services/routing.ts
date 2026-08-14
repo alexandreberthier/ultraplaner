@@ -119,6 +119,20 @@ export function isOrsConfigured(): boolean {
   return Boolean(import.meta.env.VITE_ORS_API_KEY)
 }
 
+/**
+ * HeiGIT unified API (api.openrouteservice.org is deprecated, shut-off 2026-08-24).
+ * Keep the old host as fallback while quota is still served there.
+ */
+const ORS_DIRECTIONS_BASES = [
+  'https://api.heigit.org/openrouteservice/v2/directions',
+  'https://api.openrouteservice.org/v2/directions',
+] as const
+
+const ORS_GEOCODE_URLS = [
+  'https://api.heigit.org/pelias/v1/search',
+  'https://api.openrouteservice.org/geocode/search',
+] as const
+
 /** True when any consecutive waypoint hop is a long straight-line distance (e.g. Wien–Bratislava). */
 export function isLongStraightRoute(waypoints: LatLng[]): boolean {
   if (waypoints.length < 2) return false
@@ -206,9 +220,7 @@ export async function searchAddresses(query: string, limit = 6): Promise<Geocode
     size: String(limit),
   })
 
-  const res = await fetch(`https://api.openrouteservice.org/geocode/search?${params}`, {
-    headers: { Authorization: orsKey() },
-  })
+  const res = await fetchOrsGeocode(params, orsKey())
 
   if (!res.ok) {
     if (res.status === 429) throw new Error(tGlobal('routing.rateLimited'))
@@ -298,21 +310,75 @@ function parseOrsRoute(data: OrsGeoJson): CyclingRouteResult {
   }
 }
 
+async function fetchOrsGeocode(params: URLSearchParams, key: string): Promise<Response> {
+  let lastNetwork: unknown
+  for (const url of ORS_GEOCODE_URLS) {
+    try {
+      const res = await fetch(`${url}?${params}`, {
+        headers: {
+          Authorization: key,
+          Accept: 'application/json, application/geo+json',
+        },
+      })
+      if (res.ok || res.status === 401 || res.status === 403 || res.status === 429) {
+        return res
+      }
+      if (!isTransientOrsStatus(res.status)) return res
+    } catch (err) {
+      if (isRouteAborted(err)) throw err
+      if (isNetworkFailure(err)) {
+        lastNetwork = err
+        continue
+      }
+      throw err
+    }
+  }
+  if (lastNetwork) throw lastNetwork
+  return fetch(`${ORS_GEOCODE_URLS[0]}?${params}`, {
+    headers: { Authorization: key, Accept: 'application/json, application/geo+json' },
+  })
+}
+
 async function postOrsDirections(
   profile: CyclingProfile,
   body: Record<string, unknown>,
   key: string,
   signal?: AbortSignal
 ): Promise<Response> {
-  return fetch(`https://api.openrouteservice.org/v2/directions/${profile}/geojson`, {
-    method: 'POST',
-    headers: {
-      Authorization: key,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(body),
-    signal,
-  })
+  let lastNetwork: unknown
+  let lastTransient: Response | null = null
+  for (const base of ORS_DIRECTIONS_BASES) {
+    try {
+      const res = await fetch(`${base}/${profile}/geojson`, {
+        method: 'POST',
+        headers: {
+          Authorization: key,
+          Accept: 'application/json, application/geo+json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(body),
+        signal,
+      })
+      if (res.ok || res.status === 401 || res.status === 403 || res.status === 429) {
+        return res
+      }
+      if (isTransientOrsStatus(res.status)) {
+        lastTransient = res
+        continue
+      }
+      return res
+    } catch (err) {
+      if (isRouteAborted(err)) throw err
+      if (isNetworkFailure(err)) {
+        lastNetwork = err
+        continue
+      }
+      throw err
+    }
+  }
+  if (lastTransient) return lastTransient
+  if (lastNetwork) throw lastNetwork
+  throw new TypeError('Failed to fetch')
 }
 
 /**
