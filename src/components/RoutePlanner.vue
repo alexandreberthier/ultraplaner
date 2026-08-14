@@ -2644,7 +2644,7 @@ onUnmounted(() => {
 
 .routing-options {
   border: none;
-  margin: 0;
+  margin: 0 0 0.7rem;
   padding: 0;
 }
 
