@@ -3263,6 +3263,137 @@ function onDocClick(e: MouseEvent) {
   color: #111;
 }
 
+.sidebar :deep(.hours-badge) {
+  display: inline-block;
+  padding: 0.05rem 0.28rem;
+  border: 1.5px solid #111;
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  font-style: normal;
+}
+
+.sidebar :deep(.hours-badge.open) {
+  background: var(--cta);
+  color: #111;
+}
+
+.sidebar :deep(.hours-badge.closed) {
+  background: #111;
+  color: #fff;
+}
+
+.sidebar :deep(.hours-badge.unknown) {
+  background: #fff;
+  color: #111;
+  opacity: 1;
+}
+
+.sidebar :deep(.kind-btn),
+.sidebar :deep(.pack-btn),
+.sidebar :deep(.time-select),
+.sidebar :deep(.buffer-select),
+.sidebar :deep(.cp-name) {
+  border: 2px solid #111;
+  border-radius: 0;
+  background: #fff;
+  color: #111;
+}
+
+.sidebar :deep(.kind-btn.active) {
+  background: var(--cta);
+  border-color: #111;
+  color: #111;
+  font-weight: 800;
+}
+
+.sidebar :deep(.pack-btn.primary),
+.sidebar :deep(.btn-primary) {
+  border: 3px solid #111;
+  border-radius: 0;
+  background: var(--cta);
+  color: #111;
+  box-shadow: 4px 4px 0 #111;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.sidebar :deep(.pack-btn.danger) {
+  background: #fff;
+  color: #111;
+  border-color: #111;
+}
+
+.sidebar :deep(.weather-chip) {
+  border: 2px solid #111;
+  border-radius: 0;
+  background: #fff;
+}
+
+.sidebar :deep(.weather-chip.rain-low),
+.sidebar :deep(.weather-chip.rain-mid),
+.sidebar :deep(.weather-chip.rain-high) {
+  border-color: #111;
+}
+
+.sidebar :deep(.swatch) {
+  border-radius: 0;
+  border: 1px solid #111;
+}
+
+.sidebar :deep(.cat-chip) {
+  border: 2px solid #111;
+  border-radius: 0;
+  background: #fff;
+  color: #111;
+  font-weight: 700;
+}
+
+.sidebar :deep(.cat-chip.active) {
+  background: var(--cta);
+  color: #111;
+  border-color: #111;
+}
+
+.sidebar :deep(.radius-value) {
+  border-radius: 0;
+  border: 2px solid #111;
+  background: #fff;
+  color: #111;
+  box-shadow: 3px 3px 0 #111;
+}
+
+.sidebar :deep(.radius-slider)::-webkit-slider-runnable-track,
+.sidebar :deep(.radius-row input[type='range'])::-webkit-slider-runnable-track {
+  border-radius: 0;
+  background: #d8d2c6;
+  border: 2px solid #111;
+}
+
+.sidebar :deep(.radius-slider)::-moz-range-track,
+.sidebar :deep(.radius-row input[type='range'])::-moz-range-track {
+  border-radius: 0;
+  background: #d8d2c6;
+  border: 2px solid #111;
+}
+
+.sidebar :deep(.radius-slider)::-webkit-slider-thumb,
+.sidebar :deep(.radius-row input[type='range'])::-webkit-slider-thumb {
+  border-radius: 0;
+  border: 3px solid #111;
+  background: var(--cta);
+  box-shadow: 3px 3px 0 #111;
+}
+
+.sidebar :deep(.radius-slider)::-moz-range-thumb,
+.sidebar :deep(.radius-row input[type='range'])::-moz-range-thumb {
+  border-radius: 0;
+  border: 3px solid #111;
+  background: var(--cta);
+  box-shadow: 3px 3px 0 #111;
+}
+
 .map-layout :deep(.elevation-profile) {
   border-top: 3px solid #111;
   box-shadow: none;
@@ -3311,10 +3442,28 @@ function onDocClick(e: MouseEvent) {
 .mobile-sheet-inner :deep(.cat-chip) {
   border: 2px solid #111;
   border-radius: 0;
+  background: #fff;
+  color: #111;
 }
 
 .mobile-sheet-inner :deep(.cat-chip.active) {
   background: var(--cta);
   color: #111;
+}
+
+.mobile-sheet-inner :deep(.radius-value),
+.mobile-sheet-inner :deep(.kind-btn),
+.mobile-sheet-inner :deep(.pack-btn),
+.mobile-sheet-inner :deep(.time-select) {
+  border-radius: 0;
+  border: 2px solid #111;
+}
+
+.mobile-sheet-inner :deep(.radius-slider)::-webkit-slider-thumb,
+.mobile-sheet-inner :deep(.radius-row input[type='range'])::-webkit-slider-thumb {
+  border-radius: 0;
+  border: 3px solid #111;
+  background: var(--cta);
+  box-shadow: 3px 3px 0 #111;
 }
 </style>

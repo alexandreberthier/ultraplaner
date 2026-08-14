@@ -273,6 +273,139 @@ defineExpose({ openMapFirst, searchNearby })
 .in-map .intro {
   font-size: 0.95rem;
   line-height: 1.45;
+  color: #111;
+}
+
+.in-map .ios-geo-hint {
+  margin: 0;
+  padding: 0.7rem 0.8rem;
+  font-size: 0.92rem;
+  border-radius: 0;
+  border: 2px solid #111;
+  background: #fff;
+  color: #111;
+}
+
+.in-map .field-label,
+.in-map .categories legend {
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #111;
+  margin-bottom: 0.45rem;
+}
+
+.in-map .radius-slider,
+.in-map .radius-row input[type='range'] {
+  accent-color: #111;
+}
+
+.in-map .radius-slider::-webkit-slider-runnable-track,
+.in-map .radius-row input[type='range']::-webkit-slider-runnable-track {
+  height: 8px;
+  border-radius: 0;
+  background: #d8d2c6;
+  border: 2px solid #111;
+  box-sizing: border-box;
+}
+
+.in-map .radius-slider::-moz-range-track,
+.in-map .radius-row input[type='range']::-moz-range-track {
+  height: 8px;
+  border-radius: 0;
+  background: #d8d2c6;
+  border: 2px solid #111;
+}
+
+.in-map .radius-slider::-webkit-slider-thumb,
+.in-map .radius-row input[type='range']::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 24px;
+  height: 24px;
+  margin-top: -10px;
+  border-radius: 0;
+  border: 3px solid #111;
+  background: var(--cta);
+  box-shadow: 3px 3px 0 #111;
+}
+
+.in-map .radius-slider::-moz-range-thumb,
+.in-map .radius-row input[type='range']::-moz-range-thumb {
+  width: 24px;
+  height: 24px;
+  border-radius: 0;
+  border: 3px solid #111;
+  background: var(--cta);
+  box-shadow: 3px 3px 0 #111;
+}
+
+.in-map .radius-value {
+  flex-basis: 6.25rem;
+  width: 6.25rem;
+  font-size: 0.88rem;
+  border-radius: 0;
+  border: 2px solid #111;
+  background: #fff;
+  color: #111;
+  box-shadow: 3px 3px 0 #111;
+  font-weight: 800;
+}
+
+.in-map .cat-chip {
+  padding: 0.7rem 1rem;
+  min-height: 48px;
+  font-size: 1rem;
+  gap: 0.4rem;
+  border-radius: 0;
+  border: 2px solid #111;
+  background: #fff;
+  color: #111;
+  font-weight: 700;
+}
+
+.in-map .cat-chip.active {
+  background: var(--cta);
+  color: #111;
+  border-color: #111;
+  font-weight: 800;
+}
+
+.in-map .btn-primary {
+  margin-top: 0.15rem;
+  padding: 0.85rem 1rem;
+  font-size: 0.88rem;
+  min-height: 48px;
+  border: 3px solid #111;
+  border-radius: 0;
+  background: var(--cta);
+  color: #111;
+  box-shadow: 4px 4px 0 #111;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.in-map .btn-primary:disabled {
+  opacity: 1;
+  background: #e8e4dc;
+  box-shadow: none;
+}
+
+@media (max-width: 768px) {
+  .in-map .radius-slider::-webkit-slider-thumb,
+  .in-map .radius-row input[type='range']::-webkit-slider-thumb {
+    width: 40px;
+    height: 40px;
+    margin-top: -18px;
+  }
+
+  .in-map .radius-slider::-moz-range-thumb,
+  .in-map .radius-row input[type='range']::-moz-range-thumb {
+    width: 40px;
+    height: 40px;
+  }
 }
 
 .load-summary {
@@ -301,22 +434,11 @@ defineExpose({ openMapFirst, searchNearby })
   line-height: 1.4;
 }
 
-.in-map .ios-geo-hint {
-  margin: 0;
-  padding: 0.7rem 0.8rem;
-  font-size: 0.92rem;
-}
-
 .field-label {
   display: block;
   font-weight: 600;
   margin-bottom: 0.5rem;
   font-size: 0.9rem;
-}
-
-.in-map .field-label {
-  font-size: 0.95rem;
-  margin-bottom: 0.45rem;
 }
 
 .radius-row {
@@ -447,12 +569,6 @@ defineExpose({ openMapFirst, searchNearby })
   line-height: 1.2;
 }
 
-.in-map .radius-value {
-  flex-basis: 6.25rem;
-  width: 6.25rem;
-  font-size: 0.88rem;
-}
-
 .categories {
   border: none;
   padding: 0;
@@ -464,11 +580,6 @@ defineExpose({ openMapFirst, searchNearby })
   font-size: 0.9rem;
   margin-bottom: 0.5rem;
   padding: 0;
-}
-
-.in-map .categories legend {
-  font-size: 0.95rem;
-  margin-bottom: 0.55rem;
 }
 
 .category-grid {
@@ -493,13 +604,6 @@ defineExpose({ openMapFirst, searchNearby })
   cursor: pointer;
   font-size: 0.9rem;
   -webkit-tap-highlight-color: transparent;
-}
-
-.in-map .cat-chip {
-  padding: 0.7rem 1rem;
-  min-height: 48px;
-  font-size: 1rem;
-  gap: 0.4rem;
 }
 
 .cat-chip.active {
@@ -541,14 +645,6 @@ defineExpose({ openMapFirst, searchNearby })
   font-weight: 600;
   font-size: 1rem;
   cursor: pointer;
-}
-
-.in-map .btn-primary {
-  margin-top: 0.15rem;
-  padding: 0.85rem 1rem;
-  font-size: 0.95rem;
-  min-height: 48px;
-  border-radius: 10px;
 }
 
 .map-first .btn-primary {
