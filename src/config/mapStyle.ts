@@ -324,17 +324,17 @@ export function poiColors(): Record<PoiCategory, string> {
   return colorblindMode.value ? POI_COLORS_CB : POI_COLORS_STD
 }
 
-/** Flat uses dark slate (not green — blends with basemap parks/forests). */
+/** Flat dark → yellow → purple → fuchsia → rose (no orange→red adjacent steps). */
 const GRADE_COLORS_STD = [
   '#1e293b',
   '#ca8a04',
-  '#f59e0b',
-  '#ea580c',
-  '#dc2626',
-  '#991b1b',
+  '#9333ea',
+  '#c026d3',
+  '#e11d48',
+  '#881337',
 ]
 
-/** Blue → yellow → orange → purple (no green/red slope scale). */
+/** Blue → yellow → orange → purple (Okabe-Ito style; no green/red slope scale). */
 const GRADE_COLORS_CB = [
   '#BABABA',
   '#F0E442',
@@ -347,7 +347,7 @@ const GRADE_COLORS_CB = [
 const GRADE_DESCENT_STD = { steep: '#1d4ed8', mild: '#2563eb' }
 const GRADE_DESCENT_CB = { steep: '#2166AC', mild: '#4393C3' }
 
-/** Steigung in % → Farbe (Standard: dunkel→gelb→rot; Farbblind: grau→lila). */
+/** Steigung in % → Farbe (Standard: dunkel→gelb→lila→rosa; Farbblind: grau→lila). */
 export function gradeToColor(gradePercent: number): string {
   const cb = colorblindMode.value
   const descent = cb ? GRADE_DESCENT_CB : GRADE_DESCENT_STD
@@ -369,9 +369,9 @@ const GRADE_LEGEND_STD = [
   { label: 'Abfahrt', color: '#1d4ed8' },
   { label: '< 2 %', color: '#1e293b' },
   { label: '2–5 %', color: '#ca8a04' },
-  { label: '5–8 %', color: '#f59e0b' },
-  { label: '8–12 %', color: '#ea580c' },
-  { label: '> 12 %', color: '#dc2626' },
+  { label: '5–8 %', color: '#9333ea' },
+  { label: '8–12 %', color: '#c026d3' },
+  { label: '> 12 %', color: '#e11d48' },
 ] as const
 
 const GRADE_LEGEND_CB = [

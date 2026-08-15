@@ -881,7 +881,7 @@ function onDocClick(e: MouseEvent) {
           >
             {{ shareCopied ? `✓ ${t('map.linkCopied')}` : `🔗 ${t('map.share')}` }}
           </button>
-          <TopbarSettings brutal />
+          <TopbarSettings brutal force-menu />
         </div>
       </header>
 
@@ -1521,7 +1521,7 @@ function onDocClick(e: MouseEvent) {
 <style scoped>
 .map-layout {
   display: grid;
-  grid-template-columns: 320px minmax(0, 1fr);
+  grid-template-columns: 348px minmax(0, 1fr);
   height: 100vh;
   height: 100dvh;
   transition: grid-template-columns 0.2s ease;
@@ -1614,34 +1614,40 @@ function onDocClick(e: MouseEvent) {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 0.65rem;
-  min-height: 58px;
-  padding: 0.7rem 1rem;
+  flex-wrap: nowrap;
+  gap: 0.5rem;
+  min-height: 52px;
+  padding: 0.55rem 0.85rem;
   background: #fff;
   border-bottom: 3px solid #111;
   flex-shrink: 0;
-  z-index: 5;
+  /* Above map overlays so export dropdown isn't covered by basemap toggles */
+  z-index: 80;
 }
 
 .toolbar-left,
 .toolbar-right {
   display: flex;
   align-items: center;
-  gap: 0.35rem;
+  gap: 0.3rem;
+  flex-shrink: 1;
+  min-width: 0;
+}
+
+.toolbar-right {
   flex-shrink: 0;
 }
 
 .tool-btn {
-  padding: 0.55rem 0.85rem;
+  padding: 0.45rem 0.7rem;
   border: 2px solid #111;
   border-radius: 0;
   background: #fff;
   color: #111;
   cursor: pointer;
-  font-size: 0.88rem;
+  font-size: 0.82rem;
   font-weight: 750;
-  line-height: 1.2;
+  line-height: 1.15;
   white-space: nowrap;
 }
 
@@ -2159,14 +2165,31 @@ function onDocClick(e: MouseEvent) {
   padding: 1rem;
 }
 
-@media (max-width: 1100px) {
+@media (max-width: 1200px) {
   .toggle-label {
     display: none;
   }
 
   .export-toggle {
-    font-size: 0.82rem;
-    padding: 0.55rem 0.75rem;
+    font-size: 0.78rem;
+    padding: 0.45rem 0.6rem;
+  }
+
+  .share-btn {
+    font-size: 0.78rem;
+    padding: 0.45rem 0.55rem;
+  }
+}
+
+@media (max-width: 1100px) {
+  .home-btn {
+    font-size: 0.78rem;
+    padding: 0.45rem 0.55rem;
+  }
+
+  .tool-btn.ride-enter {
+    font-size: 0.78rem;
+    padding: 0.45rem 0.55rem;
   }
 }
 
@@ -3080,16 +3103,19 @@ function onDocClick(e: MouseEvent) {
 
 .export-item.featured {
   background: var(--cta);
+  color: #111;
 }
 
 .export-item.featured:hover {
   background: var(--cta);
+  color: #111;
 }
 
 .export-icon {
   flex-shrink: 0;
   font-size: 1.1rem;
   line-height: 1.4;
+  color: inherit;
 }
 
 .export-text {
@@ -3101,12 +3127,21 @@ function onDocClick(e: MouseEvent) {
 
 .export-text strong {
   font-size: 0.88rem;
+  color: inherit;
+  font-weight: 800;
 }
 
 .export-text small {
-  font-size: 0.75rem;
-  color: var(--text-muted);
-  line-height: 1.3;
+  font-size: 0.78rem;
+  color: #334155;
+  line-height: 1.35;
+  font-weight: 650;
+}
+
+.export-item.featured .export-text small {
+  color: #111;
+  opacity: 0.9;
+  font-weight: 700;
 }
 
 .export-divider {
@@ -3149,17 +3184,27 @@ function onDocClick(e: MouseEvent) {
 .export-sheet-btn.featured {
   background: var(--cta);
   border-color: #111;
+  color: #111;
 }
 
 .export-sheet-btn strong {
   display: block;
+  color: inherit;
+  font-weight: 800;
 }
 
 .export-sheet-btn small {
   display: block;
   font-size: 0.78rem;
-  color: var(--text-muted);
+  color: #334155;
   margin-top: 0.1rem;
+  font-weight: 650;
+}
+
+.export-sheet-btn.featured small {
+  color: #111;
+  opacity: 0.9;
+  font-weight: 700;
 }
 
 .sheet-btn-icon {
@@ -3173,6 +3218,7 @@ function onDocClick(e: MouseEvent) {
 
 .export-sheet-btn.featured:hover {
   background: var(--cta);
+  color: #111;
 }
 
 .export-print-hint {
@@ -3357,6 +3403,13 @@ function onDocClick(e: MouseEvent) {
 .sidebar :deep(.weather-chip.rain-mid),
 .sidebar :deep(.weather-chip.rain-high) {
   border-color: #111;
+}
+
+.sidebar :deep(.weather-row) {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.3rem;
+  overflow: visible;
 }
 
 .sidebar :deep(.swatch) {

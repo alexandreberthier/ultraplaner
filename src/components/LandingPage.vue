@@ -159,7 +159,7 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
           >
             ↓ {{ t('map.exportRoute') }} ▾
           </button>
-          <TopbarSettings brutal />
+          <TopbarSettings brutal force-menu />
         </div>
       </header>
       <section

@@ -277,11 +277,13 @@ onUnmounted(() => {
 }
 
 .brutal .menu-btn {
-  border: 3px solid #111;
+  border: 2px solid #111;
   border-radius: 0;
   background: #fff;
   color: #111;
-  box-shadow: 4px 4px 0 #111;
+  box-shadow: 3px 3px 0 #111;
+  width: 2.5rem;
+  height: 2.5rem;
 }
 
 .brutal .menu-btn:hover,

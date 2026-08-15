@@ -218,23 +218,24 @@ watch(
 }
 
 .weather-row {
-  display: flex;
-  gap: 0.45rem;
-  overflow-x: auto;
-  padding-bottom: 0.15rem;
-  -webkit-overflow-scrolling: touch;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.35rem;
+  overflow: visible;
+  padding-bottom: 0;
 }
 
 .weather-chip {
-  flex: 0 0 auto;
-  min-width: 6rem;
-  padding: 0.55rem 0.65rem;
+  flex: none;
+  min-width: 0;
+  width: auto;
+  padding: 0.4rem 0.4rem 0.45rem;
   border: 1px solid var(--border);
   border-radius: 8px;
   background: var(--surface-2);
   display: flex;
   flex-direction: column;
-  gap: 0.1rem;
+  gap: 0.05rem;
 }
 
 .weather-chip.rain-low {
@@ -253,34 +254,36 @@ watch(
 }
 
 .weather-chip strong {
-  font-size: 0.82rem;
+  font-size: 0.68rem;
   color: var(--text-muted);
-  font-weight: 600;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
 }
 
 .weather-temp {
-  font-size: 1.15rem;
-  font-weight: 700;
-  line-height: 1.2;
+  font-size: 1rem;
+  font-weight: 800;
+  line-height: 1.15;
 }
 
 .weather-rain {
-  font-size: 0.78rem;
+  font-size: 0.68rem;
   font-weight: 700;
-  line-height: 1.25;
+  line-height: 1.2;
   color: #1e40af;
 }
 
 .weather-rain.rain-high {
-  font-size: 0.85rem;
+  font-size: 0.72rem;
   color: #1e3a8a;
 }
 
 .weather-detail,
 .weather-time {
-  font-size: 0.78rem;
+  font-size: 0.68rem;
   color: var(--text-muted);
-  line-height: 1.25;
+  line-height: 1.2;
 }
 
 .weather-error,

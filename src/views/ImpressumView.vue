@@ -25,7 +25,7 @@ onMounted(() => {
       <router-link class="back-btn" :to="homePath">
         {{ t('landing.backHome') }}
       </router-link>
-      <TopbarSettings brutal />
+      <TopbarSettings brutal force-menu />
     </header>
 
     <div class="imprint legal-body">

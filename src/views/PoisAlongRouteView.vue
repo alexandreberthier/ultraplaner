@@ -31,7 +31,7 @@ function goStartApp() {
       <button type="button" class="back-btn" @click="goHome">
         {{ t('landing.backHome') }}
       </button>
-      <TopbarSettings brutal />
+      <TopbarSettings brutal force-menu />
     </header>
 
     <main class="guide-body">

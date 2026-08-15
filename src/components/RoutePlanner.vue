@@ -2229,8 +2229,8 @@ onUnmounted(() => {
   background: transparent;
   padding: 0.4rem 0.65rem;
   font-size: 0.75rem;
-  font-weight: 600;
-  color: #4b5563;
+  font-weight: 700;
+  color: #111;
   cursor: pointer;
 }
 
@@ -2244,8 +2244,9 @@ onUnmounted(() => {
 }
 
 .route-color-toggle button:disabled {
-  opacity: 0.4;
+  opacity: 0.45;
   cursor: not-allowed;
+  color: #6b7280;
 }
 
 .basemap-fallback {
@@ -2318,8 +2319,8 @@ onUnmounted(() => {
   background: transparent;
   padding: 0.45rem 0.7rem;
   font-size: 0.78rem;
-  font-weight: 600;
-  color: #4b5563;
+  font-weight: 700;
+  color: #111;
   cursor: pointer;
 }
 
