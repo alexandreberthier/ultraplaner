@@ -184,6 +184,25 @@ export async function getPackMeta(mapId: string): Promise<OfflinePackMeta | null
   }
 }
 
+/** Map IDs with a usable offline pack (ready or partial). */
+export async function listUsableOfflinePackMapIds(): Promise<Map<string, PackStatus>> {
+  const out = new Map<string, PackStatus>()
+  if (typeof indexedDB === 'undefined') return out
+  try {
+    const rows = await withStores([STORE_META], 'readonly', async (stores) =>
+      idbReq(stores[STORE_META]!.getAll() as IDBRequest<OfflinePackMeta[]>)
+    )
+    for (const row of rows ?? []) {
+      if (row.status === 'ready' || row.status === 'partial') {
+        out.set(row.mapId, row.status)
+      }
+    }
+  } catch {
+    /* ignore */
+  }
+  return out
+}
+
 export async function putPackMeta(meta: OfflinePackMeta): Promise<void> {
   await withStores([STORE_META], 'readwrite', async (stores) => {
     await idbReq(stores[STORE_META]!.put(meta))

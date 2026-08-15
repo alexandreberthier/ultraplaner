@@ -3,6 +3,7 @@ import { nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { deleteOfflineMap, listOfflineMaps } from '../services/offlineMaps'
+import { listUsableOfflinePackMapIds, type PackStatus } from '../services/offlinePacks'
 
 withDefaults(
   defineProps<{
@@ -22,6 +23,7 @@ type RecentItem = {
   cachedAt: number
   totalKm: number
   poiCount: number
+  packStatus: PackStatus | null
 }
 
 const open = ref(false)
@@ -35,7 +37,11 @@ const panelStyle = ref<Record<string, string>>({})
 async function refresh() {
   loading.value = true
   try {
-    items.value = await listOfflineMaps()
+    const [maps, packs] = await Promise.all([listOfflineMaps(), listUsableOfflinePackMapIds()])
+    items.value = maps.map((m) => ({
+      ...m,
+      packStatus: packs.get(m.id) ?? null,
+    }))
   } finally {
     loading.value = false
   }
@@ -153,7 +159,25 @@ onUnmounted(() => {
         <ul v-else class="recent-panel-list">
           <li v-for="m in items" :key="m.id">
             <button type="button" class="recent-panel-open" role="menuitem" @click="openMap(m.id)">
-              <strong>{{ m.name }}</strong>
+              <span class="recent-panel-title">
+                <strong>{{ m.name }}</strong>
+                <span
+                  v-if="m.packStatus"
+                  class="recent-offline-badge"
+                  :class="{ partial: m.packStatus === 'partial' }"
+                  :title="
+                    m.packStatus === 'partial'
+                      ? t('recent.offlineBadgePartialTitle')
+                      : t('recent.offlineBadgeTitle')
+                  "
+                >
+                  {{
+                    m.packStatus === 'partial'
+                      ? t('recent.offlineBadgePartial')
+                      : t('recent.offlineBadge')
+                  }}
+                </span>
+              </span>
               <span>
                 {{ t('recent.kmPois', { km: m.totalKm.toFixed(0), count: m.poiCount }) }}
                 · {{ formatWhen(m.cachedAt) }}
@@ -289,8 +313,16 @@ onUnmounted(() => {
   background: var(--cta);
 }
 
+.recent-panel-title {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-width: 0;
+}
+
 .recent-panel-open strong {
   display: block;
+  min-width: 0;
   font-size: 0.9rem;
   font-weight: 800;
   overflow: hidden;
@@ -298,7 +330,25 @@ onUnmounted(() => {
   white-space: nowrap;
 }
 
-.recent-panel-open span {
+.recent-offline-badge {
+  flex: 0 0 auto;
+  padding: 0.12rem 0.35rem;
+  border: 2px solid #111;
+  background: #111;
+  color: #fff;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  line-height: 1.2;
+}
+
+.recent-offline-badge.partial {
+  background: #fff;
+  color: #111;
+}
+
+.recent-panel-open > span:last-child {
   display: block;
   margin-top: 0.15rem;
   font-size: 0.72rem;
