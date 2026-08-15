@@ -2,7 +2,6 @@
 import { defineAsyncComponent, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import GpxForm from '../components/GpxForm.vue'
-import RecentMaps from '../components/RecentMaps.vue'
 import TopbarSettings from '../components/TopbarSettings.vue'
 import RecentRoutesMenu from '../components/RecentRoutesMenu.vue'
 import FeedbackForm from '../components/FeedbackForm.vue'
@@ -314,7 +313,6 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
             <NearbyForm v-else-if="tab === 'nearby'" />
             <GpxForm v-if="tab === 'gpx'" />
           </section>
-          <RecentMaps />
         </section>
 
         <section class="how-section">
@@ -896,53 +894,6 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
   border: 2px solid #111;
   background: #f3efe6;
   color: #111;
-}
-
-.landing :deep(.recent-maps) {
-  margin-top: 2.25rem;
-  border: 3px solid #111;
-  border-radius: 0;
-  background: #fff;
-  box-shadow: 5px 5px 0 #111;
-}
-
-.landing :deep(.recent-head h2) {
-  font-size: 0.92rem;
-  font-weight: 800;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  color: #111;
-}
-
-.landing :deep(.recent-head p) {
-  color: #111;
-  opacity: 0.65;
-}
-
-.landing :deep(.recent-open),
-.landing :deep(.recent-remove) {
-  border: 2px solid #111;
-  border-radius: 0;
-}
-
-.landing :deep(.recent-open) {
-  background: #f3efe6;
-}
-
-.landing :deep(.recent-open:hover) {
-  background: #fff;
-  border-color: #111;
-}
-
-.landing :deep(.recent-meta) {
-  color: #111;
-  opacity: 0.62;
-}
-
-.landing :deep(.recent-remove:hover) {
-  background: #111;
-  color: #fff;
-  border-color: #111;
 }
 
 .landing :deep(.feedback) {
