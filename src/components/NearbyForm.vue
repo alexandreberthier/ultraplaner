@@ -303,7 +303,7 @@ defineExpose({ openMapFirst, searchNearby })
 
 .in-map .radius-slider::-webkit-slider-runnable-track,
 .in-map .radius-row input[type='range']::-webkit-slider-runnable-track {
-  height: 8px;
+  height: 10px;
   border-radius: 0;
   background: #d8d2c6;
   border: 2px solid #111;
@@ -312,7 +312,7 @@ defineExpose({ openMapFirst, searchNearby })
 
 .in-map .radius-slider::-moz-range-track,
 .in-map .radius-row input[type='range']::-moz-range-track {
-  height: 8px;
+  height: 10px;
   border-radius: 0;
   background: #d8d2c6;
   border: 2px solid #111;
@@ -322,34 +322,34 @@ defineExpose({ openMapFirst, searchNearby })
 .in-map .radius-row input[type='range']::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 24px;
-  height: 24px;
-  margin-top: -10px;
+  width: 36px;
+  height: 36px;
+  margin-top: -15px;
   border-radius: 0;
   border: 3px solid #111;
   background: var(--cta);
-  box-shadow: 3px 3px 0 #111;
+  box-shadow: none;
 }
 
 .in-map .radius-slider::-moz-range-thumb,
 .in-map .radius-row input[type='range']::-moz-range-thumb {
-  width: 24px;
-  height: 24px;
+  width: 36px;
+  height: 36px;
   border-radius: 0;
   border: 3px solid #111;
   background: var(--cta);
-  box-shadow: 3px 3px 0 #111;
+  box-shadow: none;
 }
 
 .in-map .radius-value {
-  flex-basis: 6.25rem;
-  width: 6.25rem;
-  font-size: 0.88rem;
+  flex-basis: 7.25rem;
+  width: 7.25rem;
+  font-size: 0.95rem;
   border-radius: 0;
   border: 2px solid #111;
   background: #fff;
   color: #111;
-  box-shadow: 3px 3px 0 #111;
+  box-shadow: none;
   font-weight: 800;
 }
 
@@ -396,15 +396,15 @@ defineExpose({ openMapFirst, searchNearby })
 @media (max-width: 768px) {
   .in-map .radius-slider::-webkit-slider-thumb,
   .in-map .radius-row input[type='range']::-webkit-slider-thumb {
-    width: 40px;
-    height: 40px;
-    margin-top: -18px;
+    width: 52px;
+    height: 52px;
+    margin-top: -22px;
   }
 
   .in-map .radius-slider::-moz-range-thumb,
   .in-map .radius-row input[type='range']::-moz-range-thumb {
-    width: 40px;
-    height: 40px;
+    width: 52px;
+    height: 52px;
   }
 }
 
@@ -445,23 +445,24 @@ defineExpose({ openMapFirst, searchNearby })
   display: flex;
   align-items: center;
   gap: 0.85rem;
-  min-height: 48px;
-  padding: 0.15rem 0.15rem 0.15rem 0.1rem;
+  min-height: 56px;
+  padding: 0.45rem 0.15rem 0.7rem;
   touch-action: none;
   /* Keep slider + value on one row so sheet width/height stay put while dragging */
   min-width: 0;
+  box-sizing: border-box;
 }
 
 .radius-slider,
 .radius-row input[type='range'] {
   flex: 1;
   min-width: 0;
-  min-height: 48px;
-  height: 48px;
+  min-height: 56px;
+  height: 56px;
   margin: 0;
   padding: 0;
   touch-action: none;
-  accent-color: var(--primary);
+  accent-color: var(--cta);
   -webkit-appearance: none;
   appearance: none;
   background: transparent;
@@ -470,102 +471,109 @@ defineExpose({ openMapFirst, searchNearby })
 
 .radius-slider::-webkit-slider-runnable-track,
 .radius-row input[type='range']::-webkit-slider-runnable-track {
-  height: 8px;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--primary) 22%, var(--border));
+  height: 10px;
+  border-radius: 0;
+  background: #d8d2c6;
+  border: 2px solid #111;
+  box-sizing: border-box;
 }
 
 .radius-slider::-moz-range-track,
 .radius-row input[type='range']::-moz-range-track {
-  height: 8px;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--primary) 22%, var(--border));
+  height: 10px;
+  border-radius: 0;
+  background: #d8d2c6;
+  border: 2px solid #111;
+  box-sizing: border-box;
 }
 
 .radius-slider::-webkit-slider-thumb,
 .radius-row input[type='range']::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 28px;
-  height: 28px;
-  margin-top: -10px;
-  border-radius: 50%;
-  border: 3px solid #fff;
-  background: var(--primary);
-  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.28);
+  width: 36px;
+  height: 36px;
+  margin-top: -15px;
+  border-radius: 0;
+  border: 3px solid #111;
+  background: var(--cta);
+  box-shadow: none;
   cursor: grab;
 }
 
 .radius-slider::-moz-range-thumb,
 .radius-row input[type='range']::-moz-range-thumb {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  border: 3px solid #fff;
-  background: var(--primary);
-  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.28);
+  width: 36px;
+  height: 36px;
+  border-radius: 0;
+  border: 3px solid #111;
+  background: var(--cta);
+  box-shadow: none;
   cursor: grab;
 }
 
-/* Mobile: ~44px visual thumb + padded hit area */
+/* Mobile: large thumb + reserved row height so nothing below jumps */
 @media (max-width: 768px) {
   .radius-row {
-    min-height: 56px;
-    padding: 0.35rem 0.2rem;
+    min-height: 68px;
+    padding: 0.55rem 0.1rem 0.85rem;
   }
 
   .radius-slider,
   .radius-row input[type='range'] {
-    min-height: 56px;
-    height: 56px;
+    min-height: 68px;
+    height: 68px;
   }
 
   .radius-slider::-webkit-slider-runnable-track,
   .radius-row input[type='range']::-webkit-slider-runnable-track {
-    height: 10px;
+    height: 12px;
   }
 
   .radius-slider::-moz-range-track,
   .radius-row input[type='range']::-moz-range-track {
-    height: 10px;
+    height: 12px;
   }
 
   .radius-slider::-webkit-slider-thumb,
   .radius-row input[type='range']::-webkit-slider-thumb {
-    width: 44px;
-    height: 44px;
-    margin-top: -17px;
-    border-width: 4px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.32);
+    width: 52px;
+    height: 52px;
+    margin-top: -22px;
+    border-width: 3px;
+    box-shadow: none;
   }
 
   .radius-slider::-moz-range-thumb,
   .radius-row input[type='range']::-moz-range-thumb {
-    width: 44px;
-    height: 44px;
-    border-width: 4px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.32);
+    width: 52px;
+    height: 52px;
+    border-width: 3px;
+    box-shadow: none;
   }
 }
 
 .radius-value {
   /* Fixed slot for "10000 m" — avoids reflow when digits change (3000 → 10000) */
-  flex: 0 0 6.5rem;
-  width: 6.5rem;
+  flex: 0 0 7.25rem;
+  width: 7.25rem;
   box-sizing: border-box;
-  padding: 0.35rem 0.4rem;
-  border-radius: 8px;
-  background: color-mix(in srgb, var(--primary) 8%, var(--surface));
-  border: 1px solid color-mix(in srgb, var(--primary) 16%, var(--border));
+  padding: 0.45rem 0.4rem;
+  min-height: 2.75rem;
+  border-radius: 0;
+  background: #fff;
+  border: 2px solid #111;
+  box-shadow: none;
+  color: #111;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   text-align: center;
   white-space: nowrap;
-  font-weight: 700;
+  font-weight: 800;
   font-variant-numeric: tabular-nums;
   font-feature-settings: 'tnum' 1;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   line-height: 1.2;
 }
 

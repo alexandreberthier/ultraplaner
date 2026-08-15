@@ -23,7 +23,7 @@ function cancel() {
 <template>
   <div v-if="store.mode === 'loading'" class="overlay">
     <div class="overlay-card">
-      <div class="spinner" />
+      <div class="spinner" aria-hidden="true" />
       <p class="status">{{ store.loadStatus || t('loading.default') }}</p>
       <div
         class="progress"
@@ -57,26 +57,31 @@ function cancel() {
   position: fixed;
   inset: 0;
   z-index: 1000;
-  background: rgba(248, 250, 248, 0.92);
+  background: rgba(243, 239, 230, 0.94);
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 1rem;
 }
 
 .overlay-card {
   text-align: center;
-  padding: 2rem;
+  padding: 1.5rem 1.35rem 1.35rem;
   width: min(22rem, calc(100vw - 2rem));
+  background: #fff;
+  border: 3px solid #111;
+  border-radius: 0;
+  box-shadow: 6px 6px 0 #111;
 }
 
 .spinner {
-  width: 48px;
-  height: 48px;
+  width: 44px;
+  height: 44px;
   margin: 0 auto 1rem;
-  border: 4px solid var(--border);
-  border-top-color: var(--primary);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
+  border: 4px solid #111;
+  border-top-color: var(--cta);
+  border-radius: 0;
+  animation: spin 0.75s linear infinite;
 }
 
 @keyframes spin {
@@ -86,42 +91,50 @@ function cancel() {
 }
 
 .status {
-  font-weight: 600;
+  font-weight: 800;
+  font-size: 1rem;
+  color: #111;
   margin: 0 0 0.85rem;
+  letter-spacing: 0.01em;
 }
 
 .progress {
-  height: 0.55rem;
-  border-radius: 999px;
-  background: var(--surface-2);
-  border: 1px solid var(--border);
+  height: 0.85rem;
+  border-radius: 0;
+  background: #f3efe6;
+  border: 2px solid #111;
   overflow: hidden;
 }
 
 .progress-bar {
   height: 100%;
-  border-radius: inherit;
-  background: var(--primary);
+  border-radius: 0;
+  background: var(--cta);
   transition: width 0.25s ease;
   min-width: 0.35rem;
+  border-right: 2px solid #111;
 }
 
 .timer {
-  color: var(--text-muted);
+  color: #111;
   font-size: 0.9rem;
-  margin: 0.55rem 0 0;
+  font-weight: 700;
+  margin: 0.65rem 0 0;
+  font-variant-numeric: tabular-nums;
 }
 
 .timeout-hint {
   margin-top: 1rem;
-  color: var(--danger);
+  color: #9f1239;
   font-size: 0.85rem;
+  font-weight: 700;
 }
 
 .error {
   margin-top: 1rem;
-  color: var(--danger);
+  color: #9f1239;
   font-size: 0.9rem;
+  font-weight: 700;
   max-width: 360px;
 }
 
@@ -130,18 +143,23 @@ function cancel() {
 }
 
 .overlay-cancel {
-  border: 1px solid var(--border);
-  background: var(--surface);
-  color: var(--text);
-  border-radius: 8px;
-  padding: 0.45rem 0.9rem;
+  border: 2px solid #111;
+  background: #fff;
+  color: #111;
+  border-radius: 0;
+  padding: 0.65rem 1.1rem;
+  min-height: 48px;
   font: inherit;
-  font-size: 0.85rem;
-  font-weight: 600;
+  font-size: 0.88rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
   cursor: pointer;
+  box-shadow: 3px 3px 0 #111;
 }
 
 .overlay-cancel:hover {
-  border-color: var(--primary);
+  transform: translate(1px, 1px);
+  box-shadow: 2px 2px 0 #111;
 }
 </style>

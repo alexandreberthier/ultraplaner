@@ -227,7 +227,7 @@ function onNavigate() {
   position: fixed;
   inset: 0;
   z-index: 500;
-  background: rgba(0, 0, 0, 0.4);
+  background: rgba(0, 0, 0, 0.45);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -238,16 +238,17 @@ function onNavigate() {
 }
 
 .sheet {
-  background: var(--surface);
+  background: #fff;
   width: 100%;
   max-width: 480px;
   max-height: min(88dvh, 88vh);
   display: flex;
   flex-direction: column;
-  border-radius: 16px;
+  border-radius: 0;
+  border: 3px solid #111;
   position: relative;
   overflow: hidden;
-  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.28);
+  box-shadow: 6px 6px 0 #111;
   touch-action: pan-y;
   overscroll-behavior: contain;
 }
@@ -258,8 +259,8 @@ function onNavigate() {
   align-items: flex-start;
   gap: 0.35rem;
   padding: 0.85rem 1rem 0.65rem 1.25rem;
-  border-bottom: 1px solid var(--border);
-  background: var(--surface);
+  border-bottom: 3px solid #111;
+  background: #f3efe6;
   z-index: 2;
 }
 
@@ -269,19 +270,21 @@ function onNavigate() {
   min-width: 0;
   margin: 0;
   font-size: 1.15rem;
-  font-weight: 700;
+  font-weight: 800;
   line-height: 1.3;
   padding-right: 0.15rem;
+  color: #111;
 }
 
 .rename-input {
   font: inherit;
-  font-weight: 700;
-  color: var(--text);
-  padding: 0.35rem 0.5rem;
-  border: 1px solid #f59e0b;
-  border-radius: 8px;
-  background: #fffbeb;
+  font-weight: 800;
+  color: #111;
+  padding: 0.45rem 0.55rem;
+  border: 2px solid #111;
+  border-radius: 0;
+  background: #fff;
+  box-shadow: 3px 3px 0 #111;
 }
 
 .icon-btn,
@@ -290,18 +293,25 @@ function onNavigate() {
   width: 44px;
   height: 44px;
   margin: -0.35rem 0 0;
-  border: none;
-  border-radius: 10px;
-  background: var(--surface-2);
+  border: 2px solid #111;
+  border-radius: 0;
+  background: #fff;
   font-size: 1.25rem;
   line-height: 1;
   cursor: pointer;
-  color: var(--text);
+  color: #111;
+  font-weight: 800;
+  box-shadow: 2px 2px 0 #111;
 }
 
 .close {
   margin-right: -0.25rem;
   font-size: 1.6rem;
+}
+
+.icon-btn:hover,
+.close:hover {
+  background: #f3efe6;
 }
 
 .sheet-scroll {
@@ -313,6 +323,7 @@ function onNavigate() {
   touch-action: pan-y;
   padding: 0.75rem 1.25rem 1.25rem;
   font-size: 1.02rem;
+  background: #fff;
 }
 
 dl {
@@ -320,9 +331,13 @@ dl {
 }
 
 dt {
-  font-size: 0.82rem;
-  color: var(--text-muted);
-  margin-top: 0.5rem;
+  font-size: 0.78rem;
+  color: #111;
+  margin-top: 0.65rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  opacity: 0.65;
 }
 
 dt:first-child {
@@ -330,13 +345,16 @@ dt:first-child {
 }
 
 dd {
-  margin: 0.15rem 0 0;
+  margin: 0.2rem 0 0;
   font-size: 1.05rem;
+  font-weight: 700;
+  color: #111;
 }
 
 .eta-sub {
-  color: var(--text-muted);
-  font-weight: 500;
+  color: #111;
+  opacity: 0.65;
+  font-weight: 600;
   font-size: 0.9em;
 }
 
@@ -346,8 +364,8 @@ dd {
   flex-direction: column;
   gap: 0.55rem;
   padding: 0.85rem 1.25rem 0.75rem;
-  background: var(--surface);
-  border-bottom: 1px solid var(--border);
+  background: #fff;
+  border-bottom: 3px solid #111;
 }
 
 .actions.nearby-nav {
@@ -359,16 +377,17 @@ dd {
   width: 100%;
   padding: 0.75rem 0.85rem;
   min-height: 48px;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  background: var(--surface-2);
+  border: 2px solid #111;
+  border-radius: 0;
+  background: #fff;
   cursor: pointer;
   text-align: center;
   text-decoration: none;
-  color: inherit;
+  color: #111;
   font: inherit;
   font-size: 1.02rem;
-  font-weight: 600;
+  font-weight: 800;
+  box-shadow: 3px 3px 0 #111;
 }
 
 .fav-btn {
@@ -377,11 +396,9 @@ dd {
   justify-content: center;
   gap: 0.45rem;
   min-height: 52px;
-  border-color: #f59e0b;
-  background: #f59e0b;
-  color: #fff;
+  background: var(--cta);
+  color: #111;
   font-size: 1.08rem;
-  font-weight: 800;
 }
 
 .fav-star {
@@ -391,17 +408,21 @@ dd {
 
 .fav-btn.active {
   background: #dc2626;
-  border-color: #b91c1c;
+  border-color: #111;
   color: #fff;
+}
+
+.fav-btn:hover,
+.nav-btn:hover {
+  transform: translate(1px, 1px);
+  box-shadow: 2px 2px 0 #111;
 }
 
 .nav-btn {
   padding: 0.7rem 0.85rem;
   min-height: 46px;
-  border-color: var(--primary);
-  background: var(--surface);
-  color: var(--primary);
-  font-weight: 700;
+  background: #fff;
+  color: #111;
 }
 
 @media (max-width: 768px) {
@@ -449,7 +470,7 @@ dd {
   }
 
   dt {
-    font-size: 1.05rem;
+    font-size: 0.95rem;
   }
 
   dd {
@@ -459,13 +480,11 @@ dd {
   .fav-btn {
     min-height: 64px;
     font-size: 1.28rem;
-    border-radius: 14px;
   }
 
   .nav-btn {
     min-height: 56px;
     font-size: 1.18rem;
-    border-radius: 14px;
   }
 }
 </style>

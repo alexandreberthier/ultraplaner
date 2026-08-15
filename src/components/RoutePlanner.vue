@@ -2277,21 +2277,21 @@ onUnmounted(() => {
   align-items: center;
   justify-content: center;
   gap: 0.65rem;
-  background-color: rgba(248, 250, 252, 0.72);
+  background-color: rgba(243, 239, 230, 0.82);
   background-size: cover;
   background-position: center;
-  color: #0f172a;
-  font-size: 0.85rem;
-  font-weight: 600;
+  color: #111;
+  font-size: 0.88rem;
+  font-weight: 800;
   pointer-events: none;
 }
 
 .basemap-loading-spinner {
-  width: 1.55rem;
-  height: 1.55rem;
-  border: 2.5px solid rgba(15, 23, 42, 0.2);
-  border-top-color: #0f172a;
-  border-radius: 50%;
+  width: 1.75rem;
+  height: 1.75rem;
+  border: 3px solid #111;
+  border-top-color: var(--cta);
+  border-radius: 0;
   animation: basemap-spin 0.7s linear infinite;
 }
 

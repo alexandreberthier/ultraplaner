@@ -2832,9 +2832,14 @@ function onDocClick(e: MouseEvent) {
   }
 
   .sheet-scroll :deep(.time-select),
-  .sheet-scroll :deep(.speed-num) {
-    font-size: 1.05rem;
-    min-height: 44px;
+  .sheet-scroll :deep(.speed-num),
+  .sheet-scroll :deep(.time-step) {
+    font-size: 1.25rem;
+    min-height: 56px;
+  }
+
+  .sheet-scroll :deep(.time-step) {
+    width: 3rem;
   }
 
   .sheet-scroll :deep(.cat-chip) {
@@ -3291,12 +3296,31 @@ function onDocClick(e: MouseEvent) {
 .sidebar :deep(.kind-btn),
 .sidebar :deep(.pack-btn),
 .sidebar :deep(.time-select),
+.sidebar :deep(.time-step),
 .sidebar :deep(.buffer-select),
 .sidebar :deep(.cp-name) {
   border: 2px solid #111;
   border-radius: 0;
   background: #fff;
   color: #111;
+}
+
+.sidebar :deep(.time-group) {
+  box-shadow: 3px 3px 0 #111;
+}
+
+.sidebar :deep(.time-step) {
+  background: #f3efe6;
+  box-shadow: none;
+  border: none;
+}
+
+.sidebar :deep(.time-select) {
+  border-left: 2px solid #111;
+  border-right: 2px solid #111;
+  border-top: none;
+  border-bottom: none;
+  box-shadow: none;
 }
 
 .sidebar :deep(.kind-btn.active) {
@@ -3359,7 +3383,7 @@ function onDocClick(e: MouseEvent) {
   border: 2px solid #111;
   background: #fff;
   color: #111;
-  box-shadow: 3px 3px 0 #111;
+  box-shadow: none;
 }
 
 .sidebar :deep(.radius-slider)::-webkit-slider-runnable-track,
@@ -3381,7 +3405,7 @@ function onDocClick(e: MouseEvent) {
   border-radius: 0;
   border: 3px solid #111;
   background: var(--cta);
-  box-shadow: 3px 3px 0 #111;
+  box-shadow: none;
 }
 
 .sidebar :deep(.radius-slider)::-moz-range-thumb,
@@ -3389,7 +3413,7 @@ function onDocClick(e: MouseEvent) {
   border-radius: 0;
   border: 3px solid #111;
   background: var(--cta);
-  box-shadow: 3px 3px 0 #111;
+  box-shadow: none;
 }
 
 .map-layout :deep(.elevation-profile) {
@@ -3452,9 +3476,11 @@ function onDocClick(e: MouseEvent) {
 .mobile-sheet-inner :deep(.radius-value),
 .mobile-sheet-inner :deep(.kind-btn),
 .mobile-sheet-inner :deep(.pack-btn),
-.mobile-sheet-inner :deep(.time-select) {
+.mobile-sheet-inner :deep(.time-select),
+.mobile-sheet-inner :deep(.time-step),
+.mobile-sheet-inner :deep(.time-group) {
   border-radius: 0;
-  border: 2px solid #111;
+  border-color: #111;
 }
 
 .mobile-sheet-inner :deep(.radius-slider)::-webkit-slider-thumb,
@@ -3462,6 +3488,6 @@ function onDocClick(e: MouseEvent) {
   border-radius: 0;
   border: 3px solid #111;
   background: var(--cta);
-  box-shadow: 3px 3px 0 #111;
+  box-shadow: none;
 }
 </style>

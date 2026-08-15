@@ -845,7 +845,7 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
   border: 2px solid #111;
   background: #fff;
   color: #111;
-  box-shadow: 3px 3px 0 #111;
+  box-shadow: none;
 }
 
 .landing :deep(.hero-card .radius-slider)::-webkit-slider-runnable-track,
@@ -867,7 +867,7 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
   border-radius: 0;
   border: 3px solid #111;
   background: var(--cta);
-  box-shadow: 3px 3px 0 #111;
+  box-shadow: none;
 }
 
 .landing :deep(.hero-card .radius-slider)::-moz-range-thumb,
@@ -875,7 +875,7 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
   border-radius: 0;
   border: 3px solid #111;
   background: var(--cta);
-  box-shadow: 3px 3px 0 #111;
+  box-shadow: none;
 }
 
 .landing :deep(.hero-card .load-summary),

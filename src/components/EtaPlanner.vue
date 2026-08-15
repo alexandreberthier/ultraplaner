@@ -47,6 +47,18 @@ function setStartHour(h: string) {
 function setStartMinute(m: string) {
   store.setStartTimeHHmm(`${startHour.value}:${m}`)
 }
+
+function nudgeHour(delta: number) {
+  const next = (Number(startHour.value) + delta + 24) % 24
+  setStartHour(String(next).padStart(2, '0'))
+}
+
+function nudgeMinute(delta: number) {
+  const idx = MINUTES.indexOf(startMinute.value)
+  const base = idx >= 0 ? idx : 0
+  const next = (base + delta + MINUTES.length) % MINUTES.length
+  setStartMinute(MINUTES[next]!)
+}
 </script>
 
 <template>
@@ -67,51 +79,92 @@ function setStartMinute(m: string) {
 
     <div v-show="open" class="section-body">
       <div class="eta-fields">
-        <label class="field">
+        <label class="field speed-field">
           <span class="field-label">{{ t('eta.speed') }}</span>
-          <div class="speed-row">
+          <div class="speed-row radius-row">
             <input
+              class="radius-slider"
               :value="store.avgSpeedKmh"
               type="range"
               :min="MIN_AVG_SPEED_KMH"
               :max="MAX_AVG_SPEED_KMH"
               step="1"
+              :aria-valuetext="`${store.avgSpeedKmh} km/h`"
               @input="store.setAvgSpeedKmh(Number(($event.target as HTMLInputElement).value))"
             />
-            <input
-              class="speed-num"
-              type="number"
-              :min="MIN_AVG_SPEED_KMH"
-              :max="MAX_AVG_SPEED_KMH"
-              step="1"
-              :value="store.avgSpeedKmh"
-              @change="store.setAvgSpeedKmh(Number(($event.target as HTMLInputElement).value))"
-            />
-            <span class="unit">km/h</span>
+            <span class="radius-value speed-value">
+              <input
+                class="speed-num"
+                type="number"
+                inputmode="numeric"
+                :min="MIN_AVG_SPEED_KMH"
+                :max="MAX_AVG_SPEED_KMH"
+                step="1"
+                :value="store.avgSpeedKmh"
+                @change="store.setAvgSpeedKmh(Number(($event.target as HTMLInputElement).value))"
+              />
+              <span class="unit">km/h</span>
+            </span>
           </div>
         </label>
 
-        <div class="field">
+        <div class="field time-field">
           <span class="field-label">{{ t('eta.start') }}</span>
           <div class="time-row" lang="de">
-            <select
-              class="time-select"
-              :value="startHour"
-              :aria-label="t('eta.hour')"
-              @change="setStartHour(($event.target as HTMLSelectElement).value)"
-            >
-              <option v-for="h in HOURS" :key="h" :value="h">{{ h }}</option>
-            </select>
-            <span class="time-sep">:</span>
-            <select
-              class="time-select"
-              :value="startMinute"
-              :aria-label="t('eta.minute')"
-              @change="setStartMinute(($event.target as HTMLSelectElement).value)"
-            >
-              <option v-for="m in MINUTES" :key="m" :value="m">{{ m }}</option>
-            </select>
-            <span class="unit">{{ t('eta.oclock') || 'Uhr' }}</span>
+            <div class="time-group">
+              <button
+                type="button"
+                class="time-step"
+                :aria-label="`${t('eta.hour')} −`"
+                @click="nudgeHour(-1)"
+              >
+                −
+              </button>
+              <select
+                class="time-select"
+                :value="startHour"
+                :aria-label="t('eta.hour')"
+                @change="setStartHour(($event.target as HTMLSelectElement).value)"
+              >
+                <option v-for="h in HOURS" :key="h" :value="h">{{ h }}</option>
+              </select>
+              <button
+                type="button"
+                class="time-step"
+                :aria-label="`${t('eta.hour')} +`"
+                @click="nudgeHour(1)"
+              >
+                +
+              </button>
+            </div>
+            <span class="time-sep" aria-hidden="true">:</span>
+            <div class="time-group">
+              <button
+                type="button"
+                class="time-step"
+                :aria-label="`${t('eta.minute')} −`"
+                @click="nudgeMinute(-1)"
+              >
+                −
+              </button>
+              <select
+                class="time-select"
+                :value="startMinute"
+                :aria-label="t('eta.minute')"
+                @change="setStartMinute(($event.target as HTMLSelectElement).value)"
+              >
+                <option v-for="m in MINUTES" :key="m" :value="m">{{ m }}</option>
+              </select>
+              <button
+                type="button"
+                class="time-step"
+                :aria-label="`${t('eta.minute')} +`"
+                @click="nudgeMinute(1)"
+              >
+                +
+              </button>
+            </div>
+            <span class="unit time-unit">{{ t('eta.oclock') || 'Uhr' }}</span>
           </div>
         </div>
       </div>
@@ -225,22 +278,22 @@ function setStartMinute(m: string) {
 
 .eta-fields {
   display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 0.65rem 0.75rem;
-  align-items: end;
+  grid-template-columns: 1fr;
+  gap: 0.85rem;
+  align-items: stretch;
 }
 
 .field {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 0.35rem;
   min-width: 0;
 }
 
 .field-label {
   font-size: 0.8rem;
-  font-weight: 600;
-  color: var(--text-muted);
+  font-weight: 800;
+  color: #111;
   text-transform: uppercase;
   letter-spacing: 0.03em;
 }
@@ -248,51 +301,112 @@ function setStartMinute(m: string) {
 .speed-row {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
-}
-
-.speed-row input[type='range'] {
-  flex: 1;
+  gap: 0.75rem;
   min-width: 0;
 }
 
+.speed-value {
+  flex: 0 0 auto;
+  width: auto;
+  min-width: 6.5rem;
+  gap: 0.25rem;
+  padding: 0.2rem 0.45rem;
+}
+
 .speed-num {
-  width: 3.2rem;
-  padding: 0.3rem 0.35rem;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  background: var(--surface);
-  font-size: 0.85rem;
-  font-weight: 600;
+  width: 2.75rem;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  font-size: 1rem;
+  font-weight: 800;
+  color: #111;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  -moz-appearance: textfield;
+}
+
+.speed-num::-webkit-outer-spin-button,
+.speed-num::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
 
 .unit {
-  font-size: 0.75rem;
-  color: var(--text-muted);
-  font-weight: 600;
+  font-size: 0.78rem;
+  color: #111;
+  font-weight: 800;
+  opacity: 0.7;
 }
 
 .time-row {
   display: flex;
   align-items: center;
-  gap: 0.2rem;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.time-group {
+  display: inline-flex;
+  align-items: stretch;
+  border: 2px solid #111;
+  background: #fff;
+  box-shadow: 3px 3px 0 #111;
+}
+
+.time-step {
+  width: 2.75rem;
+  min-height: 52px;
+  border: none;
+  border-radius: 0;
+  background: #f3efe6;
+  color: #111;
+  font: inherit;
+  font-size: 1.35rem;
+  font-weight: 800;
+  line-height: 1;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.time-step:hover {
+  background: var(--cta);
+}
+
+.time-step:active {
+  background: #111;
+  color: #fff;
 }
 
 .time-select {
-  padding: 0.35rem 0.25rem;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  background: var(--surface);
-  font-size: 0.9rem;
-  font-weight: 700;
+  min-width: 3.6rem;
+  min-height: 52px;
+  padding: 0.35rem 0.2rem;
+  border: none;
+  border-left: 2px solid #111;
+  border-right: 2px solid #111;
+  border-radius: 0;
+  background: #fff;
+  color: #111;
+  font-size: 1.25rem;
+  font-weight: 800;
   font-variant-numeric: tabular-nums;
+  text-align: center;
   cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
 }
 
 .time-sep {
-  font-weight: 700;
-  color: var(--text);
-  padding: 0 0.1rem;
+  font-weight: 800;
+  font-size: 1.35rem;
+  color: #111;
+  padding: 0 0.05rem;
+}
+
+.time-unit {
+  margin-left: 0.15rem;
 }
 
 .eta-hint {
@@ -311,16 +425,20 @@ function setStartMinute(m: string) {
 .filter-toggle {
   display: flex;
   align-items: flex-start;
-  gap: 0.45rem;
-  font-size: 0.82rem;
-  font-weight: 600;
+  gap: 0.55rem;
+  font-size: 0.9rem;
+  font-weight: 700;
   cursor: pointer;
   line-height: 1.35;
+  color: #111;
 }
 
 .filter-toggle input {
-  margin-top: 0.15rem;
+  margin-top: 0.1rem;
   flex-shrink: 0;
+  width: 1.25rem;
+  height: 1.25rem;
+  accent-color: #111;
 }
 
 .filter-meta {
@@ -335,13 +453,15 @@ function setStartMinute(m: string) {
 }
 
 .buffer-select {
-  padding: 0.3rem 0.4rem;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  background: var(--surface);
-  font-size: 0.82rem;
-  font-weight: 600;
+  padding: 0.55rem 0.65rem;
+  min-height: 48px;
+  border: 2px solid #111;
+  border-radius: 0;
+  background: #fff;
+  font-size: 0.9rem;
+  font-weight: 700;
   cursor: pointer;
+  box-shadow: 3px 3px 0 #111;
 }
 
 .eta-filter-hint {
@@ -352,8 +472,21 @@ function setStartMinute(m: string) {
 }
 
 @media (max-width: 768px) {
-  .eta-fields {
-    grid-template-columns: 1fr;
+  .time-step {
+    width: 3rem;
+    min-height: 56px;
+    font-size: 1.5rem;
+  }
+
+  .time-select {
+    min-width: 4rem;
+    min-height: 56px;
+    font-size: 1.4rem;
+  }
+
+  .speed-num {
+    font-size: 1.1rem;
+    width: 3rem;
   }
 }
 </style>

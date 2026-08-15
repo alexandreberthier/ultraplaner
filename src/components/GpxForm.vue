@@ -370,6 +370,9 @@ async function createMap() {
   display: flex;
   align-items: center;
   gap: 0.85rem;
+  min-height: 56px;
+  padding: 0.45rem 0.15rem 0.7rem;
+  box-sizing: border-box;
 }
 
 .radius-row input[type='range'] {
@@ -379,7 +382,7 @@ async function createMap() {
 
 .radius-slider::-webkit-slider-runnable-track,
 .radius-row input[type='range']::-webkit-slider-runnable-track {
-  height: 8px;
+  height: 10px;
   border-radius: 0;
   background: #d8d2c6;
   border: 2px solid #111;
@@ -388,39 +391,44 @@ async function createMap() {
 
 .radius-slider::-moz-range-track,
 .radius-row input[type='range']::-moz-range-track {
-  height: 8px;
+  height: 10px;
   border-radius: 0;
   background: #d8d2c6;
   border: 2px solid #111;
+  box-sizing: border-box;
 }
 
 .radius-slider::-webkit-slider-thumb,
 .radius-row input[type='range']::-webkit-slider-thumb {
-  width: 26px;
-  height: 26px;
-  margin-top: -11px;
+  width: 36px;
+  height: 36px;
+  margin-top: -15px;
   border-radius: 0;
   border: 3px solid #111;
   background: var(--cta);
-  box-shadow: 3px 3px 0 #111;
+  box-shadow: none;
 }
 
 .radius-slider::-moz-range-thumb,
 .radius-row input[type='range']::-moz-range-thumb {
-  width: 26px;
-  height: 26px;
+  width: 36px;
+  height: 36px;
   border-radius: 0;
   border: 3px solid #111;
   background: var(--cta);
-  box-shadow: 3px 3px 0 #111;
+  box-shadow: none;
 }
 
 .radius-value {
+  flex: 0 0 7.25rem;
+  width: 7.25rem;
+  box-sizing: border-box;
+  min-height: 2.75rem;
   border-radius: 0;
   border: 2px solid #111;
   background: #fff;
   color: #111;
-  box-shadow: 3px 3px 0 #111;
+  box-shadow: none;
   font-weight: 800;
 }
 
@@ -477,17 +485,22 @@ async function createMap() {
 }
 
 @media (max-width: 768px) {
+  .radius-row {
+    min-height: 68px;
+    padding: 0.55rem 0.1rem 0.85rem;
+  }
+
   .radius-slider::-webkit-slider-thumb,
   .radius-row input[type='range']::-webkit-slider-thumb {
-    width: 40px;
-    height: 40px;
-    margin-top: -18px;
+    width: 52px;
+    height: 52px;
+    margin-top: -22px;
   }
 
   .radius-slider::-moz-range-thumb,
   .radius-row input[type='range']::-moz-range-thumb {
-    width: 40px;
-    height: 40px;
+    width: 52px;
+    height: 52px;
   }
 }
 
