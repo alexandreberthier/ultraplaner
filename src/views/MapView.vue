@@ -19,6 +19,7 @@ import OfflinePackPanel from '../components/OfflinePackPanel.vue'
 import { useOnline } from '../composables/useOnline'
 import { useI18n } from 'vue-i18n'
 import TopbarSettings from '../components/TopbarSettings.vue'
+import RecentRoutesMenu from '../components/RecentRoutesMenu.vue'
 import { localeHomePath, type AppLocale } from '../i18n'
 import { useRideMode } from '../composables/useRideMode'
 import { useRidePosition } from '../composables/useRidePosition'
@@ -872,6 +873,7 @@ function onDocClick(e: MouseEvent) {
               </template>
             </div>
           </div>
+          <RecentRoutesMenu brutal tool-style />
           <button
             v-if="store.savedMapId"
             type="button"

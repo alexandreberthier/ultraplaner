@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n'
 import GpxForm from '../components/GpxForm.vue'
 import RecentMaps from '../components/RecentMaps.vue'
 import TopbarSettings from '../components/TopbarSettings.vue'
+import RecentRoutesMenu from '../components/RecentRoutesMenu.vue'
 import FeedbackForm from '../components/FeedbackForm.vue'
 import { localeHomePath, poisAlongRoutePath, type AppLocale } from '../i18n'
 import { useRouter } from 'vue-router'
@@ -150,6 +151,7 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
           {{ t('landing.backHome') }}
         </button>
         <div class="plan-topbar-actions">
+          <RecentRoutesMenu brutal />
           <button
             type="button"
             class="plan-export-btn"
@@ -215,7 +217,10 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
                 />
               </picture>
             </button>
-            <TopbarSettings brutal />
+            <div class="hero-top-actions">
+              <RecentRoutesMenu brutal />
+              <TopbarSettings brutal />
+            </div>
           </div>
 
           <div class="page-wrap hero-wrap">
@@ -548,6 +553,13 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
     0.15rem
     max(0.75rem, env(safe-area-inset-left, 0px));
   min-width: 0;
+}
+
+.hero-top-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex-shrink: 0;
 }
 
 .brand-lockup {

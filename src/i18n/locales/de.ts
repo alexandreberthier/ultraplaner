@@ -111,7 +111,7 @@ export default {
       q13: 'Export zu Wahoo, Garmin, COROS oder Strava?',
       a13: 'Nur markierte Favoriten ★ und Kontrollpunkte (⚑) gehen als Stops mit — nicht alle POIs auf der Karte (Garmin-Limit ~200 Course Points). Wahoo: „Mit Wahoo verbinden“ → „An Wahoo senden“. Garmin Edge: FIT Course speichern → USB Massenspeicher → Ordner Garmin/NewFiles (nicht Connect — dort gehen Course Points oft verloren). COROS Dura: am Desktop „An COROS senden“ (QR scannen) bzw. GPX herunterladen → in der COROS-App öffnen und speichern → Explore → Routenbibliothek → an Dura senden (keine Cloud-API wie bei Wahoo). Strava/Komoot: GPX; Wegpunkte je nach App unterschiedlich.',
       q14: 'Speichern & teilen?',
-      a14: '„Zuletzt geöffnet“ = GPX- und Planungs-Routen schnell wiederfinden (lokal) — Fahrt-Karten werden nicht gespeichert. „Route offline mitnehmen“ = Karte + POIs ohne Netz entlang der Strecke. Teilen-Link ~180 Tage online.',
+      a14: '„Routen“ / „Deine Routen“ = GPX- und Planungs-Routen schnell wiederfinden (lokal) — Fahrt-Karten werden nicht gespeichert. „Route offline mitnehmen“ = Karte + POIs ohne Netz entlang der Strecke. Teilen-Link ~180 Tage online.',
       q11: 'Feedback & Roadmap?',
       a11: 'Ideen gern über das Formular unten — geht direkt an mich (Alex). Wahoo-Cloud-Push ist live; Garmin bleibt vorerst FIT/USB (Connect-API nur nach Partner-Zugang). COROS-Cloud-API ist beantragt und geplant, sobald Partner-Zugang möglich ist — bis dahin QR/GPX. Öffnungszeiten verbessern wir laufend über OSM und Hinweise in der App.',
       // Legacy keys kept for safety (not shown on landing)
@@ -218,7 +218,7 @@ export default {
     intro:
       'Unterwegs? Fahrt nutzt deinen Standort und sucht Versorgung im Umkreis — ohne GPX. (Fahrtmodus nur mit Route.)',
     introMapFirst:
-      'Standort wird geholt und die Karte öffnet sich sofort (Standard: 3 km, Tankstellen, Supermärkte, Trinkwasser — ausgedünnt). Radius und Kategorien kannst du auf der Karte in den Fahrt-Optionen ändern.',
+      'Standort wird geholt und die Karte öffnet sich sofort (Standard: 3 km, Tankstellen, Supermärkte, Trinkwasser — ausgedünnt). Radius und Kategorien kannst du auf der Karte unter Standort POIs ändern.',
     introMap:
       'Standort erneut holen und POIs im Umkreis neu laden. (Kein Fahrtmodus — der braucht eine Route.)',
     introMapRoute:
@@ -234,7 +234,7 @@ export default {
     searchRescan: 'POIs neu laden',
     searching: 'Standort & POIs werden geladen…',
     mapName: 'Fahrt',
-    panelTitle: 'Fahrt-Optionen',
+    panelTitle: 'Standort POIs',
     panelSummaryNearby: 'Umkreis {m} m',
     panelSummaryRoute: 'Hier suchen',
     panelSummaryRouteKeep: 'Route bleibt · GPS-Umkreis',
@@ -256,8 +256,13 @@ export default {
       'Als App: Einstellungen → UltraPlaner → Standort → Beim Verwenden der App (nicht nur Safari-Website-Einstellungen).',
   },
   recent: {
-    title: 'Zuletzt geöffnet',
-    hint: 'GPX- und Planungs-Routen zum schnellen Wiederöffnen (nur dieser Browser). Fahrt erscheint hier nicht. Ohne Netz: Liste/Spickzettel — die Karte braucht „Route offline mitnehmen“.',
+    title: 'Deine Routen',
+    hint: 'GPX- und Planungs-Routen auf diesem Gerät. Tippen zum Öffnen. Fahrt-Scans erscheinen hier nicht. Offline-Karte nur nach „Route offline mitnehmen“.',
+    menuTitle: 'Routen',
+    menuShort: 'Routen',
+    menuHint: 'Zuletzt bearbeitete GPX-/Planungs-Routen auf diesem Gerät.',
+    loading: 'Lädt…',
+    empty: 'Noch keine gespeicherte Route — GPX laden oder Route planen.',
     open: 'Öffnen',
     remove: 'Entfernen',
     removeTitle: '„{name}“ vom Gerät entfernen',
@@ -340,7 +345,7 @@ export default {
     shareHintNative: 'Teilen-Funktion · Link ca. 180 Tage gültig',
     shareHintCopy: 'Link kopieren · online ca. 180 Tage gültig',
     shareCopiedHint: 'Online ca. 180 Tage gültig',
-    offlineBanner: 'Offline — nur Liste/Spickzettel aus „Zuletzt geöffnet“. Für die Karte: Route offline mitnehmen.',
+    offlineBanner: 'Offline — nur Liste/Spickzettel aus „Routen“. Für die Karte: Route offline mitnehmen.',
     offlineBannerPack: 'Offline-Pack aktiv — Karte und POIs entlang der Strecke von diesem Gerät.',
     offlinePackReadyBanner: 'Route offline mitgenommen. Ohne Internet: Karte + POIs entlang der Strecke.',
     exportTipDesktop: 'Als Nächstes: POIs mit ★ markieren — oder oben „Nur Route“ ohne Favoriten exportieren.',
@@ -371,7 +376,7 @@ export default {
     sheetPois: 'Versorgungspunkte',
     sheetExport: 'Route exportieren',
     sheetLegend: 'Legende',
-    sheetNearby: 'Fahrt-Optionen',
+    sheetNearby: 'Standort POIs',
     exportIntro: '★ Favoriten · Gerät · Schritte',
     gpxRoutePois: 'GPX — nur Route',
     gpxRoutePoisHint: 'Nur Track, ohne Wegpunkte',
@@ -419,7 +424,7 @@ export default {
     needSavedMap: 'Karte muss zuerst gespeichert sein (kurz warten).',
     noCoverageAroundGps:
       'Offline: An deinem Standort ist nichts aus der gespeicherten Route verfügbar. Route erneut offline vorbereiten oder online laden.',
-    help: 'Zuerst die App einmal online öffnen (am besten als PWA auf dem Homescreen). Dann per WLAN die Strecke speichern: Kartenkacheln + POIs. Unterwegs ohne Internet: Homescreen-Icon → gespeicherte Route. Anders als „Zuletzt geöffnet“ (nur Liste).',
+    help: 'Zuerst die App einmal online öffnen (am besten als PWA auf dem Homescreen). Dann per WLAN die Strecke speichern: Kartenkacheln + POIs. Unterwegs ohne Internet: Homescreen-Icon → gespeicherte Route. Anders als „Routen“ (nur Liste).',
     where: 'Status hier und Hinweis oben auf der Karte.',
     hint: 'Am besten per WLAN. Nur diese Route — nicht der Fahrt-Scan um deinen Standort.',
   },
@@ -756,7 +761,7 @@ export default {
     supabaseNotConfigured: 'Kartenspeicher vorübergehend nicht erreichbar',
     supabaseNotConfiguredEnv: 'Kartenspeicher vorübergehend nicht erreichbar — bitte später erneut versuchen.',
     saveFailedUser:
-      'Online-Speichern fehlgeschlagen. Export geht trotzdem — Teilen und „Zuletzt geöffnet“ erst nach erfolgreichem Speichern.',
+      'Online-Speichern fehlgeschlagen. Export geht trotzdem — Teilen und „Routen“ erst nach erfolgreichem Speichern.',
     routeTooLong: 'Route zu lang (max. {max} km, ist {km} km)',
     routeTooFew: 'Route hat zu wenige Punkte',
     offlineNoCache: 'Karte offline nicht im Cache — einmal online öffnen',

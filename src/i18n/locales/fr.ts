@@ -217,7 +217,7 @@
     intro:
       'En selle ? Trajet utilise votre position pour chercher des ravitaillements dans un rayon — sans GPX. (Mode conduite seulement avec une route.)',
     introMapFirst:
-      'La position est récupérée et la carte s’ouvre tout de suite (défaut : 3 km, stations, supermarchés, eau — éclairci). Changez rayon et catégories sur la carte sous Options Trajet.',
+      'La position est récupérée et la carte s’ouvre tout de suite (défaut : 3 km, stations, supermarchés, eau — éclairci). Changez rayon et catégories sur la carte sous POIs autour de vous.',
     introMap:
       'Rafraîchir le GPS et recharger les POIs dans le rayon. (Pas de mode conduite — il faut une route.)',
     introMapRoute:
@@ -233,7 +233,7 @@
     searchRescan: 'Recharger les POIs',
     searching: 'Chargement de la position et des POIs…',
     mapName: 'Trajet',
-    panelTitle: 'Options Trajet',
+    panelTitle: 'POIs autour de vous',
     panelSummaryNearby: 'Rayon {m} m',
     panelSummaryRoute: 'Chercher ici',
     panelSummaryRouteKeep: 'Route conservée · rayon GPS',
@@ -255,8 +255,13 @@
       'En app : Réglages → UltraPlaner → Position → Lorsque l’app est active (pas seulement les réglages du site Safari).',
   },
   recent: {
-    title: 'Récents',
-    hint: 'Routes GPX et planifiées pour rouvrir vite (ce navigateur seulement). Trajet n’apparaît pas ici. Hors ligne : liste/mémo — la carte demande « Emporter la route offline ».',
+    title: 'Vos routes',
+    hint: 'Routes GPX et planifiées sur cet appareil. Toucher pour ouvrir. Trajet n’apparaît pas ici. Carte hors ligne seulement après « Emporter la route offline ».',
+    menuTitle: 'Routes',
+    menuShort: 'Routes',
+    menuHint: 'Routes GPX/planifiées récemment modifiées sur cet appareil.',
+    loading: 'Chargement…',
+    empty: 'Pas encore de route — importez un GPX ou planifiez une route.',
     open: 'Ouvrir',
     remove: 'Supprimer',
     removeTitle: 'Retirer «{name}» de l\'appareil',
@@ -370,7 +375,7 @@
     sheetPois: 'Points de ravitaillement',
     sheetExport: 'Exporter la route',
     sheetLegend: 'Légende',
-    sheetNearby: 'Options Trajet',
+    sheetNearby: 'POIs autour de vous',
     exportIntro: '★ favoris · appareil · étapes',
     gpxRoutePois: 'GPX — route seule',
     gpxRoutePoisHint: 'Track uniquement, sans points',

@@ -73,7 +73,6 @@ async function load() {
       mapId: store.savedMapId,
       routeCoords: store.routeCoords,
       routePoints: store.routePoints,
-      favoritePois: store.favoritePois,
       startTimeHHmm: store.startTimeHHmm,
       avgSpeedKmh: store.avgSpeedKmh,
     })
@@ -103,7 +102,6 @@ watch(
       store.startTimeHHmm,
       store.avgSpeedKmh,
       store.routeCoords.length,
-      store.favorites.size,
     ] as const,
   scheduleLoad,
   { immediate: true }

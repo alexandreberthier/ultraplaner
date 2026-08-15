@@ -1,8 +1,8 @@
-import type { Poi, RoutePoint } from '../../shared/types'
+import type { RoutePoint } from '../../shared/types'
 import { hoursForDistanceKm } from '../utils/eta'
 import { tGlobal } from '../i18n'
 
-export type WeatherLabel = 'start' | 'mid' | 'end' | 'fav'
+export type WeatherLabel = 'start' | 'mid' | 'end'
 
 export interface WeatherSample {
   label: WeatherLabel
@@ -57,8 +57,7 @@ function hourIndexForEta(
 
 function pickPoints(
   routeCoords: [number, number][],
-  routePoints: RoutePoint[],
-  favorites: Poi[]
+  routePoints: RoutePoint[]
 ): { label: WeatherLabel; title: string; lng: number; lat: number; routeKm: number }[] {
   if (routeCoords.length < 2) return []
 
@@ -66,69 +65,29 @@ function pickPoints(
   const mid = Math.floor(routeCoords.length / 2)
   const totalKm = routePoints[routePoints.length - 1]?.distanceFromStart ?? 0
 
-  const points: { label: WeatherLabel; title: string; lng: number; lat: number; routeKm: number }[] =
-    [
-      {
-        label: 'start',
-        title: tGlobal('weather.start'),
-        lng: routeCoords[0]![0],
-        lat: routeCoords[0]![1],
-        routeKm: 0,
-      },
-      {
-        label: 'mid',
-        title: tGlobal('weather.mid'),
-        lng: routeCoords[mid]![0],
-        lat: routeCoords[mid]![1],
-        routeKm: totalKm / 2,
-      },
-      {
-        label: 'end',
-        title: tGlobal('weather.end'),
-        lng: routeCoords[last]![0],
-        lat: routeCoords[last]![1],
-        routeKm: totalKm,
-      },
-    ]
-
-  const spaced = [...favorites]
-    .filter((p) => p.distanceAlongRouteKm != null)
-    .sort((a, b) => (a.distanceAlongRouteKm ?? 0) - (b.distanceAlongRouteKm ?? 0))
-
-  if (spaced.length >= 2) {
-    const a = spaced[0]!
-    const b = spaced[spaced.length - 1]!
-    if ((b.distanceAlongRouteKm ?? 0) - (a.distanceAlongRouteKm ?? 0) > 15) {
-      points.push({
-        label: 'fav',
-        title: a.name || tGlobal('export.favorite'),
-        lng: a.lng,
-        lat: a.lat,
-        routeKm: a.distanceAlongRouteKm ?? 0,
-      })
-      points.push({
-        label: 'fav',
-        title: b.name || tGlobal('export.favorite'),
-        lng: b.lng,
-        lat: b.lat,
-        routeKm: b.distanceAlongRouteKm ?? 0,
-      })
-    }
-  } else if (spaced.length === 1) {
-    const a = spaced[0]!
-    const km = a.distanceAlongRouteKm ?? 0
-    if (km > 10 && km < totalKm - 10) {
-      points.push({
-        label: 'fav',
-        title: a.name || tGlobal('export.favorite'),
-        lng: a.lng,
-        lat: a.lat,
-        routeKm: km,
-      })
-    }
-  }
-
-  return points.slice(0, 5)
+  return [
+    {
+      label: 'start',
+      title: tGlobal('weather.start'),
+      lng: routeCoords[0]![0],
+      lat: routeCoords[0]![1],
+      routeKm: 0,
+    },
+    {
+      label: 'mid',
+      title: tGlobal('weather.mid'),
+      lng: routeCoords[mid]![0],
+      lat: routeCoords[mid]![1],
+      routeKm: totalKm / 2,
+    },
+    {
+      label: 'end',
+      title: tGlobal('weather.end'),
+      lng: routeCoords[last]![0],
+      lat: routeCoords[last]![1],
+      routeKm: totalKm,
+    },
+  ]
 }
 
 function cacheKey(
@@ -146,11 +105,10 @@ export async function fetchRouteWeather(opts: {
   mapId: string | null
   routeCoords: [number, number][]
   routePoints: RoutePoint[]
-  favoritePois: Poi[]
   startTimeHHmm: string
   avgSpeedKmh: number
 }): Promise<RouteWeather | null> {
-  const points = pickPoints(opts.routeCoords, opts.routePoints, opts.favoritePois)
+  const points = pickPoints(opts.routeCoords, opts.routePoints)
   if (!points.length) return null
 
   const key = cacheKey(opts.mapId, points, opts.startTimeHHmm, opts.avgSpeedKmh)

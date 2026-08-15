@@ -218,7 +218,7 @@ export default {
     intro:
       '¿En la bici? En ruta usa tu ubicación para buscar avituallamiento en un radio — sin GPX. (Modo de marcha solo con ruta.)',
     introMapFirst:
-      'Se obtiene tu ubicación y se abre el mapa al momento (por defecto: 3 km, gasolineras, supermercados, agua — filtrado). Cambia radio y categorías en el mapa bajo opciones En ruta.',
+      'Se obtiene tu ubicación y se abre el mapa al momento (por defecto: 3 km, gasolineras, supermercados, agua — filtrado). Cambia radio y categorías en el mapa bajo POIs de ubicación.',
     introMap:
       'Actualiza el GPS y vuelve a cargar los POIs en el radio. (Sin modo de marcha — hace falta una ruta.)',
     introMapRoute:
@@ -234,7 +234,7 @@ export default {
     searchRescan: 'Recargar POIs',
     searching: 'Cargando ubicación y POIs…',
     mapName: 'En ruta',
-    panelTitle: 'Opciones en ruta',
+    panelTitle: 'POIs de ubicación',
     panelSummaryNearby: 'Radio {m} m',
     panelSummaryRoute: 'Buscar aquí',
     panelSummaryRouteKeep: 'Ruta se mantiene · radio GPS',
@@ -256,8 +256,13 @@ export default {
       'Como app: Ajustes → UltraPlaner → Ubicación → Al usar la app (no solo ajustes del sitio en Safari).',
   },
   recent: {
-    title: 'Recientes',
-    hint: 'Rutas GPX y planificadas para reabrir rápido (solo este navegador). En ruta no aparece aquí. Sin red: lista/chuleta — el mapa necesita « Llevar ruta offline ».',
+    title: 'Tus rutas',
+    hint: 'Rutas GPX y planificadas en este dispositivo. Toca para abrir. En ruta no aparece aquí. Mapa offline solo tras « Llevar ruta offline ».',
+    menuTitle: 'Rutas',
+    menuShort: 'Rutas',
+    menuHint: 'Rutas GPX/planificadas editadas recientemente en este dispositivo.',
+    loading: 'Cargando…',
+    empty: 'Aún no hay ruta — sube un GPX o planifica una ruta.',
     open: 'Abrir',
     remove: 'Eliminar',
     removeTitle: 'Eliminar «{name}» del dispositivo',
@@ -371,7 +376,7 @@ export default {
     sheetPois: 'Puntos de avituallamiento',
     sheetExport: 'Exportar ruta',
     sheetLegend: 'Leyenda',
-    sheetNearby: 'Opciones en ruta',
+    sheetNearby: 'POIs de ubicación',
     exportIntro: '★ favoritos · dispositivo · pasos',
     gpxRoutePois: 'GPX — solo ruta',
     gpxRoutePoisHint: 'Solo track, sin waypoints',

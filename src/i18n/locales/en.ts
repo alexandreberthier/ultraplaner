@@ -134,7 +134,7 @@ export default {
       q20: 'How does “Connect Wahoo” work?',
       a20: 'No UltraPlaner account needed. You sign in to Wahoo once; the link stays in this browser/device only (tokens stored locally). Then use “Send to Wahoo”. “Disconnect Wahoo” clears tokens here — on another phone or after clearing cache, just connect again. The route appears in the Wahoo app and on the ELEMNT (not the legacy ELEMNT app).',
       q14: 'Save & share?',
-      a14: '“Recently opened” = reopen GPX and planned routes quickly (local) — Ride maps are not saved. “Take route offline” = map + POIs without internet along the route. Share link ~180 days online.',
+      a14: '“Routes” / “Your routes” = reopen GPX and planned routes quickly (local) — Ride maps are not saved. “Take route offline” = map + POIs without internet along the route. Share link ~180 days online.',
       q15: 'What do the red zones on the elevation profile mean?',
       a15: 'Red markings show supply gaps: stretches of at least about 25 km without a POI under your current categories/filters. That helps you spot where to plan extra or mark favorites.',
       q16: 'What is “Ride”?',
@@ -218,7 +218,7 @@ export default {
     intro:
       'On the bike? Ride uses your location to find supply in a radius — no GPX. (Ride mode only with a route.)',
     introMapFirst:
-      'Getting your location and opening the map right away (defaults: 3 km, fuel, supermarkets, drinking water — thinned). Change radius and categories on the map under Ride options.',
+      'Getting your location and opening the map right away (defaults: 3 km, fuel, supermarkets, drinking water — thinned). Change radius and categories on the map under Location POIs.',
     introMap:
       'Refresh your GPS and reload POIs in the radius. (No ride mode — that needs a route.)',
     introMapRoute:
@@ -234,7 +234,7 @@ export default {
     searchRescan: 'Reload POIs',
     searching: 'Loading location & POIs…',
     mapName: 'Ride',
-    panelTitle: 'Ride options',
+    panelTitle: 'Location POIs',
     panelSummaryNearby: 'Radius {m} m',
     panelSummaryRoute: 'Search here',
     panelSummaryRouteKeep: 'Route stays · GPS radius',
@@ -256,8 +256,13 @@ export default {
       'As an app: Settings → UltraPlaner → Location → While Using the App (not only Safari website settings).',
   },
   recent: {
-    title: 'Recently opened',
-    hint: 'GPX and planned routes to reopen quickly (this browser only). Ride maps are not listed. Offline: list/cheat sheet — the map needs “Take route offline”.',
+    title: 'Your routes',
+    hint: 'GPX and planned routes on this device. Tap to open. Ride scans are not listed. Offline map only after “Take route offline”.',
+    menuTitle: 'Routes',
+    menuShort: 'Routes',
+    menuHint: 'Recently edited GPX/planned routes on this device.',
+    loading: 'Loading…',
+    empty: 'No saved route yet — upload a GPX or plan a route.',
     open: 'Open',
     remove: 'Remove',
     removeTitle: 'Remove "{name}" from device',
@@ -340,7 +345,7 @@ export default {
     shareHintNative: 'Share · link valid ~180 days',
     shareHintCopy: 'Copy link · valid online ~180 days',
     shareCopiedHint: 'Valid online ~180 days',
-    offlineBanner: 'Offline — list/cheat sheet from “Recently opened” only. For the map: take route offline.',
+    offlineBanner: 'Offline — list/cheat sheet from “Routes” only. For the map: take route offline.',
     offlineBannerPack: 'Offline pack active — map and POIs along the route from this device.',
     offlinePackReadyBanner: 'Route taken offline. No internet: map + POIs along the route.',
     exportTipDesktop: 'Next: star POIs with ★ — or export “Route only” above without favorites.',
@@ -371,7 +376,7 @@ export default {
     sheetPois: 'Supply points',
     sheetExport: 'Export route',
     sheetLegend: 'Legend',
-    sheetNearby: 'Ride options',
+    sheetNearby: 'Location POIs',
     exportIntro: '★ favorites · device · steps',
     gpxRoutePois: 'GPX — route only',
     gpxRoutePoisHint: 'Track only, no waypoints',
@@ -419,7 +424,7 @@ export default {
     needSavedMap: 'Map must be saved first (wait a moment).',
     noCoverageAroundGps:
       'Offline: nothing from the saved route is available at your location. Prepare the route offline again or go online.',
-    help: 'Downloads the whole route to this device: map tiles + POIs along the track. On the road without internet you see map and supply — unlike “Recently opened” (reopen only).',
+    help: 'Downloads the whole route to this device: map tiles + POIs along the track. On the road without internet you see map and supply — unlike “Routes” (reopen only).',
     where: 'Status here and a notice on the map.',
     hint: 'Wi‑Fi recommended. This route only — not the Ride GPS scan.',
   },
@@ -754,7 +759,7 @@ export default {
     supabaseNotConfigured: 'Map storage temporarily unavailable',
     supabaseNotConfiguredEnv: 'Map storage temporarily unavailable — please try again later.',
     saveFailedUser:
-      'Online save failed. Export still works — share link and “Recently opened” only after a successful save.',
+      'Online save failed. Export still works — share link and “Routes” only after a successful save.',
     routeTooLong: 'Route too long (max. {max} km, is {km} km)',
     routeTooFew: 'Route has too few points',
     offlineNoCache: 'Map not in offline cache — open online once',
