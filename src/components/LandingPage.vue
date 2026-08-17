@@ -201,17 +201,17 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
               <picture>
                 <source
                   srcset="/logo-ultraplaner-64.webp 64w, /logo-ultraplaner-96.webp 96w, /logo-ultraplaner-200.webp 200w"
-                  sizes="26px"
+                  sizes="40px"
                   type="image/webp"
                 />
                 <img
                   class="brand-logo"
                   src="/logo-ultraplaner-64.png"
                   srcset="/logo-ultraplaner-64.png 64w, /logo-ultraplaner-96.png 96w, /logo-ultraplaner-200.png 200w"
-                  sizes="26px"
+                  sizes="40px"
                   alt="UltraPlaner"
-                  width="64"
-                  height="64"
+                  width="40"
+                  height="40"
                   decoding="async"
                 />
               </picture>
@@ -577,9 +577,8 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
 
 .brand-logo {
   display: block;
-  height: 1.85rem;
-  width: auto;
-  max-width: min(190px, 46vw);
+  height: 2.5rem;
+  width: 2.5rem;
   object-fit: contain;
 }
 
@@ -1421,7 +1420,8 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
   }
 
   .brand-logo {
-    height: 1.65rem;
+    height: 2.25rem;
+    width: 2.25rem;
   }
 
   .stats-bar,
