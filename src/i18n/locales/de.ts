@@ -41,6 +41,8 @@ export default {
     skipToContent: 'Zum Inhalt',
     appTitle: 'Route starten',
     appIntro: 'GPX, Planung oder Fahrt — unterwegs ein Tipp genügt.',
+    appPrivacy:
+      'Standort nur, wenn du Fahrt oder den Fahrtmodus startest. Die App fragt dann Android — kein Bewegungsprofil, keine Werbung.',
     discardPlan: 'Wegpunkte verwerfen und zur Startseite zurück?',
     backHome: '← Startseite',
     settingsMenu: 'Darstellung & Sprache',

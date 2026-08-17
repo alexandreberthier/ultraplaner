@@ -41,6 +41,8 @@ export default {
     skipToContent: 'Ir al contenido',
     appTitle: 'Empezar la ruta',
     appIntro: 'GPX, planificación o En ruta — un toque en carrera.',
+    appPrivacy:
+      'La ubicación solo se usa al iniciar En ruta o el modo marcha. Android preguntará antes — sin perfil de movimiento ni anuncios.',
     discardPlan: '¿Descartar waypoints y volver al inicio?',
     backHome: '← Inicio',
     settingsMenu: 'Apariencia e idioma',

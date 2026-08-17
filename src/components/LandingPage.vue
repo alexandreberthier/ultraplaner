@@ -18,6 +18,7 @@ import {
   NEARBY_GEO_OPTIONS,
 } from '../utils/nearbyGeo'
 import { withNativeLocationPermission } from '../utils/nativeLocation'
+import { isNativeApp } from '../utils/nativeApp'
 
 /** MapLibre only when user opens „Route planen“ — keeps landing light. */
 const RoutePlanner = defineAsyncComponent(() => import('../components/RoutePlanner.vue'))
@@ -35,6 +36,7 @@ const plannerRef = ref<{
 } | null>(null)
 const plannerCanExport = ref(false)
 const nearbyPending = ref(false)
+const nativeApp = isNativeApp()
 
 function scrollToApp() {
   appRef.value?.scrollIntoView({ behavior: 'smooth' })
@@ -149,7 +151,7 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
 </script>
 
 <template>
-  <div class="landing" :class="{ 'plan-fullscreen': tab === 'plan' }">
+  <div class="landing" :class="{ 'plan-fullscreen': tab === 'plan', 'landing--native': nativeApp }">
     <a href="#app-start" class="skip-link">{{ t('landing.skipToContent') }}</a>
 
     <main id="main-content">
@@ -183,8 +185,8 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
     </template>
 
     <template v-else>
-      <div class="hero-band">
-        <div class="hero-media">
+      <div class="hero-band" :class="{ 'hero-band--app': nativeApp }">
+        <div v-if="!nativeApp" class="hero-media">
           <picture>
             <source
               media="(min-width: 641px)"
@@ -231,7 +233,7 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
             </div>
           </div>
 
-          <div class="page-wrap hero-wrap">
+          <div v-if="!nativeApp" class="page-wrap hero-wrap">
             <div class="hero-center">
               <h1 class="hero-title">
                 <span class="hero-title-lead">{{ t('landing.heroLine1') }}</span>
@@ -245,11 +247,12 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
               </div>
             </div>
           </div>
+          <p v-else class="app-chrome-sub">{{ t('landing.appIntro') }}</p>
         </header>
       </div>
 
       <div class="page-wrap">
-        <div class="stats-bar">
+        <div v-if="!nativeApp" class="stats-bar">
           <div class="stat">
             <strong>{{ t('landing.stats.regions') }}</strong>
             <span>{{ t('landing.stats.regionsDesc') }}</span>
@@ -269,6 +272,7 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
         <section id="app-start" ref="appRef" class="app-section" tabindex="-1">
           <div class="section-head">
             <h2>{{ t('landing.appTitle') }}</h2>
+            <p v-if="nativeApp" class="app-privacy">{{ t('landing.appPrivacy') }}</p>
           </div>
 
           <div class="mode-tabs" role="tablist" aria-label="App-Modus">
@@ -324,6 +328,7 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
           </section>
         </section>
 
+        <template v-if="!nativeApp">
         <section class="how-section">
           <h2>{{ t('landing.how.title') }}</h2>
           <div class="steps">
@@ -395,6 +400,7 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
             </div>
           </div>
         </section>
+        </template>
 
         <FeedbackForm />
 
@@ -485,6 +491,35 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
   align-items: stretch;
   border-bottom: 3px solid #111;
   overflow: hidden;
+}
+
+.hero-band--app {
+  min-height: 0;
+  overflow: visible;
+  background: #f3efe6;
+}
+
+.hero-band--app .hero {
+  min-height: 0;
+  padding: 0;
+  flex: 0 0 auto;
+}
+
+.app-chrome-sub {
+  margin: 0;
+  padding: 0.15rem 1.1rem 0.85rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #111;
+}
+
+.app-privacy {
+  margin: 0.4rem 0 0;
+  font-size: 0.88rem;
+  font-weight: 650;
+  line-height: 1.35;
+  color: #111;
+  max-width: 36rem;
 }
 
 .hero-media {
@@ -1269,6 +1304,22 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
   z-index: 40;
 }
 
+.landing--native .plan-topbar {
+  padding-top: calc(0.7rem + env(safe-area-inset-top, 0px));
+}
+
+.landing--native .page-wrap {
+  padding-top: 0.35rem;
+}
+
+.landing--native .stats-bar {
+  display: none;
+}
+
+.landing--native .app-section {
+  padding-top: 1.15rem;
+}
+
 .back-btn {
   border: 2px solid #111;
   background: var(--cta);
@@ -1411,8 +1462,17 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
     min-height: min(46vh, 440px);
   }
 
+  .hero-band--app,
+  .hero-band--app .hero {
+    min-height: 0;
+  }
+
   .hero {
     padding-bottom: 3.5rem;
+  }
+
+  .hero-band--app .hero {
+    padding-bottom: 0;
   }
 
   .hero-center {

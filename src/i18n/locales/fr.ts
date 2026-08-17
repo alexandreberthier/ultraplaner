@@ -41,6 +41,8 @@
     skipToContent: 'Aller au contenu',
     appTitle: 'Démarrer la route',
     appIntro: 'GPX, planification ou Trajet — un tap en course.',
+    appPrivacy:
+      'La position n’est utilisée que pour Trajet ou le mode route. Android demandera d’abord — pas de profil de déplacement, pas de pub.',
     discardPlan: 'Abandonner les points de passage et revenir à l’accueil ?',
     backHome: '← Accueil',
     settingsMenu: 'Affichage et langue',
