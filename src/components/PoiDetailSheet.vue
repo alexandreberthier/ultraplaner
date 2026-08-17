@@ -2,12 +2,17 @@
 import { computed, nextTick, onUnmounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useMapStore } from '../stores/mapStore'
-import { formatDistance, formatKm } from '../services/geo'
-import { poiCategoryLabel } from '../utils/poiLabels'
+import { useRideMode } from '../composables/useRideMode'
+import { useRidePosition } from '../composables/useRidePosition'
+import { formatDistance, formatKm, haversineM } from '../services/geo'
+import { poiCategoryEmoji, poiCategoryLabel } from '../utils/poiLabels'
 import { googleMapsDirectionsUrl } from '../services/navigation'
+import { hasOsmOpeningHours, openStatusAtEta } from '../utils/openingHours'
 
 const store = useMapStore()
 const { t } = useI18n()
+const { rideMode } = useRideMode()
+const { rideKmAlong, rideLatLng } = useRidePosition()
 
 const isFavorite = computed(() =>
   store.selectedPoi ? store.favorites.has(store.selectedPoi.id) : false
@@ -124,6 +129,28 @@ const googleNavHref = computed(() => {
   return googleMapsDirectionsUrl(poi.lat, poi.lng)
 })
 
+const rideDistanceKm = computed(() => {
+  const poi = store.selectedPoi
+  if (!poi) return 0
+  if (poi.distanceAlongRouteKm != null && rideKmAlong.value != null) {
+    return Math.abs(poi.distanceAlongRouteKm - rideKmAlong.value)
+  }
+  if (rideLatLng.value) {
+    return haversineM(rideLatLng.value, { lat: poi.lat, lng: poi.lng }) / 1000
+  }
+  return (poi.distanceToRouteM ?? 0) / 1000
+})
+
+const rideOpen = computed(() => {
+  const poi = store.selectedPoi
+  if (!poi) return null
+  const status = openStatusAtEta(poi, new Date(), { bufferMinutes: 0 })
+  if (status === 'open') return { status, label: t('map.rideOpenNow') }
+  if (status === 'closed') return { status, label: t('map.rideClosedNow') }
+  if (hasOsmOpeningHours(poi)) return { status: 'unknown', label: t('map.rideHoursUnknown') }
+  return null
+})
+
 function onNavigate() {
   if (renameOpen.value) saveRename()
   else persistFavName()
@@ -133,7 +160,60 @@ function onNavigate() {
 
 <template>
   <div
-    v-if="store.selectedPoi"
+    v-if="store.selectedPoi && rideMode"
+    class="ride-peek"
+  >
+    <div
+      class="ride-peek-card"
+      role="dialog"
+      :aria-label="displayName"
+    >
+      <div class="ride-peek-row">
+        <span class="ride-peek-emoji" aria-hidden="true">{{
+          poiCategoryEmoji(store.selectedPoi.category)
+        }}</span>
+        <div class="ride-peek-text">
+          <strong>{{ displayName }}</strong>
+          <div class="ride-peek-meta">
+            <span class="ride-peek-dist">{{ formatKm(rideDistanceKm) }}</span>
+            <span
+              v-if="rideOpen"
+              class="ride-open"
+              :class="`ride-open--${rideOpen.status}`"
+            >
+              {{ rideOpen.label }}
+            </span>
+          </div>
+        </div>
+        <button type="button" class="ride-peek-close" :aria-label="t('detail.close')" @click="onClose()">
+          ×
+        </button>
+      </div>
+      <div class="ride-peek-actions">
+        <a
+          class="ride-peek-maps"
+          :href="googleNavHref"
+          target="_blank"
+          rel="noopener noreferrer"
+          @click="onNavigate"
+        >
+          {{ t('detail.navigate') }}
+        </a>
+        <button
+          type="button"
+          class="ride-peek-fav"
+          :class="{ active: isFavorite }"
+          :aria-label="isFavorite ? t('detail.removeFavorite') : t('detail.addFavorite')"
+          @click="onToggleFavorite"
+        >
+          {{ isFavorite ? '★' : '☆' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div
+    v-else-if="store.selectedPoi"
     class="sheet-backdrop"
     @click.self="onClose()"
     @touchmove.self.prevent
@@ -485,6 +565,154 @@ dd {
   .nav-btn {
     min-height: 56px;
     font-size: 1.18rem;
+  }
+}
+
+.ride-peek {
+  position: fixed;
+  left: 0.45rem;
+  right: 0.45rem;
+  bottom: calc(0.45rem + env(safe-area-inset-bottom, 0px));
+  z-index: 45;
+  pointer-events: none;
+}
+
+.ride-peek-card {
+  pointer-events: auto;
+  width: 100%;
+  max-width: 28rem;
+  margin: 0 auto;
+  padding: 0.55rem 0.65rem 0.6rem;
+  border: 3px solid #111;
+  background: #fff;
+  box-shadow: 4px 4px 0 #111;
+}
+
+.ride-peek-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.45rem;
+}
+
+.ride-peek-emoji {
+  flex-shrink: 0;
+  font-size: 1.45rem;
+  line-height: 1.2;
+}
+
+.ride-peek-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.ride-peek-text strong {
+  display: block;
+  font-size: 1.05rem;
+  font-weight: 800;
+  line-height: 1.25;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ride-peek-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.55rem;
+  margin-top: 0.2rem;
+}
+
+.ride-peek-dist {
+  font-size: 1.15rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  color: var(--primary, #2d6a4f);
+}
+
+.ride-open {
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 0.12rem 0.4rem;
+  border: 2px solid #111;
+  background: #e5e7eb;
+  color: #111;
+}
+
+.ride-open--open {
+  background: color-mix(in srgb, var(--primary, #2d6a4f) 22%, #fff);
+}
+
+.ride-open--closed {
+  background: #fecaca;
+}
+
+.ride-open--unknown {
+  background: #f3efe6;
+}
+
+.ride-peek-close {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  margin: -0.15rem -0.1rem 0 0;
+  border: 2px solid #111;
+  background: #fff;
+  font-size: 1.55rem;
+  font-weight: 800;
+  line-height: 1;
+  color: #111;
+  cursor: pointer;
+  box-shadow: 2px 2px 0 #111;
+}
+
+.ride-peek-actions {
+  display: flex;
+  gap: 0.4rem;
+  margin-top: 0.5rem;
+}
+
+.ride-peek-maps {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0.35rem 0.55rem;
+  border: 2px solid #111;
+  background: #fff;
+  color: #111;
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 800;
+  text-decoration: none;
+  text-align: center;
+  box-shadow: 2px 2px 0 #111;
+}
+
+.ride-peek-fav {
+  flex-shrink: 0;
+  width: 44px;
+  min-height: 44px;
+  border: 2px solid #111;
+  background: var(--cta, #facc15);
+  color: #111;
+  font-size: 1.25rem;
+  cursor: pointer;
+  box-shadow: 2px 2px 0 #111;
+}
+
+.ride-peek-fav.active {
+  background: #dc2626;
+  color: #fff;
+}
+
+@media (min-width: 769px) {
+  .ride-peek {
+    left: auto;
+    right: 1rem;
+    bottom: 1rem;
+    width: min(22rem, calc(100vw - 2rem));
   }
 }
 </style>

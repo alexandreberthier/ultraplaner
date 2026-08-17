@@ -1048,6 +1048,8 @@ function routeCursorGeoJson() {
 
 function focusOnPoi(lng: number, lat: number) {
   if (!map) return
+  // Ride follow would snap back on the next GPS tick — keep the camera on the rider.
+  if (props.rideMode && followActive.value && !userPanning.value) return
   const zoom = Math.max(map.getZoom(), 14)
   map.easeTo({ center: [lng, lat], zoom, duration: 550 })
 }

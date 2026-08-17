@@ -340,6 +340,7 @@ function enterRideMode() {
 }
 
 function exitRideMode() {
+  store.closePoiDetail()
   setRideMode(false)
   mapCanvasRef.value?.stopLocation()
   void wakeLock.release()
@@ -349,6 +350,10 @@ function exitRideMode() {
 function onRideKey(e: KeyboardEvent) {
   if (e.key !== 'Escape' || !rideMode.value) return
   e.preventDefault()
+  if (store.selectedPoi) {
+    store.closePoiDetail()
+    return
+  }
   exitRideMode()
 }
 
@@ -464,7 +469,8 @@ function toggleSidebar() {
 }
 
 function syncMapDragPan() {
-  const overlayOpen = mobilePanel.value !== 'none' || Boolean(store.selectedPoi)
+  const overlayOpen =
+    mobilePanel.value !== 'none' || (Boolean(store.selectedPoi) && !rideMode.value)
   document.documentElement.classList.toggle('map-overlay-open', overlayOpen)
   mapCanvasRef.value?.setDragPanEnabled(!overlayOpen)
 }
@@ -549,7 +555,12 @@ function onDocClick(e: MouseEvent) {
   <div
     v-if="store.mapReady"
     class="map-layout"
-    :class="{ 'sidebar-closed': !sidebarOpen, 'ride-mode': rideMode, 'nearby-map': store.isNearbyMap }"
+    :class="{
+      'sidebar-closed': !sidebarOpen,
+      'ride-mode': rideMode,
+      'nearby-map': store.isNearbyMap,
+      'ride-poi-open': rideMode && store.selectedPoi,
+    }"
   >
     <aside class="sidebar" :class="{ collapsed: !sidebarOpen }" :aria-hidden="!sidebarOpen">
       <header class="map-header">
@@ -1039,7 +1050,7 @@ function onDocClick(e: MouseEvent) {
               v-if="nextSupply"
               type="button"
               class="ride-primary"
-              @click="store.selectPoi(nextSupply.poi, true)"
+              @click="store.selectPoi(nextSupply.poi)"
             >
               <span class="ride-primary-kind">
                 <span aria-hidden="true">{{ poiCategoryEmoji(nextSupply.poi.category) }}</span>
@@ -1061,7 +1072,7 @@ function onDocClick(e: MouseEvent) {
               v-if="nextFavorite"
               type="button"
               class="ride-secondary"
-              @click="store.selectPoi(nextFavorite.poi, true)"
+              @click="store.selectPoi(nextFavorite.poi)"
             >
               <span class="ride-secondary-kind">{{ t('map.rideNextFav') }}</span>
               <strong>{{ formatKm(nextFavorite.remainingKm) }}</strong>
@@ -2350,6 +2361,10 @@ function onDocClick(e: MouseEvent) {
     flex-direction: column;
     gap: 0.35rem;
     pointer-events: none;
+  }
+
+  .map-layout.ride-mode.ride-poi-open .ride-cockpit {
+    display: none;
   }
 
   .ride-primary {
