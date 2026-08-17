@@ -407,6 +407,8 @@ export default {
     offline: 'Sin conexión',
     fromCache: 'Desde caché',
     noMap: 'No hay mapa cargado.',
+    noMapHint:
+      'El mapa existía solo en esta pestaña. Desde inicio, carga un GPX, planifica o vuelve a iniciar Trayecto.',
   },
   offlinePack: {
     title: 'Llevar ruta offline',

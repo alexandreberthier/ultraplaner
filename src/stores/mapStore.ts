@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import type {
   ControlPoint,
   ControlPointKind,
@@ -35,6 +35,7 @@ import { thinPoisByProximity, thinPoisForMap } from '../utils/poiThin'
 import { tileIdsAlongRoute } from '../services/poiQuery'
 import { hasAnyCachedPoiTile } from '../services/offlinePacks'
 import { normalizePoiCategory, expandLegacyCategories } from '../utils/poiNormalize'
+import { clearViewSession, readViewSession, writeViewSession } from '../utils/viewSession'
 import {
   defaultControlPointName,
   newControlPointId,
@@ -556,11 +557,73 @@ export const useMapStore = defineStore('map', () => {
   function backToLanding() {
     loadGeneration++
     stopLoadTimer()
+    clearViewSession()
     resetState()
     mode.value = 'landing'
     loadStatus.value = ''
     loadProgress.value = null
     error.value = ''
+  }
+
+  function captureViewSession() {
+    if (!mapReady.value || routeCoords.value.length < 1) return
+    writeViewSession({
+      v: 1,
+      nearby: isNearbyMap.value,
+      name: routeName.value,
+      coords: routeCoords.value,
+      points: routePoints.value,
+      radiusM: poiRadiusM.value,
+      categories: [...activeCategories.value],
+      pois: Array.from(poiMap.value.values()),
+      favorites: Array.from(favorites.value),
+      favoriteMeta: favoriteMetaRecord(),
+      controlPoints: controlPoints.value,
+      surfaceSummary: surfaceSummary.value,
+    })
+  }
+
+  /** Restore an unsaved /map/view map after reload (Fahrt + GPX before share id). */
+  function restoreViewSession(): boolean {
+    const snap = readViewSession()
+    if (!snap) return false
+
+    loadGeneration++
+    stopLoadTimer()
+    resetState()
+
+    routeName.value = snap.name || tGlobal('nearby.mapName')
+    routeCoords.value = sanitizeRouteCoords(snap.coords)
+    routePoints.value = sanitizeRoutePoints(snap.points?.length ? snap.points : [])
+    if (!routePoints.value.length && routeCoords.value.length) {
+      routePoints.value = buildRoutePoints(routeCoords.value)
+    }
+    isNearbyMap.value = Boolean(snap.nearby) || routeCoords.value.length === 1
+    poiRadiusM.value = snap.radiusM
+    activeCategories.value = expandLegacyCategories(snap.categories as string[])
+    favorites.value = new Set(snap.favorites ?? [])
+    favoriteMeta.value = new Map(Object.entries(snap.favoriteMeta ?? {}))
+    controlPoints.value = snap.controlPoints ?? []
+    surfaceSummary.value = snap.surfaceSummary ?? null
+    showAllPoisOnMap.value = false
+
+    poiMap.value.clear()
+    for (const p of snap.pois ?? []) {
+      poiMap.value.set(p.id, normalizePoiCategory(p))
+    }
+    syncVisibleCategories()
+
+    if (isNearbyMap.value) locationFollowRequested.value = true
+
+    mapEpoch.value++
+    mapReady.value = true
+    mode.value = 'map'
+    error.value = ''
+
+    if (isNearbyMap.value && poiMap.value.size === 0) {
+      void refreshNearbyPois(poiRadiusM.value, [...activeCategories.value])
+    }
+    return routeCoords.value.length > 0
   }
 
   async function createMapFromGpx(
@@ -1129,6 +1192,13 @@ export const useMapStore = defineStore('map', () => {
     error.value = ''
   }
 
+  watch(
+    () => [mapReady.value, mapEpoch.value, poisEpoch.value, isNearbyMap.value] as const,
+    () => {
+      captureViewSession()
+    }
+  )
+
   return {
     mode,
     mapReady,
@@ -1206,6 +1276,7 @@ export const useMapStore = defineStore('map', () => {
     removeControlPoint,
     toggleCategoryVisibility,
     backToLanding,
+    restoreViewSession,
     cancelLoading,
     clearError,
   }

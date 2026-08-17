@@ -2064,9 +2064,9 @@ onUnmounted(() => {
       @click.stop.prevent="onLocationButtonClick"
     >
       <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-        <circle cx="12" cy="12" r="4" fill="currentColor" />
-        <path d="M12 2v3M12 19v3M2 12h3M19 12h3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-        <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.5" fill="none" />
+        <circle cx="12" cy="12" r="4.2" fill="currentColor" />
+        <path d="M12 2v3.2M12 18.8V22M2 12h3.2M18.8 12H22" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>
+        <circle cx="12" cy="12" r="8.4" stroke="currentColor" stroke-width="2.2" fill="none" />
         <path
           v-if="headingUp && !needsRecenter"
           d="M12 5 L15 11 H9 Z"
@@ -2171,19 +2171,18 @@ onUnmounted(() => {
   top: calc(10px + env(safe-area-inset-top, 0px));
   right: calc(47px + env(safe-area-inset-right, 0px));
   z-index: 40;
-  width: 44px;
-  height: 44px;
-  border: none;
-  border-radius: 8px;
+  width: 52px;
+  height: 52px;
+  border: 3px solid #111;
+  border-radius: 0;
   background: #fff;
-  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
+  box-shadow: 3px 3px 0 #111;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 8px;
-  color: #333;
-  transition: background 0.15s;
+  color: #111;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
 }
@@ -2316,7 +2315,7 @@ onUnmounted(() => {
 }
 
 .location-btn:hover {
-  background: #f0f0f0;
+  background: #f3efe6;
 }
 
 .location-btn.following,
@@ -2325,8 +2324,17 @@ onUnmounted(() => {
 .location-btn.north-up,
 .location-btn.active {
   background: #fff;
-  color: #333;
-  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.12);
+  color: #111;
+  box-shadow: 3px 3px 0 #111;
+}
+
+.location-btn.following,
+.location-btn.heading-up {
+  background: var(--cta, #ea580c);
+}
+
+.location-btn.needs-recenter {
+  background: #facc15;
 }
 
 .location-btn.needs-recenter svg {
@@ -2429,16 +2437,14 @@ onUnmounted(() => {
 
   .location-btn {
     top: calc(10px + env(safe-area-inset-top, 0px));
-    right: calc(52px + env(safe-area-inset-right, 0px));
-    width: 48px;
-    height: 48px;
-    padding: 9px;
-    border-radius: 10px;
-    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.12);
+    right: calc(56px + env(safe-area-inset-right, 0px));
+    width: 56px;
+    height: 56px;
+    padding: 8px;
   }
 
   .heading-fallback-hint {
-    top: calc(68px + env(safe-area-inset-top, 0px));
+    top: calc(76px + env(safe-area-inset-top, 0px));
     right: calc(10px + env(safe-area-inset-right, 0px));
     left: auto;
     max-width: min(14rem, calc(100% - 80px));
@@ -2447,13 +2453,14 @@ onUnmounted(() => {
   .map-canvas-wrap.ride-mode .location-btn {
     /* Ride: NavigationControl hidden — occupy that corner */
     right: calc(10px + env(safe-area-inset-right, 0px));
-    width: 56px;
-    height: 56px;
+    width: 68px;
+    height: 68px;
+    padding: 10px;
     z-index: 120;
   }
 
   .map-canvas-wrap.ride-mode .heading-fallback-hint {
-    top: calc(68px + env(safe-area-inset-top, 0px));
+    top: calc(86px + env(safe-area-inset-top, 0px));
   }
 
   .map-canvas-wrap.ride-mode :deep(.maplibregl-ctrl-top-right) {
@@ -2461,7 +2468,7 @@ onUnmounted(() => {
   }
 
   .location-error {
-    top: calc(68px + env(safe-area-inset-top, 0px));
+    top: calc(76px + env(safe-area-inset-top, 0px));
     right: calc(10px + env(safe-area-inset-right, 0px));
     left: calc(12px + env(safe-area-inset-left, 0px));
     z-index: 120;
@@ -2469,7 +2476,7 @@ onUnmounted(() => {
   }
 
   .map-canvas-wrap.ride-mode .location-error {
-    top: calc(52px + env(safe-area-inset-top, 0px));
+    top: calc(86px + env(safe-area-inset-top, 0px));
   }
 
   .map-canvas-wrap.ride-mode .map-left-stack {

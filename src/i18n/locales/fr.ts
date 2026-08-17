@@ -406,6 +406,8 @@
     offline: 'Hors ligne',
     fromCache: 'Depuis le cache',
     noMap: 'Aucune carte chargée.',
+    noMapHint:
+      'La carte n’existait que dans cet onglet. Depuis l’accueil, charge un GPX, trace un itinéraire ou relance Trajet.',
   },
   offlinePack: {
     title: 'Emporter la route offline',

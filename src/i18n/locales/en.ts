@@ -407,6 +407,8 @@ export default {
     offline: 'Offline',
     fromCache: 'From cache',
     noMap: 'No map loaded.',
+    noMapHint:
+      'This map lived only in this tab. From the home page, load a GPX, plan a route, or start Ride again.',
   },
   offlinePack: {
     title: 'Take route offline',

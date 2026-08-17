@@ -407,6 +407,8 @@ export default {
     offline: 'Offline',
     fromCache: 'Aus Cache',
     noMap: 'Keine Karte geladen.',
+    noMapHint:
+      'Die Karte lag nur in diesem Tab. Von der Startseite GPX laden, eine Route planen oder Fahrt neu starten.',
   },
   offlinePack: {
     title: 'Route offline mitnehmen',

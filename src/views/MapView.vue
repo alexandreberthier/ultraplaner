@@ -359,8 +359,10 @@ function onRideKey(e: KeyboardEvent) {
 
 async function loadIfNeeded() {
   const id = route.params.id as string
-  if (id === 'view') return
-  if (!id) return
+  if (id === 'view' || !id) {
+    if (!store.mapReady) store.restoreViewSession()
+    return
+  }
   if (store.savedMapId === id && store.mapReady) return
   await store.loadSavedMap(id)
 }
@@ -1526,14 +1528,34 @@ function onDocClick(e: MouseEvent) {
     />
   </div>
 
-  <div v-else-if="store.error" class="error-page">
-    <p>{{ store.error }}</p>
-    <button type="button" @click="goHome">{{ t('map.errorPage') }}</button>
+  <div v-else-if="store.error" class="empty-map">
+    <div class="empty-map-card">
+      <img
+        class="empty-map-logo"
+        src="/logo-ultraplaner-200.png"
+        width="72"
+        height="72"
+        alt=""
+      />
+      <h1>{{ t('map.noMap') }}</h1>
+      <p>{{ store.error }}</p>
+      <button type="button" class="empty-map-cta" @click="goHome">{{ t('map.errorPage') }}</button>
+    </div>
   </div>
 
-  <div v-else class="error-page">
-    <p>{{ t('map.noMap') }}</p>
-    <button type="button" @click="goHome">{{ t('map.errorPage') }}</button>
+  <div v-else class="empty-map">
+    <div class="empty-map-card">
+      <img
+        class="empty-map-logo"
+        src="/logo-ultraplaner-200.png"
+        width="72"
+        height="72"
+        alt=""
+      />
+      <h1>{{ t('map.noMap') }}</h1>
+      <p>{{ t('map.noMapHint') }}</p>
+      <button type="button" class="empty-map-cta" @click="goHome">{{ t('map.errorPage') }}</button>
+    </div>
   </div>
 </template>
 
@@ -2177,11 +2199,62 @@ function onDocClick(e: MouseEvent) {
   display: none;
 }
 
-.error-page {
-  max-width: 480px;
-  margin: 4rem auto;
+.empty-map {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem;
+  background: #f3efe6;
+}
+
+.empty-map-card {
+  width: min(26rem, calc(100vw - 2rem));
+  padding: 1.5rem 1.35rem 1.35rem;
   text-align: center;
-  padding: 1rem;
+  background: #fff;
+  border: 3px solid #111;
+  box-shadow: 6px 6px 0 #111;
+}
+
+.empty-map-logo {
+  display: block;
+  width: 72px;
+  height: 72px;
+  margin: 0 auto 0.85rem;
+  object-fit: contain;
+}
+
+.empty-map-card h1 {
+  margin: 0 0 0.55rem;
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #111;
+}
+
+.empty-map-card p {
+  margin: 0 0 1.15rem;
+  font-size: 1.02rem;
+  font-weight: 650;
+  line-height: 1.4;
+  color: #111;
+}
+
+.empty-map-cta {
+  width: 100%;
+  min-height: 52px;
+  padding: 0.75rem 1.1rem;
+  border: 3px solid #111;
+  background: var(--cta);
+  color: #111;
+  font: inherit;
+  font-size: 0.95rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow: 4px 4px 0 #111;
 }
 
 @media (max-width: 1200px) {

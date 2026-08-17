@@ -8,7 +8,7 @@ export function createUserLocationElement(): HTMLDivElement {
     <div class="user-location-accuracy" aria-hidden="true"></div>
     <div class="user-location-pulse"></div>
     <div class="user-location-arrow" aria-hidden="true">
-      <svg viewBox="0 0 40 40" width="52" height="52">
+      <svg viewBox="0 0 40 40" width="64" height="64">
         <path d="M20 3 L34 32 L20 25 L6 32 Z" fill="#1d4ed8" stroke="#111" stroke-width="2.75" stroke-linejoin="round" paint-order="stroke fill"/>
       </svg>
     </div>
