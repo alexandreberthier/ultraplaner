@@ -46,6 +46,7 @@ import {
   resolveGeoHeading,
   setLocationAccuracyRadius,
   setLocationMarkerHeading,
+  smoothHeading,
 } from '../utils/userLocationMarker'
 import { createRouteBikeCursorElement } from '../utils/routeBikeCursor'
 import {
@@ -251,9 +252,9 @@ function updateBikeCursorMarker() {
 function applyGeoPosition(pos: GeolocationPosition) {
   const lat = pos.coords.latitude
   const lng = pos.coords.longitude
-  let heading = resolveGeoHeading(pos, lastFollowPos)
+  const rawHeading = resolveGeoHeading(pos, lastFollowPos)
+  const heading = smoothHeading(lastStableHeading, rawHeading)
   if (heading != null) lastStableHeading = heading
-  else if (lastStableHeading != null) heading = lastStableHeading
 
   lastFollowPos = { lat, lng }
   userLocation.value = {
@@ -427,6 +428,16 @@ function clearLocationError() {
   locationDeniedHelp.value = false
 }
 
+function followCameraPadding(): maplibregl.PaddingOptions {
+  if (!map || !headingUp.value) {
+    return { top: 0, bottom: 0, left: 0, right: 0 }
+  }
+  const h = map.getContainer().clientHeight
+  // Push the rider down the screen so more of the road ahead is visible.
+  const top = Math.round(h * (props.rideMode ? 0.3 : 0.2))
+  return { top, bottom: 0, left: 0, right: 0 }
+}
+
 function applyFollowCamera(force: boolean) {
   if (!map || !userLocation.value || !followActive.value || userPanning.value) return
   const { lat, lng, heading } = userLocation.value
@@ -434,6 +445,7 @@ function applyFollowCamera(force: boolean) {
     center: [lng, lat],
     duration: force ? 0 : headingUp.value ? 220 : 320,
     essential: true,
+    padding: followCameraPadding(),
   }
   if (headingUp.value && heading != null) {
     // Heading-up: travel direction at top (like Google Maps)

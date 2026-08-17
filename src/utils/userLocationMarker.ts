@@ -55,6 +55,31 @@ export function bearingBetween(
   return (toDeg(Math.atan2(y, x)) + 360) % 360
 }
 
+/** Signed shortest turn from `from` to `to`, in (-180, 180]. */
+export function shortestHeadingDelta(from: number, to: number): number {
+  return ((to - from + 540) % 360) - 180
+}
+
+export function lerpHeading(from: number, to: number, t: number): number {
+  const d = shortestHeadingDelta(from, to)
+  return (from + d * t + 360) % 360
+}
+
+/**
+ * Exponential moving average on a circle. Drops one-tick 100°+ spikes
+ * (typical GPS noise) so the nav triangle does not whip around.
+ * Small jitter is damped harder than real turns.
+ */
+export function smoothHeading(previous: number | null, incoming: number | null): number | null {
+  if (incoming == null) return previous
+  if (previous == null || Number.isNaN(previous)) return incoming
+  const delta = shortestHeadingDelta(previous, incoming)
+  const abs = Math.abs(delta)
+  if (abs > 100) return previous
+  const t = abs < 12 ? 0.28 : 0.62
+  return lerpHeading(previous, incoming, t)
+}
+
 /** Prefer device heading; else derive from movement between fixes. */
 export function resolveGeoHeading(
   pos: GeolocationPosition,
