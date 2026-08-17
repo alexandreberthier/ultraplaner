@@ -14,6 +14,7 @@ import {
 import { poiCategoryLabel } from '../utils/poiLabels'
 import { isAppleMobile, isStandalonePwa } from '../utils/geoDevice'
 import { nearbyGeoBlockedReason, nearbyGeoErrorI18nKey, NEARBY_GEO_OPTIONS } from '../utils/nearbyGeo'
+import { withNativeLocationPermission } from '../utils/nativeLocation'
 import { useRidePosition } from '../composables/useRidePosition'
 
 const props = defineProps<{
@@ -114,27 +115,35 @@ function openMapFirst() {
   if (!ensureGeoReady()) return
   creating.value = true
 
-  // Sync call inside click handler — required for iOS geolocation permission
-  navigator.geolocation.getCurrentPosition(
-    async (pos) => {
-      try {
-        const lat = pos.coords.latitude
-        const lng = pos.coords.longitude
-        store.prepareNearbyCenter(lat, lng, radiusM.value, [...selected.value])
-        await router.push('/map/view')
-        await store.refreshNearbyPois(radiusM.value, [...selected.value])
-        if (store.error) formError.value = store.error
-      } catch (err) {
-        formError.value = err instanceof Error ? err.message : t('store.unknownError')
-      } finally {
-        creating.value = false
-      }
+  withNativeLocationPermission(
+    () => {
+      // Sync call inside click handler — required for iOS geolocation permission
+      navigator.geolocation.getCurrentPosition(
+        async (pos) => {
+          try {
+            const lat = pos.coords.latitude
+            const lng = pos.coords.longitude
+            store.prepareNearbyCenter(lat, lng, radiusM.value, [...selected.value])
+            await router.push('/map/view')
+            await store.refreshNearbyPois(radiusM.value, [...selected.value])
+            if (store.error) formError.value = store.error
+          } catch (err) {
+            formError.value = err instanceof Error ? err.message : t('store.unknownError')
+          } finally {
+            creating.value = false
+          }
+        },
+        (err) => {
+          creating.value = false
+          formError.value = geoErrorMessage(err.code)
+        },
+        NEARBY_GEO_OPTIONS
+      )
     },
-    (err) => {
+    () => {
       creating.value = false
-      formError.value = geoErrorMessage(err.code)
-    },
-    NEARBY_GEO_OPTIONS
+      formError.value = geoErrorMessage(1)
+    }
   )
 }
 
@@ -172,15 +181,23 @@ function searchNearby() {
     return
   }
 
-  navigator.geolocation.getCurrentPosition(
-    (pos) => {
-      void runNearbySearch(pos.coords.latitude, pos.coords.longitude)
+  withNativeLocationPermission(
+    () => {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          void runNearbySearch(pos.coords.latitude, pos.coords.longitude)
+        },
+        (err) => {
+          creating.value = false
+          formError.value = geoErrorMessage(err.code)
+        },
+        NEARBY_GEO_OPTIONS
+      )
     },
-    (err) => {
+    () => {
       creating.value = false
-      formError.value = geoErrorMessage(err.code)
-    },
-    NEARBY_GEO_OPTIONS
+      formError.value = geoErrorMessage(1)
+    }
   )
 }
 

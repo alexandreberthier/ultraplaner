@@ -13,12 +13,15 @@ import {
   reloadOnceOnChunkError,
 } from './utils/chunkLoadRecovery'
 import { initPwaUpdates } from './utils/pwaUpdate'
+import { initNativeShell, isNativeApp } from './utils/nativeApp'
 import './style.css'
 
 enforcePreferredHostSeo()
 initColorblindMode()
-initPwaInstallListener()
-initPwaUpdates()
+if (!isNativeApp()) {
+  initPwaInstallListener()
+  initPwaUpdates()
+}
 
 const app = createApp(App)
 app.use(createPinia())
@@ -55,6 +58,7 @@ router.afterEach((to) => {
   }
 })
 
+initNativeShell(router)
 app.mount('#app')
 
 // Only clear after a successful resolve — clearing at boot would allow reload loops

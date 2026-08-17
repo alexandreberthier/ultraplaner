@@ -1,4 +1,5 @@
 import { computed, onMounted, ref } from 'vue'
+import { isNativeApp } from '../utils/nativeApp'
 
 type BeforeInstallPromptEvent = Event & {
   prompt: () => Promise<void>
@@ -12,6 +13,7 @@ let listening = false
 
 function isStandalone(): boolean {
   if (typeof window === 'undefined') return true
+  if (isNativeApp()) return true
   if (window.matchMedia('(display-mode: standalone)').matches) return true
   const nav = window.navigator as Navigator & { standalone?: boolean }
   return nav.standalone === true

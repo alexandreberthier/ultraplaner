@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">UltraPlaner</string>
+    <string name="title_activity_main">UltraPlaner</string>
+    <string name="package_name">com.ultraplaner.app</string>
+    <string name="custom_url_scheme">com.ultraplaner.app</string>
+</resources>

@@ -17,6 +17,7 @@ import {
   nearbyGeoErrorI18nKey,
   NEARBY_GEO_OPTIONS,
 } from '../utils/nearbyGeo'
+import { withNativeLocationPermission } from '../utils/nativeLocation'
 
 /** MapLibre only when user opens „Route planen“ — keeps landing light. */
 const RoutePlanner = defineAsyncComponent(() => import('../components/RoutePlanner.vue'))
@@ -57,30 +58,38 @@ function startNearbyMapFirst() {
     return
   }
 
-  navigator.geolocation.getCurrentPosition(
-    async (pos) => {
-      try {
-        store.prepareNearbyCenter(
-          pos.coords.latitude,
-          pos.coords.longitude,
-          NEARBY_DEFAULT_POI_RADIUS_M,
-          [...NEARBY_DEFAULT_POI_CATEGORIES]
-        )
-        await router.push('/map/view')
-        await store.refreshNearbyPois(
-          NEARBY_DEFAULT_POI_RADIUS_M,
-          [...NEARBY_DEFAULT_POI_CATEGORIES]
-        )
-      } catch (err) {
-        store.error = err instanceof Error ? err.message : t('store.unknownError')
-        nearbyPending.value = false
-      }
+  withNativeLocationPermission(
+    () => {
+      navigator.geolocation.getCurrentPosition(
+        async (pos) => {
+          try {
+            store.prepareNearbyCenter(
+              pos.coords.latitude,
+              pos.coords.longitude,
+              NEARBY_DEFAULT_POI_RADIUS_M,
+              [...NEARBY_DEFAULT_POI_CATEGORIES]
+            )
+            await router.push('/map/view')
+            await store.refreshNearbyPois(
+              NEARBY_DEFAULT_POI_RADIUS_M,
+              [...NEARBY_DEFAULT_POI_CATEGORIES]
+            )
+          } catch (err) {
+            store.error = err instanceof Error ? err.message : t('store.unknownError')
+            nearbyPending.value = false
+          }
+        },
+        (err) => {
+          store.error = t(nearbyGeoErrorI18nKey(err.code))
+          nearbyPending.value = false
+        },
+        NEARBY_GEO_OPTIONS
+      )
     },
-    (err) => {
-      store.error = t(nearbyGeoErrorI18nKey(err.code))
+    () => {
+      store.error = t('nearby.geoDenied')
       nearbyPending.value = false
-    },
-    NEARBY_GEO_OPTIONS
+    }
   )
 }
 
