@@ -1112,8 +1112,8 @@ function updatePlannerLocationMarker(lat: number, lng: number, heading: number |
     locationMarker = new maplibregl.Marker({
       element: el,
       anchor: 'center',
-      rotationAlignment: 'map',
-      pitchAlignment: 'map',
+      rotationAlignment: 'viewport',
+      pitchAlignment: 'viewport',
     })
       .setLngLat([lng, lat])
       .addTo(map)

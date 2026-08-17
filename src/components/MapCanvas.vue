@@ -432,7 +432,7 @@ function applyFollowCamera(force: boolean) {
   const { lat, lng, heading } = userLocation.value
   const cam: maplibregl.EaseToOptions = {
     center: [lng, lat],
-    duration: force ? 0 : headingUp.value ? 350 : 500,
+    duration: force ? 0 : headingUp.value ? 220 : 320,
     essential: true,
   }
   if (headingUp.value && heading != null) {
@@ -490,8 +490,10 @@ function updateLocationMarker() {
     locationMarker = new maplibregl.Marker({
       element: el,
       anchor: 'center',
-      rotationAlignment: 'map',
-      pitchAlignment: 'map',
+      // Viewport: CSS heading rotation is screen-relative (map alignment
+      // made the triangle point at map-north while heading-up).
+      rotationAlignment: 'viewport',
+      pitchAlignment: 'viewport',
     })
       .setLngLat([lng, lat])
       .addTo(map)
@@ -1286,6 +1288,11 @@ watch(
     if (!focus || !map) return
     // Ensure POI GeoJSON is current before / while zooming to the scan area
     updateSources()
+    // Don't yank the camera off a live GPS follow (ride / nearby)
+    if (followActive.value && !userPanning.value) {
+      applyFollowCamera(true)
+      return
+    }
     fitToRadius(focus.lng, focus.lat, focus.radiusM)
   }
 )
@@ -1845,18 +1852,23 @@ function setupMapDragBehavior() {
 
   canvas.addEventListener('dragstart', (e) => e.preventDefault())
 
-  const pauseFollowFromUserGesture = () => {
+  const isUserGesture = (e: { originalEvent?: Event }) => Boolean(e.originalEvent)
+
+  const pauseFollowFromUserGesture = (e: { originalEvent?: Event }) => {
+    // easeTo({ bearing }) also fires rotatestart/pitchstart — ignore those
+    if (!isUserGesture(e)) return
+    // Ride + nearby: keep the camera on the rider so the dot doesn't drift off-screen
+    if (preferHeadingUpDefault() && followActive.value) return
     if (locationActive.value && followActive.value) {
       userPanning.value = true
       followActive.value = false
     }
   }
 
-  map.on('dragstart', () => {
+  map.on('dragstart', (e) => {
     canvas.classList.remove('poi-hover')
-    pauseFollowFromUserGesture()
+    pauseFollowFromUserGesture(e)
   })
-  // Finger-rotate / pinch should also pause follow (easeTo follow does not fire these)
   map.on('rotatestart', pauseFollowFromUserGesture)
   map.on('pitchstart', pauseFollowFromUserGesture)
 }
@@ -2421,6 +2433,8 @@ onUnmounted(() => {
   .map-canvas-wrap.ride-mode .location-btn {
     /* Ride: NavigationControl hidden — occupy that corner */
     right: calc(10px + env(safe-area-inset-right, 0px));
+    width: 56px;
+    height: 56px;
     z-index: 120;
   }
 

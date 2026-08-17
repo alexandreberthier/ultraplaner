@@ -1082,11 +1082,12 @@ function onDocClick(e: MouseEvent) {
         @click="goHome"
       >
         <span class="nav-glyph" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.35" stroke-linecap="round" stroke-linejoin="round">
             <path d="M4 11.2 12 4l8 7.2" />
             <path d="M6.5 10.2V20h4.2v-6.2h2.6V20h4.2V10.2" />
           </svg>
         </span>
+        <span class="nav-label">{{ t('map.navStart') }}</span>
       </button>
       <button
         type="button"
@@ -1097,13 +1098,14 @@ function onDocClick(e: MouseEvent) {
         @click="openNearbyPanel"
       >
         <span class="nav-glyph" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.35" stroke-linecap="round" stroke-linejoin="round">
             <path d="M4 21v-7M4 8V3" />
             <path d="M12 21v-9M12 6V3" />
             <path d="M20 21v-5M20 10V3" />
             <path d="M2 14h4M10 6h4M18 16h4" />
           </svg>
         </span>
+        <span class="nav-label">{{ t('map.navNearby') }}</span>
       </button>
       <div v-if="!store.isNearbyMap" class="nav-cp-wrap">
         <button
@@ -1116,10 +1118,11 @@ function onDocClick(e: MouseEvent) {
           @click="toggleCpMenu"
         >
           <span class="nav-glyph" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.35" stroke-linecap="round" stroke-linejoin="round">
               <path d="M5 22V3.8s.9 1 3.6 1 4.6-1.8 7.3-1.8 3.6.9 3.6.9v11.4s-.9-.9-3.6-.9-4.6 1.8-7.3 1.8-3.6-.9-3.6-.9" />
             </svg>
           </span>
+          <span class="nav-label">{{ t('map.navCp') }}</span>
         </button>
         <div v-if="cpMenuOpen || store.controlPointPlaceKind" class="nav-cp-menu" role="menu">
           <button
@@ -1145,12 +1148,13 @@ function onDocClick(e: MouseEvent) {
         @click="openMobilePanel('pois')"
       >
         <span class="nav-glyph" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.35" stroke-linecap="round" stroke-linejoin="round">
             <path d="M12 22s8-6.4 8-12.2A8 8 0 1 0 4 9.8C4 15.6 12 22 12 22z" />
             <circle cx="12" cy="9.8" r="2.4" />
           </svg>
           <span v-if="store.displayPois.length" class="nav-badge">{{ store.displayPois.length }}</span>
         </span>
+        <span class="nav-label">{{ t('map.navPoisShort') }}</span>
       </button>
       <button
         v-if="!store.isNearbyMap"
@@ -1161,13 +1165,14 @@ function onDocClick(e: MouseEvent) {
         @click="enterRideMode"
       >
         <span class="nav-glyph" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.35" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="5.5" cy="17.5" r="3.2" />
             <circle cx="18.5" cy="17.5" r="3.2" />
             <circle cx="15" cy="5.2" r="1.15" fill="currentColor" stroke="none" />
             <path d="M12 17.5V14l-3-3 4-3 2 3h2" />
           </svg>
         </span>
+        <span class="nav-label">{{ t('map.rideOn') }}</span>
       </button>
       <button
         v-if="!store.isNearbyMap"
@@ -1179,12 +1184,13 @@ function onDocClick(e: MouseEvent) {
         @click="openMobilePanel('export')"
       >
         <span class="nav-glyph" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.35" stroke-linecap="round" stroke-linejoin="round">
             <path d="M12 3v12" />
             <path d="m7 11 5 5 5-5" />
             <path d="M5 21h14" />
           </svg>
         </span>
+        <span class="nav-label">{{ t('map.navExport') }}</span>
       </button>
     </nav>
 
@@ -2228,7 +2234,7 @@ function onDocClick(e: MouseEvent) {
 
   .export-tip {
     top: auto;
-    bottom: calc(72px + env(safe-area-inset-bottom, 0px));
+    bottom: calc(96px + env(safe-area-inset-bottom, 0px));
     left: 0.75rem;
     right: 0.75rem;
     transform: none;
@@ -2237,7 +2243,7 @@ function onDocClick(e: MouseEvent) {
 
   .offline-banner {
     top: auto;
-    bottom: calc(72px + env(safe-area-inset-bottom, 0px));
+    bottom: calc(96px + env(safe-area-inset-bottom, 0px));
     left: 0.75rem;
     right: 0.75rem;
     transform: none;
@@ -2245,7 +2251,7 @@ function onDocClick(e: MouseEvent) {
   }
 
   .map-stack {
-    padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px));
+    padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px));
   }
 
   .map-layout :deep(.map-left-stack .map-cp-tools) {
@@ -2283,7 +2289,7 @@ function onDocClick(e: MouseEvent) {
   .fav-hud {
     left: 0.45rem;
     right: 0.45rem;
-    bottom: calc(0.45rem + 72px + env(safe-area-inset-bottom, 0px));
+    bottom: calc(0.45rem + 96px + env(safe-area-inset-bottom, 0px));
   }
 
   .map-layout.ride-mode .ride-overlay {
@@ -2303,15 +2309,15 @@ function onDocClick(e: MouseEvent) {
   .ride-exit {
     pointer-events: auto;
     align-self: flex-start;
-    min-height: 36px;
-    padding: 0.35rem 0.65rem;
-    border: none;
-    border-radius: 8px;
-    background: rgba(255, 255, 255, 0.92);
+    min-height: 48px;
+    padding: 0.5rem 0.85rem;
+    border: 2px solid #111;
+    border-radius: 0;
+    background: #fff;
     color: #111;
-    font-weight: 700;
-    font-size: 0.78rem;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+    font-weight: 800;
+    font-size: 0.88rem;
+    box-shadow: 3px 3px 0 #111;
     cursor: pointer;
   }
 
@@ -2327,15 +2333,15 @@ function onDocClick(e: MouseEvent) {
     pointer-events: auto;
     display: inline-flex;
     align-items: center;
-    min-height: 36px;
-    padding: 0.35rem 0.65rem;
-    border: none;
-    border-radius: 8px;
-    background: var(--primary, #2d6a4f);
-    color: #fff;
-    font-weight: 700;
-    font-size: 0.78rem;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+    min-height: 48px;
+    padding: 0.5rem 0.85rem;
+    border: 2px solid #111;
+    border-radius: 0;
+    background: var(--cta);
+    color: #111;
+    font-weight: 800;
+    font-size: 0.88rem;
+    box-shadow: 3px 3px 0 #111;
     cursor: pointer;
   }
 
@@ -2509,20 +2515,22 @@ function onDocClick(e: MouseEvent) {
     z-index: 100;
     background: #fff;
     border-top: 3px solid #111;
-    padding: 0.4rem 0.2rem calc(0.4rem + env(safe-area-inset-bottom, 0px));
+    padding: 0.45rem 0.15rem calc(0.45rem + env(safe-area-inset-bottom, 0px));
     box-shadow: none;
   }
 
   .nav-item {
     flex: 1;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 0.3rem 0.05rem;
+    gap: 0.22rem;
+    padding: 0.2rem 0.05rem 0.15rem;
     border: none;
     background: none;
     cursor: pointer;
-    min-height: 64px;
+    min-height: 76px;
     overflow: visible;
     -webkit-tap-highlight-color: transparent;
   }
@@ -2533,7 +2541,7 @@ function onDocClick(e: MouseEvent) {
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height: 64px;
+    min-height: 76px;
   }
 
   .nav-cp-wrap .nav-item {
@@ -2547,8 +2555,8 @@ function onDocClick(e: MouseEvent) {
     align-items: center;
     justify-content: center;
     overflow: visible;
-    width: 48px;
-    height: 48px;
+    width: 56px;
+    height: 56px;
     border-radius: 0;
     background: #fff;
     border: 2.5px solid #111;
@@ -2557,23 +2565,38 @@ function onDocClick(e: MouseEvent) {
   }
 
   .nav-glyph svg {
-    width: 1.55rem;
-    height: 1.55rem;
-    stroke-width: 2.4;
+    width: 1.95rem;
+    height: 1.95rem;
+    stroke-width: 2.6;
     overflow: visible;
     shape-rendering: geometricPrecision;
   }
 
-  .nav-home { color: #0f172a; }
-  .nav-radius { color: #9a3412; }
-  .nav-cp { color: #6d28d9; }
-  .nav-pois { color: #be123c; }
-  .nav-ride { color: #166534; }
-  .nav-export { color: #1d4ed8; }
+  .nav-label {
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: #111;
+    line-height: 1.1;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .nav-home,
+  .nav-radius,
+  .nav-cp,
+  .nav-pois,
+  .nav-ride,
+  .nav-export {
+    color: #111;
+  }
 
   .nav-item.active .nav-glyph,
   .nav-cp.active .nav-glyph {
-    background: color-mix(in srgb, currentColor 14%, #fff);
+    background: var(--cta);
   }
 
   .nav-badge {
@@ -2645,7 +2668,7 @@ function onDocClick(e: MouseEvent) {
     padding:
       env(safe-area-inset-top, 0px)
       max(0.75rem, env(safe-area-inset-right, 0px))
-      calc(72px + 0.5rem + env(safe-area-inset-bottom, 0px))
+      calc(96px + 0.5rem + env(safe-area-inset-bottom, 0px))
       max(0.75rem, env(safe-area-inset-left, 0px));
     touch-action: none;
   }

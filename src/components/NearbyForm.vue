@@ -14,6 +14,7 @@ import {
 import { poiCategoryLabel } from '../utils/poiLabels'
 import { isAppleMobile, isStandalonePwa } from '../utils/geoDevice'
 import { nearbyGeoBlockedReason, nearbyGeoErrorI18nKey, NEARBY_GEO_OPTIONS } from '../utils/nearbyGeo'
+import { useRidePosition } from '../composables/useRidePosition'
 
 const props = defineProps<{
   /** Embedded in MapView — stay on map, no Landing navigation. */
@@ -27,6 +28,7 @@ const emit = defineEmits<{
 const { t } = useI18n()
 const store = useMapStore()
 const router = useRouter()
+const { rideLatLng } = useRidePosition()
 const showIosGeoHint = isAppleMobile()
 const iosGeoHintKey = isStandalonePwa() ? 'nearby.geoHintIosApp' : 'nearby.geoHintIos'
 
@@ -137,46 +139,42 @@ function openMapFirst() {
 }
 
 /** In-map: rescan nearby or enrich route POIs (unchanged semantics). */
+async function runNearbySearch(lat: number, lng: number) {
+  try {
+    if (keepRouteOnScan()) {
+      await store.enrichPoisAroundGps(lat, lng, radiusM.value, [...selected.value])
+    } else if (store.isNearbyMap) {
+      store.prepareNearbyCenter(lat, lng, radiusM.value, [...selected.value])
+      await store.refreshNearbyPois(radiusM.value, [...selected.value])
+    } else {
+      await store.createMapFromNearby(lat, lng, radiusM.value, [...selected.value])
+    }
+    if (store.mapReady && !store.error) {
+      emit('done')
+    } else if (store.error) {
+      formError.value = store.error
+    }
+  } catch (err) {
+    formError.value = err instanceof Error ? err.message : t('store.unknownError')
+  } finally {
+    creating.value = false
+  }
+}
+
 function searchNearby() {
   if (!ensureGeoReady()) return
   creating.value = true
 
+  // Live GPS from the map watch is faster than a new getCurrentPosition while moving
+  const cached = rideLatLng.value
+  if (cached) {
+    void runNearbySearch(cached.lat, cached.lng)
+    return
+  }
+
   navigator.geolocation.getCurrentPosition(
-    async (pos) => {
-      try {
-        if (keepRouteOnScan()) {
-          await store.enrichPoisAroundGps(
-            pos.coords.latitude,
-            pos.coords.longitude,
-            radiusM.value,
-            [...selected.value]
-          )
-        } else if (store.isNearbyMap) {
-          store.prepareNearbyCenter(
-            pos.coords.latitude,
-            pos.coords.longitude,
-            radiusM.value,
-            [...selected.value]
-          )
-          await store.refreshNearbyPois(radiusM.value, [...selected.value])
-        } else {
-          await store.createMapFromNearby(
-            pos.coords.latitude,
-            pos.coords.longitude,
-            radiusM.value,
-            [...selected.value]
-          )
-        }
-        if (store.mapReady && !store.error) {
-          emit('done')
-        } else if (store.error) {
-          formError.value = store.error
-        }
-      } catch (err) {
-        formError.value = err instanceof Error ? err.message : t('store.unknownError')
-      } finally {
-        creating.value = false
-      }
+    (pos) => {
+      void runNearbySearch(pos.coords.latitude, pos.coords.longitude)
     },
     (err) => {
       creating.value = false

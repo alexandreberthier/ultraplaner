@@ -58,9 +58,9 @@
 }
 
 .user-location-arrow svg {
-  width: 48px;
-  height: 48px;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.45));
+  width: 52px;
+  height: 52px;
+  filter: drop-shadow(0 1px 0 #fff) drop-shadow(0 2px 5px rgba(0, 0, 0, 0.5));
 }
 
 .user-location-arrow:not(.has-heading) svg path {
