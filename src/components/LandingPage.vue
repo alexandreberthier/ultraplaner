@@ -556,7 +556,7 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
 .hero-top-actions {
   display: inline-flex;
   align-items: center;
-  gap: 0.45rem;
+  gap: 0.6rem;
   flex-shrink: 0;
 }
 

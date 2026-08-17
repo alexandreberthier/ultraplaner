@@ -226,6 +226,32 @@ onUnmounted(() => {
   background: #f3efe6;
 }
 
+.brutal:not(.tool-style) .recent-btn {
+  padding: 0.7rem 1.1rem;
+  min-height: 3rem;
+  font-size: 1rem;
+  border-width: 3px;
+  box-shadow: 4px 4px 0 #111;
+  background: var(--cta);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.brutal:not(.tool-style) .recent-btn:hover,
+.brutal:not(.tool-style) .recent-btn.active {
+  background: var(--cta);
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 #111;
+}
+
+@media (min-width: 721px) {
+  .brutal:not(.tool-style) .recent-btn {
+    font-size: 1.08rem;
+    padding: 0.78rem 1.25rem;
+    min-height: 3.25rem;
+  }
+}
+
 .tool-style .recent-btn {
   box-shadow: none;
   font-weight: 750;

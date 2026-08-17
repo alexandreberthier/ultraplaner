@@ -5,6 +5,7 @@ import { localeHomePath, type AppLocale } from '../i18n'
 import { applyLegalSeo } from '../composables/useDocumentSeo'
 import TopbarSettings from '../components/TopbarSettings.vue'
 import ProtectedEmail from '../components/ProtectedEmail.vue'
+import '../styles/legalPage.css'
 
 const { t, locale } = useI18n()
 const homePath = computed(() => localeHomePath(locale.value as AppLocale))
@@ -28,7 +29,7 @@ onMounted(() => {
       <TopbarSettings brutal force-menu />
     </header>
 
-    <article class="privacy-policy">
+    <article class="privacy-policy legal-body">
       <h1>Datenschutzerklärung</h1>
 
       <p class="stand">Stand: 8. August 2026</p>
@@ -656,126 +657,3 @@ onMounted(() => {
     </article>
   </div>
 </template>
-
-<style scoped>
-.legal-page {
-  min-height: 100%;
-  background: #f3efe6;
-}
-
-.legal-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  min-height: 58px;
-  padding: 0.7rem 1rem;
-  border-bottom: 3px solid #111;
-  background: #fff;
-  position: sticky;
-  top: 0;
-  z-index: 20;
-}
-
-.back-btn {
-  border: 2px solid #111;
-  background: var(--cta);
-  border-radius: 0;
-  padding: 0.55rem 0.85rem;
-  cursor: pointer;
-  font-weight: 800;
-  color: #111;
-  text-decoration: none;
-  box-shadow: 3px 3px 0 #111;
-}
-
-.back-btn:hover {
-  transform: translate(1px, 1px);
-  box-shadow: 2px 2px 0 #111;
-}
-
-.back-btn:focus-visible {
-  outline: 3px solid #111;
-  outline-offset: 2px;
-}
-
-.legal-footer {
-  margin-top: 2.5rem;
-  padding-top: 1.25rem;
-  border-top: 1px solid var(--border);
-  font-size: 0.9rem;
-  color: var(--text-muted);
-}
-
-.privacy-policy {
-  max-width: 44rem;
-  margin: 0 auto;
-  padding: 1.75rem 1.15rem 3.5rem;
-  color: var(--text);
-  line-height: 1.65;
-}
-
-.privacy-policy h1 {
-  margin: 0 0 0.5rem;
-  font-size: 1.85rem;
-  color: var(--primary-dark);
-  letter-spacing: -0.02em;
-}
-
-.stand {
-  margin: 0 0 1.75rem;
-  color: var(--text-muted);
-  font-size: 0.92rem;
-}
-
-.privacy-policy h2 {
-  margin: 2rem 0 0.75rem;
-  font-size: 1.2rem;
-  color: var(--primary-dark);
-}
-
-.privacy-policy h3 {
-  margin: 1.25rem 0 0.55rem;
-  font-size: 1.02rem;
-}
-
-.privacy-policy p,
-.privacy-policy ul {
-  margin: 0 0 0.9rem;
-  font-size: 0.95rem;
-}
-
-.privacy-policy ul {
-  padding-left: 1.2rem;
-}
-
-.privacy-policy li {
-  margin-bottom: 0.3rem;
-}
-
-.privacy-policy a {
-  color: var(--primary);
-  text-decoration-thickness: 1px;
-  text-underline-offset: 2px;
-}
-
-.contact-hint {
-  font-size: 0.9rem;
-  color: var(--muted, #64748b);
-}
-
-@media (max-width: 640px) {
-  .back-btn {
-    font-size: 0.85rem;
-    padding: 0.55rem 0.7rem;
-  }
-
-  .privacy-policy {
-    padding: 1.25rem 1rem 2.75rem;
-  }
-
-  .privacy-policy h1 {
-    font-size: 1.5rem;
-  }
-}
-</style>
