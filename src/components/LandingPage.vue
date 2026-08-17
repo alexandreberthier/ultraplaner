@@ -563,16 +563,23 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
 .brand-lockup {
   display: inline-flex;
   align-items: center;
-  gap: 0.55rem;
-  min-width: 0;
-  flex-shrink: 1;
-  padding: 0.35rem 0.6rem 0.35rem 0.4rem;
+  justify-content: center;
+  flex-shrink: 0;
+  padding: 0.32rem;
   border: 3px solid #111;
-  border-radius: 0;
-  background: #fff;
+  border-radius: 8px;
+  background: #f3efe6;
   box-shadow: 4px 4px 0 #111;
   cursor: pointer;
   font: inherit;
+  line-height: 0;
+}
+
+.brand-lockup picture {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 0;
 }
 
 .brand-logo {
@@ -580,6 +587,7 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
   height: 2.5rem;
   width: 2.5rem;
   object-fit: contain;
+  object-position: center;
 }
 
 .hero-center {
