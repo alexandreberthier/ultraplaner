@@ -200,21 +200,30 @@ async function submit() {
   grid-column: 1 / -1;
   justify-self: start;
   margin-top: 0.25rem;
-  background: var(--primary);
-  color: #fff;
-  border: none;
-  border-radius: 12px;
+  background: var(--cta);
+  color: #111;
+  border: 3px solid #111;
+  border-radius: 0;
+  box-shadow: 5px 5px 0 #111;
   padding: 0.75rem 1.4rem;
-  font-weight: 700;
+  font-weight: 800;
+  font-size: 0.88rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
   cursor: pointer;
+  transition: transform 0.08s ease, box-shadow 0.08s ease;
 }
 
 .feedback-submit:hover:not(:disabled) {
-  background: var(--primary-dark);
+  transform: translate(3px, 3px);
+  box-shadow: 2px 2px 0 #111;
 }
 
 .feedback-submit:disabled {
-  opacity: 0.65;
+  opacity: 1;
+  background: #e8e4dc;
+  color: #111;
+  box-shadow: none;
   cursor: default;
 }
 

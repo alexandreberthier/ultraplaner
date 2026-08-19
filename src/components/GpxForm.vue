@@ -520,16 +520,17 @@ async function createMap() {
   color: #111;
   border: 3px solid #111;
   border-radius: 0;
-  box-shadow: 4px 4px 0 #111;
+  box-shadow: 5px 5px 0 #111;
   font-weight: 800;
   font-size: 0.92rem;
   letter-spacing: 0.05em;
   text-transform: uppercase;
   cursor: pointer;
+  transition: transform 0.08s ease, box-shadow 0.08s ease;
 }
 
 .btn-primary:hover:not(:disabled) {
-  transform: translate(2px, 2px);
+  transform: translate(3px, 3px);
   box-shadow: 2px 2px 0 #111;
 }
 

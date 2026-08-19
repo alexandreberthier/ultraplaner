@@ -375,20 +375,14 @@ defineExpose({ openMapFirst, searchNearby })
   padding: 0.85rem 1rem;
   font-size: 0.88rem;
   min-height: 48px;
-  border: 3px solid #111;
-  border-radius: 0;
-  background: var(--cta);
-  color: #111;
-  box-shadow: 4px 4px 0 #111;
-  font-weight: 800;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  box-shadow: 5px 5px 0 #111;
 }
 
 .in-map .btn-primary:disabled {
   opacity: 1;
   background: #e8e4dc;
   box-shadow: none;
+  transform: none;
 }
 
 @media (max-width: 768px) {
@@ -644,23 +638,35 @@ defineExpose({ openMapFirst, searchNearby })
 
 .btn-primary {
   padding: 0.85rem 1.5rem;
-  background: var(--primary);
-  color: #fff;
-  border: none;
-  border-radius: 10px;
-  font-weight: 600;
-  font-size: 1rem;
+  background: var(--cta);
+  color: #111;
+  border: 3px solid #111;
+  border-radius: 0;
+  box-shadow: 5px 5px 0 #111;
+  font-weight: 800;
+  font-size: 0.92rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
   cursor: pointer;
+  transition: transform 0.08s ease, box-shadow 0.08s ease;
+}
+
+.btn-primary:hover:not(:disabled) {
+  transform: translate(3px, 3px);
+  box-shadow: 2px 2px 0 #111;
 }
 
 .map-first .btn-primary {
   padding: 1rem 1.5rem;
-  font-size: 1.05rem;
+  font-size: 0.95rem;
   min-height: 52px;
 }
 
 .btn-primary:disabled {
-  opacity: 0.6;
+  opacity: 1;
+  background: #e8e4dc;
+  color: #111;
+  box-shadow: none;
   cursor: not-allowed;
 }
 </style>
