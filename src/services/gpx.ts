@@ -11,6 +11,8 @@ import {
 import { isInBbox } from './geo'
 import { buildRoutePoints, totalRouteKm } from '../utils/route'
 
+export { simplifyCoords } from '../utils/route'
+
 export interface GpxWaypointImport {
   lat: number
   lng: number
@@ -174,18 +176,4 @@ export function routePointsFromGpx(text: string): {
     name,
     waypoints,
   }
-}
-
-export function simplifyCoords(
-  coords: [number, number][],
-  maxPoints = 3000
-): [number, number][] {
-  if (coords.length <= maxPoints) return coords
-  const step = Math.ceil(coords.length / maxPoints)
-  const simplified = coords.filter((_, i) => i % step === 0)
-  const last = coords[coords.length - 1]!
-  if (simplified.at(-1)?.[0] !== last[0] || simplified.at(-1)?.[1] !== last[1]) {
-    simplified.push(last)
-  }
-  return simplified
 }

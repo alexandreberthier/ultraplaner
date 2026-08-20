@@ -2,6 +2,14 @@ import type { RoutePoint } from '../../shared/types'
 import { haversineM } from '../services/geo'
 import { gradeToColor } from '../config/mapStyle'
 
+/** Soft cap after Douglas–Peucker — MapLibre/IndexedDB stay responsive. */
+export const ROUTE_SIMPLIFY_MAX_POINTS = 20_000
+/**
+ * Max deviation from original track (meters). Uniform every-Nth sampling used to
+ * cut corners across fields on long race GPX; DP keeps junctions within this ε.
+ */
+export const ROUTE_SIMPLIFY_EPSILON_M = 4
+
 function isFiniteLngLat(lng: unknown, lat: unknown): boolean {
   return typeof lng === 'number' && typeof lat === 'number' && Number.isFinite(lng) && Number.isFinite(lat)
 }
@@ -70,7 +78,7 @@ export function buildRoutePoints(
       ? cleanedEle
       : undefined
 
-  const simplified = simplifyCoords(cleanedCoords, useEle, 3000)
+  const simplified = simplifyRouteGeometry(cleanedCoords, useEle)
   const points: RoutePoint[] = []
   let totalM = 0
 
@@ -105,27 +113,115 @@ export function buildRoutePoints(
   return points
 }
 
-function simplifyCoords(
+/** Perpendicular distance of P to segment AB, local meters (equirectangular). */
+function pointToSegmentDistanceM(
+  p: [number, number],
+  a: [number, number],
+  b: [number, number]
+): number {
+  const lat0 = (((a[1] + b[1]) / 2) * Math.PI) / 180
+  const cosLat = Math.cos(lat0)
+  const ax = a[0] * cosLat
+  const ay = a[1]
+  const bx = b[0] * cosLat
+  const by = b[1]
+  const px = p[0] * cosLat
+  const py = p[1]
+  const dx = bx - ax
+  const dy = by - ay
+  const len2 = dx * dx + dy * dy
+  let t = 0
+  if (len2 > 0) {
+    t = ((px - ax) * dx + (py - ay) * dy) / len2
+    t = Math.max(0, Math.min(1, t))
+  }
+  const qx = ax + t * dx
+  const qy = ay + t * dy
+  // degrees → meters (~111320 m per degree lat)
+  const mPerDeg = 111_320
+  const dEast = (px - qx) * mPerDeg
+  const dNorth = (py - qy) * mPerDeg
+  return Math.hypot(dEast, dNorth)
+}
+
+/**
+ * Douglas–Peucker that preserves turns/junctions within ε meters.
+ * If still over maxPoints, ε is raised until the cap is met (never uniform skip).
+ */
+export function simplifyRouteGeometry(
   coords: [number, number][],
   elevations?: number[],
-  maxPoints = 3000
+  maxPoints = ROUTE_SIMPLIFY_MAX_POINTS,
+  epsilonM = ROUTE_SIMPLIFY_EPSILON_M
 ): { coords: [number, number][]; elevations?: number[] } {
-  if (coords.length <= maxPoints) {
+  if (coords.length <= 2) {
     return { coords, elevations }
   }
-  const step = Math.ceil(coords.length / maxPoints)
-  const simplified: [number, number][] = []
-  const simplifiedEle: number[] = []
-  for (let i = 0; i < coords.length; i += step) {
-    simplified.push(coords[i]!)
-    if (elevations) simplifiedEle.push(finiteElev(elevations[i]) ?? 0)
+
+  let eps = Math.max(0.5, epsilonM)
+  let keep = douglasPeuckerKeep(coords, eps)
+
+  while (keep.length > maxPoints && eps < 80) {
+    eps *= 1.6
+    keep = douglasPeuckerKeep(coords, eps)
   }
-  const last = coords[coords.length - 1]!
-  if (simplified.at(-1)?.[0] !== last[0] || simplified.at(-1)?.[1] !== last[1]) {
-    simplified.push(last)
-    if (elevations) simplifiedEle.push(finiteElev(elevations[elevations.length - 1]) ?? 0)
+
+  if (keep.length > maxPoints) {
+    // Extreme denseness: keep endpoints + evenly spaced from DP result (still better than raw)
+    const step = Math.ceil(keep.length / maxPoints)
+    const thinned: number[] = [keep[0]!]
+    for (let i = step; i < keep.length - 1; i += step) thinned.push(keep[i]!)
+    thinned.push(keep[keep.length - 1]!)
+    keep = thinned
   }
-  return { coords: simplified, elevations: elevations ? simplifiedEle : undefined }
+
+  const outCoords = keep.map((i) => coords[i]!)
+  const outEle = elevations ? keep.map((i) => finiteElev(elevations[i]) ?? 0) : undefined
+  return { coords: outCoords, elevations: outEle }
+}
+
+function douglasPeuckerKeep(coords: [number, number][], epsilonM: number): number[] {
+  const n = coords.length
+  if (n <= 2) return Array.from({ length: n }, (_, i) => i)
+
+  const keep = new Uint8Array(n)
+  keep[0] = 1
+  keep[n - 1] = 1
+
+  const stack: Array<[number, number]> = [[0, n - 1]]
+  while (stack.length) {
+    const [start, end] = stack.pop()!
+    if (end <= start + 1) continue
+    const a = coords[start]!
+    const b = coords[end]!
+    let maxDist = 0
+    let maxIdx = start
+    for (let i = start + 1; i < end; i++) {
+      const d = pointToSegmentDistanceM(coords[i]!, a, b)
+      if (d > maxDist) {
+        maxDist = d
+        maxIdx = i
+      }
+    }
+    if (maxDist > epsilonM) {
+      keep[maxIdx] = 1
+      stack.push([start, maxIdx], [maxIdx, end])
+    }
+  }
+
+  const indices: number[] = []
+  for (let i = 0; i < n; i++) {
+    if (keep[i]) indices.push(i)
+  }
+  return indices
+}
+
+/** Display / cache polyline — same DP as route points. */
+export function simplifyCoords(
+  coords: [number, number][],
+  maxPoints = ROUTE_SIMPLIFY_MAX_POINTS
+): [number, number][] {
+  return simplifyRouteGeometry(coords, undefined, maxPoints).coords
 }
 
 export function totalRouteKm(points: RoutePoint[]): number {
