@@ -2,13 +2,10 @@ import type { RoutePoint } from '../../shared/types'
 import { haversineM } from '../services/geo'
 import { gradeToColor } from '../config/mapStyle'
 
-/** Soft cap after Douglas–Peucker — MapLibre/IndexedDB stay responsive. */
-export const ROUTE_SIMPLIFY_MAX_POINTS = 20_000
-/**
- * Max deviation from original track (meters). Uniform every-Nth sampling used to
- * cut corners across fields on long race GPX; DP keeps junctions within this ε.
- */
-export const ROUTE_SIMPLIFY_EPSILON_M = 4
+/** Emergency cap only — normal GPX tracks are kept 1:1 (no geometry rewrite). */
+export const ROUTE_SIMPLIFY_MAX_POINTS = 250_000
+/** Only used if a track exceeds ROUTE_SIMPLIFY_MAX_POINTS (pathological files). */
+export const ROUTE_SIMPLIFY_EPSILON_M = 1
 
 function isFiniteLngLat(lng: unknown, lat: unknown): boolean {
   return typeof lng === 'number' && typeof lat === 'number' && Number.isFinite(lng) && Number.isFinite(lat)
@@ -145,8 +142,8 @@ function pointToSegmentDistanceM(
 }
 
 /**
- * Douglas–Peucker that preserves turns/junctions within ε meters.
- * If still over maxPoints, ε is raised until the cap is met (never uniform skip).
+ * Keep GPX geometry verbatim. Douglas–Peucker runs only if the track exceeds
+ * maxPoints (browser safety) — race courses must not be rewritten for display.
  */
 export function simplifyRouteGeometry(
   coords: [number, number][],
@@ -154,7 +151,7 @@ export function simplifyRouteGeometry(
   maxPoints = ROUTE_SIMPLIFY_MAX_POINTS,
   epsilonM = ROUTE_SIMPLIFY_EPSILON_M
 ): { coords: [number, number][]; elevations?: number[] } {
-  if (coords.length <= 2) {
+  if (coords.length <= 2 || coords.length <= maxPoints) {
     return { coords, elevations }
   }
 
@@ -167,7 +164,6 @@ export function simplifyRouteGeometry(
   }
 
   if (keep.length > maxPoints) {
-    // Extreme denseness: keep endpoints + evenly spaced from DP result (still better than raw)
     const step = Math.ceil(keep.length / maxPoints)
     const thinned: number[] = [keep[0]!]
     for (let i = step; i < keep.length - 1; i += step) thinned.push(keep[i]!)
@@ -216,7 +212,7 @@ function douglasPeuckerKeep(coords: [number, number][], epsilonM: number): numbe
   return indices
 }
 
-/** Display / cache polyline — same DP as route points. */
+/** Display / cache polyline — full GPX fidelity (same as route points). */
 export function simplifyCoords(
   coords: [number, number][],
   maxPoints = ROUTE_SIMPLIFY_MAX_POINTS
