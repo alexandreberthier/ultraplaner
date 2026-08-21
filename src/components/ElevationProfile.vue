@@ -780,18 +780,18 @@ onUnmounted(() => {
 
 .title {
   margin: 0;
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
+  font-size: 0.95rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--text-muted);
+  color: #111;
 }
 
 .subtitle {
   margin: 0;
-  font-size: 0.8rem;
-  color: var(--text);
-  font-weight: 500;
+  font-size: 0.88rem;
+  color: #111;
+  font-weight: 700;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -836,8 +836,9 @@ onUnmounted(() => {
 
 .select-hint {
   margin: 0;
-  font-size: 0.72rem;
-  color: var(--text-muted);
+  font-size: 0.82rem;
+  font-weight: 650;
+  color: #111;
 }
 
 .surface-summary {

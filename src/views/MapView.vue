@@ -3636,6 +3636,22 @@ function onDocClick(e: MouseEvent) {
 
 .map-layout :deep(.elevation-profile .profile-toggle) {
   background: #f3efe6;
+  color: #111;
+  min-height: 56px;
+  padding: 0.75rem 1rem;
+  border-bottom: 2px solid #111;
+}
+
+.map-layout :deep(.elevation-profile .title) {
+  color: #111;
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.map-layout :deep(.elevation-profile .subtitle) {
+  color: #111;
+  font-size: 0.9rem;
+  font-weight: 700;
 }
 
 .map-layout :deep(.elevation-profile .chevron-wrap) {
