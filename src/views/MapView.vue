@@ -896,7 +896,7 @@ function onDocClick(e: MouseEvent) {
           >
             {{ shareCopied ? `✓ ${t('map.linkCopied')}` : `🔗 ${t('map.share')}` }}
           </button>
-          <TopbarSettings brutal force-menu />
+          <TopbarSettings brutal force-menu compact />
         </div>
       </header>
 
@@ -1639,7 +1639,6 @@ function onDocClick(e: MouseEvent) {
   margin: 0.25rem 0 0;
   font-size: 0.85rem;
   color: #111;
-  opacity: 0.68;
   font-weight: 650;
 }
 
@@ -3357,6 +3356,53 @@ function onDocClick(e: MouseEvent) {
 .sidebar :deep(.toggle-title) {
   color: #111;
   font-weight: 800;
+  font-size: 0.78rem;
+}
+
+.sidebar :deep(.toggle-summary),
+.sidebar :deep(.toggle-summary.has-rain) {
+  color: #111;
+  font-weight: 700;
+  font-size: 0.82rem;
+}
+
+.sidebar :deep(.hint),
+.sidebar :deep(.pack-hint),
+.sidebar :deep(.eta-hint),
+.sidebar :deep(.eta-filter-hint),
+.sidebar :deep(.place-hint),
+.sidebar :deep(.map-poi-thin-hint),
+.sidebar :deep(.empty),
+.sidebar :deep(.empty-hint),
+.sidebar :deep(.weather-error),
+.sidebar :deep(.weather-empty),
+.sidebar :deep(.intro) {
+  color: #111;
+  font-size: 0.82rem;
+  font-weight: 650;
+  line-height: 1.4;
+}
+
+.sidebar :deep(.section-body),
+.sidebar :deep(.section-body p),
+.sidebar :deep(.section-body li),
+.sidebar :deep(.section-body label),
+.sidebar :deep(.section-body span),
+.sidebar :deep(.map-poi-status),
+.sidebar :deep(.map-poi-toggle),
+.sidebar :deep(.poi-body),
+.sidebar :deep(.poi-body li),
+.sidebar :deep(.km),
+.sidebar :deep(.weather-chip),
+.sidebar :deep(.weather-chip strong),
+.sidebar :deep(.weather-temp),
+.sidebar :deep(.weather-rain),
+.sidebar :deep(.weather-rain.rain-high),
+.sidebar :deep(.weather-detail),
+.sidebar :deep(.weather-time),
+.sidebar :deep(.field-label),
+.sidebar :deep(.categories legend) {
+  color: #111;
 }
 
 .sidebar :deep(.section-toggle:hover) {

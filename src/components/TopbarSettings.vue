@@ -12,8 +12,10 @@ withDefaults(
     forceMenu?: boolean
     /** Hard neo-brutalist chrome (landing hero). */
     brutal?: boolean
+    /** Smaller burger — map toolbar, not landing. */
+    compact?: boolean
   }>(),
-  { forceMenu: false, brutal: false }
+  { forceMenu: false, brutal: false, compact: false }
 )
 
 const { t } = useI18n()
@@ -93,7 +95,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div ref="root" class="topbar-settings" :class="{ 'force-menu': forceMenu, brutal }">
+  <div ref="root" class="topbar-settings" :class="{ 'force-menu': forceMenu, brutal, compact }">
     <div class="settings-inline" aria-hidden="false">
       <ColorModeToggle compact />
       <LanguagePicker compact />
@@ -294,6 +296,25 @@ onUnmounted(() => {
   .brutal .menu-btn {
     width: 3.25rem;
     height: 3.25rem;
+  }
+}
+
+.brutal.compact .menu-btn,
+.brutal.compact.force-menu .menu-btn {
+  width: 2.4rem;
+  height: 2.4rem;
+  border-width: 2px;
+  box-shadow: 2px 2px 0 #111;
+}
+
+.brutal.compact .menu-icon {
+  font-size: 1.28rem;
+}
+
+@media (min-width: 721px) {
+  .brutal.compact .menu-btn {
+    width: 2.4rem;
+    height: 2.4rem;
   }
 }
 
