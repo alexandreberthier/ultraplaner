@@ -1,5 +1,16 @@
 apply plugin: 'com.android.application'
 
+// Optional Play release signing: android/keystore.properties or repo-root keystore.properties
+def keystoreProperties = new Properties()
+def keystorePropertiesFile = rootProject.file('keystore.properties')
+if (!keystorePropertiesFile.exists()) {
+    keystorePropertiesFile = rootProject.file('../keystore.properties')
+}
+def hasReleaseKeystore = keystorePropertiesFile.exists()
+if (hasReleaseKeystore) {
+    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+}
+
 android {
     namespace = "com.ultraplaner.app"
     compileSdk = rootProject.ext.compileSdkVersion
@@ -16,11 +27,25 @@ android {
             ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
+    if (hasReleaseKeystore) {
+        signingConfigs {
+            release {
+                // storeFile path is relative to the android/ directory (or absolute)
+                storeFile rootProject.file(keystoreProperties['storeFile'])
+                storePassword keystoreProperties['storePassword']
+                keyAlias keystoreProperties['keyAlias']
+                keyPassword keystoreProperties['keyPassword']
+            }
+        }
+    }
     buildTypes {
         release {
             minifyEnabled false
             // AGP 9+; cap sync does not overwrite this file.
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            if (hasReleaseKeystore) {
+                signingConfig signingConfigs.release
+            }
         }
     }
 }

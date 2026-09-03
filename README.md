@@ -15,6 +15,10 @@ cp .env.example .env
 npm run dev
 ```
 
+## Android (Play AAB)
+
+Release-Signing und Bundle: siehe [docs/android-play-release.md](docs/android-play-release.md). Kurz: Keystore + `android/keystore.properties`, dann `npm run android:bundle`.
+
 ## Deploy
 
 ```bash
