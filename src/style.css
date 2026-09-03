@@ -109,6 +109,14 @@ html.map-overlay-open body {
   overscroll-behavior: none;
 }
 
+/* Capacitor WebView: status bar / home indicator insets for overlays */
+html.native-app {
+  --native-safe-top: env(safe-area-inset-top, 0px);
+  --native-safe-right: env(safe-area-inset-right, 0px);
+  --native-safe-bottom: env(safe-area-inset-bottom, 0px);
+  --native-safe-left: env(safe-area-inset-left, 0px);
+}
+
 html.map-overlay-open .maplibregl-canvas,
 html.map-overlay-open .maplibregl-canvas-container {
   pointer-events: none !important;

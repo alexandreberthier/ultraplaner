@@ -11,6 +11,8 @@ export function isNativeApp(): boolean {
 export function initNativeShell(router: Router): void {
   if (!isNativeApp()) return
 
+  document.documentElement.classList.add('native-app')
+
   void App.addListener('backButton', () => {
     if (isLocaleHomePath(router.currentRoute.value.path)) {
       void App.exitApp()

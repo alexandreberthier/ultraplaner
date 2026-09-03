@@ -2003,10 +2003,17 @@ onUnmounted(() => {
 
 .map-hint {
   position: absolute;
-  left: 0.75rem;
-  bottom: 0.75rem;
+  left: max(0.5rem, env(safe-area-inset-left, 0px));
+  right: max(3.25rem, calc(0.5rem + env(safe-area-inset-right, 0px)));
+  bottom: max(0.5rem, env(safe-area-inset-bottom, 0px));
   margin: 0;
   padding: 0.35rem 0.55rem;
+  box-sizing: border-box;
+  max-width: 100%;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  white-space: normal;
   background: #fff;
   border-radius: var(--radius);
   border: 1px solid var(--border);
@@ -2019,7 +2026,7 @@ onUnmounted(() => {
 
 .surface-legend {
   position: absolute;
-  left: 0.75rem;
+  left: max(0.5rem, env(safe-area-inset-left, 0px));
   bottom: 2.85rem;
   z-index: 2;
   display: flex;
@@ -2028,7 +2035,9 @@ onUnmounted(() => {
   margin: 0;
   padding: 0.3rem 0.5rem;
   list-style: none;
-  max-width: min(92%, 20rem);
+  max-width: min(92%, calc(100% - 3.5rem - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px)));
+  box-sizing: border-box;
+  overflow: hidden;
   background: #fff;
   border: 1px solid var(--border);
   border-radius: var(--radius);
@@ -2062,8 +2071,8 @@ onUnmounted(() => {
 
 .route-km-badge {
   position: absolute;
-  top: 10px;
-  right: 52px;
+  top: max(10px, env(safe-area-inset-top, 0px));
+  right: max(52px, calc(52px + env(safe-area-inset-right, 0px)));
   z-index: 3;
   display: inline-flex;
   align-items: baseline;
@@ -2075,6 +2084,9 @@ onUnmounted(() => {
   border: 1px solid var(--border);
   box-shadow: var(--shadow);
   pointer-events: none;
+  max-width: calc(100% - 4rem - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px));
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .route-km-badge strong {
@@ -2110,10 +2122,13 @@ onUnmounted(() => {
 
 .export-menu {
   position: absolute;
-  top: 10px;
-  right: 10px;
+  top: max(10px, env(safe-area-inset-top, 0px));
+  right: max(10px, env(safe-area-inset-right, 0px));
   z-index: 41;
-  width: min(320px, calc(100% - 20px));
+  width: min(320px, calc(100% - 20px - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px)));
+  max-width: calc(100% - 20px);
+  box-sizing: border-box;
+  overflow: auto;
   padding: 0.65rem;
   border-radius: var(--radius);
   background: #fff;
@@ -2203,8 +2218,8 @@ onUnmounted(() => {
 
 .basemap-toggle {
   position: absolute;
-  top: 10px;
-  left: 10px;
+  top: max(10px, env(safe-area-inset-top, 0px));
+  left: max(10px, env(safe-area-inset-left, 0px));
   z-index: 3;
   display: flex;
   background: #fff;
@@ -2875,7 +2890,6 @@ onUnmounted(() => {
   .map-hint {
     font-size: 0.7rem;
     padding: 0.28rem 0.45rem;
-    max-width: calc(100% - 1.5rem);
   }
 
   .route-color-toggle,
@@ -2894,9 +2908,11 @@ onUnmounted(() => {
     padding: 0;
     gap: 0;
     overflow: hidden;
-    border-radius: var(--radius);
+    border-radius: 0;
     display: flex;
     flex-direction: column;
+    max-width: 100%;
+    box-sizing: border-box;
   }
 
   .planner-controls.sheet-collapsed {
@@ -2911,7 +2927,8 @@ onUnmounted(() => {
     border-right: none;
     border-bottom: none;
     border-top: 1px solid var(--border);
-    padding: 0.7rem 1rem calc(0.75rem + env(safe-area-inset-bottom, 0px));
+    padding: 0.7rem max(1rem, env(safe-area-inset-right, 0px))
+      calc(0.75rem + env(safe-area-inset-bottom, 0px)) max(1rem, env(safe-area-inset-left, 0px));
     background: #fff;
     box-shadow: none;
   }
@@ -2926,8 +2943,11 @@ onUnmounted(() => {
     align-items: center;
     gap: 0.65rem;
     width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
     flex-shrink: 0;
-    padding: 0.95rem 1rem 0.85rem;
+    padding: 0.95rem max(1rem, env(safe-area-inset-right, 0px))
+      calc(0.85rem + env(safe-area-inset-bottom, 0px)) max(1rem, env(safe-area-inset-left, 0px));
     border: none;
     background: #fff;
     cursor: pointer;
@@ -2994,7 +3014,8 @@ onUnmounted(() => {
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: contain;
-    padding: 0.75rem 1rem 1rem;
+    padding: 0.75rem max(1rem, env(safe-area-inset-right, 0px))
+      calc(1rem + env(safe-area-inset-bottom, 0px)) max(1rem, env(safe-area-inset-left, 0px));
     max-height: none;
   }
 

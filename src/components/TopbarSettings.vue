@@ -5,6 +5,7 @@ import ColorModeToggle from './ColorModeToggle.vue'
 import LanguagePicker from './LanguagePicker.vue'
 import PwaInstallHint from './PwaInstallHint.vue'
 import { usePwaInstall } from '../composables/usePwaInstall'
+import { clampFixedPanelStyle } from '../utils/clampFixedPanel'
 
 withDefaults(
   defineProps<{
@@ -38,14 +39,9 @@ function repositionPanel() {
   if (!open.value) return
   const btn = menuBtn.value
   if (!btn) return
-  const r = btn.getBoundingClientRect()
-  const gap = 8
-  const margin = 8
-  panelStyle.value = {
-    top: `${Math.round(r.bottom + gap)}px`,
-    right: `${Math.round(Math.max(margin, window.innerWidth - r.right))}px`,
-    maxHeight: `${Math.round(Math.max(140, window.innerHeight - r.bottom - gap - margin))}px`,
-  }
+  panelStyle.value = clampFixedPanelStyle(btn.getBoundingClientRect(), {
+    preferredWidth: 16 * 16,
+  })
 }
 
 function onInstallClick() {
@@ -84,6 +80,8 @@ onMounted(() => {
   document.addEventListener('keydown', onKey)
   window.addEventListener('resize', repositionPanel)
   window.addEventListener('scroll', repositionPanel, true)
+  window.visualViewport?.addEventListener('resize', repositionPanel)
+  window.visualViewport?.addEventListener('scroll', repositionPanel)
 })
 
 onUnmounted(() => {
@@ -91,6 +89,8 @@ onUnmounted(() => {
   document.removeEventListener('keydown', onKey)
   window.removeEventListener('resize', repositionPanel)
   window.removeEventListener('scroll', repositionPanel, true)
+  window.visualViewport?.removeEventListener('resize', repositionPanel)
+  window.visualViewport?.removeEventListener('scroll', repositionPanel)
 })
 </script>
 
@@ -347,8 +347,10 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   gap: 0.85rem;
-  min-width: 16rem;
-  max-width: calc(100vw - 16px);
+  box-sizing: border-box;
+  min-width: 0;
+  max-width: min(16rem, calc(100vw - 16px - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px)));
+  overflow-x: hidden;
   overflow-y: auto;
   padding: 0.9rem;
   border: 1px solid var(--border);

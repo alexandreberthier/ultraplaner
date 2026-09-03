@@ -19,7 +19,6 @@ import OfflinePackPanel from '../components/OfflinePackPanel.vue'
 import { useOnline } from '../composables/useOnline'
 import { useI18n } from 'vue-i18n'
 import TopbarSettings from '../components/TopbarSettings.vue'
-import RecentRoutesMenu from '../components/RecentRoutesMenu.vue'
 import { localeHomePath, type AppLocale } from '../i18n'
 import { useRideMode } from '../composables/useRideMode'
 import { useRidePosition } from '../composables/useRidePosition'
@@ -33,11 +32,13 @@ import { poiCategoryEmoji } from '../utils/poiLabels'
 import type { ControlPointKind, Poi, PoiCategory } from '../../shared/types'
 
 import { getPackMeta, type OfflinePackMeta } from '../services/offlinePacks'
+import { isNativeApp } from '../utils/nativeApp'
 
 const store = useMapStore()
 const route = useRoute()
 const router = useRouter()
 const { t, locale } = useI18n()
+const nativeApp = isNativeApp()
 const {
   exportGpxFavorites,
   exportGpxRoute,
@@ -154,10 +155,12 @@ function openExportPanel(e?: Event) {
   // cannot immediately close the desktop menu again.
   if (isMobileLayout()) {
     mobilePanel.value = 'export'
+    if (nativeApp) showPcFiles.value = true
     return
   }
   window.setTimeout(() => {
     showExportMenu.value = true
+    if (nativeApp) showPcFiles.value = true
   }, 0)
 }
 
@@ -224,6 +227,15 @@ function openExportMenuFromTip(e?: Event) {
 const EXPORT_TIP_KEY = 'ultraplaner-export-tip-seen'
 
 const favCount = computed(() => store.exportStops.length)
+const deviceFilesLabel = computed(() => t(nativeApp ? 'map.deviceFiles' : 'map.devicePc'))
+const deviceFilesHint = computed(() =>
+  store.isNearbyMap
+    ? t(nativeApp ? 'map.deviceFilesHintNearby' : 'map.devicePcHintNearby', { count: favCount.value })
+    : t(nativeApp ? 'map.deviceFilesHint' : 'map.devicePcHint', { count: favCount.value })
+)
+const deviceFilesRouteOnlyHint = computed(() =>
+  t(nativeApp ? 'map.exportFilesRouteOnlyHint' : 'map.exportPcRouteOnlyHint')
+)
 const finishEta = computed(() => store.etaAtRouteKm(store.totalKm))
 const rideDuration = computed(() => finishEta.value.durationLabel)
 
@@ -482,6 +494,7 @@ function openMobilePanel(panel: 'pois' | 'export' | 'nearby') {
   mobilePanel.value = mobilePanel.value === panel ? 'none' : panel
   if (mobilePanel.value !== 'none') showExportMenu.value = false
   if (mobilePanel.value !== 'export') showPcFiles.value = false
+  else if (nativeApp) showPcFiles.value = true
   if (mobilePanel.value === 'pois') {
     setActiveSidebarSection('categories')
     void nextTick(() => {
@@ -533,6 +546,7 @@ function toggleExportMenu() {
     return
   }
   showExportMenu.value = !showExportMenu.value
+  if (showExportMenu.value && nativeApp) showPcFiles.value = true
 }
 
 function runExport(action: () => void | Promise<void>) {
@@ -660,8 +674,9 @@ function onDocClick(e: MouseEvent) {
 
               <!-- Fall A: Mit Favoriten/Kontrollpunkten -->
               <template v-if="favCount > 0">
-                <!-- 1. QR / Aufs Handy -->
+                <!-- 1. QR / Aufs Handy (web only — already on phone in native) -->
                 <button
+                  v-if="!nativeApp"
                   type="button"
                   class="export-item featured"
                   role="menuitem"
@@ -674,27 +689,22 @@ function onDocClick(e: MouseEvent) {
                   </span>
                 </button>
 
-                <!-- 2. PC herunterladen (GPX + FIT) -->
+                <!-- 2. GPX / FIT speichern (native) bzw. PC (web) -->
                 <button
                   type="button"
                   class="export-item"
+                  :class="{ featured: nativeApp }"
                   role="menuitem"
                   :aria-expanded="showPcFiles"
                   @click="togglePcFiles"
                 >
                   <span class="export-icon">↓</span>
                   <span class="export-text">
-                    <strong>{{ t('map.devicePc') }}</strong>
-                    <small>
-                      {{
-                        store.isNearbyMap
-                          ? t('map.devicePcHintNearby', { count: favCount })
-                          : t('map.devicePcHint', { count: favCount })
-                      }}
-                    </small>
+                    <strong>{{ deviceFilesLabel }}</strong>
+                    <small>{{ deviceFilesHint }}</small>
                   </span>
                 </button>
-                <div v-if="showPcFiles" class="export-pc-panel" role="group" :aria-label="t('map.devicePc')">
+                <div v-if="showPcFiles" class="export-pc-panel" role="group" :aria-label="deviceFilesLabel">
                   <button
                     type="button"
                     class="export-item nested"
@@ -782,8 +792,9 @@ function onDocClick(e: MouseEvent) {
 
               <!-- Fall B: Ohne Favoriten -->
               <template v-else-if="hasRealTrack()">
-                <!-- 1. QR / Aufs Handy (routeOnly) -->
+                <!-- 1. QR / Aufs Handy (routeOnly, web only) -->
                 <button
+                  v-if="!nativeApp"
                   type="button"
                   class="export-item featured"
                   role="menuitem"
@@ -796,21 +807,22 @@ function onDocClick(e: MouseEvent) {
                   </span>
                 </button>
 
-                <!-- 2. PC herunterladen (GPX + FIT, routeOnly) -->
+                <!-- 2. GPX / FIT speichern (native) bzw. PC (web) -->
                 <button
                   type="button"
                   class="export-item"
+                  :class="{ featured: nativeApp }"
                   role="menuitem"
                   :aria-expanded="showPcFiles"
                   @click="togglePcFiles"
                 >
                   <span class="export-icon">↓</span>
                   <span class="export-text">
-                    <strong>{{ t('map.devicePc') }}</strong>
-                    <small>{{ t('map.exportPcRouteOnlyHint') }}</small>
+                    <strong>{{ deviceFilesLabel }}</strong>
+                    <small>{{ deviceFilesRouteOnlyHint }}</small>
                   </span>
                 </button>
-                <div v-if="showPcFiles" class="export-pc-panel" role="group" :aria-label="t('map.devicePc')">
+                <div v-if="showPcFiles" class="export-pc-panel" role="group" :aria-label="deviceFilesLabel">
                   <button
                     type="button"
                     class="export-item nested"
@@ -886,7 +898,6 @@ function onDocClick(e: MouseEvent) {
               </template>
             </div>
           </div>
-          <RecentRoutesMenu brutal tool-style />
           <button
             v-if="store.savedMapId"
             type="button"
@@ -1263,8 +1274,9 @@ function onDocClick(e: MouseEvent) {
 
           <!-- Fall A: Mit Favoriten/Kontrollpunkten -->
           <template v-if="favCount > 0">
-            <!-- 1. QR / Aufs Handy -->
+            <!-- 1. QR / Aufs Handy (web only) -->
             <button
+              v-if="!nativeApp"
               type="button"
               class="export-sheet-btn featured"
               @click="void openQrExport('gpx').then(() => closeMobilePanel())"
@@ -1276,26 +1288,21 @@ function onDocClick(e: MouseEvent) {
               </span>
             </button>
 
-            <!-- 2. PC herunterladen (GPX + FIT) -->
+            <!-- 2. GPX / FIT speichern (native) bzw. PC (web) -->
             <button
               type="button"
               class="export-sheet-btn"
+              :class="{ featured: nativeApp }"
               :aria-expanded="showPcFiles"
               @click="togglePcFiles"
             >
               <span class="sheet-btn-icon">↓</span>
               <span>
-                <strong>{{ t('map.devicePc') }}</strong>
-                <small>
-                  {{
-                    store.isNearbyMap
-                      ? t('map.devicePcHintNearby', { count: favCount })
-                      : t('map.devicePcHint', { count: favCount })
-                  }}
-                </small>
+                <strong>{{ deviceFilesLabel }}</strong>
+                <small>{{ deviceFilesHint }}</small>
               </span>
             </button>
-            <div v-if="showPcFiles" class="export-pc-panel sheet" role="group" :aria-label="t('map.devicePc')">
+            <div v-if="showPcFiles" class="export-pc-panel sheet" role="group" :aria-label="deviceFilesLabel">
               <button
                 type="button"
                 class="export-sheet-btn nested"
@@ -1384,8 +1391,9 @@ function onDocClick(e: MouseEvent) {
 
           <!-- Fall B: Ohne Favoriten -->
           <template v-else-if="hasRealTrack()">
-            <!-- 1. QR / Aufs Handy (routeOnly) -->
+            <!-- 1. QR / Aufs Handy (routeOnly, web only) -->
             <button
+              v-if="!nativeApp"
               type="button"
               class="export-sheet-btn featured"
               @click="void openQrExport('gpx', { routeOnly: true }).then(() => closeMobilePanel())"
@@ -1397,20 +1405,21 @@ function onDocClick(e: MouseEvent) {
               </span>
             </button>
 
-            <!-- 2. PC herunterladen (GPX + FIT, routeOnly) -->
+            <!-- 2. GPX / FIT speichern (native) bzw. PC (web) -->
             <button
               type="button"
               class="export-sheet-btn"
+              :class="{ featured: nativeApp }"
               :aria-expanded="showPcFiles"
               @click="togglePcFiles"
             >
               <span class="sheet-btn-icon">↓</span>
               <span>
-                <strong>{{ t('map.devicePc') }}</strong>
-                <small>{{ t('map.exportPcRouteOnlyHint') }}</small>
+                <strong>{{ deviceFilesLabel }}</strong>
+                <small>{{ deviceFilesRouteOnlyHint }}</small>
               </span>
             </button>
-            <div v-if="showPcFiles" class="export-pc-panel sheet" role="group" :aria-label="t('map.devicePc')">
+            <div v-if="showPcFiles" class="export-pc-panel sheet" role="group" :aria-label="deviceFilesLabel">
               <button
                 type="button"
                 class="export-sheet-btn nested"
@@ -3018,8 +3027,11 @@ function onDocClick(e: MouseEvent) {
   border-radius: var(--radius);
   box-shadow: var(--shadow);
   z-index: 200;
-  min-width: 300px;
+  min-width: min(300px, calc(100vw - 1.5rem));
+  max-width: min(360px, calc(100vw - 1rem - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px)));
+  box-sizing: border-box;
   overflow: hidden;
+  overflow-x: hidden;
   padding-bottom: 0.35rem;
 }
 
@@ -3299,6 +3311,8 @@ function onDocClick(e: MouseEvent) {
   align-items: center;
   gap: 0.75rem;
   width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
   padding: 0.85rem 1rem;
   border: 1px solid var(--border);
   border-radius: var(--radius);

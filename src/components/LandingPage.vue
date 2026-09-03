@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { defineAsyncComponent, ref } from 'vue'
+import { defineAsyncComponent, onMounted, onUnmounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import GpxForm from '../components/GpxForm.vue'
 import TopbarSettings from '../components/TopbarSettings.vue'
@@ -37,6 +37,20 @@ const plannerRef = ref<{
 const plannerCanExport = ref(false)
 const nearbyPending = ref(false)
 const nativeApp = isNativeApp()
+const isNarrowPlanBar = ref(false)
+
+function syncNarrowPlanBar() {
+  isNarrowPlanBar.value =
+    typeof window !== 'undefined' && window.matchMedia('(max-width: 640px)').matches
+}
+
+onMounted(() => {
+  syncNarrowPlanBar()
+  window.addEventListener('resize', syncNarrowPlanBar)
+})
+onUnmounted(() => {
+  window.removeEventListener('resize', syncNarrowPlanBar)
+})
 
 function scrollToApp() {
   appRef.value?.scrollIntoView({ behavior: 'smooth' })
@@ -159,10 +173,9 @@ const garminFitGuidePath = () => garminFitPath(locale.value as AppLocale)
     <template v-if="tab === 'plan'">
       <header class="plan-topbar">
         <button type="button" class="back-btn" @click="leavePlanMode">
-          {{ t('landing.backHome') }}
+          {{ nativeApp || isNarrowPlanBar ? t('landing.backHomeShort') : t('landing.backHome') }}
         </button>
         <div class="plan-topbar-actions">
-          <RecentRoutesMenu brutal />
           <button
             type="button"
             class="plan-export-btn"
@@ -170,7 +183,7 @@ const garminFitGuidePath = () => garminFitPath(locale.value as AppLocale)
             :title="t('map.exportRoute')"
             @click="togglePlannerExport"
           >
-            ↓ {{ t('map.exportRoute') }} ▾
+            ↓ {{ nativeApp || isNarrowPlanBar ? t('map.exportShort') : t('map.exportRoute') }} ▾
           </button>
           <TopbarSettings brutal force-menu />
         </div>
@@ -1396,12 +1409,20 @@ const garminFitGuidePath = () => garminFitPath(locale.value as AppLocale)
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 0.65rem;
+  gap: 0.5rem;
+  flex-wrap: nowrap;
   min-height: 58px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
   padding: max(0.7rem, env(safe-area-inset-top, 0px))
-    max(1rem, env(safe-area-inset-right, 0px))
+    max(0.75rem, env(safe-area-inset-right, 0px))
     0.7rem
-    max(1rem, env(safe-area-inset-left, 0px));
+    max(0.75rem, env(safe-area-inset-left, 0px));
   background: #fff;
   border-bottom: 1px solid var(--border);
   z-index: 40;
@@ -1448,8 +1469,10 @@ const garminFitGuidePath = () => garminFitPath(locale.value as AppLocale)
 .plan-topbar-actions {
   display: flex;
   align-items: center;
-  gap: 0.45rem;
+  gap: 0.4rem;
+  flex-wrap: nowrap;
   flex-shrink: 0;
+  min-width: 0;
   margin-left: auto;
 }
 
@@ -1483,43 +1506,48 @@ const garminFitGuidePath = () => garminFitPath(locale.value as AppLocale)
 
 @media (max-width: 768px) {
   .plan-topbar {
-    gap: 0.5rem;
-    padding: 0.55rem 0.75rem;
+    gap: 0.4rem;
+    padding: max(0.55rem, env(safe-area-inset-top, 0px))
+      max(0.65rem, env(safe-area-inset-right, 0px))
+      0.55rem
+      max(0.65rem, env(safe-area-inset-left, 0px));
     min-height: 56px;
   }
 
   .back-btn {
-    min-width: 48px;
-    min-height: 48px;
-    padding: 0.65rem 0.85rem;
-    font-size: 0.9rem;
+    min-width: 0;
+    min-height: 44px;
+    padding: 0.55rem 0.7rem;
+    font-size: 0.85rem;
   }
 
   .plan-export-btn {
-    min-width: 48px;
-    min-height: 48px;
-    padding: 0.65rem 0.8rem;
-    font-size: 0.88rem;
+    min-width: 0;
+    min-height: 44px;
+    padding: 0.55rem 0.65rem;
+    font-size: 0.82rem;
   }
 
   .plan-topbar-actions {
-    gap: 0.4rem;
+    gap: 0.35rem;
   }
 
   .plan-topbar-actions :deep(.menu-icon) {
-    font-size: 1.55rem;
+    font-size: 1.4rem;
   }
 }
 
 @media (max-width: 520px) {
+  .landing--native .plan-export-btn,
   .plan-export-btn {
-    padding: 0.65rem 0.65rem;
-    font-size: 0.82rem;
+    padding: 0.5rem 0.55rem;
+    font-size: 0.78rem;
   }
 
+  .landing--native .back-btn,
   .back-btn {
-    padding: 0.65rem 0.7rem;
-    font-size: 0.85rem;
+    padding: 0.5rem 0.55rem;
+    font-size: 0.78rem;
   }
 }
 

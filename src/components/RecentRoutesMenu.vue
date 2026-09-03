@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { deleteOfflineMap, listOfflineMaps } from '../services/offlineMaps'
 import { listUsableOfflinePackMapIds, type PackStatus } from '../services/offlinePacks'
+import { clampFixedPanelStyle } from '../utils/clampFixedPanel'
 
 withDefaults(
   defineProps<{
@@ -56,14 +57,9 @@ function formatWhen(ts: number): string {
 
 function repositionPanel() {
   if (!open.value || !menuBtn.value) return
-  const r = menuBtn.value.getBoundingClientRect()
-  const gap = 8
-  const margin = 8
-  panelStyle.value = {
-    top: `${Math.round(r.bottom + gap)}px`,
-    right: `${Math.round(Math.max(margin, window.innerWidth - r.right))}px`,
-    maxHeight: `${Math.round(Math.max(160, window.innerHeight - r.bottom - gap - margin))}px`,
-  }
+  panelStyle.value = clampFixedPanelStyle(menuBtn.value.getBoundingClientRect(), {
+    preferredWidth: Math.min(22 * 16, window.innerWidth < 480 ? window.innerWidth - 16 : 22 * 16),
+  })
 }
 
 async function toggle() {
@@ -112,6 +108,8 @@ onMounted(() => {
   document.addEventListener('keydown', onKey)
   window.addEventListener('resize', repositionPanel)
   window.addEventListener('scroll', repositionPanel, true)
+  window.visualViewport?.addEventListener('resize', repositionPanel)
+  window.visualViewport?.addEventListener('scroll', repositionPanel)
 })
 
 onUnmounted(() => {
@@ -119,6 +117,8 @@ onUnmounted(() => {
   document.removeEventListener('keydown', onKey)
   window.removeEventListener('resize', repositionPanel)
   window.removeEventListener('scroll', repositionPanel, true)
+  window.visualViewport?.removeEventListener('resize', repositionPanel)
+  window.visualViewport?.removeEventListener('scroll', repositionPanel)
 })
 </script>
 
@@ -270,8 +270,10 @@ onUnmounted(() => {
 .recent-panel {
   position: fixed;
   z-index: 10050;
-  width: min(22rem, calc(100vw - 16px));
+  box-sizing: border-box;
+  max-width: min(22rem, calc(100vw - 16px - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px)));
   overflow: auto;
+  overflow-x: hidden;
   padding: 0.65rem;
   border: 1px solid var(--border);
   border-radius: var(--radius);
@@ -301,6 +303,8 @@ onUnmounted(() => {
   font-size: 0.75rem;
   line-height: 1.35;
   color: #444;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .recent-empty {
@@ -308,6 +312,8 @@ onUnmounted(() => {
   font-size: 0.85rem;
   font-weight: 650;
   color: #444;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .recent-panel-list {
