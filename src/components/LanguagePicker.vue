@@ -4,9 +4,11 @@ import { useRoute, useRouter } from 'vue-router'
 import {
   LOCALE_LABELS,
   SUPPORTED_LOCALES,
+  garminFitPath,
   isLocaleHomePath,
   localeHomePath,
   poisAlongRoutePath,
+  racaVersorgungPath,
   setAppLocale,
   type AppLocale,
 } from '../i18n'
@@ -24,8 +26,12 @@ const { locale, t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 
+function cleanPath(path: string): string {
+  return path.replace(/\/+$/, '') || '/'
+}
+
 function isPoisGuidePath(path: string): boolean {
-  const clean = path.replace(/\/+$/, '') || '/'
+  const clean = cleanPath(path)
   return (
     clean === '/versorgung-ultracycling' ||
     clean === '/en/ultracycling-supply' ||
@@ -38,6 +44,26 @@ function isPoisGuidePath(path: string): boolean {
   )
 }
 
+function isRacaGuidePath(path: string): boolean {
+  const clean = cleanPath(path)
+  return (
+    clean === '/raca-versorgung' ||
+    clean === '/en/raca-supply' ||
+    clean === '/es/raca-avituallamiento' ||
+    clean === '/fr/raca-ravitaillement'
+  )
+}
+
+function isGarminFitGuidePath(path: string): boolean {
+  const clean = cleanPath(path)
+  return (
+    clean === '/garmin-course-points-fit' ||
+    clean === '/en/garmin-course-points-fit' ||
+    clean === '/es/garmin-course-points-fit' ||
+    clean === '/fr/garmin-course-points-fit'
+  )
+}
+
 function pick(code: AppLocale) {
   if (locale.value !== code) setAppLocale(code)
   if (isLocaleHomePath(route.path)) {
@@ -45,11 +71,15 @@ function pick(code: AppLocale) {
     if (route.path !== next && route.path !== next.replace(/\/$/, '')) {
       void router.replace(next)
     }
-    } else if (isPoisGuidePath(route.path)) {
+  } else if (isPoisGuidePath(route.path)) {
     const next = poisAlongRoutePath(code)
-    const clean = route.path.replace(/\/+$/, '') || '/'
-    const nextClean = next.replace(/\/+$/, '') || '/'
-    if (clean !== nextClean) void router.replace(next)
+    if (cleanPath(route.path) !== cleanPath(next)) void router.replace(next)
+  } else if (isRacaGuidePath(route.path)) {
+    const next = racaVersorgungPath(code)
+    if (cleanPath(route.path) !== cleanPath(next)) void router.replace(next)
+  } else if (isGarminFitGuidePath(route.path)) {
+    const next = garminFitPath(code)
+    if (cleanPath(route.path) !== cleanPath(next)) void router.replace(next)
   }
 }
 </script>

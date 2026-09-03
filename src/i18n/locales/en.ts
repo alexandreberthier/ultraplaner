@@ -174,8 +174,71 @@ export default {
     },
     guideTeaser: {
       title: 'Plan ultracycling supply',
-      body: 'GPX or drawn route, POIs along the track, favorites and export to Wahoo or Garmin — more than the navigation line alone.',
+      body: 'GPX or drawn route, POIs along the track, favorites and export to Wahoo or Garmin — more than the navigation line alone. Specific guides: Race Around Austria (RACA) on the official GPX, and Garmin FIT course points via USB instead of Connect.',
       link: 'Open the supply guide',
+      racaLink: 'RACA: plan supply',
+      garminLink: 'Garmin FIT / course points',
+    },
+    racaGuide: {
+      title: 'Race Around Austria: plan supply on the official GPX',
+      lead:
+        'RACA is an ultra around Austria — east-west logic, mandatory CPs, and time penalties if you leave the course. UltraPlaner is not the organiser, but you can load the official GPX 1:1 and plan supply, gaps and export before the start.',
+      honestTitle: 'Straight talk first',
+      honestBody:
+        'UltraPlaner is an independent planner — not the RACA organisation. Official course, rules, cut-offs and CP lists always come from the organiser. What you do here: prepare on the current GPX line, not “something similar” from the internet.',
+      courseTitle: 'Why the official GPX 1:1 matters',
+      courseBody:
+        'At RACA the course is the truth. UltraPlaner shows the loaded track 1:1 (no silent rewriting of the line). That matters because shortcuts or parallel roads can get expensive. Load the current official file from the organiser — not an old tour or a “similar” loop.',
+      planTitle: 'How to plan supply and mandatory stops',
+      plan1: 'Upload the official RACA GPX under “Upload GPX” (#app-start)',
+      plan2: 'Place mandatory CPs as your own control points (⚑ CP) — they stay where you tap',
+      plan3: 'Mark supply in between: fuel, shops, water, food — favorites ★',
+      plan4: 'Check filters and radius, review ETA/opening hours, then export',
+      gapsTitle: 'Reading gaps on the elevation profile',
+      gapsBody:
+        'Red profile segments mark supply gaps (≥ ~25 km without a POI at your current filters). East-west stretches and long night sections often need extra buffer: a petrol station at 3 a.m. is not the same as a supermarket at 2 p.m. Plan buffers before you are on course — not when the bottle is empty.',
+      exportTitle: 'Export to Wahoo, Garmin and COROS',
+      exportBody:
+        'Only your favorites ★ and control points ⚑ become stops — not the full POI cloud. Wahoo via cloud, Garmin Edge as a FIT course via USB to Garmin/NewFiles (not Connect), COROS Dura via GPX/app. Plus a printable cheat sheet with km and ETA for support or your pocket.',
+      deviceTitle: 'On the device and in your head',
+      deviceBody:
+        'Navigation stays on the bike computer; UltraPlaner adds supply and CP planning. Before the start, re-check the current official GPX and the rulebook — the planner replaces neither briefing nor race bible.',
+      cta: 'Load the official RACA GPX in UltraPlaner',
+      seoTitle: 'Plan RACA supply – Race Around Austria GPX | UltraPlaner',
+      seoDescription:
+        'Plan Race Around Austria supply: load the official GPX 1:1, place CPs, spot elevation gaps, export to Wahoo/Garmin/COROS. Independent planner, not the organiser.',
+      relatedLabel: 'More guides',
+      relatedSupply: 'General ultracycling supply guide',
+      relatedGarmin: 'Garmin FIT course points: USB instead of Connect',
+    },
+    garminFitGuide: {
+      title: 'Garmin course points for ultracycling: FIT via USB, not Connect',
+      lead:
+        'When favorites and control points are missing on the Edge, it is often not the plan — it is the transfer path. For ultracycling with course points: save FIT and copy via USB into Garmin/NewFiles.',
+      whyTitle: 'Why course points are finicky',
+      whyBody:
+        'Garmin Edge devices typically allow about 200 course points (including turn cues). UltraPlaner therefore exports only your marked stops ★ and control points ⚑ — not every fuel stop on the map. That keeps the course usable and readable on the device.',
+      connectTitle: 'Why not Garmin Connect?',
+      connectBody:
+        'Via Garmin Connect, course points are often lost or arrive incomplete. A familiar ultracycling pain: route yes, stops no. USB mass storage into the Garmin → NewFiles folder keeps track and points more reliably.',
+      usbTitle: 'From UltraPlaner to the Edge',
+      usb1: 'In UltraPlaner, star favorites ★ and place control points ⚑',
+      usb2: 'Download the FIT course (Export)',
+      usb3: 'Connect the Edge via USB as mass storage',
+      usb4: 'Copy the file into Garmin/NewFiles, eject safely — course under Navigation → Courses',
+      limitTitle: 'Limit and selection',
+      limitBody:
+        'If you mark more than ~200 stops, FIT export caps at the Garmin limit. Prioritise mandatory CPs and real supply stops; leave the rest on the cheat sheet or map. For a navigation line without stops there is also “FIT — route only”.',
+      buildTitle: 'Build the course in UltraPlaner',
+      buildBody:
+        'Load a GPX or draw a route, filter POIs, check elevation gaps, then mark only the stops you want on the Edge. Then FIT/USB — or parallel Wahoo cloud and COROS GPX if you ride a mixed setup.',
+      cta: 'Load GPX and build a FIT for Garmin',
+      seoTitle: 'Garmin course points FIT via USB (NewFiles) | UltraPlaner',
+      seoDescription:
+        'Garmin Edge course points for ultracycling: FIT via USB to NewFiles instead of Connect. Marked stops only, ~200 limit, step-by-step from UltraPlaner.',
+      relatedLabel: 'More guides',
+      relatedSupply: 'General ultracycling supply guide',
+      relatedRaca: 'Race Around Austria: supply along the GPX',
     },
     feedback: {
       title: 'Feedback & improvement ideas',
@@ -185,7 +248,6 @@ export default {
       placeholder: 'e.g. more countries, better opening hours, export ideas…',
       submit: 'Send',
       sending: 'Sending…',
-      note: 'Your feedback is sent securely to me via Web3Forms.',
       sentHint: 'Thanks! Your feedback has been received.',
       errorShort: 'Please write at least a short suggestion.',
       errorSend: 'Sending failed — please try again later.',

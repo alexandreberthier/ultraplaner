@@ -37,15 +37,56 @@ export function poisAlongRoutePath(locale: AppLocale): string {
   }
 }
 
+/** Race Around Austria supply-planning guide (localized slugs). */
+export function racaVersorgungPath(locale: AppLocale): string {
+  switch (locale) {
+    case 'en':
+      return '/en/raca-supply/'
+    case 'es':
+      return '/es/raca-avituallamiento/'
+    case 'fr':
+      return '/fr/raca-ravitaillement/'
+    default:
+      return '/raca-versorgung/'
+  }
+}
+
+/** Garmin FIT / Course Points guide (localized slugs). */
+export function garminFitPath(locale: AppLocale): string {
+  switch (locale) {
+    case 'en':
+      return '/en/garmin-course-points-fit/'
+    case 'es':
+      return '/es/garmin-course-points-fit/'
+    case 'fr':
+      return '/fr/garmin-course-points-fit/'
+    default:
+      return '/garmin-course-points-fit/'
+  }
+}
+
+export type SeoGuideKind = 'racaGuide' | 'garminFitGuide'
+
+export function seoGuidePath(kind: SeoGuideKind, locale: AppLocale): string {
+  return kind === 'racaGuide' ? racaVersorgungPath(locale) : garminFitPath(locale)
+}
+
+const DE_CONTENT_SEGMENTS = [
+  'datenschutz',
+  'impressum',
+  'versorgung-ultracycling',
+  'pois-entlang-der-route',
+  'raca-versorgung',
+  'garmin-course-points-fit',
+] as const
+
 export function localeFromPath(pathname: string): AppLocale | null {
   const parts = pathname.replace(/\/+$/, '').split('/').filter(Boolean)
   const seg = parts[0]?.toLowerCase()
   if (!seg) return 'de'
   if ((PATH_LOCALES as readonly string[]).includes(seg)) return seg as AppLocale
   // German unprefixed content pages
-  if (
-    ['datenschutz', 'impressum', 'versorgung-ultracycling', 'pois-entlang-der-route'].includes(seg)
-  ) {
+  if ((DE_CONTENT_SEGMENTS as readonly string[]).includes(seg)) {
     return 'de'
   }
   return null

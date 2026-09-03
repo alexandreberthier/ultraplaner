@@ -173,8 +173,71 @@
     },
     guideTeaser: {
       title: 'Planifier le ravitaillement ultracycling',
-      body: 'GPX ou tracé, POIs le long de la route, favoris et export Wahoo ou Garmin — plus que la ligne de navigation.',
+      body: 'GPX ou tracé, POIs le long de la route, favoris et export Wahoo ou Garmin — plus que la ligne de navigation. Guides ciblés : Race Around Austria (RACA) sur le GPX officiel, et course points FIT Garmin via USB plutôt que Connect.',
       link: 'Ouvrir le guide ravitaillement',
+      racaLink: 'RACA : planifier le ravitaillement',
+      garminLink: 'Garmin FIT / course points',
+    },
+    racaGuide: {
+      title: 'Race Around Austria : ravitaillement sur le GPX officiel',
+      lead:
+        'RACA est un ultra autour de l’Autriche — logique est-ouest, CP obligatoires et pénalités de temps si vous quittez le course. UltraPlaner n’est pas l’organisateur, mais vous pouvez charger le GPX officiel 1:1 et planifier ravitaillement, lacunes et export avant le départ.',
+      honestTitle: 'En clair d’abord',
+      honestBody:
+        'UltraPlaner est un planificateur indépendant — pas l’organisation RACA. Parcours officiel, règlement, cut-offs et liste de CP viennent toujours de l’organisateur. Ici vous préparez sur la ligne GPX actuelle, pas « quelque chose de similaire » trouvé en ligne.',
+      courseTitle: 'Pourquoi le GPX officiel 1:1 compte',
+      courseBody:
+        'À RACA, le course est la vérité. UltraPlaner affiche le tracé chargé 1:1 (sans réécriture silencieuse de la ligne). C’est important : raccourcis ou routes parallèles peuvent coûter cher. Chargez le fichier officiel actuel de l’organisateur — pas une vieille sortie ni une boucle « similaire ».',
+      planTitle: 'Comment planifier ravitaillement et arrêts obligatoires',
+      plan1: 'Importer le GPX officiel RACA sous « Importer GPX » (#app-start)',
+      plan2: 'Placer les CP obligatoires comme points de contrôle personnels (⚑ CP) — ils restent où vous tapez',
+      plan3: 'Marquer le ravitaillement entre les deux : stations, magasins, eau, resto — favoris ★',
+      plan4: 'Vérifier filtres et rayon, regarder ETA/horaires, puis exporter',
+      gapsTitle: 'Lire les lacunes sur le profil',
+      gapsBody:
+        'Les zones rouges du profil marquent des lacunes de ravitaillement (≥ ~25 km sans POI avec vos filtres actuels). Les tronçons est-ouest et les longues nuits demandent souvent plus de marge : une station à 3 h n’est pas un supermarché à 14 h. Anticipez avant d’être sur le course — pas quand la bidon est vide.',
+      exportTitle: 'Export Wahoo, Garmin et COROS',
+      exportBody:
+        'Seuls vos favoris ★ et points de contrôle ⚑ partent comme arrêts — pas tout le nuage de POIs. Wahoo via le cloud, Garmin Edge en course FIT via USB vers Garmin/NewFiles (pas Connect), COROS Dura via GPX/app. Plus une aide-mémoire imprimable avec km et ETA pour le support ou la poche.',
+      deviceTitle: 'Sur l’appareil et dans la tête',
+      deviceBody:
+        'La navigation reste sur le compteur ; UltraPlaner ajoute la planification ravitaillement et CP. Avant le départ, revérifiez le GPX officiel actuel et le règlement — le planificateur ne remplace ni le briefing ni la race bible.',
+      cta: 'Charger le GPX officiel RACA dans UltraPlaner',
+      seoTitle: 'Planifier le ravitaillement RACA – GPX Race Around Austria | UltraPlaner',
+      seoDescription:
+        'Planifiez le ravitaillement Race Around Austria : chargez le GPX officiel 1:1, placez les CP, repérez les lacunes, exportez vers Wahoo/Garmin/COROS. Planificateur indépendant, pas l’organisateur.',
+      relatedLabel: 'Autres guides',
+      relatedSupply: 'Guide général de ravitaillement ultracycling',
+      relatedGarmin: 'Garmin FIT course points : USB plutôt que Connect',
+    },
+    garminFitGuide: {
+      title: 'Course points Garmin pour l’ultracycling : FIT via USB, pas Connect',
+      lead:
+        'Quand favoris et points de contrôle manquent sur l’Edge, ce n’est souvent pas le plan — c’est le chemin de transfert. Pour l’ultracycling avec course points : enregistrez le FIT et copiez-le via USB dans Garmin/NewFiles.',
+      whyTitle: 'Pourquoi les course points sont délicats',
+      whyBody:
+        'Les Garmin Edge autorisent typiquement environ 200 course points (y compris les virages). UltraPlaner n’exporte donc que vos arrêts marqués ★ et points de contrôle ⚑ — pas chaque station sur la carte. Le course reste utilisable et lisible sur l’appareil.',
+      connectTitle: 'Pourquoi pas Garmin Connect ?',
+      connectBody:
+        'Via Garmin Connect, les course points se perdent souvent ou arrivent incomplets. Un classique ultracycling : parcours oui, arrêts non. Le stockage de masse USB vers le dossier Garmin → NewFiles conserve mieux le tracé et les points.',
+      usbTitle: 'D’UltraPlaner à l’Edge',
+      usb1: 'Dans UltraPlaner, marquer favoris ★ et points de contrôle ⚑',
+      usb2: 'Télécharger la course FIT (Export)',
+      usb3: 'Brancher l’Edge en USB (stockage de masse)',
+      usb4: 'Copier le fichier dans Garmin/NewFiles, éjecter proprement — course sous Navigation → Courses',
+      limitTitle: 'Limite et sélection',
+      limitBody:
+        'Au-delà d’environ 200 arrêts marqués, l’export FIT plafonne à la limite Garmin. Priorisez CP obligatoires et vrais ravitaillements ; le reste reste sur l’aide-mémoire ou la carte. Pour la seule ligne de navigation, il existe aussi « FIT — parcours seul ».',
+      buildTitle: 'Construire le course dans UltraPlaner',
+      buildBody:
+        'Chargez un GPX ou tracez, filtrez les POIs, vérifiez les lacunes du profil, puis marquez seulement les arrêts que vous voulez sur l’Edge. Ensuite FIT/USB — ou en parallèle cloud Wahoo et GPX COROS si vous roulez en setup mixte.',
+      cta: 'Charger un GPX et créer un FIT pour Garmin',
+      seoTitle: 'Garmin course points FIT via USB (NewFiles) | UltraPlaner',
+      seoDescription:
+        'Course points Garmin Edge pour l’ultracycling : FIT via USB vers NewFiles plutôt que Connect. Arrêts marqués seulement, limite ~200, pas à pas depuis UltraPlaner.',
+      relatedLabel: 'Autres guides',
+      relatedSupply: 'Guide général de ravitaillement ultracycling',
+      relatedRaca: 'Race Around Austria : ravitaillement sur le GPX',
     },
     feedback: {
       title: 'Feedback et idées d’amélioration',
@@ -184,7 +247,6 @@
       placeholder: 'ex. plus de pays, meilleurs horaires, idées d’export…',
       submit: 'Envoyer',
       sending: 'Envoi…',
-      note: 'Votre feedback m’est transmis de façon sécurisée via Web3Forms.',
       sentHint: 'Merci ! Votre feedback est bien arrivé.',
       errorShort: 'Écrivez au moins quelques lignes pour votre suggestion.',
       errorSend: 'Échec de l’envoi — réessayez plus tard.',

@@ -3,7 +3,7 @@
         xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://ultraplaner.com/</loc>
-    <lastmod>2026-07-28</lastmod>
+    <lastmod>2026-09-03</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
     <xhtml:link rel="alternate" hreflang="de" href="https://ultraplaner.com/" />
@@ -14,7 +14,7 @@
   </url>
   <url>
     <loc>https://ultraplaner.com/en/</loc>
-    <lastmod>2026-07-28</lastmod>
+    <lastmod>2026-09-03</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
     <xhtml:link rel="alternate" hreflang="de" href="https://ultraplaner.com/" />
@@ -25,7 +25,7 @@
   </url>
   <url>
     <loc>https://ultraplaner.com/es/</loc>
-    <lastmod>2026-07-28</lastmod>
+    <lastmod>2026-09-03</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
     <xhtml:link rel="alternate" hreflang="de" href="https://ultraplaner.com/" />
@@ -36,7 +36,7 @@
   </url>
   <url>
     <loc>https://ultraplaner.com/fr/</loc>
-    <lastmod>2026-07-28</lastmod>
+    <lastmod>2026-09-03</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
     <xhtml:link rel="alternate" hreflang="de" href="https://ultraplaner.com/" />
@@ -47,7 +47,7 @@
   </url>
   <url>
     <loc>https://ultraplaner.com/versorgung-ultracycling/</loc>
-    <lastmod>2026-07-28</lastmod>
+    <lastmod>2026-09-03</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
     <xhtml:link rel="alternate" hreflang="de" href="https://ultraplaner.com/versorgung-ultracycling/" />
@@ -58,7 +58,7 @@
   </url>
   <url>
     <loc>https://ultraplaner.com/en/ultracycling-supply/</loc>
-    <lastmod>2026-07-28</lastmod>
+    <lastmod>2026-09-03</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.75</priority>
     <xhtml:link rel="alternate" hreflang="de" href="https://ultraplaner.com/versorgung-ultracycling/" />
@@ -69,7 +69,7 @@
   </url>
   <url>
     <loc>https://ultraplaner.com/es/avituallamiento-ultracycling/</loc>
-    <lastmod>2026-07-28</lastmod>
+    <lastmod>2026-09-03</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
     <xhtml:link rel="alternate" hreflang="de" href="https://ultraplaner.com/versorgung-ultracycling/" />
@@ -80,7 +80,7 @@
   </url>
   <url>
     <loc>https://ultraplaner.com/fr/ravitaillement-ultracycling/</loc>
-    <lastmod>2026-07-28</lastmod>
+    <lastmod>2026-09-03</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
     <xhtml:link rel="alternate" hreflang="de" href="https://ultraplaner.com/versorgung-ultracycling/" />
@@ -90,14 +90,102 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://ultraplaner.com/versorgung-ultracycling/" />
   </url>
   <url>
+    <loc>https://ultraplaner.com/raca-versorgung/</loc>
+    <lastmod>2026-09-03</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="de" href="https://ultraplaner.com/raca-versorgung/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://ultraplaner.com/en/raca-supply/" />
+    <xhtml:link rel="alternate" hreflang="es" href="https://ultraplaner.com/es/raca-avituallamiento/" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://ultraplaner.com/fr/raca-ravitaillement/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ultraplaner.com/raca-versorgung/" />
+  </url>
+  <url>
+    <loc>https://ultraplaner.com/en/raca-supply/</loc>
+    <lastmod>2026-09-03</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.75</priority>
+    <xhtml:link rel="alternate" hreflang="de" href="https://ultraplaner.com/raca-versorgung/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://ultraplaner.com/en/raca-supply/" />
+    <xhtml:link rel="alternate" hreflang="es" href="https://ultraplaner.com/es/raca-avituallamiento/" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://ultraplaner.com/fr/raca-ravitaillement/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ultraplaner.com/raca-versorgung/" />
+  </url>
+  <url>
+    <loc>https://ultraplaner.com/es/raca-avituallamiento/</loc>
+    <lastmod>2026-09-03</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="de" href="https://ultraplaner.com/raca-versorgung/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://ultraplaner.com/en/raca-supply/" />
+    <xhtml:link rel="alternate" hreflang="es" href="https://ultraplaner.com/es/raca-avituallamiento/" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://ultraplaner.com/fr/raca-ravitaillement/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ultraplaner.com/raca-versorgung/" />
+  </url>
+  <url>
+    <loc>https://ultraplaner.com/fr/raca-ravitaillement/</loc>
+    <lastmod>2026-09-03</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="de" href="https://ultraplaner.com/raca-versorgung/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://ultraplaner.com/en/raca-supply/" />
+    <xhtml:link rel="alternate" hreflang="es" href="https://ultraplaner.com/es/raca-avituallamiento/" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://ultraplaner.com/fr/raca-ravitaillement/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ultraplaner.com/raca-versorgung/" />
+  </url>
+  <url>
+    <loc>https://ultraplaner.com/garmin-course-points-fit/</loc>
+    <lastmod>2026-09-03</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="de" href="https://ultraplaner.com/garmin-course-points-fit/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://ultraplaner.com/en/garmin-course-points-fit/" />
+    <xhtml:link rel="alternate" hreflang="es" href="https://ultraplaner.com/es/garmin-course-points-fit/" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://ultraplaner.com/fr/garmin-course-points-fit/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ultraplaner.com/garmin-course-points-fit/" />
+  </url>
+  <url>
+    <loc>https://ultraplaner.com/en/garmin-course-points-fit/</loc>
+    <lastmod>2026-09-03</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.75</priority>
+    <xhtml:link rel="alternate" hreflang="de" href="https://ultraplaner.com/garmin-course-points-fit/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://ultraplaner.com/en/garmin-course-points-fit/" />
+    <xhtml:link rel="alternate" hreflang="es" href="https://ultraplaner.com/es/garmin-course-points-fit/" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://ultraplaner.com/fr/garmin-course-points-fit/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ultraplaner.com/garmin-course-points-fit/" />
+  </url>
+  <url>
+    <loc>https://ultraplaner.com/es/garmin-course-points-fit/</loc>
+    <lastmod>2026-09-03</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="de" href="https://ultraplaner.com/garmin-course-points-fit/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://ultraplaner.com/en/garmin-course-points-fit/" />
+    <xhtml:link rel="alternate" hreflang="es" href="https://ultraplaner.com/es/garmin-course-points-fit/" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://ultraplaner.com/fr/garmin-course-points-fit/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ultraplaner.com/garmin-course-points-fit/" />
+  </url>
+  <url>
+    <loc>https://ultraplaner.com/fr/garmin-course-points-fit/</loc>
+    <lastmod>2026-09-03</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+    <xhtml:link rel="alternate" hreflang="de" href="https://ultraplaner.com/garmin-course-points-fit/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://ultraplaner.com/en/garmin-course-points-fit/" />
+    <xhtml:link rel="alternate" hreflang="es" href="https://ultraplaner.com/es/garmin-course-points-fit/" />
+    <xhtml:link rel="alternate" hreflang="fr" href="https://ultraplaner.com/fr/garmin-course-points-fit/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://ultraplaner.com/garmin-course-points-fit/" />
+  </url>
+  <url>
     <loc>https://ultraplaner.com/datenschutz/</loc>
-    <lastmod>2026-07-28</lastmod>
+    <lastmod>2026-09-03</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
     <loc>https://ultraplaner.com/impressum/</loc>
-    <lastmod>2026-07-28</lastmod>
+    <lastmod>2026-09-03</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>

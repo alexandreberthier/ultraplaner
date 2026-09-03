@@ -17,7 +17,36 @@ const STRICT = process.env.PRERENDER_STRICT === '1'
 
 type PageKind = 'landing' | 'guide' | 'legal'
 
-const PAGES: { path: string; out: string; lang: string; kind: PageKind }[] = [
+type PageEntry = {
+  path: string
+  out: string
+  lang: string
+  kind: PageKind
+  hreflang?: Record<string, string>
+}
+
+const SUPPLY_HREFLANG: Record<string, string> = {
+  de: `${SITE}/versorgung-ultracycling/`,
+  en: `${SITE}/en/ultracycling-supply/`,
+  es: `${SITE}/es/avituallamiento-ultracycling/`,
+  fr: `${SITE}/fr/ravitaillement-ultracycling/`,
+}
+
+const RACA_HREFLANG: Record<string, string> = {
+  de: `${SITE}/raca-versorgung/`,
+  en: `${SITE}/en/raca-supply/`,
+  es: `${SITE}/es/raca-avituallamiento/`,
+  fr: `${SITE}/fr/raca-ravitaillement/`,
+}
+
+const GARMIN_HREFLANG: Record<string, string> = {
+  de: `${SITE}/garmin-course-points-fit/`,
+  en: `${SITE}/en/garmin-course-points-fit/`,
+  es: `${SITE}/es/garmin-course-points-fit/`,
+  fr: `${SITE}/fr/garmin-course-points-fit/`,
+}
+
+const PAGES: PageEntry[] = [
   { path: '/', out: 'index.html', lang: 'de', kind: 'landing' },
   { path: '/en/', out: 'en/index.html', lang: 'en', kind: 'landing' },
   { path: '/es/', out: 'es/index.html', lang: 'es', kind: 'landing' },
@@ -27,35 +56,88 @@ const PAGES: { path: string; out: string; lang: string; kind: PageKind }[] = [
     out: 'versorgung-ultracycling/index.html',
     lang: 'de',
     kind: 'guide',
+    hreflang: SUPPLY_HREFLANG,
   },
   {
     path: '/en/ultracycling-supply/',
     out: 'en/ultracycling-supply/index.html',
     lang: 'en',
     kind: 'guide',
+    hreflang: SUPPLY_HREFLANG,
   },
   {
     path: '/es/avituallamiento-ultracycling/',
     out: 'es/avituallamiento-ultracycling/index.html',
     lang: 'es',
     kind: 'guide',
+    hreflang: SUPPLY_HREFLANG,
   },
   {
     path: '/fr/ravitaillement-ultracycling/',
     out: 'fr/ravitaillement-ultracycling/index.html',
     lang: 'fr',
     kind: 'guide',
+    hreflang: SUPPLY_HREFLANG,
+  },
+  {
+    path: '/raca-versorgung/',
+    out: 'raca-versorgung/index.html',
+    lang: 'de',
+    kind: 'guide',
+    hreflang: RACA_HREFLANG,
+  },
+  {
+    path: '/en/raca-supply/',
+    out: 'en/raca-supply/index.html',
+    lang: 'en',
+    kind: 'guide',
+    hreflang: RACA_HREFLANG,
+  },
+  {
+    path: '/es/raca-avituallamiento/',
+    out: 'es/raca-avituallamiento/index.html',
+    lang: 'es',
+    kind: 'guide',
+    hreflang: RACA_HREFLANG,
+  },
+  {
+    path: '/fr/raca-ravitaillement/',
+    out: 'fr/raca-ravitaillement/index.html',
+    lang: 'fr',
+    kind: 'guide',
+    hreflang: RACA_HREFLANG,
+  },
+  {
+    path: '/garmin-course-points-fit/',
+    out: 'garmin-course-points-fit/index.html',
+    lang: 'de',
+    kind: 'guide',
+    hreflang: GARMIN_HREFLANG,
+  },
+  {
+    path: '/en/garmin-course-points-fit/',
+    out: 'en/garmin-course-points-fit/index.html',
+    lang: 'en',
+    kind: 'guide',
+    hreflang: GARMIN_HREFLANG,
+  },
+  {
+    path: '/es/garmin-course-points-fit/',
+    out: 'es/garmin-course-points-fit/index.html',
+    lang: 'es',
+    kind: 'guide',
+    hreflang: GARMIN_HREFLANG,
+  },
+  {
+    path: '/fr/garmin-course-points-fit/',
+    out: 'fr/garmin-course-points-fit/index.html',
+    lang: 'fr',
+    kind: 'guide',
+    hreflang: GARMIN_HREFLANG,
   },
   { path: '/datenschutz/', out: 'datenschutz/index.html', lang: 'de', kind: 'legal' },
   { path: '/impressum/', out: 'impressum/index.html', lang: 'de', kind: 'legal' },
 ]
-
-const GUIDE_HREFLANG: Record<string, string> = {
-  de: `${SITE}/versorgung-ultracycling/`,
-  en: `${SITE}/en/ultracycling-supply/`,
-  es: `${SITE}/es/avituallamiento-ultracycling/`,
-  fr: `${SITE}/fr/ravitaillement-ultracycling/`,
-}
 
 function wait(ms: number) {
   return new Promise((r) => setTimeout(r, ms))
@@ -140,10 +222,10 @@ function stripAlternateHreflang(html: string): string {
   return html.replace(/<link[^>]*rel=["']alternate["'][^>]*hreflang=[^>]*>/gi, '')
 }
 
-function insertGuideHreflang(html: string): string {
-  const tags = Object.entries(GUIDE_HREFLANG)
+function insertGuideHreflang(html: string, map: Record<string, string>): string {
+  const tags = Object.entries(map)
     .map(([lang, href]) => `<link rel="alternate" hreflang="${lang}" href="${href}">`)
-    .concat(`<link rel="alternate" hreflang="x-default" href="${GUIDE_HREFLANG.de}">`)
+    .concat(`<link rel="alternate" hreflang="x-default" href="${map.de}">`)
     .join('\n')
   return html.replace(/<\/head>/i, `${tags}\n</head>`)
 }
@@ -161,10 +243,7 @@ function insertWebPageLd(html: string, opts: { name: string; description: string
   return html.replace(/<\/head>/i, `${tag}\n</head>`)
 }
 
-function patchHtml(
-  html: string,
-  entry: { path: string; lang: string; kind: PageKind }
-): string {
+function patchHtml(html: string, entry: PageEntry): string {
   let out = html
   out = out.replaceAll(`http://127.0.0.1:${PORT}/`, '/')
   out = out.replaceAll(`http://localhost:${PORT}/`, '/')
@@ -191,7 +270,7 @@ function patchHtml(
     out = stripLandingLdJson(out)
     out = stripAlternateHreflang(out)
     out = replaceOrInsertCanonical(out, canonical)
-    out = insertGuideHreflang(out)
+    out = insertGuideHreflang(out, entry.hreflang ?? SUPPLY_HREFLANG)
     const titleMatch = out.match(/<title>([^<]*)<\/title>/i)
     const descMatch = out.match(/<meta[^>]*name=["']description["'][^>]*content=["']([^"']*)["']/i)
     out = insertWebPageLd(out, {

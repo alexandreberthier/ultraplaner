@@ -1,6 +1,8 @@
 /// <reference types="vite/client" />
 /// <reference types="vite-plugin-pwa/client" />
 
+import type { SeoGuideKind } from './i18n'
+
 interface ImportMetaEnv {
   readonly VITE_FIREBASE_API_KEY?: string
   readonly VITE_FIREBASE_AUTH_DOMAIN?: string
@@ -16,4 +18,10 @@ interface ImportMetaEnv {
 
 interface ImportMeta {
   readonly env: ImportMetaEnv
+}
+
+declare module 'vue-router' {
+  interface RouteMeta {
+    guideKind?: SeoGuideKind
+  }
 }

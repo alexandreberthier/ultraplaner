@@ -10,6 +10,15 @@ export function pagePathBucket(path: string): string {
   ) {
     return 'supply'
   }
+  if (
+    path.startsWith('/raca-versorgung') ||
+    path.startsWith('/en/raca-supply') ||
+    path.startsWith('/es/raca-avituallamiento') ||
+    path.startsWith('/fr/raca-ravitaillement')
+  ) {
+    return 'raca'
+  }
+  if (path.includes('garmin-course-points-fit')) return 'garmin_fit'
   if (path.startsWith('/datenschutz')) return 'privacy'
   if (path.startsWith('/impressum')) return 'imprint'
   if (path.startsWith('/oauth/wahoo')) return 'wahoo_callback'

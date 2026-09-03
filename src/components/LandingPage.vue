@@ -5,7 +5,7 @@ import GpxForm from '../components/GpxForm.vue'
 import TopbarSettings from '../components/TopbarSettings.vue'
 import RecentRoutesMenu from '../components/RecentRoutesMenu.vue'
 import FeedbackForm from '../components/FeedbackForm.vue'
-import { localeHomePath, poisAlongRoutePath, type AppLocale } from '../i18n'
+import { localeHomePath, poisAlongRoutePath, racaVersorgungPath, garminFitPath, type AppLocale } from '../i18n'
 import { useRouter } from 'vue-router'
 import { useMapStore } from '../stores/mapStore'
 import {
@@ -148,6 +148,8 @@ function toggleFaq(key: string) {
 }
 
 const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
+const racaGuidePath = () => racaVersorgungPath(locale.value as AppLocale)
+const garminFitGuidePath = () => garminFitPath(locale.value as AppLocale)
 </script>
 
 <template>
@@ -358,6 +360,11 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
           <router-link class="guide-teaser-link" :to="supplyGuidePath()">
             {{ t('landing.guideTeaser.link') }}
           </router-link>
+          <p class="guide-teaser-more">
+            <router-link :to="racaGuidePath()">{{ t('landing.guideTeaser.racaLink') }}</router-link>
+            ·
+            <router-link :to="garminFitGuidePath()">{{ t('landing.guideTeaser.garminLink') }}</router-link>
+          </p>
         </section>
 
         <section class="updates-section" aria-labelledby="updates-heading">
@@ -1044,6 +1051,19 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
   padding: 0.55rem 0.9rem;
   background: var(--cta);
   box-shadow: var(--shadow);
+}
+
+.guide-teaser-more {
+  margin: 0.85rem 0 0 !important;
+  font-size: 0.92rem !important;
+  line-height: 1.45;
+}
+
+.guide-teaser-more a {
+  color: #111;
+  font-weight: 700;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 2px;
 }
 
 @media (hover: hover) {

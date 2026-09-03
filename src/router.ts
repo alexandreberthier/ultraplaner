@@ -4,6 +4,7 @@ import { useMapStore } from './stores/mapStore'
 
 const MapView = () => import('./views/MapView.vue')
 const PoisAlongRouteView = () => import('./views/PoisAlongRouteView.vue')
+const SeoGuideView = () => import('./views/SeoGuideView.vue')
 
 const router = createRouter({
   history: createWebHistory(),
@@ -33,6 +34,54 @@ const router = createRouter({
       path: '/fr/ravitaillement-ultracycling',
       name: 'supply-guide-fr',
       component: PoisAlongRouteView,
+    },
+    {
+      path: '/raca-versorgung',
+      name: 'raca-guide-de',
+      component: SeoGuideView,
+      meta: { guideKind: 'racaGuide' },
+    },
+    {
+      path: '/en/raca-supply',
+      name: 'raca-guide-en',
+      component: SeoGuideView,
+      meta: { guideKind: 'racaGuide' },
+    },
+    {
+      path: '/es/raca-avituallamiento',
+      name: 'raca-guide-es',
+      component: SeoGuideView,
+      meta: { guideKind: 'racaGuide' },
+    },
+    {
+      path: '/fr/raca-ravitaillement',
+      name: 'raca-guide-fr',
+      component: SeoGuideView,
+      meta: { guideKind: 'racaGuide' },
+    },
+    {
+      path: '/garmin-course-points-fit',
+      name: 'garmin-fit-guide-de',
+      component: SeoGuideView,
+      meta: { guideKind: 'garminFitGuide' },
+    },
+    {
+      path: '/en/garmin-course-points-fit',
+      name: 'garmin-fit-guide-en',
+      component: SeoGuideView,
+      meta: { guideKind: 'garminFitGuide' },
+    },
+    {
+      path: '/es/garmin-course-points-fit',
+      name: 'garmin-fit-guide-es',
+      component: SeoGuideView,
+      meta: { guideKind: 'garminFitGuide' },
+    },
+    {
+      path: '/fr/garmin-course-points-fit',
+      name: 'garmin-fit-guide-fr',
+      component: SeoGuideView,
+      meta: { guideKind: 'garminFitGuide' },
     },
     // Legacy slugs → keep routes for SPA; Firebase also 301-redirects
     {

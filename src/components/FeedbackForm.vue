@@ -122,7 +122,6 @@ async function submit() {
       <button type="submit" class="feedback-submit" :disabled="loading || success">
         {{ loading ? t('landing.feedback.sending') : t('landing.feedback.submit') }}
       </button>
-      <p class="feedback-note">{{ t('landing.feedback.note') }}</p>
     </form>
   </section>
 </template>
@@ -241,14 +240,6 @@ async function submit() {
   color: var(--primary-dark);
   font-size: 0.85rem;
   font-weight: 600;
-}
-
-.feedback-note {
-  grid-column: 1 / -1;
-  margin: 0;
-  font-size: 0.75rem;
-  color: var(--text-muted);
-  line-height: 1.4;
 }
 
 @media (max-width: 640px) {

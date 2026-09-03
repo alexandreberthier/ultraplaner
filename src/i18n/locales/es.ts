@@ -174,8 +174,71 @@ export default {
     },
     guideTeaser: {
       title: 'Planificar avituallamiento ultracycling',
-      body: 'GPX o ruta dibujada, POIs en el trazado, favoritos y export a Wahoo o Garmin — más que la línea de navegación.',
+      body: 'GPX o ruta dibujada, POIs en el trazado, favoritos y export a Wahoo o Garmin — más que la línea de navegación. Guías concretas: Race Around Austria (RACA) con el GPX oficial, y course points FIT de Garmin por USB en vez de Connect.',
       link: 'Abrir la guía de avituallamiento',
+      racaLink: 'RACA: planificar avituallamiento',
+      garminLink: 'Garmin FIT / course points',
+    },
+    racaGuide: {
+      title: 'Race Around Austria: avituallamiento sobre el GPX oficial',
+      lead:
+        'RACA es un ultra alrededor de Austria — lógica este-oeste, CPs obligatorios y penalizaciones de tiempo si sales del course. UltraPlaner no es el organizador, pero puedes cargar el GPX oficial 1:1 y planificar avituallamiento, huecos y export antes de la salida.',
+      honestTitle: 'Con claridad primero',
+      honestBody:
+        'UltraPlaner es un planificador independiente — no la organización RACA. El recorrido oficial, el reglamento, los cut-offs y la lista de CPs vienen siempre del organizador. Aquí preparas sobre la línea GPX actual, no “algo parecido” de internet.',
+      courseTitle: 'Por qué importa el GPX oficial 1:1',
+      courseBody:
+        'En RACA el course es la verdad. UltraPlaner muestra el track cargado 1:1 (sin reescribir la línea en silencio). Importa porque atajos o carreteras paralelas pueden salir caros. Carga el archivo oficial actual del organizador — no una vuelta antigua o un bucle “similar”.',
+      planTitle: 'Cómo planificar avituallamiento y paradas obligatorias',
+      plan1: 'Sube el GPX oficial de RACA en «Subir GPX» (#app-start)',
+      plan2: 'Coloca los CPs obligatorios como puntos de control propios (⚑ CP) — se quedan donde tocas',
+      plan3: 'Marca avituallamiento entre medias: gasolineras, tiendas, agua, gastro — favoritos ★',
+      plan4: 'Revisa filtros y radio, mira ETA/horarios y luego exporta',
+      gapsTitle: 'Leer huecos en el perfil de altitud',
+      gapsBody:
+        'Las zonas rojas del perfil marcan huecos de avituallamiento (≥ ~25 km sin POI con tus filtros actuales). Tramos este-oeste y noches largas suelen pedir más margen: una gasolinera a las 3 no es lo mismo que un supermercado a las 14. Planifica el margen antes de estar en el course — no cuando la botella esté vacía.',
+      exportTitle: 'Exportar a Wahoo, Garmin y COROS',
+      exportBody:
+        'Solo tus favoritos ★ y puntos de control ⚑ salen como paradas — no toda la nube de POIs. Wahoo por nube, Garmin Edge como curso FIT por USB a Garmin/NewFiles (no Connect), COROS Dura por GPX/app. Más una chuleta imprimible con km y ETA para el apoyo o el bolsillo.',
+      deviceTitle: 'En el aparato y en la cabeza',
+      deviceBody:
+        'La navegación sigue en el ordenador de a bordo; UltraPlaner añade planificación de avituallamiento y CPs. Antes de la salida, vuelve a comprobar el GPX oficial actual y el reglamento — el planificador no sustituye el briefing ni la race bible.',
+      cta: 'Cargar el GPX oficial de RACA en UltraPlaner',
+      seoTitle: 'Planificar avituallamiento RACA – GPX Race Around Austria | UltraPlaner',
+      seoDescription:
+        'Planifica el avituallamiento de Race Around Austria: carga el GPX oficial 1:1, coloca CPs, ve huecos en el perfil, exporta a Wahoo/Garmin/COROS. Planificador independiente, no el organizador.',
+      relatedLabel: 'Más guías',
+      relatedSupply: 'Guía general de avituallamiento ultracycling',
+      relatedGarmin: 'Garmin FIT course points: USB en vez de Connect',
+    },
+    garminFitGuide: {
+      title: 'Course points Garmin para ultracycling: FIT por USB, no Connect',
+      lead:
+        'Si faltan favoritos y puntos de control en el Edge, a menudo no es el plan — es la vía de transferencia. Para ultracycling con course points: guarda el FIT y cópialo por USB a Garmin/NewFiles.',
+      whyTitle: 'Por qué los course points son delicados',
+      whyBody:
+        'Los Garmin Edge suelen permitir unos 200 course points (incl. giros). UltraPlaner exporta por eso solo tus paradas marcadas ★ y puntos de control ⚑ — no cada gasolinera del mapa. Así el curso sigue usable y legible en el aparato.',
+      connectTitle: '¿Por qué no Garmin Connect?',
+      connectBody:
+        'Por Garmin Connect los course points a menudo se pierden o llegan incompletos. Un clásico del ultracycling: ruta sí, paradas no. El almacenamiento USB en la carpeta Garmin → NewFiles conserva track y points con más fiabilidad.',
+      usbTitle: 'De UltraPlaner al Edge',
+      usb1: 'En UltraPlaner marca favoritos ★ y puntos de control ⚑',
+      usb2: 'Descarga el curso FIT (Exportar)',
+      usb3: 'Conecta el Edge por USB como almacenamiento masivo',
+      usb4: 'Copia el archivo a Garmin/NewFiles, expulsa con seguridad — curso en Navigation → Courses',
+      limitTitle: 'Límite y selección',
+      limitBody:
+        'Si marcas más de ~200 paradas, el export FIT se corta al límite de Garmin. Prioriza CPs obligatorios y avituallamiento real; el resto déjalo en la chuleta o el mapa. Para solo la línea de navegación existe también «FIT — solo ruta».',
+      buildTitle: 'Montar el curso en UltraPlaner',
+      buildBody:
+        'Sube un GPX o dibuja la ruta, filtra POIs, revisa huecos en el perfil y marca solo las paradas que quieras ver en el Edge. Luego FIT/USB — o en paralelo nube Wahoo y GPX COROS si vas con setup mixto.',
+      cta: 'Subir GPX y crear FIT para Garmin',
+      seoTitle: 'Garmin course points FIT por USB (NewFiles) | UltraPlaner',
+      seoDescription:
+        'Course points Garmin Edge para ultracycling: FIT por USB a NewFiles en vez de Connect. Solo paradas marcadas, límite ~200, paso a paso desde UltraPlaner.',
+      relatedLabel: 'Más guías',
+      relatedSupply: 'Guía general de avituallamiento ultracycling',
+      relatedRaca: 'Race Around Austria: avituallamiento sobre el GPX',
     },
     feedback: {
       title: 'Feedback e ideas de mejora',
@@ -185,7 +248,6 @@ export default {
       placeholder: 'p. ej. más países, mejores horarios, ideas de exportación…',
       submit: 'Enviar',
       sending: 'Enviando…',
-      note: 'Tu feedback se envía de forma segura con Web3Forms.',
       sentHint: '¡Gracias! He recibido tu feedback.',
       errorShort: 'Escribe al menos unas líneas con tu sugerencia.',
       errorSend: 'Error al enviar — inténtalo más tarde.',

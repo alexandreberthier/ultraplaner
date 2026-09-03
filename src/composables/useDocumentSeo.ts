@@ -1,5 +1,12 @@
-import type { AppLocale } from '../i18n'
-import { localeHomePath, poisAlongRoutePath, tGlobal } from '../i18n'
+import type { AppLocale, SeoGuideKind } from '../i18n'
+import {
+  garminFitPath,
+  localeHomePath,
+  poisAlongRoutePath,
+  racaVersorgungPath,
+  seoGuidePath,
+  tGlobal,
+} from '../i18n'
 
 const SITE = 'https://ultraplaner.com'
 const OG_LOCALES: Record<AppLocale, string> = {
@@ -79,6 +86,16 @@ function setHreflang(links: { lang: string; href: string }[]) {
   }
 }
 
+function guideHreflang(pathFor: (locale: AppLocale) => string) {
+  return [
+    { lang: 'de', href: `${SITE}${pathFor('de')}` },
+    { lang: 'en', href: `${SITE}${pathFor('en')}` },
+    { lang: 'es', href: `${SITE}${pathFor('es')}` },
+    { lang: 'fr', href: `${SITE}${pathFor('fr')}` },
+    { lang: 'x-default', href: `${SITE}${pathFor('de')}` },
+  ]
+}
+
 /** Landing locale URL used as canonical (map views point back to the locale home). */
 export function applyDocumentSeo(locale: AppLocale) {
   const title = String(tGlobal('seo.title'))
@@ -118,13 +135,28 @@ export function applyGuideSeo(locale: AppLocale) {
   ensureMeta('property', 'og:locale').content = OG_LOCALES[locale]
 
   setCanonical(canonicalUrl)
-  setHreflang([
-    { lang: 'de', href: `${SITE}${poisAlongRoutePath('de')}` },
-    { lang: 'en', href: `${SITE}${poisAlongRoutePath('en')}` },
-    { lang: 'es', href: `${SITE}${poisAlongRoutePath('es')}` },
-    { lang: 'fr', href: `${SITE}${poisAlongRoutePath('fr')}` },
-    { lang: 'x-default', href: `${SITE}${poisAlongRoutePath('de')}` },
-  ])
+  setHreflang(guideHreflang(poisAlongRoutePath))
+}
+
+/** Race / intent SEO guides (RACA, Garmin FIT). */
+export function applyTopicGuideSeo(locale: AppLocale, kind: SeoGuideKind) {
+  const title = String(tGlobal(`landing.${kind}.seoTitle`))
+  const description = String(tGlobal(`landing.${kind}.seoDescription`))
+  const path = seoGuidePath(kind, locale)
+  const canonicalUrl = `${SITE}${path}`
+  const pathFor = kind === 'racaGuide' ? racaVersorgungPath : garminFitPath
+
+  document.title = title
+  document.documentElement.lang = locale
+
+  ensureMeta('name', 'description').content = description
+  ensureMeta('property', 'og:title').content = title
+  ensureMeta('property', 'og:description').content = description
+  ensureMeta('property', 'og:url').content = canonicalUrl
+  ensureMeta('property', 'og:locale').content = OG_LOCALES[locale]
+
+  setCanonical(canonicalUrl)
+  setHreflang(guideHreflang(pathFor))
 }
 
 /** Legal pages (DE only): self-canonical, no landing hreflang/FAQ schema responsibility. */

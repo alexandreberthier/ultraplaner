@@ -14,6 +14,10 @@ UltraPlaner is a web app for long-distance cycling. Load a GPX, draw a route, or
 - [Supply for ultracycling (EN)](https://ultraplaner.com/en/ultracycling-supply/)
 - [Supply for ultracycling (ES)](https://ultraplaner.com/es/avituallamiento-ultracycling/)
 - [Supply for ultracycling (FR)](https://ultraplaner.com/fr/ravitaillement-ultracycling/)
+- [RACA supply planning (DE)](https://ultraplaner.com/raca-versorgung/)
+- [RACA supply planning (EN)](https://ultraplaner.com/en/raca-supply/)
+- [Garmin FIT course points / USB NewFiles (DE)](https://ultraplaner.com/garmin-course-points-fit/)
+- [Garmin FIT course points / USB NewFiles (EN)](https://ultraplaner.com/en/garmin-course-points-fit/)
 - [Privacy policy (DE)](https://ultraplaner.com/datenschutz/)
 - [Imprint (DE)](https://ultraplaner.com/impressum/)
 - [Sitemap](https://ultraplaner.com/sitemap.xml)
@@ -23,5 +27,6 @@ UltraPlaner is a web app for long-distance cycling. Load a GPX, draw a route, or
 
 - Map views under `/map/*` are app screens (client-rendered) and not primary SEO content.
 - Content and POI data derive from OpenStreetMap and related open data sources.
-- Prefer linking users to the locale home pages or the supply guide above rather than ephemeral share URLs.
+- Prefer linking users to the locale home pages or the supply / race guides above rather than ephemeral share URLs.
+- UltraPlaner is an independent planner, not a race organiser (e.g. not Race Around Austria).
 - Contact: use the feedback form on the home page (`#feedback`). Do not harvest or publish personal email addresses from imprint/privacy pages.
