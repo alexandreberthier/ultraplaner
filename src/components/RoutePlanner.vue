@@ -69,6 +69,7 @@ import { thinPoisForMap } from '../utils/poiThin'
 import { fetchPoisForRoute } from '../services/maps'
 import { ensureRouteEndImages, routeEndIconId } from '../utils/routeEndIcons'
 import { isSecureGeoContext } from '../utils/geoDevice'
+import { withNativeLocationPermission } from '../utils/nativeLocation'
 import {
   createUserLocationElement,
   resolveGeoHeading,
@@ -1150,23 +1151,25 @@ function centerOnUserLocation() {
   }
 
   // One-shot for quick center (works with cached position); then watch for heading updates
-  navigator.geolocation.getCurrentPosition(
-    (pos) => {
-      onFix(pos)
-      if (!geoLocateAlive || locationWatchId != null) return
-      locationWatchId = navigator.geolocation.watchPosition(
-        onPlannerGeoPosition,
-        () => {
-          /* keep last marker */
-        },
-        { enableHighAccuracy: true, timeout: 20_000, maximumAge: 10_000 }
-      )
-    },
-    () => {
-      /* keep Vienna fallback */
-    },
-    { enableHighAccuracy: false, timeout: GEO_TIMEOUT_MS, maximumAge: 120_000 }
-  )
+  withNativeLocationPermission(() => {
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        onFix(pos)
+        if (!geoLocateAlive || locationWatchId != null) return
+        locationWatchId = navigator.geolocation.watchPosition(
+          onPlannerGeoPosition,
+          () => {
+            /* keep last marker */
+          },
+          { enableHighAccuracy: true, timeout: 20_000, maximumAge: 10_000 }
+        )
+      },
+      () => {
+        /* keep Vienna fallback */
+      },
+      { enableHighAccuracy: false, timeout: GEO_TIMEOUT_MS, maximumAge: 120_000 }
+    )
+  })
 }
 
 function applyStyleAndRestore(

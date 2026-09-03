@@ -26,3 +26,9 @@ data/
 *.njsproj
 *.sln
 *.sw?
+
+# Android / signing (SDK path and keystores stay local)
+*.jks
+*.keystore
+*.apk
+*.aab

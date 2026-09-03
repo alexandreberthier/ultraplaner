@@ -32,11 +32,11 @@ onMounted(() => {
     <article class="privacy-policy legal-body">
       <h1>Datenschutzerklärung</h1>
 
-      <p class="stand">Stand: 8. August 2026</p>
+      <p class="stand">Stand: 17. August 2026</p>
 
       <h2>1. Verantwortlicher</h2>
 
-      <p>Verantwortlicher für die Verarbeitung personenbezogener Daten auf dieser Website ist:</p>
+      <p>Verantwortlicher für die Verarbeitung personenbezogener Daten auf der Website und in der Android-App UltraPlaner ist:</p>
 
       <p>
         Alexandre Berthier<br />
@@ -442,8 +442,9 @@ onMounted(() => {
 
       <p>
         Wenn Sie die Funktionen „Fahrt“ oder den Fahrtmodus nutzen, greift die Anwendung auf
-        Ihren aktuellen Gerätstandort zu. Dazu wird die vom Browser bereitgestellte
-        Geolocation-Schnittstelle verwendet.
+        Ihren aktuellen Gerätstandort zu. Im Browser geschieht das über die Geolocation-Schnittstelle.
+        In der Android-App holt UltraPlaner zuvor die Systemberechtigung „Beim Verwenden der App“
+        ein; der Standort wird nicht im Hintergrund erfasst, wenn die App nicht sichtbar ist.
       </p>
 
       <p>Die Standortdaten werden insbesondere verwendet, um:</p>

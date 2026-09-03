@@ -41,6 +41,7 @@ import {
 import { ensurePoiCategoryImages, poiCategoryIconId } from '../utils/poiMapIcons'
 import { ensureRouteEndImages, routeEndIconId } from '../utils/routeEndIcons'
 import { isAppleMobile, isStandalonePwa } from '../utils/geoDevice'
+import { withNativeLocationPermission } from '../utils/nativeLocation'
 import {
   createUserLocationElement,
   resolveGeoHeading,
@@ -331,21 +332,28 @@ function ensureLocationWatch() {
   }, 25000)
 
   const apple = isAppleMobile()
-  // Sync call in this turn — required for iOS user-activation / permission prompt
-  locationWatchId.value = navigator.geolocation.watchPosition(
-    applyGeoPosition,
-    (err) => {
-      // Ignore transient watch errors if we already have a fix
-      if (userLocation.value && err.code !== 1) return
-      onGeoError(err)
-    },
-    {
-      enableHighAccuracy: true,
-      // Fresh enough for riding; older maxAge made the marker look "stuck"
-      maximumAge: apple ? 5000 : 2000,
-      timeout: apple ? 30000 : 15000,
-    }
-  )
+  const startWatch = () => {
+    if (locationWatchId.value != null) return
+    // Sync call in this turn on web — required for iOS user-activation / permission prompt
+    locationWatchId.value = navigator.geolocation.watchPosition(
+      applyGeoPosition,
+      (err) => {
+        // Ignore transient watch errors if we already have a fix
+        if (userLocation.value && err.code !== 1) return
+        onGeoError(err)
+      },
+      {
+        enableHighAccuracy: true,
+        // Fresh enough for riding; older maxAge made the marker look "stuck"
+        maximumAge: apple ? 5000 : 2000,
+        timeout: apple ? 30000 : 15000,
+      }
+    )
+  }
+
+  withNativeLocationPermission(startWatch, () => {
+    onGeoError({ code: 1 } as GeolocationPositionError)
+  })
   return true
 }
 

@@ -41,6 +41,8 @@ export default {
     skipToContent: 'Skip to content',
     appTitle: 'Start your route',
     appIntro: 'GPX, planning, or Ride — one tap while racing.',
+    appPrivacy:
+      'Location is used only when you start Ride or ride mode. Android will ask first — no movement profile, no ads.',
     discardPlan: 'Discard waypoints and return to the home page?',
     backHome: '← Home',
     settingsMenu: 'Display & language',

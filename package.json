@@ -14,9 +14,15 @@
     "page-stats": "tsx scripts/page-stats.ts",
     "verify-austria": "tsx scripts/verify-austria.ts",
     "setup-credentials": "tsx scripts/setup-credentials.ts",
-    "deploy": "npm run build && npm run prerender && firebase deploy --only hosting,firestore:rules --project ultracycling-8bd56"
+    "deploy": "npm run build && npm run prerender && firebase deploy --only hosting,firestore:rules --project ultracycling-8bd56",
+    "android:sync": "npm run build && npx cap sync android",
+    "android:open": "npx cap open android"
   },
   "dependencies": {
+    "@capacitor/android": "^8.5.0",
+    "@capacitor/app": "^8.1.1",
+    "@capacitor/core": "^8.5.0",
+    "@capacitor/geolocation": "^8.2.2",
     "@garmin/fitsdk": "^21.208.0",
     "@supabase/supabase-js": "^2.110.7",
     "@tmcw/togeojson": "^7.1.2",
@@ -32,6 +38,7 @@
     "vue-router": "^5.1.0"
   },
   "devDependencies": {
+    "@capacitor/cli": "^8.5.0",
     "@types/ngeohash": "^0.6.8",
     "@types/node": "^24.13.2",
     "@types/qrcode": "^1.5.6",
