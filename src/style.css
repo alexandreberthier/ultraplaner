@@ -15,9 +15,15 @@
   --text-muted: #5c6b63;
   --border: #d8e2dc;
   --danger: #bc4749;
-  --cta: #ea580c;
-  --cta-hover: #c2410c;
+  /* Softened CTA: still orange, less loud than #ea580c */
+  --cta: #f97316;
+  --cta-hover: #ea580c;
   --cta-text: #fff;
+  /* Calm wash for large featured surfaces (not action buttons) */
+  --cta-soft: #fff4ed;
+  --cta-soft-hover: #ffedd5;
+  --cta-soft-border: #fdba74;
+  --cta-soft-text: #1a1a1a;
   --radius: 12px;
   --shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
@@ -32,6 +38,10 @@
   --cta: #e69f00;
   --cta-hover: #c68900;
   --cta-text: #1a1408;
+  --cta-soft: #fff8e8;
+  --cta-soft-hover: #fff1cc;
+  --cta-soft-border: #e6c35c;
+  --cta-soft-text: #1a1408;
 }
 
 html,

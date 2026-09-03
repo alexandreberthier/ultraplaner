@@ -752,14 +752,14 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
 }
 
 .stat:first-child {
-  background: var(--cta);
-  color: var(--cta-text);
+  background: var(--cta-soft);
+  color: var(--cta-soft-text);
   border-radius: var(--radius) 0 0 var(--radius);
 }
 
 .stat:first-child span {
-  color: var(--cta-text);
-  opacity: 0.85;
+  color: var(--cta-soft-text);
+  opacity: 0.72;
 }
 
 .stat strong {
@@ -1111,12 +1111,25 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
   color: #fff;
 }
 
-.features-grid {
+.features-section,
+.how-section {
+  background: none;
+}
+
+.features-grid,
+.steps {
   display: grid;
+  gap: 0.75rem;
+  align-items: stretch;
+  background: none;
+  border: none;
+  box-shadow: none;
+  overflow: visible;
+}
+
+.features-grid {
   grid-template-columns: 1.55fr 1fr 1fr;
-  gap: 0;
-  border-top: 1px solid var(--border);
-  border-left: 1px solid var(--border);
+  grid-template-rows: 1fr 1fr;
 }
 
 .feature-card {
@@ -1124,33 +1137,64 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
   flex-direction: column;
   gap: 0.45rem;
   align-items: flex-start;
+  height: 100%;
   background: #fff;
-  border: none;
-  border-right: 1px solid var(--border);
-  border-bottom: 1px solid var(--border);
+  border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 1.25rem 1.2rem 1.4rem;
+  box-sizing: border-box;
+}
+
+.feature-card:nth-child(1) {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.feature-card:nth-child(2) {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.feature-card:nth-child(3) {
+  grid-column: 3;
+  grid-row: 1;
+}
+
+.feature-card:nth-child(4) {
+  grid-column: 2;
+  grid-row: 2;
+}
+
+.feature-card:nth-child(5) {
+  grid-column: 3;
+  grid-row: 2;
+}
+
+.feature-card:nth-child(6) {
+  grid-column: 1;
+  grid-row: 2;
 }
 
 .feature-card:first-child {
-  grid-column: 1;
-  grid-row: 1 / span 2;
-  background: var(--cream);
-  color: var(--text);
+  background: var(--cta-soft);
+  color: var(--cta-soft-text);
   justify-content: flex-end;
-  min-height: 16rem;
+  min-height: 0;
+  border: 1px solid var(--cta-soft-border);
+  border-radius: var(--radius);
 }
 
-.feature-card:first-child p {
-  color: var(--text-muted);
+.feature-card:first-child p,
+.feature-card:first-child strong {
+  color: var(--cta-soft-text);
 }
 
 .feature-card:hover {
-  background: #fff;
+  background: #fffaf5;
 }
 
 .feature-card:first-child:hover {
-  background: var(--cream);
+  background: var(--cta-soft-hover);
 }
 
 .feature-card strong {
@@ -1161,6 +1205,7 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
   line-height: 1.15;
   margin-bottom: 0;
   text-transform: none;
+  color: #111;
 }
 
 .feature-card:first-child strong {
@@ -1173,16 +1218,12 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
 .feature-card p {
   margin: 0;
   font-size: 0.88rem;
-  color: #333;
+  color: #2a2a2a;
   line-height: 1.45;
 }
 
 .steps {
-  display: grid;
   grid-template-columns: 1.4fr 1fr 1fr;
-  gap: 0;
-  border-top: 1px solid var(--border);
-  border-left: 1px solid var(--border);
 }
 
 .step {
@@ -1191,15 +1232,21 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
   gap: 0.65rem;
   align-items: flex-start;
   background: #fff;
-  border: none;
-  border-right: 1px solid var(--border);
-  border-bottom: 1px solid var(--border);
+  border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 1.2rem 1.15rem 1.4rem;
 }
 
 .step:first-child {
-  background: var(--cta);
+  background: var(--cta-soft);
+  color: var(--cta-soft-text);
+  border-color: var(--cta-soft-border);
+}
+
+.step:first-child .step-num,
+.step:first-child strong,
+.step:first-child p {
+  color: var(--cta-soft-text);
 }
 
 .step-num {
@@ -1282,6 +1329,7 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
   outline: 2px solid var(--primary);
   outline-offset: -3px;
   background: var(--cta);
+  color: var(--cta-text);
 }
 
 .faq-chevron {
@@ -1481,6 +1529,7 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
   .steps,
   .stats-bar {
     grid-template-columns: 1fr 1fr;
+    grid-template-rows: none;
   }
 
   .stats-bar .stat:first-child,
@@ -1488,10 +1537,16 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
     border-radius: 0;
   }
 
+  .feature-card:nth-child(n) {
+    grid-column: auto;
+    grid-row: auto;
+  }
+
   .feature-card:first-child {
     grid-column: 1 / -1;
     grid-row: auto;
-    min-height: 10rem;
+    min-height: 0;
+    border-radius: var(--radius);
   }
 
   .step:first-child {

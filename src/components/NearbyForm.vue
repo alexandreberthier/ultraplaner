@@ -382,8 +382,8 @@ defineExpose({ openMapFirst, searchNearby })
 
 .in-map .cat-chip.active {
   background: var(--cta);
-  color: #111;
-  border-color: var(--border);
+  color: var(--cta-text);
+  border-color: transparent;
   font-weight: 800;
 }
 

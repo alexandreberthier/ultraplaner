@@ -297,9 +297,9 @@ async function createMap() {
   height: 2.15rem;
   margin-bottom: 0.4rem;
   border-radius: var(--radius);
-  border: 1px solid var(--border);
+  border: 1px solid transparent;
   background: var(--cta);
-  color: #111;
+  color: var(--cta-text);
   font-size: 1.1rem;
   font-weight: 800;
 }
@@ -477,8 +477,8 @@ async function createMap() {
 
 .cat-chip.active {
   background: var(--cta);
-  color: #111;
-  border-color: var(--border);
+  color: var(--cta-text);
+  border-color: transparent;
   font-weight: 800;
 }
 

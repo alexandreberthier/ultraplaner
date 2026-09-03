@@ -477,7 +477,7 @@ dd {
   gap: 0.45rem;
   min-height: 52px;
   background: var(--cta);
-  color: #111;
+  color: var(--cta-text);
   font-size: 1.08rem;
 }
 
@@ -693,9 +693,9 @@ dd {
   flex-shrink: 0;
   width: 44px;
   min-height: 44px;
-  border: 1px solid var(--border);
-  background: var(--cta, #facc15);
-  color: #111;
+  border: 1px solid transparent;
+  background: var(--cta, #ea580c);
+  color: var(--cta-text, #fff);
   font-size: 1.25rem;
   cursor: pointer;
   box-shadow: var(--shadow);

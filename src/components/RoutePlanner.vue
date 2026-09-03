@@ -2590,7 +2590,7 @@ onUnmounted(() => {
   border: 1px solid var(--border);
   border-radius: var(--radius);
   background: var(--cta);
-  color: #111;
+  color: var(--cta-text);
   cursor: pointer;
   font-size: 0.95rem;
   line-height: 1;
@@ -2598,7 +2598,8 @@ onUnmounted(() => {
 }
 
 .wp-loop:hover {
-  background: var(--cta);
+  background: var(--cta-hover);
+  color: var(--cta-text);
 }
 
 .field-label {
@@ -2680,8 +2681,8 @@ onUnmounted(() => {
 
 .cat-chip.active {
   background: var(--cta);
-  color: #111;
-  border-color: var(--border);
+  color: var(--cta-text);
+  border-color: transparent;
 }
 
 @media (min-width: 769px) {
@@ -2724,12 +2725,20 @@ onUnmounted(() => {
   font-weight: 700;
   color: #111;
   -webkit-tap-highlight-color: transparent;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+@media (hover: hover) {
+  .option-chip:hover:not(.active) {
+    background: var(--cream);
+    border-color: color-mix(in srgb, var(--cta) 40%, var(--border));
+  }
 }
 
 .option-chip.active {
   background: var(--cta);
-  color: #111;
-  border-color: var(--border);
+  color: var(--cta-text);
+  border-color: transparent;
 }
 
 .route-elev {

@@ -1988,7 +1988,7 @@ function onDocClick(e: MouseEvent) {
 
 .map-cp-fab.active {
   background: var(--cta);
-  color: #111;
+  color: var(--cta-text);
   box-shadow: var(--shadow);
 }
 
@@ -2028,8 +2028,8 @@ function onDocClick(e: MouseEvent) {
 .map-cp-kind:hover,
 .map-cp-kind.active {
   background: var(--cta);
-  border-color: var(--border);
-  color: #111;
+  border-color: transparent;
+  color: var(--cta-text);
 }
 
 .map-cp-banner {
@@ -2434,10 +2434,10 @@ function onDocClick(e: MouseEvent) {
     align-items: center;
     min-height: 48px;
     padding: 0.5rem 0.85rem;
-    border: 1px solid var(--border);
+    border: 1px solid transparent;
     border-radius: var(--radius);
     background: var(--cta);
-    color: #111;
+    color: var(--cta-text);
     font-weight: 800;
     font-size: 0.88rem;
     box-shadow: var(--shadow);
@@ -3231,12 +3231,12 @@ function onDocClick(e: MouseEvent) {
 
 .export-item.featured {
   background: var(--cta);
-  color: #111;
+  color: var(--cta-text);
 }
 
 .export-item.featured:hover {
-  background: var(--cta);
-  color: #111;
+  background: var(--cta-hover);
+  color: var(--cta-text);
 }
 
 .export-icon {
@@ -3267,7 +3267,7 @@ function onDocClick(e: MouseEvent) {
 }
 
 .export-item.featured .export-text small {
-  color: #111;
+  color: var(--cta-text);
   opacity: 0.9;
   font-weight: 700;
 }
@@ -3311,8 +3311,8 @@ function onDocClick(e: MouseEvent) {
 
 .export-sheet-btn.featured {
   background: var(--cta);
-  border-color: var(--border);
-  color: #111;
+  border-color: transparent;
+  color: var(--cta-text);
 }
 
 .export-sheet-btn strong {
@@ -3330,7 +3330,7 @@ function onDocClick(e: MouseEvent) {
 }
 
 .export-sheet-btn.featured small {
-  color: #111;
+  color: var(--cta-text);
   opacity: 0.9;
   font-weight: 700;
 }
@@ -3345,8 +3345,8 @@ function onDocClick(e: MouseEvent) {
 }
 
 .export-sheet-btn.featured:hover {
-  background: var(--cta);
-  color: #111;
+  background: var(--cta-hover);
+  color: var(--cta-text);
 }
 
 .export-print-hint {
@@ -3481,10 +3481,12 @@ function onDocClick(e: MouseEvent) {
 
 .sidebar :deep(.poi-list li.selected) {
   background: var(--cta);
+  color: var(--cta-text);
 }
 
-.sidebar :deep(.km) {
-  color: #111;
+.sidebar :deep(.poi-list li.selected .km),
+.sidebar :deep(.poi-list li.selected .hours-badge) {
+  color: var(--cta-text);
 }
 
 .sidebar :deep(.hours-badge) {
@@ -3546,17 +3548,17 @@ function onDocClick(e: MouseEvent) {
 
 .sidebar :deep(.kind-btn.active) {
   background: var(--cta);
-  border-color: var(--border);
-  color: #111;
+  border-color: transparent;
+  color: var(--cta-text);
   font-weight: 800;
 }
 
 .sidebar :deep(.pack-btn.primary),
 .sidebar :deep(.btn-primary) {
-  border: 1px solid var(--border);
+  border: 1px solid transparent;
   border-radius: var(--radius);
   background: var(--cta);
-  color: #111;
+  color: var(--cta-text);
   box-shadow: var(--shadow);
   font-weight: 800;
   text-transform: uppercase;
@@ -3602,8 +3604,8 @@ function onDocClick(e: MouseEvent) {
 
 .sidebar :deep(.cat-chip.active) {
   background: var(--cta);
-  color: #111;
-  border-color: var(--border);
+  color: var(--cta-text);
+  border-color: transparent;
 }
 
 .sidebar :deep(.radius-value) {
@@ -3714,7 +3716,7 @@ function onDocClick(e: MouseEvent) {
 
 .mobile-sheet-inner :deep(.cat-chip.active) {
   background: var(--cta);
-  color: #111;
+  color: var(--cta-text);
 }
 
 .mobile-sheet-inner :deep(.radius-value),

@@ -2343,6 +2343,7 @@ onUnmounted(() => {
 .location-btn.following,
 .location-btn.heading-up {
   background: var(--cta, #ea580c);
+  color: var(--cta-text, #fff);
 }
 
 .location-btn.needs-recenter {
