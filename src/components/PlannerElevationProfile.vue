@@ -488,7 +488,7 @@ onUnmounted(() => {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 8px;
+  border-radius: var(--radius);
   background: var(--surface);
   border: 1px solid var(--border);
 }
@@ -523,7 +523,7 @@ onUnmounted(() => {
   flex: 1;
   display: flex;
   height: 8px;
-  border-radius: 4px;
+  border-radius: var(--radius);
   overflow: hidden;
   background: var(--border);
 }
@@ -629,7 +629,7 @@ onUnmounted(() => {
   right: 8px;
   margin: 0;
   padding: 0.2rem 0.45rem;
-  border-radius: 6px;
+  border-radius: var(--radius);
   background: rgba(17, 24, 39, 0.88);
   color: #fff;
   font-size: 0.72rem;

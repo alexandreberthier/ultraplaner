@@ -32,7 +32,7 @@ const { t } = useI18n()
   background: #fef2f2;
   border: 1px solid #fecaca;
   color: #991b1b;
-  border-radius: 8px;
+  border-radius: var(--radius);
   font-size: 0.9rem;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
 }
@@ -47,7 +47,7 @@ const { t } = useI18n()
   padding: 0.65rem 1rem;
   background: #1b4332;
   color: #f8faf9;
-  border-radius: 8px;
+  border-radius: var(--radius);
   font-size: 0.875rem;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.18);
   pointer-events: none;

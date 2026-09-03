@@ -37,7 +37,7 @@ const { colorblindMode, toggleColorblindMode } = useColorblindMode()
   padding: 0.5rem 0.7rem;
   min-height: 2.5rem;
   border: 1px solid var(--border);
-  border-radius: 10px;
+  border-radius: var(--radius);
   background: var(--surface-2);
   color: var(--text-muted);
   font: inherit;
@@ -55,14 +55,16 @@ const { colorblindMode, toggleColorblindMode } = useColorblindMode()
 .color-toggle.compact {
   padding: 0.4rem 0.55rem;
   min-height: 2.25rem;
-  border-radius: 8px;
+  border-radius: var(--radius);
   font-size: 0.8rem;
 }
 
-.color-toggle:hover {
-  background: var(--surface);
-  border-color: color-mix(in srgb, var(--primary) 35%, var(--border));
-  color: var(--text);
+@media (hover: hover) {
+  .color-toggle:hover {
+    background: var(--surface);
+    border-color: color-mix(in srgb, var(--primary) 35%, var(--border));
+    color: var(--text);
+  }
 }
 
 .color-toggle.active {

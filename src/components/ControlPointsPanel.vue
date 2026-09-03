@@ -170,7 +170,7 @@ function kindEmoji(kind: ControlPointKind) {
 .kind-btn {
   border: 1px solid var(--border, #d1d5db);
   background: #fff;
-  border-radius: 10px;
+  border-radius: var(--radius);
   padding: 0.55rem 0.85rem;
   min-height: 44px;
   font-size: 0.95rem;
@@ -235,7 +235,7 @@ function kindEmoji(kind: ControlPointKind) {
   flex: 1 1 auto;
   min-width: 0;
   border: 1px solid var(--border, #e5e7eb);
-  border-radius: 6px;
+  border-radius: var(--radius);
   padding: 0.3rem 0.45rem;
   font-size: 0.8rem;
   font-weight: 600;

@@ -324,11 +324,11 @@ function onNavigate() {
   max-height: min(88dvh, 88vh);
   display: flex;
   flex-direction: column;
-  border-radius: 0;
-  border: 3px solid #111;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
   position: relative;
   overflow: hidden;
-  box-shadow: 6px 6px 0 #111;
+  box-shadow: var(--shadow);
   touch-action: pan-y;
   overscroll-behavior: contain;
 }
@@ -339,7 +339,7 @@ function onNavigate() {
   align-items: flex-start;
   gap: 0.35rem;
   padding: 0.85rem 1rem 0.65rem 1.25rem;
-  border-bottom: 3px solid #111;
+  border-bottom: 1px solid var(--border);
   background: #f3efe6;
   z-index: 2;
 }
@@ -361,10 +361,10 @@ function onNavigate() {
   font-weight: 800;
   color: #111;
   padding: 0.45rem 0.55rem;
-  border: 2px solid #111;
-  border-radius: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
   background: #fff;
-  box-shadow: 3px 3px 0 #111;
+  box-shadow: var(--shadow);
 }
 
 .icon-btn,
@@ -373,15 +373,15 @@ function onNavigate() {
   width: 44px;
   height: 44px;
   margin: -0.35rem 0 0;
-  border: 2px solid #111;
-  border-radius: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
   background: #fff;
   font-size: 1.25rem;
   line-height: 1;
   cursor: pointer;
   color: #111;
   font-weight: 800;
-  box-shadow: 2px 2px 0 #111;
+  box-shadow: var(--shadow);
 }
 
 .close {
@@ -445,7 +445,7 @@ dd {
   gap: 0.55rem;
   padding: 0.85rem 1.25rem 0.75rem;
   background: #fff;
-  border-bottom: 3px solid #111;
+  border-bottom: 1px solid var(--border);
 }
 
 .actions.nearby-nav {
@@ -457,8 +457,8 @@ dd {
   width: 100%;
   padding: 0.75rem 0.85rem;
   min-height: 48px;
-  border: 2px solid #111;
-  border-radius: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
   background: #fff;
   cursor: pointer;
   text-align: center;
@@ -467,7 +467,7 @@ dd {
   font: inherit;
   font-size: 1.02rem;
   font-weight: 800;
-  box-shadow: 3px 3px 0 #111;
+  box-shadow: var(--shadow);
 }
 
 .fav-btn {
@@ -488,14 +488,13 @@ dd {
 
 .fav-btn.active {
   background: #dc2626;
-  border-color: #111;
+  border-color: var(--border);
   color: #fff;
 }
 
 .fav-btn:hover,
 .nav-btn:hover {
-  transform: translate(1px, 1px);
-  box-shadow: 2px 2px 0 #111;
+  box-shadow: var(--shadow);
 }
 
 .nav-btn {
@@ -583,9 +582,9 @@ dd {
   max-width: 28rem;
   margin: 0 auto;
   padding: 0.55rem 0.65rem 0.6rem;
-  border: 3px solid #111;
+  border: 1px solid var(--border);
   background: #fff;
-  box-shadow: 4px 4px 0 #111;
+  box-shadow: var(--shadow);
 }
 
 .ride-peek-row {
@@ -634,7 +633,7 @@ dd {
   font-size: 0.72rem;
   font-weight: 800;
   padding: 0.12rem 0.4rem;
-  border: 2px solid #111;
+  border: 1px solid var(--border);
   background: #e5e7eb;
   color: #111;
 }
@@ -656,14 +655,14 @@ dd {
   width: 44px;
   height: 44px;
   margin: -0.15rem -0.1rem 0 0;
-  border: 2px solid #111;
+  border: 1px solid var(--border);
   background: #fff;
   font-size: 1.55rem;
   font-weight: 800;
   line-height: 1;
   color: #111;
   cursor: pointer;
-  box-shadow: 2px 2px 0 #111;
+  box-shadow: var(--shadow);
 }
 
 .ride-peek-actions {
@@ -679,7 +678,7 @@ dd {
   justify-content: center;
   min-height: 44px;
   padding: 0.35rem 0.55rem;
-  border: 2px solid #111;
+  border: 1px solid var(--border);
   background: #fff;
   color: #111;
   font: inherit;
@@ -687,19 +686,19 @@ dd {
   font-weight: 800;
   text-decoration: none;
   text-align: center;
-  box-shadow: 2px 2px 0 #111;
+  box-shadow: var(--shadow);
 }
 
 .ride-peek-fav {
   flex-shrink: 0;
   width: 44px;
   min-height: 44px;
-  border: 2px solid #111;
+  border: 1px solid var(--border);
   background: var(--cta, #facc15);
   color: #111;
   font-size: 1.25rem;
   cursor: pointer;
-  box-shadow: 2px 2px 0 #111;
+  box-shadow: var(--shadow);
 }
 
 .ride-peek-fav.active {

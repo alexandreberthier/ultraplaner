@@ -142,7 +142,7 @@ async function copyLink() {
   width: min(100%, 22rem);
   background: #fff;
   color: #0f172a;
-  border-radius: 12px;
+  border-radius: var(--radius);
   padding: 1rem 1.1rem 1.1rem;
   box-shadow: 0 18px 40px rgba(15, 23, 42, 0.22);
 }
@@ -176,13 +176,13 @@ async function copyLink() {
   gap: 0.35rem;
   margin-top: 0.75rem;
   padding: 0.25rem;
-  border-radius: 10px;
+  border-radius: var(--radius);
   background: #f1f5f9;
 }
 
 .qr-format-btn {
   border: none;
-  border-radius: 8px;
+  border-radius: var(--radius);
   background: transparent;
   color: #475569;
   font: inherit;
@@ -233,7 +233,7 @@ async function copyLink() {
   display: block;
   width: 220px;
   height: 220px;
-  border-radius: 8px;
+  border-radius: var(--radius);
   background: #fff;
 }
 
@@ -273,7 +273,7 @@ async function copyLink() {
 .qr-primary,
 .qr-secondary {
   width: 100%;
-  border-radius: 8px;
+  border-radius: var(--radius);
   font: inherit;
   font-weight: 700;
   padding: 0.65rem 0.85rem;

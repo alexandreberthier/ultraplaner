@@ -418,7 +418,7 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
   top: 0.75rem;
   z-index: 1000;
   padding: 0.55rem 0.9rem;
-  border-radius: 8px;
+  border-radius: var(--radius);
   background: var(--primary);
   color: #fff;
   font-weight: 700;
@@ -474,7 +474,7 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
   min-height: min(48vh, 520px);
   display: flex;
   align-items: stretch;
-  border-bottom: 3px solid #111;
+  border-bottom: 1px solid var(--border);
   overflow: hidden;
 }
 
@@ -566,10 +566,10 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
   justify-content: center;
   flex-shrink: 0;
   padding: 0.32rem;
-  border: 3px solid #111;
-  border-radius: 8px;
-  background: #f3efe6;
-  box-shadow: 4px 4px 0 #111;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--cream);
+  box-shadow: var(--shadow);
   cursor: pointer;
   font: inherit;
   line-height: 0;
@@ -603,15 +603,15 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
 }
 
 .hero-title {
-  font-family: 'Arial Black', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  font-size: clamp(2.15rem, 6.2vw, 4.4rem);
-  font-weight: 800;
+  font-family: var(--display);
+  font-size: clamp(2rem, 5.4vw, 3.6rem);
+  font-weight: 750;
   color: #fff;
   margin: 0 0 0.7rem;
-  line-height: 0.95;
-  letter-spacing: 0.01em;
-  text-transform: uppercase;
-  text-shadow: 3px 3px 0 #111;
+  line-height: 1.02;
+  letter-spacing: -0.02em;
+  text-transform: none;
+  text-shadow: 0 1px 12px rgba(0, 0, 0, 0.35);
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -619,12 +619,12 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
 
 .hero-title-lead {
   font-size: 0.42em;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  line-height: 1.05;
-  margin-bottom: 0.18em;
-  opacity: 1;
-  text-shadow: 2px 2px 0 #111;
+  font-weight: 650;
+  letter-spacing: 0.02em;
+  line-height: 1.15;
+  margin-bottom: 0.22em;
+  opacity: 0.92;
+  text-shadow: none;
 }
 
 .hero-title-route {
@@ -637,32 +637,33 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
   font-size: clamp(0.95rem, 1.55vw, 1.08rem);
   color: #fff;
   margin: 0 0 1.15rem;
-  line-height: 1.4;
+  line-height: 1.45;
   max-width: 28rem;
-  font-weight: 700;
-  background: #111;
-  padding: 0.5rem 0.7rem;
+  font-weight: 500;
+  background: rgba(17, 17, 17, 0.42);
+  border-radius: var(--radius);
+  padding: 0.5rem 0.75rem;
 }
 
 .cta-primary {
-  border-radius: 0;
-  padding: 0.85rem 1.4rem;
-  font-size: 0.92rem;
-  font-weight: 800;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
+  border-radius: var(--radius);
+  padding: 0.8rem 1.25rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: normal;
+  text-transform: none;
   cursor: pointer;
   background: var(--cta);
-  color: #111;
-  border: 3px solid #111;
-  box-shadow: 5px 5px 0 #111;
-  transition: transform 0.08s ease, box-shadow 0.08s ease;
+  color: var(--cta-text);
+  border: 1px solid transparent;
+  box-shadow: var(--shadow);
+  transition: background 0.15s ease;
 }
 
-.cta-primary:hover {
-  background: var(--cta);
-  transform: translate(3px, 3px);
-  box-shadow: 3px 3px 0 #111;
+@media (hover: hover) {
+  .cta-primary:hover {
+    background: var(--cta-hover);
+  }
 }
 
 .cta-row {
@@ -683,10 +684,10 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
   position: relative;
   z-index: 3;
   background: #fff;
-  border: 3px solid #111;
-  border-radius: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
   padding: 0;
-  box-shadow: 5px 5px 0 #111;
+  box-shadow: var(--shadow);
 }
 
 .stat {
@@ -695,7 +696,7 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
   align-items: flex-start;
   gap: 0.25rem;
   padding: 1.15rem 1.25rem 1.25rem;
-  border-right: 3px solid #111;
+  border-right: 1px solid var(--border);
   text-align: left;
 }
 
@@ -705,16 +706,22 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
 
 .stat:first-child {
   background: var(--cta);
+  color: var(--cta-text);
+}
+
+.stat:first-child span {
+  color: var(--cta-text);
+  opacity: 0.85;
 }
 
 .stat strong {
   font-family: var(--display);
   font-size: clamp(1.2rem, 2.4vw, 1.75rem);
-  font-weight: 800;
+  font-weight: 750;
   letter-spacing: -0.02em;
   line-height: 1.1;
-  color: #111;
-  text-transform: uppercase;
+  color: inherit;
+  text-transform: none;
 }
 
 .stat span {
@@ -742,10 +749,10 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
   margin: 0;
   font-family: var(--display);
   font-size: clamp(1.55rem, 2.8vw, 2.35rem);
-  font-weight: 800;
+  font-weight: 750;
   letter-spacing: -0.02em;
   line-height: 1.05;
-  text-transform: uppercase;
+  text-transform: none;
   color: #111;
   white-space: nowrap;
 }
@@ -758,25 +765,26 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
 
 .mode-tabs {
   display: flex;
-  gap: 0;
-  margin-bottom: 0;
-  border: 3px solid #111;
-  border-bottom: none;
+  gap: 0.35rem;
+  margin-bottom: 0.75rem;
+  border: none;
+  padding: 0.3rem;
+  background: var(--cream);
+  border-radius: var(--radius);
 }
 
 .mode-tabs button {
   flex: 1;
-  padding: 0.85rem 0.7rem;
+  padding: 0.7rem 0.7rem;
   border: none;
-  border-right: 3px solid #111;
-  border-radius: 0;
-  background: #fff;
-  font-weight: 800;
-  font-size: 0.78rem;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  border-radius: var(--radius);
+  background: transparent;
+  font-weight: 650;
+  font-size: 0.88rem;
+  letter-spacing: normal;
+  text-transform: none;
   cursor: pointer;
-  color: #111;
+  color: var(--text);
 }
 
 .mode-tabs button:last-child {
@@ -784,16 +792,17 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
 }
 
 .mode-tabs button.active {
-  background: #111;
-  color: #fff;
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: var(--shadow);
 }
 
 .hero-card {
   background: #fff;
-  border: 3px solid #111;
-  border-radius: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
   padding: 1.35rem 1.4rem 1.5rem;
-  box-shadow: 5px 5px 0 #111;
+  box-shadow: var(--shadow);
 }
 
 .hero-card[hidden] {
@@ -809,10 +818,10 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
 }
 
 .landing :deep(.menu-btn) {
-  border: 3px solid #111;
-  border-radius: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
   background: #fff;
-  box-shadow: 4px 4px 0 #111;
+  box-shadow: var(--shadow);
 }
 
 .landing :deep(.hero-card .field-label),
@@ -825,8 +834,8 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
 }
 
 .landing :deep(.hero-card .cat-chip) {
-  border: 2px solid #111;
-  border-radius: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
   background: #fff;
   color: #111;
   font-weight: 700;
@@ -834,20 +843,20 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
 
 .landing :deep(.hero-card .cat-chip.active) {
   background: var(--cta);
-  color: #111;
-  border-color: #111;
+  color: var(--cta-text);
+  border-color: transparent;
 }
 
 .landing :deep(.hero-card .btn-primary),
 .landing :deep(.feedback-submit) {
-  border: 3px solid #111;
-  border-radius: 0;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
   background: var(--cta);
-  color: #111;
-  box-shadow: 4px 4px 0 #111;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+  color: var(--cta-text);
+  box-shadow: var(--shadow);
+  font-weight: 700;
+  text-transform: none;
+  letter-spacing: normal;
 }
 
 .landing :deep(.hero-card .btn-primary:disabled) {
@@ -858,8 +867,8 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
 }
 
 .landing :deep(.hero-card .radius-value) {
-  border-radius: 0;
-  border: 2px solid #111;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
   background: #fff;
   color: #111;
   box-shadow: none;
@@ -867,54 +876,54 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
 
 .landing :deep(.hero-card .radius-slider)::-webkit-slider-runnable-track,
 .landing :deep(.hero-card .radius-row input[type='range'])::-webkit-slider-runnable-track {
-  border-radius: 0;
+  border-radius: var(--radius);
   background: #d8d2c6;
-  border: 2px solid #111;
+  border: 1px solid var(--border);
 }
 
 .landing :deep(.hero-card .radius-slider)::-moz-range-track,
 .landing :deep(.hero-card .radius-row input[type='range'])::-moz-range-track {
-  border-radius: 0;
+  border-radius: var(--radius);
   background: #d8d2c6;
-  border: 2px solid #111;
+  border: 1px solid var(--border);
 }
 
 .landing :deep(.hero-card .radius-slider)::-webkit-slider-thumb,
 .landing :deep(.hero-card .radius-row input[type='range'])::-webkit-slider-thumb {
-  border-radius: 0;
-  border: 3px solid #111;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
   background: var(--cta);
   box-shadow: none;
 }
 
 .landing :deep(.hero-card .radius-slider)::-moz-range-thumb,
 .landing :deep(.hero-card .radius-row input[type='range'])::-moz-range-thumb {
-  border-radius: 0;
-  border: 3px solid #111;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
   background: var(--cta);
   box-shadow: none;
 }
 
 .landing :deep(.hero-card .load-summary),
 .landing :deep(.hero-card .ios-geo-hint) {
-  border-radius: 0;
-  border: 2px solid #111;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
   background: #f3efe6;
   color: #111;
 }
 
 .landing :deep(.feedback) {
   margin-top: 6.5rem;
-  border: 3px solid #111;
-  border-radius: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
   background: #fff;
-  box-shadow: 5px 5px 0 #111;
+  box-shadow: var(--shadow);
 }
 
 .landing :deep(.feedback h2) {
   font-family: var(--display);
-  font-weight: 800;
-  text-transform: uppercase;
+  font-weight: 750;
+  text-transform: none;
   letter-spacing: -0.02em;
   color: #111;
   white-space: nowrap;
@@ -922,8 +931,8 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
 
 .landing :deep(.field input),
 .landing :deep(.field textarea) {
-  border: 2px solid #111;
-  border-radius: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
   background: #f3efe6;
 }
 
@@ -947,12 +956,12 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
 .faq-section h2 {
   font-family: var(--display);
   font-size: clamp(1.55rem, 2.8vw, 2.35rem);
-  font-weight: 800;
+  font-weight: 750;
   color: #111;
   margin: 0 0 1.5rem;
   letter-spacing: -0.02em;
   line-height: 1.05;
-  text-transform: uppercase;
+  text-transform: none;
   white-space: nowrap;
 }
 
@@ -966,15 +975,22 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
 
 .guide-teaser-link {
   display: inline-block;
-  font-weight: 800;
-  color: #111;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+  font-weight: 700;
+  color: var(--cta-text);
+  text-transform: none;
+  letter-spacing: normal;
   text-decoration: none;
-  border: 3px solid #111;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
   padding: 0.55rem 0.9rem;
   background: var(--cta);
-  box-shadow: 4px 4px 0 #111;
+  box-shadow: var(--shadow);
+}
+
+@media (hover: hover) {
+  .guide-teaser-link:hover {
+    background: var(--cta-hover);
+  }
 }
 
 .updates-section h2 {
@@ -992,8 +1008,11 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
   list-style: none;
   margin: 0;
   padding: 0;
-  border: 3px solid #111;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
   background: #fff;
+  overflow: hidden;
+  box-shadow: var(--shadow);
 }
 
 .updates-row {
@@ -1001,7 +1020,7 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
   gap: 0.75rem;
   align-items: baseline;
   padding: 0.85rem 1rem;
-  border-bottom: 3px solid #111;
+  border-bottom: 1px solid var(--border);
   font-size: 0.95rem;
   line-height: 1.4;
   font-weight: 650;
@@ -1014,16 +1033,17 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
 .updates-tag {
   flex: 0 0 auto;
   font-size: 0.7rem;
-  font-weight: 800;
-  letter-spacing: 0.08em;
+  font-weight: 700;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: #111;
+  color: var(--cta-text);
   background: var(--cta);
-  padding: 0.15rem 0.4rem;
+  border-radius: var(--radius);
+  padding: 0.15rem 0.5rem;
 }
 
 .updates-tag[data-kind='fix'] {
-  background: #111;
+  background: var(--primary);
   color: #fff;
 }
 
@@ -1036,8 +1056,8 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
   display: grid;
   grid-template-columns: 1.55fr 1fr 1fr;
   gap: 0;
-  border-top: 3px solid #111;
-  border-left: 3px solid #111;
+  border-top: 1px solid var(--border);
+  border-left: 1px solid var(--border);
 }
 
 .feature-card {
@@ -1047,23 +1067,23 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
   align-items: flex-start;
   background: #fff;
   border: none;
-  border-right: 3px solid #111;
-  border-bottom: 3px solid #111;
-  border-radius: 0;
+  border-right: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  border-radius: var(--radius);
   padding: 1.25rem 1.2rem 1.4rem;
 }
 
 .feature-card:first-child {
   grid-column: 1;
   grid-row: 1 / span 2;
-  background: #111;
-  color: #fff;
+  background: var(--cream);
+  color: var(--text);
   justify-content: flex-end;
   min-height: 16rem;
 }
 
 .feature-card:first-child p {
-  color: rgba(255, 255, 255, 0.78);
+  color: var(--text-muted);
 }
 
 .feature-card:hover {
@@ -1071,17 +1091,17 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
 }
 
 .feature-card:first-child:hover {
-  background: #111;
+  background: var(--cream);
 }
 
 .feature-card strong {
   display: block;
   font-size: 1.05rem;
-  font-weight: 800;
+  font-weight: 750;
   letter-spacing: -0.02em;
   line-height: 1.15;
   margin-bottom: 0;
-  text-transform: uppercase;
+  text-transform: none;
 }
 
 .feature-card:first-child strong {
@@ -1102,8 +1122,8 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
   display: grid;
   grid-template-columns: 1.4fr 1fr 1fr;
   gap: 0;
-  border-top: 3px solid #111;
-  border-left: 3px solid #111;
+  border-top: 1px solid var(--border);
+  border-left: 1px solid var(--border);
 }
 
 .step {
@@ -1113,9 +1133,9 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
   align-items: flex-start;
   background: #fff;
   border: none;
-  border-right: 3px solid #111;
-  border-bottom: 3px solid #111;
-  border-radius: 0;
+  border-right: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  border-radius: var(--radius);
   padding: 1.2rem 1.15rem 1.4rem;
 }
 
@@ -1126,7 +1146,7 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
 .step-num {
   width: auto;
   height: auto;
-  border-radius: 0;
+  border-radius: var(--radius);
   background: none;
   color: #111;
   font-family: var(--display);
@@ -1140,8 +1160,8 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
 .step strong {
   display: block;
   font-size: 1.05rem;
-  font-weight: 800;
-  text-transform: uppercase;
+  font-weight: 750;
+  text-transform: none;
   margin-bottom: 0.15rem;
   letter-spacing: -0.02em;
 }
@@ -1157,14 +1177,14 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
   display: flex;
   flex-direction: column;
   gap: 0;
-  border: 3px solid #111;
+  border: 1px solid var(--border);
   background: #fff;
 }
 
 .faq-item {
   border: none;
-  border-bottom: 3px solid #111;
-  border-radius: 0;
+  border-bottom: 1px solid var(--border);
+  border-radius: var(--radius);
   background: #fff;
 }
 
@@ -1187,7 +1207,7 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
   padding: 1.05rem 1.15rem;
   background: none;
   border: none;
-  border-radius: 0;
+  border-radius: var(--radius);
   cursor: pointer;
   text-align: left;
   font-size: 1rem;
@@ -1200,7 +1220,7 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
 }
 
 .faq-q:focus-visible {
-  outline: 3px solid #111;
+  outline: 2px solid var(--primary);
   outline-offset: -3px;
   background: var(--cta);
 }
@@ -1232,7 +1252,7 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
 .site-footer {
   margin: 6.5rem 0 2.5rem;
   padding-top: 1.25rem;
-  border-top: 3px solid #111;
+  border-top: 1px solid var(--border);
   text-align: left;
   font-size: 0.78rem;
   font-weight: 650;
@@ -1254,32 +1274,35 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
   justify-content: space-between;
   gap: 0.65rem;
   min-height: 58px;
-  padding: 0.7rem 1rem;
+  padding: max(0.7rem, env(safe-area-inset-top, 0px))
+    max(1rem, env(safe-area-inset-right, 0px))
+    0.7rem
+    max(1rem, env(safe-area-inset-left, 0px));
   background: #fff;
-  border-bottom: 3px solid #111;
+  border-bottom: 1px solid var(--border);
   z-index: 40;
 }
 
 .back-btn {
-  border: 2px solid #111;
+  border: 1px solid transparent;
   background: var(--cta);
-  border-radius: 0;
+  border-radius: var(--radius);
   padding: 0.55rem 0.85rem;
   font-size: 0.88rem;
-  font-weight: 800;
-  color: #111;
+  font-weight: 700;
+  color: var(--cta-text);
   cursor: pointer;
   white-space: nowrap;
   flex-shrink: 0;
   min-height: 40px;
-  box-shadow: 3px 3px 0 #111;
+  box-shadow: var(--shadow);
   -webkit-tap-highlight-color: transparent;
 }
 
-.back-btn:hover {
-  background: var(--cta);
-  transform: translate(1px, 1px);
-  box-shadow: 2px 2px 0 #111;
+@media (hover: hover) {
+  .back-btn:hover {
+    background: var(--cta-hover);
+  }
 }
 
 .plan-topbar-actions {
@@ -1291,24 +1314,24 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
 }
 
 .plan-export-btn {
-  border: 2px solid #111;
+  border: 1px solid transparent;
   background: var(--cta);
-  border-radius: 0;
+  border-radius: var(--radius);
   padding: 0.55rem 0.85rem;
   font-size: 0.88rem;
-  font-weight: 800;
-  color: #111;
+  font-weight: 700;
+  color: var(--cta-text);
   cursor: pointer;
   white-space: nowrap;
   min-height: 40px;
-  box-shadow: 3px 3px 0 #111;
+  box-shadow: var(--shadow);
   -webkit-tap-highlight-color: transparent;
 }
 
-.plan-export-btn:hover:not(:disabled) {
-  background: var(--cta);
-  transform: translate(1px, 1px);
-  box-shadow: 2px 2px 0 #111;
+@media (hover: hover) {
+  .plan-export-btn:hover:not(:disabled) {
+    background: var(--cta-hover);
+  }
 }
 
 .plan-export-btn:disabled {
@@ -1441,12 +1464,12 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
   .stats-bar {
     margin-top: -1.75rem;
     margin-bottom: 3.25rem;
-    box-shadow: 5px 5px 0 #111;
+    box-shadow: var(--shadow);
   }
 
   .stat {
     border-right: none;
-    border-bottom: 3px solid #111;
+    border-bottom: 1px solid var(--border);
   }
 
   .stat:last-child {
@@ -1460,7 +1483,7 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
 
   .hero-card {
     padding: 1.1rem 1rem 1.25rem;
-    box-shadow: 5px 5px 0 #111;
+    box-shadow: var(--shadow);
   }
 
   .features-section,

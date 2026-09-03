@@ -69,18 +69,18 @@ function cancel() {
   padding: 1.5rem 1.35rem 1.35rem;
   width: min(22rem, calc(100vw - 2rem));
   background: #fff;
-  border: 3px solid #111;
-  border-radius: 0;
-  box-shadow: 6px 6px 0 #111;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
 }
 
 .spinner {
   width: 44px;
   height: 44px;
   margin: 0 auto 1rem;
-  border: 4px solid #111;
+  border: 3px solid var(--border);
   border-top-color: var(--cta);
-  border-radius: 0;
+  border-radius: 50%;
   animation: spin 0.75s linear infinite;
 }
 
@@ -100,19 +100,19 @@ function cancel() {
 
 .progress {
   height: 0.85rem;
-  border-radius: 0;
+  border-radius: var(--radius);
   background: #f3efe6;
-  border: 2px solid #111;
+  border: 1px solid var(--border);
   overflow: hidden;
 }
 
 .progress-bar {
   height: 100%;
-  border-radius: 0;
+  border-radius: var(--radius);
   background: var(--cta);
   transition: width 0.25s ease;
   min-width: 0.35rem;
-  border-right: 2px solid #111;
+  border-right: 1px solid var(--border);
 }
 
 .timer {
@@ -143,23 +143,24 @@ function cancel() {
 }
 
 .overlay-cancel {
-  border: 2px solid #111;
+  border: 1px solid var(--border);
   background: #fff;
-  color: #111;
-  border-radius: 0;
+  color: var(--text);
+  border-radius: var(--radius);
   padding: 0.65rem 1.1rem;
   min-height: 48px;
   font: inherit;
   font-size: 0.88rem;
-  font-weight: 800;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: normal;
+  text-transform: none;
   cursor: pointer;
-  box-shadow: 3px 3px 0 #111;
+  box-shadow: var(--shadow);
 }
 
-.overlay-cancel:hover {
-  transform: translate(1px, 1px);
-  box-shadow: 2px 2px 0 #111;
+@media (hover: hover) {
+  .overlay-cancel:hover {
+    background: var(--cream);
+  }
 }
 </style>

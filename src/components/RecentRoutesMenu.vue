@@ -208,58 +208,61 @@ onUnmounted(() => {
 
 .recent-btn {
   padding: 0.45rem 0.7rem;
-  border: 2px solid #111;
-  border-radius: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
   background: #fff;
-  color: #111;
+  color: var(--text);
   cursor: pointer;
   font: inherit;
   font-size: 0.82rem;
-  font-weight: 800;
+  font-weight: 650;
   line-height: 1.15;
   white-space: nowrap;
-  box-shadow: 3px 3px 0 #111;
+  box-shadow: var(--shadow);
 }
 
-.recent-btn:hover,
-.recent-btn.active {
-  background: #f3efe6;
+@media (hover: hover) {
+  .recent-btn:hover,
+  .recent-btn.active {
+    background: var(--cream);
+  }
 }
 
 .brutal:not(.tool-style) .recent-btn {
-  padding: 0.7rem 1.1rem;
-  min-height: 3rem;
-  font-size: 1rem;
-  border-width: 3px;
-  box-shadow: 4px 4px 0 #111;
+  padding: 0.55rem 0.9rem;
+  min-height: 2.5rem;
+  font-size: 0.92rem;
+  border-width: 1px;
+  box-shadow: var(--shadow);
   background: var(--cta);
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  color: var(--cta-text);
+  letter-spacing: normal;
+  text-transform: none;
 }
 
-.brutal:not(.tool-style) .recent-btn:hover,
-.brutal:not(.tool-style) .recent-btn.active {
-  background: var(--cta);
-  transform: translate(2px, 2px);
-  box-shadow: 2px 2px 0 #111;
+@media (hover: hover) {
+  .brutal:not(.tool-style) .recent-btn:hover,
+  .brutal:not(.tool-style) .recent-btn.active {
+    background: var(--cta-hover);
+  }
 }
 
 @media (min-width: 721px) {
   .brutal:not(.tool-style) .recent-btn {
-    font-size: 1.08rem;
-    padding: 0.78rem 1.25rem;
-    min-height: 3.25rem;
+    font-size: 0.95rem;
+    padding: 0.55rem 1rem;
+    min-height: 2.6rem;
   }
 }
 
 .tool-style .recent-btn {
   box-shadow: none;
-  font-weight: 750;
+  font-weight: 650;
 }
 
 .tool-style .recent-btn.active {
-  background: #111;
-  color: #fff;
+  background: var(--cta);
+  color: var(--cta-text);
 }
 </style>
 
@@ -271,19 +274,19 @@ onUnmounted(() => {
   overflow: auto;
   padding: 0.65rem;
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: var(--radius);
   background: var(--surface);
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.16);
+  box-shadow: var(--shadow);
   display: flex;
   flex-direction: column;
   gap: 0.45rem;
 }
 
 .recent-panel.brutal-panel {
-  border: 3px solid #111;
-  border-radius: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
   background: #fff;
-  box-shadow: 6px 6px 0 #111;
+  box-shadow: var(--shadow);
 }
 
 .recent-panel-head strong {
@@ -326,8 +329,8 @@ onUnmounted(() => {
   flex: 1;
   min-width: 0;
   text-align: left;
-  border: 2px solid #111;
-  border-radius: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
   padding: 0.6rem 0.7rem;
   background: #f3efe6;
   cursor: pointer;
@@ -335,8 +338,10 @@ onUnmounted(() => {
   font: inherit;
 }
 
-.recent-panel-open:hover {
-  background: var(--cta);
+@media (hover: hover) {
+  .recent-panel-open:hover {
+    background: var(--cream);
+  }
 }
 
 .recent-panel-title {
@@ -358,14 +363,15 @@ onUnmounted(() => {
 
 .recent-offline-badge {
   flex: 0 0 auto;
-  padding: 0.12rem 0.35rem;
-  border: 2px solid #111;
-  background: #111;
+  padding: 0.12rem 0.4rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--primary);
   color: #fff;
   font-size: 0.62rem;
-  font-weight: 800;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: none;
   line-height: 1.2;
 }
 
@@ -385,8 +391,8 @@ onUnmounted(() => {
 .recent-panel-remove {
   flex: 0 0 auto;
   width: 2.5rem;
-  border: 2px solid #111;
-  border-radius: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
   background: #fff;
   color: #111;
   font-size: 1.25rem;

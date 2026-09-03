@@ -139,7 +139,7 @@ async function downloadOrShare() {
   width: min(100%, 24rem);
   background: rgba(255, 255, 255, 0.92);
   border: 1px solid #e2e8f0;
-  border-radius: 14px;
+  border-radius: var(--radius);
   padding: 1.35rem 1.25rem 1.4rem;
   display: flex;
   flex-direction: column;
@@ -193,7 +193,7 @@ h1 {
 
 .btn {
   width: 100%;
-  border-radius: 10px;
+  border-radius: var(--radius);
   font: inherit;
   font-weight: 700;
   padding: 0.8rem 0.95rem;

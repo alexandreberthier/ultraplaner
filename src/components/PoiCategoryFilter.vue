@@ -194,7 +194,7 @@ function toggleCat(id: PoiCategory) {
 .map-poi-bar {
   margin: 0 0 0.55rem;
   padding: 0.45rem 0.5rem;
-  border-radius: 8px;
+  border-radius: var(--radius);
   background: var(--surface-2);
   border: 1px solid var(--border);
 }
@@ -250,7 +250,7 @@ ul {
   padding: 0.65rem 0.7rem;
   min-height: 48px;
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: var(--radius);
   background: var(--surface);
   cursor: pointer;
   font-size: 0.95rem;

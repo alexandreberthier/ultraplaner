@@ -133,7 +133,7 @@ async function submit() {
   padding: 1.5rem;
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 16px;
+  border-radius: var(--radius);
 }
 
 .feedback h2 {
@@ -179,7 +179,7 @@ async function submit() {
   color: var(--text);
   background: var(--bg);
   border: 1px solid var(--border);
-  border-radius: 10px;
+  border-radius: var(--radius);
   padding: 0.65rem 0.75rem;
   resize: vertical;
 }
@@ -201,22 +201,23 @@ async function submit() {
   justify-self: start;
   margin-top: 0.25rem;
   background: var(--cta);
-  color: #111;
-  border: 3px solid #111;
-  border-radius: 0;
-  box-shadow: 5px 5px 0 #111;
+  color: var(--cta-text);
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
   padding: 0.75rem 1.4rem;
-  font-weight: 800;
+  font-weight: 700;
   font-size: 0.88rem;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
+  letter-spacing: normal;
+  text-transform: none;
   cursor: pointer;
-  transition: transform 0.08s ease, box-shadow 0.08s ease;
+  transition: background 0.15s ease;
 }
 
-.feedback-submit:hover:not(:disabled) {
-  transform: translate(3px, 3px);
-  box-shadow: 2px 2px 0 #111;
+@media (hover: hover) {
+  .feedback-submit:hover:not(:disabled) {
+    background: var(--cta-hover);
+  }
 }
 
 .feedback-submit:disabled {

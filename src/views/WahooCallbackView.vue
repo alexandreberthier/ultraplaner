@@ -82,7 +82,7 @@ onMounted(async () => {
 
 .wahoo-cb-home {
   border: 1px solid var(--border, #e5e7eb);
-  border-radius: 8px;
+  border-radius: var(--radius);
   padding: 0.55rem 0.9rem;
   background: var(--surface, #fff);
   font: inherit;

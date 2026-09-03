@@ -278,8 +278,8 @@ defineExpose({ openMapFirst, searchNearby })
   margin: 0;
   padding: 0.7rem 0.8rem;
   font-size: 0.92rem;
-  border-radius: 0;
-  border: 2px solid #111;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
   background: #fff;
   color: #111;
 }
@@ -296,24 +296,24 @@ defineExpose({ openMapFirst, searchNearby })
 
 .in-map .radius-slider,
 .in-map .radius-row input[type='range'] {
-  accent-color: #111;
+  accent-color: var(--cta);
 }
 
 .in-map .radius-slider::-webkit-slider-runnable-track,
 .in-map .radius-row input[type='range']::-webkit-slider-runnable-track {
   height: 10px;
-  border-radius: 0;
+  border-radius: var(--radius);
   background: #d8d2c6;
-  border: 2px solid #111;
+  border: 1px solid var(--border);
   box-sizing: border-box;
 }
 
 .in-map .radius-slider::-moz-range-track,
 .in-map .radius-row input[type='range']::-moz-range-track {
   height: 10px;
-  border-radius: 0;
+  border-radius: var(--radius);
   background: #d8d2c6;
-  border: 2px solid #111;
+  border: 1px solid var(--border);
 }
 
 .in-map .radius-slider::-webkit-slider-thumb,
@@ -323,8 +323,8 @@ defineExpose({ openMapFirst, searchNearby })
   width: 36px;
   height: 36px;
   margin-top: -15px;
-  border-radius: 0;
-  border: 3px solid #111;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
   background: var(--cta);
   box-shadow: none;
 }
@@ -333,8 +333,8 @@ defineExpose({ openMapFirst, searchNearby })
 .in-map .radius-row input[type='range']::-moz-range-thumb {
   width: 36px;
   height: 36px;
-  border-radius: 0;
-  border: 3px solid #111;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
   background: var(--cta);
   box-shadow: none;
 }
@@ -343,8 +343,8 @@ defineExpose({ openMapFirst, searchNearby })
   flex-basis: 7.25rem;
   width: 7.25rem;
   font-size: 0.95rem;
-  border-radius: 0;
-  border: 2px solid #111;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
   background: #fff;
   color: #111;
   box-shadow: none;
@@ -356,8 +356,8 @@ defineExpose({ openMapFirst, searchNearby })
   min-height: 48px;
   font-size: 1rem;
   gap: 0.4rem;
-  border-radius: 0;
-  border: 2px solid #111;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
   background: #fff;
   color: #111;
   font-weight: 700;
@@ -366,7 +366,7 @@ defineExpose({ openMapFirst, searchNearby })
 .in-map .cat-chip.active {
   background: var(--cta);
   color: #111;
-  border-color: #111;
+  border-color: var(--border);
   font-weight: 800;
 }
 
@@ -375,7 +375,7 @@ defineExpose({ openMapFirst, searchNearby })
   padding: 0.85rem 1rem;
   font-size: 0.88rem;
   min-height: 48px;
-  box-shadow: 5px 5px 0 #111;
+  box-shadow: var(--shadow);
 }
 
 .in-map .btn-primary:disabled {
@@ -403,7 +403,7 @@ defineExpose({ openMapFirst, searchNearby })
 .load-summary {
   margin: -0.35rem 0 0;
   padding: 0.55rem 0.7rem;
-  border-radius: 10px;
+  border-radius: var(--radius);
   background: color-mix(in srgb, var(--primary) 8%, var(--surface));
   border: 1px solid color-mix(in srgb, var(--primary) 18%, var(--border));
   color: var(--text);
@@ -418,7 +418,7 @@ defineExpose({ openMapFirst, searchNearby })
 .ios-geo-hint {
   margin: -0.5rem 0 0;
   padding: 0.65rem 0.75rem;
-  border-radius: 10px;
+  border-radius: var(--radius);
   background: color-mix(in srgb, var(--primary) 10%, transparent);
   border: 1px solid color-mix(in srgb, var(--primary) 22%, transparent);
   color: var(--text);
@@ -464,18 +464,18 @@ defineExpose({ openMapFirst, searchNearby })
 .radius-slider::-webkit-slider-runnable-track,
 .radius-row input[type='range']::-webkit-slider-runnable-track {
   height: 10px;
-  border-radius: 0;
+  border-radius: var(--radius);
   background: #d8d2c6;
-  border: 2px solid #111;
+  border: 1px solid var(--border);
   box-sizing: border-box;
 }
 
 .radius-slider::-moz-range-track,
 .radius-row input[type='range']::-moz-range-track {
   height: 10px;
-  border-radius: 0;
+  border-radius: var(--radius);
   background: #d8d2c6;
-  border: 2px solid #111;
+  border: 1px solid var(--border);
   box-sizing: border-box;
 }
 
@@ -486,8 +486,8 @@ defineExpose({ openMapFirst, searchNearby })
   width: 36px;
   height: 36px;
   margin-top: -15px;
-  border-radius: 0;
-  border: 3px solid #111;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
   background: var(--cta);
   box-shadow: none;
   cursor: grab;
@@ -497,8 +497,8 @@ defineExpose({ openMapFirst, searchNearby })
 .radius-row input[type='range']::-moz-range-thumb {
   width: 36px;
   height: 36px;
-  border-radius: 0;
-  border: 3px solid #111;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
   background: var(--cta);
   box-shadow: none;
   cursor: grab;
@@ -532,7 +532,7 @@ defineExpose({ openMapFirst, searchNearby })
     width: 52px;
     height: 52px;
     margin-top: -22px;
-    border-width: 3px;
+    border-width: 1px;
     box-shadow: none;
   }
 
@@ -540,7 +540,7 @@ defineExpose({ openMapFirst, searchNearby })
   .radius-row input[type='range']::-moz-range-thumb {
     width: 52px;
     height: 52px;
-    border-width: 3px;
+    border-width: 1px;
     box-shadow: none;
   }
 }
@@ -552,9 +552,9 @@ defineExpose({ openMapFirst, searchNearby })
   box-sizing: border-box;
   padding: 0.45rem 0.4rem;
   min-height: 2.75rem;
-  border-radius: 0;
+  border-radius: var(--radius);
   background: #fff;
-  border: 2px solid #111;
+  border: 1px solid var(--border);
   box-shadow: none;
   color: #111;
   display: inline-flex;
@@ -598,7 +598,7 @@ defineExpose({ openMapFirst, searchNearby })
   gap: 0.4rem;
   padding: 0.55rem 0.9rem;
   min-height: 44px;
-  border-radius: 999px;
+  border-radius: var(--radius);
   border: 1px solid var(--border);
   background: var(--surface);
   cursor: pointer;
@@ -639,21 +639,22 @@ defineExpose({ openMapFirst, searchNearby })
 .btn-primary {
   padding: 0.85rem 1.5rem;
   background: var(--cta);
-  color: #111;
-  border: 3px solid #111;
-  border-radius: 0;
-  box-shadow: 5px 5px 0 #111;
-  font-weight: 800;
+  color: var(--cta-text);
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  font-weight: 700;
   font-size: 0.92rem;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
+  letter-spacing: normal;
+  text-transform: none;
   cursor: pointer;
-  transition: transform 0.08s ease, box-shadow 0.08s ease;
+  transition: background 0.15s ease;
 }
 
-.btn-primary:hover:not(:disabled) {
-  transform: translate(3px, 3px);
-  box-shadow: 2px 2px 0 #111;
+@media (hover: hover) {
+  .btn-primary:hover:not(:disabled) {
+    background: var(--cta-hover);
+  }
 }
 
 .map-first .btn-primary {

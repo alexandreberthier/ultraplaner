@@ -178,7 +178,7 @@ onUnmounted(() => {
   height: 2.75rem;
   padding: 0;
   border: 1px solid var(--border);
-  border-radius: 10px;
+  border-radius: var(--radius);
   background: var(--surface-2);
   color: var(--text);
   cursor: pointer;
@@ -186,7 +186,12 @@ onUnmounted(() => {
   -webkit-tap-highlight-color: transparent;
 }
 
-.menu-btn:hover,
+@media (hover: hover) {
+  .menu-btn:hover {
+    border-color: color-mix(in srgb, var(--primary) 40%, var(--border));
+  }
+}
+
 .menu-btn[aria-expanded='true'] {
   border-color: color-mix(in srgb, var(--primary) 40%, var(--border));
 }
@@ -209,7 +214,7 @@ onUnmounted(() => {
   .menu-btn {
     width: 52px;
     height: 52px;
-    border-radius: 12px;
+    border-radius: var(--radius);
   }
 
   .menu-icon {
@@ -231,71 +236,73 @@ onUnmounted(() => {
 
 .brutal :deep(.color-toggle),
 .brutal :deep(.lang-picker) {
-  border: 3px solid #111;
-  border-radius: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
   background: #fff;
-  color: #111;
-  box-shadow: 4px 4px 0 #111;
+  color: var(--text);
+  box-shadow: var(--shadow);
 }
 
 .brutal :deep(.color-toggle) {
-  font-weight: 800;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  font-weight: 650;
+  letter-spacing: normal;
+  text-transform: none;
 }
 
-.brutal :deep(.color-toggle:hover) {
-  background: #fff;
-  border-color: #111;
-  color: #111;
-  transform: translate(2px, 2px);
-  box-shadow: 2px 2px 0 #111;
+@media (hover: hover) {
+  .brutal :deep(.color-toggle:hover) {
+    background: var(--cream);
+    border-color: var(--border);
+    color: var(--text);
+  }
 }
 
 .brutal :deep(.color-toggle.active) {
-  background: #111;
-  border-color: #111;
-  color: #fff;
-  box-shadow: 4px 4px 0 #111;
+  background: var(--cta);
+  border-color: transparent;
+  color: var(--cta-text);
+  box-shadow: var(--shadow);
 }
 
 .brutal :deep(.lang-btn) {
-  border-radius: 0;
-  color: #111;
-  transition: background 0.08s ease, color 0.08s ease;
+  border-radius: var(--radius);
+  color: var(--text);
+  transition: background 0.15s ease, color 0.15s ease;
 }
 
-.brutal :deep(.lang-btn:hover:not(.active)) {
-  background: #f3efe6;
-  border-color: transparent;
-  color: #111;
+@media (hover: hover) {
+  .brutal :deep(.lang-btn:hover:not(.active)) {
+    background: var(--cream);
+    border-color: transparent;
+    color: var(--text);
+  }
 }
 
 .brutal :deep(.lang-btn.active) {
-  background: #111;
-  border-color: #111;
-  color: #fff;
+  background: var(--cta);
+  border-color: transparent;
+  color: var(--cta-text);
   box-shadow: none;
 }
 
 .brutal .menu-btn {
-  border: 3px solid #111;
-  border-radius: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
   background: #fff;
-  color: #111;
-  box-shadow: 4px 4px 0 #111;
-  width: 3rem;
-  height: 3rem;
+  color: var(--text);
+  box-shadow: var(--shadow);
+  width: 2.75rem;
+  height: 2.75rem;
 }
 
 .brutal .menu-icon {
-  font-size: 1.7rem;
+  font-size: 1.4rem;
 }
 
 @media (min-width: 721px) {
   .brutal .menu-btn {
-    width: 3.25rem;
-    height: 3.25rem;
+    width: 2.75rem;
+    height: 2.75rem;
   }
 }
 
@@ -303,8 +310,8 @@ onUnmounted(() => {
 .brutal.compact.force-menu .menu-btn {
   width: 2.4rem;
   height: 2.4rem;
-  border-width: 2px;
-  box-shadow: 2px 2px 0 #111;
+  border-width: 1px;
+  box-shadow: var(--shadow);
 }
 
 .brutal.compact .menu-icon {
@@ -318,11 +325,17 @@ onUnmounted(() => {
   }
 }
 
-.brutal .menu-btn:hover,
+@media (hover: hover) {
+  .brutal .menu-btn:hover {
+    background: var(--cream);
+    color: var(--text);
+  }
+}
+
 .brutal .menu-btn[aria-expanded='true'] {
-  border-color: #111;
-  background: #111;
-  color: #fff;
+  border-color: var(--border);
+  background: var(--cream);
+  color: var(--text);
 }
 </style>
 
@@ -339,17 +352,17 @@ onUnmounted(() => {
   overflow-y: auto;
   padding: 0.9rem;
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: var(--radius);
   background: var(--surface);
-  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.12);
+  box-shadow: var(--shadow);
 }
 
 .topbar-settings-menu-panel .menu-title {
   margin: 0;
   font-size: 0.88rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+  font-weight: 650;
+  text-transform: none;
+  letter-spacing: normal;
   color: var(--text-muted);
 }
 
@@ -372,11 +385,11 @@ onUnmounted(() => {
 
 .topbar-settings-menu-panel .pwa-install-btn {
   width: 100%;
-  border: 1px solid var(--border, #e5e7eb);
-  border-radius: 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
   padding: 0.55rem 0.75rem;
-  background: var(--surface-2, #f3f4f6);
-  color: var(--text, #111);
+  background: var(--surface-2);
+  color: var(--text);
   font: inherit;
   font-size: 0.85rem;
   font-weight: 700;
@@ -384,9 +397,10 @@ onUnmounted(() => {
   cursor: pointer;
 }
 
-.topbar-settings-menu-panel .pwa-install-btn:hover:not(:disabled) {
-  border-color: color-mix(in srgb, var(--primary, #2d6a4f) 45%, var(--border, #e5e7eb));
-  background: var(--surface, #fff);
+@media (hover: hover) {
+  .topbar-settings-menu-panel .pwa-install-btn:hover:not(:disabled) {
+    background: var(--cream);
+  }
 }
 
 .topbar-settings-menu-panel .pwa-install-btn:disabled {
@@ -395,84 +409,72 @@ onUnmounted(() => {
 }
 
 .topbar-settings-menu-panel.brutal-panel {
-  border: 3px solid #111;
-  border-radius: 0;
-  background: #f3efe6;
-  box-shadow: 6px 6px 0 #111;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow);
 }
 
-.topbar-settings-menu-panel.brutal-panel .menu-title {
-  font-weight: 800;
-  letter-spacing: 0.06em;
-  color: #111;
-}
-
+.topbar-settings-menu-panel.brutal-panel .menu-title,
 .topbar-settings-menu-panel.brutal-panel .menu-label {
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: #111;
+  font-weight: 650;
+  letter-spacing: normal;
+  text-transform: none;
+  color: var(--text-muted);
 }
 
 .topbar-settings-menu-panel.brutal-panel .color-toggle,
 .topbar-settings-menu-panel.brutal-panel .lang-picker {
-  border: 3px solid #111;
-  border-radius: 0;
-  background: #fff;
-  color: #111;
-  box-shadow: 4px 4px 0 #111;
-}
-
-.topbar-settings-menu-panel.brutal-panel .color-toggle {
-  font-weight: 800;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
-
-.topbar-settings-menu-panel.brutal-panel .color-toggle:hover {
-  background: #fff;
-  border-color: #111;
-  color: #111;
-}
-
-.topbar-settings-menu-panel.brutal-panel .color-toggle.active {
-  background: #111;
-  border-color: #111;
-  color: #fff;
-  box-shadow: 4px 4px 0 #111;
-}
-
-.topbar-settings-menu-panel.brutal-panel .lang-btn {
-  border-radius: 0;
-  color: #111;
-}
-
-.topbar-settings-menu-panel.brutal-panel .lang-btn:hover:not(.active) {
-  background: #f3efe6;
-  border-color: transparent;
-  color: #111;
-}
-
-.topbar-settings-menu-panel.brutal-panel .lang-btn.active {
-  background: #111;
-  border-color: #111;
-  color: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text);
   box-shadow: none;
 }
 
-.topbar-settings-menu-panel.brutal-panel .pwa-install-btn {
-  border: 3px solid #111;
-  border-radius: 0;
-  background: var(--cta);
-  color: #111;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  box-shadow: 4px 4px 0 #111;
+.topbar-settings-menu-panel.brutal-panel .color-toggle {
+  font-weight: 650;
+  letter-spacing: normal;
+  text-transform: none;
 }
 
-.topbar-settings-menu-panel.brutal-panel .pwa-install-btn:hover:not(:disabled) {
-  border-color: #111;
+@media (hover: hover) {
+  .topbar-settings-menu-panel.brutal-panel .color-toggle:hover {
+    background: var(--cream);
+  }
+
+  .topbar-settings-menu-panel.brutal-panel .lang-btn:hover:not(.active) {
+    background: var(--cream);
+    color: var(--text);
+  }
+
+  .topbar-settings-menu-panel.brutal-panel .pwa-install-btn:hover:not(:disabled) {
+    background: var(--cta-hover);
+    color: var(--cta-text);
+  }
+}
+
+.topbar-settings-menu-panel.brutal-panel .color-toggle.active,
+.topbar-settings-menu-panel.brutal-panel .lang-btn.active {
   background: var(--cta);
+  border-color: transparent;
+  color: var(--cta-text);
+  box-shadow: none;
+}
+
+.topbar-settings-menu-panel.brutal-panel .lang-btn {
+  border-radius: var(--radius);
+  color: var(--text);
+}
+
+.topbar-settings-menu-panel.brutal-panel .pwa-install-btn {
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  background: var(--cta);
+  color: var(--cta-text);
+  font-weight: 700;
+  text-transform: none;
+  letter-spacing: normal;
+  box-shadow: var(--shadow);
 }
 </style>

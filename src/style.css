@@ -8,6 +8,7 @@
   --primary: #2d6a4f;
   --primary-dark: #1b4332;
   --bg: #f8faf8;
+  --cream: #f3efe6;
   --surface: #ffffff;
   --surface-2: #f0f4f1;
   --text: #1a1a1a;
@@ -17,6 +18,8 @@
   --cta: #ea580c;
   --cta-hover: #c2410c;
   --cta-text: #fff;
+  --radius: 12px;
+  --shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
 :root[data-colorblind] {
@@ -133,19 +136,19 @@ html.map-overlay-open .maplibregl-canvas-container {
 
 .radius-slider::-webkit-slider-runnable-track,
 .radius-row input[type='range']::-webkit-slider-runnable-track {
-  height: 10px;
-  border-radius: 0;
+  height: 8px;
+  border-radius: var(--radius);
   background: #d8d2c6;
-  border: 2px solid #111;
+  border: 1px solid var(--border);
   box-sizing: border-box;
 }
 
 .radius-slider::-moz-range-track,
 .radius-row input[type='range']::-moz-range-track {
-  height: 10px;
-  border-radius: 0;
+  height: 8px;
+  border-radius: var(--radius);
   background: #d8d2c6;
-  border: 2px solid #111;
+  border: 1px solid var(--border);
   box-sizing: border-box;
 }
 
@@ -153,27 +156,25 @@ html.map-overlay-open .maplibregl-canvas-container {
 .radius-row input[type='range']::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 36px;
-  height: 36px;
-  margin-top: -15px;
-  border-radius: 0;
-  border: 3px solid #111;
+  width: 28px;
+  height: 28px;
+  margin-top: -11px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
   background: var(--cta);
-  /* Soft visual offset without layout jump: use outline-like inset feel */
-  box-shadow: none;
-  outline: 3px solid #111;
-  outline-offset: 0;
+  box-shadow: var(--shadow);
+  outline: none;
   cursor: grab;
 }
 
 .radius-slider::-moz-range-thumb,
 .radius-row input[type='range']::-moz-range-thumb {
-  width: 36px;
-  height: 36px;
-  border-radius: 0;
-  border: 3px solid #111;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
   background: var(--cta);
-  box-shadow: none;
+  box-shadow: var(--shadow);
   cursor: grab;
 }
 
@@ -182,19 +183,18 @@ html.map-overlay-open .maplibregl-canvas-container {
   width: 7.25rem;
   box-sizing: border-box;
   padding: 0.45rem 0.4rem;
-  border-radius: 0;
-  background: #fff;
-  border: 2px solid #111;
-  /* Keep badge height stable; shadow reserved via margin so row doesn't jump */
-  box-shadow: none;
-  outline: 3px solid transparent;
-  color: #111;
+  border-radius: var(--radius);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  outline: none;
+  color: var(--text);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   text-align: center;
   white-space: nowrap;
-  font-weight: 800;
+  font-weight: 700;
   font-variant-numeric: tabular-nums;
   font-size: 0.95rem;
   line-height: 1.2;
@@ -225,17 +225,15 @@ html.map-overlay-open .maplibregl-canvas-container {
 
   .radius-slider::-webkit-slider-thumb,
   .radius-row input[type='range']::-webkit-slider-thumb {
-    width: 52px;
-    height: 52px;
-    margin-top: -22px;
-    border-width: 3px;
+    width: 40px;
+    height: 40px;
+    margin-top: -16px;
   }
 
   .radius-slider::-moz-range-thumb,
   .radius-row input[type='range']::-moz-range-thumb {
-    width: 52px;
-    height: 52px;
-    border-width: 3px;
+    width: 40px;
+    height: 40px;
   }
 
   .radius-value {
@@ -244,4 +242,30 @@ html.map-overlay-open .maplibregl-canvas-container {
     min-height: 3rem;
     font-size: 1rem;
   }
+}
+
+/* Shared quiet chrome — components may still override locally */
+.btn-primary {
+  background: var(--cta);
+  color: var(--cta-text);
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  font-weight: 700;
+  letter-spacing: normal;
+  text-transform: none;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+@media (hover: hover) {
+  .btn-primary:hover:not(:disabled) {
+    background: var(--cta-hover);
+  }
+}
+
+.btn-primary:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  box-shadow: none;
 }

@@ -765,7 +765,7 @@ onUnmounted(() => {
   justify-content: center;
   width: 2.25rem;
   height: 2.25rem;
-  border-radius: 8px;
+  border-radius: var(--radius);
   background: var(--surface);
   border: 1px solid var(--border);
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
@@ -930,7 +930,7 @@ onUnmounted(() => {
   max-width: min(360px, 55vw);
   min-height: 2.2rem;
   padding: 0.28rem 0.5rem;
-  border-radius: 8px;
+  border-radius: var(--radius);
   border: 1px solid transparent;
   background: var(--surface);
   box-sizing: border-box;

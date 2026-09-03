@@ -323,7 +323,7 @@ header {
   padding: 0.5rem 0.55rem;
   min-height: 44px;
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: var(--radius);
   background: var(--surface);
   cursor: pointer;
   font-size: 0.9rem;
@@ -355,7 +355,7 @@ header {
   width: 100%;
   padding: 0.5rem 2rem 0.5rem 2.15rem;
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: var(--radius);
   background: var(--surface-2);
   color: var(--text);
   font: inherit;
@@ -554,7 +554,7 @@ li.favorite {
     min-height: 48px;
     padding: 0.55rem 0.65rem;
     font-size: 1rem;
-    border-radius: 10px;
+    border-radius: var(--radius);
   }
 
   .poi-search input {

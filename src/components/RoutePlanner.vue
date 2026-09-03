@@ -1971,7 +1971,7 @@ onUnmounted(() => {
 
 .route-planner > :deep(.planner-elev) {
   grid-area: elev;
-  border-top: 3px solid #111;
+  border-top: 1px solid var(--border);
   box-shadow: none;
   background: #fff;
 }
@@ -1987,8 +1987,8 @@ onUnmounted(() => {
 }
 
 .route-planner > :deep(.planner-elev .chevron-wrap) {
-  border-radius: 0;
-  border: 2px solid #111;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
   background: #fff;
 }
 
@@ -2005,12 +2005,12 @@ onUnmounted(() => {
   margin: 0;
   padding: 0.35rem 0.55rem;
   background: #fff;
-  border-radius: 0;
-  border: 2px solid #111;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
   font-size: 0.78rem;
   color: #111;
   pointer-events: none;
-  box-shadow: 3px 3px 0 #111;
+  box-shadow: var(--shadow);
   z-index: 2;
 }
 
@@ -2027,9 +2027,9 @@ onUnmounted(() => {
   list-style: none;
   max-width: min(92%, 20rem);
   background: #fff;
-  border: 2px solid #111;
-  border-radius: 0;
-  box-shadow: 3px 3px 0 #111;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
   pointer-events: none;
 }
 
@@ -2066,11 +2066,11 @@ onUnmounted(() => {
   align-items: baseline;
   gap: 0.3rem;
   padding: 0.45rem 0.7rem;
-  border-radius: 0;
+  border-radius: var(--radius);
   background: #fff;
   color: #111;
-  border: 2px solid #111;
-  box-shadow: 3px 3px 0 #111;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
   pointer-events: none;
 }
 
@@ -2112,10 +2112,10 @@ onUnmounted(() => {
   z-index: 41;
   width: min(320px, calc(100% - 20px));
   padding: 0.65rem;
-  border-radius: 0;
+  border-radius: var(--radius);
   background: #fff;
-  border: 3px solid #111;
-  box-shadow: 4px 4px 0 #111;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
@@ -2148,8 +2148,8 @@ onUnmounted(() => {
 }
 
 .export-name-field input {
-  border: 2px solid #111;
-  border-radius: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
   padding: 0.45rem 0.55rem;
   font: inherit;
   font-weight: 500;
@@ -2163,8 +2163,8 @@ onUnmounted(() => {
   gap: 0.55rem;
   width: 100%;
   padding: 0.55rem 0.6rem;
-  border: 2px solid #111;
-  border-radius: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
   background: #fff;
   cursor: pointer;
   text-align: left;
@@ -2205,9 +2205,9 @@ onUnmounted(() => {
   z-index: 3;
   display: flex;
   background: #fff;
-  border-radius: 0;
-  border: 2px solid #111;
-  box-shadow: 3px 3px 0 #111;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
   overflow: hidden;
 }
 
@@ -2218,9 +2218,9 @@ onUnmounted(() => {
   z-index: 3;
   display: flex;
   background: #fff;
-  border-radius: 0;
-  border: 2px solid #111;
-  box-shadow: 3px 3px 0 #111;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
   overflow: hidden;
 }
 
@@ -2235,12 +2235,12 @@ onUnmounted(() => {
 }
 
 .route-color-toggle button + button {
-  border-left: 2px solid #111;
+  border-left: 1px solid var(--border);
 }
 
 .route-color-toggle button.active {
-  background: #111;
-  color: #fff;
+  background: var(--cta);
+  color: var(--cta-text);
 }
 
 .route-color-toggle button:disabled {
@@ -2261,7 +2261,7 @@ onUnmounted(() => {
   flex-wrap: wrap;
   align-items: center;
   gap: 0.5rem 0.75rem;
-  border-radius: 8px;
+  border-radius: var(--radius);
   background: rgba(17, 24, 39, 0.92);
   color: #fff;
   font-size: 0.8rem;
@@ -2290,9 +2290,9 @@ onUnmounted(() => {
 .basemap-loading-spinner {
   width: 1.75rem;
   height: 1.75rem;
-  border: 3px solid #111;
+  border: 1px solid var(--border);
   border-top-color: var(--cta);
-  border-radius: 0;
+  border-radius: var(--radius);
   animation: basemap-spin 0.7s linear infinite;
 }
 
@@ -2306,7 +2306,7 @@ onUnmounted(() => {
   border: 1px solid rgba(255, 255, 255, 0.45);
   background: transparent;
   color: #fff;
-  border-radius: 6px;
+  border-radius: var(--radius);
   padding: 0.25rem 0.55rem;
   font: inherit;
   font-size: 0.78rem;
@@ -2325,12 +2325,12 @@ onUnmounted(() => {
 }
 
 .basemap-toggle button + button {
-  border-left: 2px solid #111;
+  border-left: 1px solid var(--border);
 }
 
 .basemap-toggle button.active {
-  background: #111;
-  color: #fff;
+  background: var(--cta);
+  color: var(--cta-text);
 }
 
 .planner-controls {
@@ -2347,7 +2347,7 @@ onUnmounted(() => {
   overscroll-behavior: contain;
   padding: 1rem 1.1rem 1.25rem;
   background: #f3efe6;
-  border-right: 3px solid #111;
+  border-right: 1px solid var(--border);
   box-shadow: none;
   color: #111;
 }
@@ -2372,8 +2372,8 @@ onUnmounted(() => {
   padding: 0.75rem 1.1rem 0.85rem;
   margin: 0;
   background: #fff;
-  border-bottom: 3px solid #111;
-  border-right: 3px solid #111;
+  border-bottom: 1px solid var(--border);
+  border-right: 1px solid var(--border);
   z-index: 4;
 }
 
@@ -2407,9 +2407,9 @@ onUnmounted(() => {
   margin: 0;
   padding: 0.25rem 0;
   background: #fff;
-  border: 2px solid #111;
-  border-radius: 0;
-  box-shadow: 4px 4px 0 #111;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
   max-height: 200px;
   overflow-y: auto;
 }
@@ -2441,8 +2441,8 @@ onUnmounted(() => {
 }
 
 .waypoint-panel {
-  border: 2px solid #111;
-  border-radius: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
   padding: 0.85rem;
   background: #fff;
 }
@@ -2469,8 +2469,8 @@ onUnmounted(() => {
 
 .btn-ghost {
   padding: 0.3rem 0.55rem;
-  border: 2px solid #111;
-  border-radius: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
   background: #fff;
   font-size: 0.75rem;
   font-weight: 700;
@@ -2500,7 +2500,7 @@ onUnmounted(() => {
   align-items: flex-start;
   gap: 0.5rem;
   padding: 0.35rem 0;
-  border-bottom: 2px solid #111;
+  border-bottom: 1px solid var(--border);
   font-size: 0.82rem;
 }
 
@@ -2521,8 +2521,8 @@ onUnmounted(() => {
 .wp-remove {
   width: 24px;
   height: 24px;
-  border: 2px solid #111;
-  border-radius: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
   background: #fee2e2;
   color: #111;
   cursor: pointer;
@@ -2545,10 +2545,10 @@ onUnmounted(() => {
   gap: 0.75rem;
   margin: 0.15rem 0 0.65rem;
   padding: 0.7rem 0.85rem;
-  border-radius: 0;
+  border-radius: var(--radius);
   background: #fff;
-  border: 2px solid #111;
-  box-shadow: 3px 3px 0 #111;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
 }
 
 .route-km-label {
@@ -2584,8 +2584,8 @@ onUnmounted(() => {
 .wp-loop {
   width: 24px;
   height: 24px;
-  border: 2px solid #111;
-  border-radius: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
   background: var(--cta);
   color: #111;
   cursor: pointer;
@@ -2610,8 +2610,8 @@ onUnmounted(() => {
 .select-input {
   width: 100%;
   padding: 0.55rem 0.65rem;
-  border: 2px solid #111;
-  border-radius: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
   background: #fff;
   font: inherit;
   color: #111;
@@ -2619,10 +2619,10 @@ onUnmounted(() => {
 
 .ors-warning {
   padding: 0.75rem;
-  border-radius: 0;
+  border-radius: var(--radius);
   background: #fff;
-  border: 2px solid #111;
-  box-shadow: 3px 3px 0 #111;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
   font-size: 0.85rem;
 }
 
@@ -2665,8 +2665,8 @@ onUnmounted(() => {
   gap: 0.4rem;
   padding: 0.55rem 0.9rem;
   min-height: 44px;
-  border-radius: 0;
-  border: 2px solid #111;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
   background: #fff;
   color: #111;
   cursor: pointer;
@@ -2678,7 +2678,7 @@ onUnmounted(() => {
 .cat-chip.active {
   background: var(--cta);
   color: #111;
-  border-color: #111;
+  border-color: var(--border);
 }
 
 @media (min-width: 769px) {
@@ -2713,8 +2713,8 @@ onUnmounted(() => {
   align-items: center;
   padding: 0.45rem 0.7rem;
   min-height: 40px;
-  border-radius: 0;
-  border: 2px solid #111;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
   background: #fff;
   cursor: pointer;
   font-size: 0.82rem;
@@ -2726,7 +2726,7 @@ onUnmounted(() => {
 .option-chip.active {
   background: var(--cta);
   color: #111;
-  border-color: #111;
+  border-color: var(--border);
 }
 
 .route-elev {
@@ -2744,15 +2744,16 @@ onUnmounted(() => {
 .btn-primary {
   padding: 0.85rem 1.5rem;
   background: var(--cta);
-  color: #111;
-  border: 3px solid #111;
-  border-radius: 0;
-  font-weight: 800;
+  color: var(--cta-text);
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  font-weight: 700;
   font-size: 1rem;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  letter-spacing: normal;
+  text-transform: none;
   cursor: pointer;
-  box-shadow: 4px 4px 0 #111;
+  box-shadow: var(--shadow);
+  transition: background 0.15s ease;
 }
 
 .btn-full {
@@ -2761,15 +2762,16 @@ onUnmounted(() => {
 
 .btn-cta {
   background: var(--cta);
-  color: #111;
-  font-weight: 800;
-  border: 3px solid #111;
+  color: var(--cta-text);
+  font-weight: 700;
+  border: 1px solid transparent;
 }
 
-.btn-cta:hover:not(:disabled) {
-  background: var(--cta);
-  transform: translate(2px, 2px);
-  box-shadow: 2px 2px 0 #111;
+@media (hover: hover) {
+  .btn-cta:hover:not(:disabled),
+  .btn-primary:hover:not(:disabled) {
+    background: var(--cta-hover);
+  }
 }
 
 .btn-primary:disabled {
@@ -2875,12 +2877,12 @@ onUnmounted(() => {
     max-height: none;
     height: auto;
     border-right: none;
-    border-top: 3px solid #111;
+    border-top: 1px solid var(--border);
     box-shadow: none;
     padding: 0;
     gap: 0;
     overflow: hidden;
-    border-radius: 0;
+    border-radius: var(--radius);
     display: flex;
     flex-direction: column;
   }
@@ -2896,7 +2898,7 @@ onUnmounted(() => {
   .poi-next-step {
     border-right: none;
     border-bottom: none;
-    border-top: 3px solid #111;
+    border-top: 1px solid var(--border);
     padding: 0.7rem 1rem calc(0.75rem + env(safe-area-inset-bottom, 0px));
     background: #fff;
     box-shadow: none;
@@ -2930,8 +2932,8 @@ onUnmounted(() => {
     width: 2.25rem;
     height: 0.28rem;
     margin-left: -1.125rem;
-    border-radius: 0;
-    background: #111;
+    border-radius: var(--radius);
+    background: var(--text-muted);
     pointer-events: none;
   }
 
@@ -2944,10 +2946,10 @@ onUnmounted(() => {
   }
 
   .sheet-title {
-    font-size: 0.75rem;
-    font-weight: 800;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: normal;
+    text-transform: none;
     color: #111;
   }
 
@@ -2967,9 +2969,9 @@ onUnmounted(() => {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    border-radius: 0;
+    border-radius: var(--radius);
     background: #fff;
-    border: 2px solid #111;
+    border: 1px solid var(--border);
     font-size: 1.1rem;
     font-weight: 800;
   }
@@ -2993,7 +2995,7 @@ onUnmounted(() => {
   }
 
   .planner-controls:not(.sheet-collapsed) .controls-sheet-toggle {
-    border-bottom: 2px solid #111;
+    border-bottom: 1px solid var(--border);
     flex-shrink: 0;
   }
 }

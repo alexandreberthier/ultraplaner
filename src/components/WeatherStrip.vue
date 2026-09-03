@@ -229,7 +229,7 @@ watch(
   width: auto;
   padding: 0.4rem 0.4rem 0.45rem;
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: var(--radius);
   background: var(--surface-2);
   display: flex;
   flex-direction: column;

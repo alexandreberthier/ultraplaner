@@ -2173,10 +2173,10 @@ onUnmounted(() => {
   z-index: 40;
   width: 52px;
   height: 52px;
-  border: 3px solid #111;
-  border-radius: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
   background: #fff;
-  box-shadow: 3px 3px 0 #111;
+  box-shadow: var(--shadow);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -2191,8 +2191,9 @@ onUnmounted(() => {
   display: flex;
   flex-shrink: 0;
   background: #fff;
-  border-radius: 6px;
-  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
   overflow: hidden;
 }
 
@@ -2200,8 +2201,9 @@ onUnmounted(() => {
   display: flex;
   flex-shrink: 0;
   background: #fff;
-  border-radius: 6px;
-  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
   overflow: hidden;
 }
 
@@ -2220,8 +2222,8 @@ onUnmounted(() => {
 }
 
 .route-color-toggle button.active {
-  background: #111;
-  color: #fff;
+  background: var(--cta);
+  color: var(--cta-text);
 }
 
 .route-color-toggle button:disabled {
@@ -2245,8 +2247,8 @@ onUnmounted(() => {
 }
 
 .basemap-toggle button.active {
-  background: #111;
-  color: #fff;
+  background: var(--cta);
+  color: var(--cta-text);
 }
 
 .basemap-toggle .colorblind-btn.active {
@@ -2261,7 +2263,7 @@ onUnmounted(() => {
   flex-wrap: wrap;
   align-items: center;
   gap: 0.5rem 0.75rem;
-  border-radius: 8px;
+  border-radius: var(--radius);
   background: rgba(17, 24, 39, 0.92);
   color: #fff;
   font-size: 0.8rem;
@@ -2290,9 +2292,9 @@ onUnmounted(() => {
 .basemap-loading-spinner {
   width: 1.75rem;
   height: 1.75rem;
-  border: 3px solid #111;
+  border: 3px solid var(--border);
   border-top-color: var(--cta);
-  border-radius: 0;
+  border-radius: 50%;
   animation: basemap-spin 0.7s linear infinite;
 }
 
@@ -2306,7 +2308,7 @@ onUnmounted(() => {
   border: 1px solid rgba(255, 255, 255, 0.45);
   background: transparent;
   color: #fff;
-  border-radius: 6px;
+  border-radius: var(--radius);
   padding: 0.25rem 0.55rem;
   font: inherit;
   font-size: 0.78rem;
@@ -2314,8 +2316,10 @@ onUnmounted(() => {
   cursor: pointer;
 }
 
-.location-btn:hover {
-  background: #f3efe6;
+@media (hover: hover) {
+  .location-btn:hover {
+    background: var(--cream);
+  }
 }
 
 .location-btn.following,
@@ -2325,7 +2329,7 @@ onUnmounted(() => {
 .location-btn.active {
   background: #fff;
   color: #111;
-  box-shadow: 3px 3px 0 #111;
+  box-shadow: var(--shadow);
 }
 
 .location-btn.following,
@@ -2361,7 +2365,7 @@ onUnmounted(() => {
   margin: 0;
   max-width: min(16rem, calc(100% - 24px));
   padding: 0.45rem 0.65rem;
-  border-radius: 8px;
+  border-radius: var(--radius);
   background: rgba(17, 24, 39, 0.9);
   color: #fff;
   font-size: 0.75rem;
@@ -2378,7 +2382,7 @@ onUnmounted(() => {
   background: #fee2e2;
   color: #991b1b;
   padding: 0.55rem 0.65rem;
-  border-radius: 8px;
+  border-radius: var(--radius);
   font-size: 0.78rem;
   max-width: 280px;
   z-index: 40;
@@ -2418,9 +2422,9 @@ onUnmounted(() => {
   display: inline-flex;
   margin-top: 0.55rem;
   border: none;
-  border-radius: 8px;
+  border-radius: var(--radius);
   padding: 0.45rem 0.7rem;
-  background: #111;
+  background: var(--primary-dark);
   color: #fff;
   font: inherit;
   font-size: 0.82rem;
@@ -2510,7 +2514,7 @@ onUnmounted(() => {
   max-width: min(92%, 22rem);
   background: color-mix(in srgb, var(--surface, #fff) 92%, transparent);
   border: 1px solid var(--border, rgba(0, 0, 0, 0.1));
-  border-radius: 6px;
+  border-radius: var(--radius);
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
   pointer-events: none;
 }

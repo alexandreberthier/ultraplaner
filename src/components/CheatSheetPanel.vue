@@ -215,7 +215,7 @@ function onPrint() {
   flex: 1 1 auto;
   -webkit-overflow-scrolling: touch;
   background: #fff;
-  border-radius: 12px;
+  border-radius: var(--radius);
   border: 1px solid #e5e7eb;
 }
 
@@ -346,7 +346,7 @@ function onPrint() {
 .btn-secondary,
 .btn-primary {
   flex: 1 1 0;
-  border-radius: 10px;
+  border-radius: var(--radius);
   padding: 0.85rem 0.75rem;
   font-weight: 700;
   font-size: 0.95rem;
@@ -384,7 +384,7 @@ function onPrint() {
     transform: translate(-50%, -50%);
     width: min(420px, calc(100vw - 2rem));
     max-height: min(85vh, 720px);
-    border-radius: 16px;
+    border-radius: var(--radius);
     box-shadow: 0 20px 50px rgb(0 0 0 / 0.25);
     border: 1px solid #e5e7eb;
   }

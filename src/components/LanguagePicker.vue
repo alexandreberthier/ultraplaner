@@ -85,14 +85,14 @@ function pick(code: AppLocale) {
   gap: 0.25rem;
   padding: 0.2rem;
   border: 1px solid var(--border);
-  border-radius: 10px;
+  border-radius: var(--radius);
   background: var(--surface-2);
 }
 
 .lang-picker.compact {
   gap: 0.15rem;
   padding: 0.15rem;
-  border-radius: 8px;
+  border-radius: var(--radius);
 }
 
 .lang-btn {
@@ -104,7 +104,7 @@ function pick(code: AppLocale) {
   min-height: 2.5rem;
   padding: 0.45rem 0.6rem;
   border: 1px solid transparent;
-  border-radius: 8px;
+  border-radius: var(--radius);
   background: transparent;
   color: var(--text-muted);
   font: inherit;
@@ -123,13 +123,15 @@ function pick(code: AppLocale) {
   min-width: 2.5rem;
   min-height: 2.25rem;
   padding: 0.35rem 0.45rem;
-  border-radius: 7px;
+  border-radius: var(--radius);
 }
 
-.lang-btn:hover:not(.active) {
-  background: var(--surface);
-  border-color: var(--border);
-  color: var(--text);
+@media (hover: hover) {
+  .lang-btn:hover:not(.active) {
+    background: var(--surface);
+    border-color: var(--border);
+    color: var(--text);
+  }
 }
 
 .lang-btn.active {

@@ -1575,7 +1575,7 @@ function onDocClick(e: MouseEvent) {
 .sidebar {
   display: flex;
   flex-direction: column;
-  border-right: 3px solid #111;
+  border-right: 1px solid var(--border);
   background: #f3efe6;
   overflow: hidden;
   min-width: 0;
@@ -1592,7 +1592,7 @@ function onDocClick(e: MouseEvent) {
 
 .map-header {
   padding: 1rem;
-  border-bottom: 3px solid #111;
+  border-bottom: 1px solid var(--border);
   background: #fff;
   flex-shrink: 0;
 }
@@ -1656,10 +1656,13 @@ function onDocClick(e: MouseEvent) {
   justify-content: space-between;
   flex-wrap: nowrap;
   gap: 0.5rem;
-  min-height: 52px;
-  padding: 0.55rem 0.85rem;
+  min-height: 48px;
+  padding: max(0.4rem, env(safe-area-inset-top, 0px))
+    max(0.75rem, env(safe-area-inset-right, 0px))
+    0.4rem
+    max(0.75rem, env(safe-area-inset-left, 0px));
   background: #fff;
-  border-bottom: 3px solid #111;
+  border-bottom: 1px solid var(--border);
   flex-shrink: 0;
   /* Above map overlays so export dropdown isn't covered by basemap toggles */
   z-index: 80;
@@ -1679,36 +1682,38 @@ function onDocClick(e: MouseEvent) {
 }
 
 .tool-btn {
-  padding: 0.45rem 0.7rem;
-  border: 2px solid #111;
-  border-radius: 0;
+  padding: 0.4rem 0.65rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
   background: #fff;
-  color: #111;
+  color: var(--text);
   cursor: pointer;
   font-size: 0.82rem;
-  font-weight: 750;
+  font-weight: 650;
   line-height: 1.15;
   white-space: nowrap;
 }
 
-.tool-btn:hover {
-  background: #f3efe6;
+@media (hover: hover) {
+  .tool-btn:hover {
+    background: var(--cream);
+  }
 }
 
 .home-btn {
   background: var(--cta);
-  border-color: #111;
-  color: #111;
-  font-weight: 800;
-  box-shadow: 3px 3px 0 #111;
+  border-color: transparent;
+  color: var(--cta-text);
+  font-weight: 700;
+  box-shadow: var(--shadow);
 }
 
-.home-btn:hover {
-  background: var(--cta);
-  border-color: #111;
-  color: #111;
-  transform: translate(1px, 1px);
-  box-shadow: 2px 2px 0 #111;
+@media (hover: hover) {
+  .home-btn:hover {
+    background: var(--cta-hover);
+    border-color: transparent;
+    color: var(--cta-text);
+  }
 }
 
 .share-btn {
@@ -1730,21 +1735,23 @@ function onDocClick(e: MouseEvent) {
 
 .export-toggle {
   background: var(--cta);
-  border-color: #111;
-  color: #111;
-  font-weight: 800;
-  box-shadow: 3px 3px 0 #111;
+  border-color: transparent;
+  color: var(--cta-text);
+  font-weight: 700;
+  box-shadow: var(--shadow);
 }
 
-.export-toggle:hover {
-  background: var(--cta);
-  border-color: #111;
+@media (hover: hover) {
+  .export-toggle:hover {
+    background: var(--cta-hover);
+    border-color: transparent;
+  }
 }
 
 .export-toggle.active {
-  background: #111;
+  background: var(--primary);
   color: #fff;
-  border-color: #111;
+  border-color: transparent;
 }
 
 .offline-banner {
@@ -1756,15 +1763,15 @@ function onDocClick(e: MouseEvent) {
   max-width: min(520px, calc(100% - 2rem));
   padding: 0.7rem 0.95rem;
   background: #fff;
-  border: 3px solid #111;
-  border-radius: 0;
-  box-shadow: 4px 4px 0 #111;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
 }
 
 .offline-banner.pack-ready-banner,
 .offline-banner.pack-active-banner {
   background: #fff;
-  border-color: #111;
+  border-color: var(--border);
 }
 
 .offline-banner-text {
@@ -1801,9 +1808,9 @@ function onDocClick(e: MouseEvent) {
   max-width: min(520px, calc(100% - 2rem));
   padding: 0.65rem 0.85rem;
   background: #fff;
-  border: 3px solid #111;
-  border-radius: 0;
-  box-shadow: 4px 4px 0 #111;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
 }
 
 .persist-banner-text {
@@ -1838,9 +1845,9 @@ function onDocClick(e: MouseEvent) {
   max-width: min(560px, calc(100% - 2rem));
   padding: 0.75rem 0.9rem;
   background: #fff;
-  border: 3px solid #111;
-  border-radius: 0;
-  box-shadow: 4px 4px 0 #111;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
 }
 
 .export-tip-text {
@@ -1865,17 +1872,19 @@ function onDocClick(e: MouseEvent) {
 .export-tip-btn {
   flex-shrink: 0;
   padding: 0.5rem 0.75rem;
-  border: 2px solid #111;
-  border-radius: 0;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
   background: var(--cta);
-  color: #111;
-  font-weight: 800;
+  color: var(--cta-text);
+  font-weight: 700;
   font-size: 0.85rem;
   cursor: pointer;
 }
 
-.export-tip-btn:hover {
-  background: var(--cta);
+@media (hover: hover) {
+  .export-tip-btn:hover {
+    background: var(--cta-hover);
+  }
 }
 
 .sidebar-reopen {
@@ -1888,11 +1897,11 @@ function onDocClick(e: MouseEvent) {
   align-items: center;
   gap: 0.25rem;
   padding: 0.6rem 0.5rem 0.6rem 0.35rem;
-  border: 3px solid #111;
+  border: 1px solid var(--border);
   border-left: none;
-  border-radius: 0;
+  border-radius: var(--radius);
   background: #fff;
-  box-shadow: 4px 4px 0 #111;
+  box-shadow: var(--shadow);
   cursor: pointer;
   font-size: 0.8rem;
   font-weight: 800;
@@ -1942,10 +1951,10 @@ function onDocClick(e: MouseEvent) {
   z-index: 40;
   margin: 0;
   padding: 0.55rem 0.9rem;
-  border-radius: 0;
+  border-radius: var(--radius);
   background: #fff;
-  border: 2px solid #111;
-  box-shadow: 3px 3px 0 #111;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
   font-size: 0.85rem;
   font-weight: 700;
   color: #111;
@@ -1965,22 +1974,22 @@ function onDocClick(e: MouseEvent) {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  border: 2px solid #111;
-  border-radius: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
   padding: 0.55rem 0.7rem;
   background: #fff;
   color: #111;
   font: inherit;
   font-size: 0.85rem;
   font-weight: 800;
-  box-shadow: 3px 3px 0 #111;
+  box-shadow: var(--shadow);
   cursor: pointer;
 }
 
 .map-cp-fab.active {
   background: var(--cta);
   color: #111;
-  box-shadow: 3px 3px 0 #111;
+  box-shadow: var(--shadow);
 }
 
 .map-cp-fab-label {
@@ -1993,10 +2002,10 @@ function onDocClick(e: MouseEvent) {
   gap: 0.4rem;
   min-width: 12rem;
   padding: 0.45rem;
-  border-radius: 0;
-  border: 3px solid #111;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
   background: #fff;
-  box-shadow: 4px 4px 0 #111;
+  box-shadow: var(--shadow);
 }
 
 .map-cp-kind {
@@ -2004,7 +2013,7 @@ function onDocClick(e: MouseEvent) {
   align-items: center;
   gap: 0.55rem;
   border: 2px solid transparent;
-  border-radius: 0;
+  border-radius: var(--radius);
   padding: 0.75rem 0.9rem;
   min-height: 48px;
   background: transparent;
@@ -2019,7 +2028,7 @@ function onDocClick(e: MouseEvent) {
 .map-cp-kind:hover,
 .map-cp-kind.active {
   background: var(--cta);
-  border-color: #111;
+  border-color: var(--border);
   color: #111;
 }
 
@@ -2034,7 +2043,7 @@ function onDocClick(e: MouseEvent) {
   gap: 0.65rem;
   max-width: min(92vw, 420px);
   padding: 0.55rem 0.75rem;
-  border-radius: 999px;
+  border-radius: var(--radius);
   background: rgba(17, 24, 39, 0.92);
   color: #fff;
   font-size: 0.85rem;
@@ -2044,7 +2053,7 @@ function onDocClick(e: MouseEvent) {
 
 .map-cp-banner button {
   border: 1px solid rgba(255, 255, 255, 0.4);
-  border-radius: 999px;
+  border-radius: var(--radius);
   background: transparent;
   color: #fff;
   font: inherit;
@@ -2061,9 +2070,9 @@ function onDocClick(e: MouseEvent) {
     height: 60px;
     padding: 0;
     justify-content: center;
-    border-radius: 0;
+    border-radius: var(--radius);
     font-size: 1.4rem;
-    box-shadow: 4px 4px 0 #111;
+    box-shadow: var(--shadow);
   }
 
   .map-cp-fab-label {
@@ -2076,7 +2085,7 @@ function onDocClick(e: MouseEvent) {
     right: auto;
     transform: translateX(-50%);
     max-width: min(92vw, 420px);
-    border-radius: 12px;
+    border-radius: var(--radius);
   }
 }
 
@@ -2086,17 +2095,17 @@ function onDocClick(e: MouseEvent) {
 
 .tool-btn.ride-enter {
   background: var(--cta);
-  color: #111;
-  border-color: #111;
-  font-weight: 800;
-  box-shadow: 3px 3px 0 #111;
+  color: var(--cta-text);
+  border-color: transparent;
+  font-weight: 700;
+  box-shadow: var(--shadow);
 }
 
 .tool-btn.ride-enter.is-on {
-  background: #111;
-  border-color: #111;
+  background: var(--primary);
+  border-color: transparent;
   color: #fff;
-  box-shadow: 3px 3px 0 #111;
+  box-shadow: var(--shadow);
 }
 
 .ride-overlay {
@@ -2117,13 +2126,13 @@ function onDocClick(e: MouseEvent) {
   pointer-events: auto;
   min-height: 40px;
   padding: 0.45rem 0.85rem;
-  border: 2px solid #111;
-  border-radius: 0;
-  background: #111;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--primary-dark);
   color: #fff;
   font-weight: 800;
   font-size: 0.88rem;
-  box-shadow: 3px 3px 0 #111;
+  box-shadow: var(--shadow);
   cursor: pointer;
 }
 
@@ -2153,7 +2162,7 @@ function onDocClick(e: MouseEvent) {
   max-width: 100%;
   padding: 0.55rem 0.8rem;
   border: none;
-  border-radius: 12px;
+  border-radius: var(--radius);
   background: rgba(255, 251, 235, 0.97);
   color: #111;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.18);
@@ -2213,8 +2222,8 @@ function onDocClick(e: MouseEvent) {
   padding: 1.5rem 1.35rem 1.35rem;
   text-align: center;
   background: #fff;
-  border: 3px solid #111;
-  box-shadow: 6px 6px 0 #111;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
 }
 
 .empty-map-logo {
@@ -2244,16 +2253,23 @@ function onDocClick(e: MouseEvent) {
   width: 100%;
   min-height: 52px;
   padding: 0.75rem 1.1rem;
-  border: 3px solid #111;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
   background: var(--cta);
-  color: #111;
+  color: var(--cta-text);
   font: inherit;
   font-size: 0.95rem;
-  font-weight: 800;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: normal;
+  text-transform: none;
   cursor: pointer;
-  box-shadow: 4px 4px 0 #111;
+  box-shadow: var(--shadow);
+}
+
+@media (hover: hover) {
+  .empty-map-cta:hover {
+    background: var(--cta-hover);
+  }
 }
 
 @media (max-width: 1200px) {
@@ -2394,13 +2410,13 @@ function onDocClick(e: MouseEvent) {
     align-self: flex-start;
     min-height: 48px;
     padding: 0.5rem 0.85rem;
-    border: 2px solid #111;
-    border-radius: 0;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
     background: #fff;
     color: #111;
     font-weight: 800;
     font-size: 0.88rem;
-    box-shadow: 3px 3px 0 #111;
+    box-shadow: var(--shadow);
     cursor: pointer;
   }
 
@@ -2418,13 +2434,13 @@ function onDocClick(e: MouseEvent) {
     align-items: center;
     min-height: 48px;
     padding: 0.5rem 0.85rem;
-    border: 2px solid #111;
-    border-radius: 0;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
     background: var(--cta);
     color: #111;
     font-weight: 800;
     font-size: 0.88rem;
-    box-shadow: 3px 3px 0 #111;
+    box-shadow: var(--shadow);
     cursor: pointer;
   }
 
@@ -2448,7 +2464,7 @@ function onDocClick(e: MouseEvent) {
     column-gap: 0.45rem;
     padding: 0.5rem 0.7rem;
     border: none;
-    border-radius: 12px;
+    border-radius: var(--radius);
     background: rgba(255, 255, 255, 0.96);
     color: #111;
     text-align: left;
@@ -2502,7 +2518,7 @@ function onDocClick(e: MouseEvent) {
     font-size: 0.72rem;
     font-weight: 700;
     padding: 0.12rem 0.4rem;
-    border-radius: 6px;
+    border-radius: var(--radius);
     background: #e5e7eb;
     color: #374151;
   }
@@ -2531,7 +2547,7 @@ function onDocClick(e: MouseEvent) {
     pointer-events: none;
     margin: 0;
     padding: 0.5rem 0.7rem;
-    border-radius: 12px;
+    border-radius: var(--radius);
     background: rgba(255, 255, 255, 0.88);
     color: #4b5563;
     font-size: 0.88rem;
@@ -2547,7 +2563,7 @@ function onDocClick(e: MouseEvent) {
     gap: 0.3rem 0.5rem;
     padding: 0.55rem 0.75rem;
     border: none;
-    border-radius: 12px;
+    border-radius: var(--radius);
     background: rgba(255, 251, 235, 0.97);
     color: #111;
     text-align: left;
@@ -2586,7 +2602,7 @@ function onDocClick(e: MouseEvent) {
     pointer-events: none;
     margin: 0;
     padding: 0.4rem 0.65rem;
-    border-radius: 10px;
+    border-radius: var(--radius);
     background: rgba(255, 255, 255, 0.82);
     color: #6b7280;
     font-size: 0.75rem;
@@ -2601,7 +2617,7 @@ function onDocClick(e: MouseEvent) {
     right: 0;
     z-index: 100;
     background: #fff;
-    border-top: 3px solid #111;
+    border-top: 1px solid var(--border);
     padding: 0.45rem 0.15rem calc(0.45rem + env(safe-area-inset-bottom, 0px));
     box-shadow: none;
   }
@@ -2644,11 +2660,11 @@ function onDocClick(e: MouseEvent) {
     overflow: visible;
     width: 56px;
     height: 56px;
-    border-radius: 0;
+    border-radius: var(--radius);
     background: #fff;
-    border: 2.5px solid #111;
+    border: 1px solid var(--border);
     color: inherit;
-    box-shadow: 3px 3px 0 #111;
+    box-shadow: var(--shadow);
   }
 
   .nav-glyph svg {
@@ -2692,7 +2708,7 @@ function onDocClick(e: MouseEvent) {
     right: -0.45rem;
     min-width: 1.45rem;
     padding: 0.12rem 0.32rem;
-    border-radius: 999px;
+    border-radius: var(--radius);
     background: #be123c;
     color: #fff;
     font-size: 0.68rem;
@@ -2712,7 +2728,7 @@ function onDocClick(e: MouseEvent) {
     gap: 0.4rem;
     min-width: 14.5rem;
     padding: 0.5rem;
-    border-radius: 14px;
+    border-radius: var(--radius);
     background: #fff;
     box-shadow: 0 10px 28px rgba(0, 0, 0, 0.22);
   }
@@ -2722,7 +2738,7 @@ function onDocClick(e: MouseEvent) {
     align-items: center;
     gap: 0.65rem;
     border: none;
-    border-radius: 10px;
+    border-radius: var(--radius);
     padding: 0.9rem 1rem;
     min-height: 56px;
     background: transparent;
@@ -2765,12 +2781,12 @@ function onDocClick(e: MouseEvent) {
     width: 100%;
     max-width: 520px;
     max-height: min(88dvh, 760px);
-    border-radius: 0;
-    border: 3px solid #111;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    box-shadow: 6px 6px 0 #111;
+    box-shadow: var(--shadow);
     touch-action: pan-y;
     overscroll-behavior: contain;
   }
@@ -2998,9 +3014,9 @@ function onDocClick(e: MouseEvent) {
   top: calc(100% + 6px);
   right: 0;
   background: #fff;
-  border: 3px solid #111;
-  border-radius: 0;
-  box-shadow: 6px 6px 0 #111;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
   z-index: 200;
   min-width: 300px;
   overflow: hidden;
@@ -3045,15 +3061,15 @@ function onDocClick(e: MouseEvent) {
   width: 100%;
   box-sizing: border-box;
   padding: 0.55rem 0.65rem;
-  border: 2px solid #111;
-  border-radius: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
   background: #f3efe6;
   color: #111;
   font-size: 0.9rem;
 }
 
 .export-name-field input:focus {
-  outline: 3px solid #111;
+  outline: 2px solid var(--primary);
   outline-offset: 1px;
 }
 
@@ -3066,7 +3082,7 @@ function onDocClick(e: MouseEvent) {
 .export-nearby-hint {
   margin: 0.35rem 0.85rem 0.45rem;
   padding: 0.55rem 0.65rem;
-  border-radius: 8px;
+  border-radius: var(--radius);
   background: #f1f5f9;
   color: #334155;
   font-size: 0.78rem;
@@ -3115,7 +3131,7 @@ function onDocClick(e: MouseEvent) {
 
 .export-howto-details {
   margin: 0 0.75rem 0.55rem;
-  border-radius: 8px;
+  border-radius: var(--radius);
   border: 1px solid var(--border);
   background: var(--surface, #fff);
 }
@@ -3174,7 +3190,7 @@ function onDocClick(e: MouseEvent) {
   color: #92400e;
   background: #fffbeb;
   border: 1px solid #fde68a;
-  border-radius: 8px;
+  border-radius: var(--radius);
 }
 
 .export-sheet-body .export-howto-warn {
@@ -3284,8 +3300,8 @@ function onDocClick(e: MouseEvent) {
   gap: 0.75rem;
   width: 100%;
   padding: 0.85rem 1rem;
-  border: 2px solid #111;
-  border-radius: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
   background: #fff;
   font-size: 0.9rem;
   color: #111;
@@ -3295,7 +3311,7 @@ function onDocClick(e: MouseEvent) {
 
 .export-sheet-btn.featured {
   background: var(--cta);
-  border-color: #111;
+  border-color: var(--border);
   color: #111;
 }
 
@@ -3341,7 +3357,7 @@ function onDocClick(e: MouseEvent) {
   color: var(--text-muted);
   background: #fffbeb;
   border: 1px solid #fde68a;
-  border-radius: 8px;
+  border-radius: var(--radius);
 }
 
 .export-sheet-print {
@@ -3350,7 +3366,7 @@ function onDocClick(e: MouseEvent) {
 
 /* Minimal brutalism: sidebar + elevation stay readable */
 .sidebar :deep([data-sidebar-section]) {
-  border-bottom: 2px solid #111;
+  border-bottom: 1px solid var(--border);
 }
 
 .sidebar :deep(.toggle-title) {
@@ -3411,18 +3427,18 @@ function onDocClick(e: MouseEvent) {
 
 .sidebar :deep(.tabs) {
   gap: 0;
-  border: 2px solid #111;
+  border: 1px solid var(--border);
 }
 
 .sidebar :deep(.tabs button) {
   border: none;
-  border-right: 2px solid #111;
-  border-radius: 0;
+  border-right: 1px solid var(--border);
+  border-radius: var(--radius);
   background: #fff;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-  font-size: 0.72rem;
+  font-weight: 650;
+  text-transform: none;
+  letter-spacing: normal;
+  font-size: 0.78rem;
 }
 
 .sidebar :deep(.tabs button:last-child) {
@@ -3430,25 +3446,25 @@ function onDocClick(e: MouseEvent) {
 }
 
 .sidebar :deep(.tabs button.active) {
-  background: #111;
-  color: #fff;
-  border-color: #111;
+  background: var(--cta);
+  color: var(--cta-text);
+  border-color: transparent;
 }
 
 .sidebar :deep(.poi-search input) {
-  border: 2px solid #111;
-  border-radius: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
   background: #fff;
   color: #111;
 }
 
 .sidebar :deep(.poi-search input:focus) {
-  outline: 3px solid #111;
+  outline: 2px solid var(--primary);
 }
 
 .sidebar :deep(.cat-btn) {
-  border: 2px solid #111;
-  border-radius: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
   background: #fff;
 }
 
@@ -3458,8 +3474,8 @@ function onDocClick(e: MouseEvent) {
 }
 
 .sidebar :deep(.map-poi-bar) {
-  border-radius: 0;
-  border: 2px solid #111;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
   background: #fff;
 }
 
@@ -3474,7 +3490,7 @@ function onDocClick(e: MouseEvent) {
 .sidebar :deep(.hours-badge) {
   display: inline-block;
   padding: 0.05rem 0.28rem;
-  border: 1.5px solid #111;
+  border: 1px solid var(--border);
   font-size: 0.65rem;
   font-weight: 800;
   letter-spacing: 0.03em;
@@ -3484,11 +3500,11 @@ function onDocClick(e: MouseEvent) {
 
 .sidebar :deep(.hours-badge.open) {
   background: var(--cta);
-  color: #111;
+  color: var(--cta-text);
 }
 
 .sidebar :deep(.hours-badge.closed) {
-  background: #111;
+  background: var(--danger);
   color: #fff;
 }
 
@@ -3504,14 +3520,14 @@ function onDocClick(e: MouseEvent) {
 .sidebar :deep(.time-step),
 .sidebar :deep(.buffer-select),
 .sidebar :deep(.cp-name) {
-  border: 2px solid #111;
-  border-radius: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
   background: #fff;
   color: #111;
 }
 
 .sidebar :deep(.time-group) {
-  box-shadow: 3px 3px 0 #111;
+  box-shadow: var(--shadow);
 }
 
 .sidebar :deep(.time-step) {
@@ -3521,8 +3537,8 @@ function onDocClick(e: MouseEvent) {
 }
 
 .sidebar :deep(.time-select) {
-  border-left: 2px solid #111;
-  border-right: 2px solid #111;
+  border-left: 1px solid var(--border);
+  border-right: 1px solid var(--border);
   border-top: none;
   border-bottom: none;
   box-shadow: none;
@@ -3530,18 +3546,18 @@ function onDocClick(e: MouseEvent) {
 
 .sidebar :deep(.kind-btn.active) {
   background: var(--cta);
-  border-color: #111;
+  border-color: var(--border);
   color: #111;
   font-weight: 800;
 }
 
 .sidebar :deep(.pack-btn.primary),
 .sidebar :deep(.btn-primary) {
-  border: 3px solid #111;
-  border-radius: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
   background: var(--cta);
   color: #111;
-  box-shadow: 4px 4px 0 #111;
+  box-shadow: var(--shadow);
   font-weight: 800;
   text-transform: uppercase;
 }
@@ -3549,19 +3565,19 @@ function onDocClick(e: MouseEvent) {
 .sidebar :deep(.pack-btn.danger) {
   background: #fff;
   color: #111;
-  border-color: #111;
+  border-color: var(--border);
 }
 
 .sidebar :deep(.weather-chip) {
-  border: 2px solid #111;
-  border-radius: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
   background: #fff;
 }
 
 .sidebar :deep(.weather-chip.rain-low),
 .sidebar :deep(.weather-chip.rain-mid),
 .sidebar :deep(.weather-chip.rain-high) {
-  border-color: #111;
+  border-color: var(--border);
 }
 
 .sidebar :deep(.weather-row) {
@@ -3572,13 +3588,13 @@ function onDocClick(e: MouseEvent) {
 }
 
 .sidebar :deep(.swatch) {
-  border-radius: 0;
-  border: 1px solid #111;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
 }
 
 .sidebar :deep(.cat-chip) {
-  border: 2px solid #111;
-  border-radius: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
   background: #fff;
   color: #111;
   font-weight: 700;
@@ -3587,12 +3603,12 @@ function onDocClick(e: MouseEvent) {
 .sidebar :deep(.cat-chip.active) {
   background: var(--cta);
   color: #111;
-  border-color: #111;
+  border-color: var(--border);
 }
 
 .sidebar :deep(.radius-value) {
-  border-radius: 0;
-  border: 2px solid #111;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
   background: #fff;
   color: #111;
   box-shadow: none;
@@ -3600,36 +3616,36 @@ function onDocClick(e: MouseEvent) {
 
 .sidebar :deep(.radius-slider)::-webkit-slider-runnable-track,
 .sidebar :deep(.radius-row input[type='range'])::-webkit-slider-runnable-track {
-  border-radius: 0;
+  border-radius: var(--radius);
   background: #d8d2c6;
-  border: 2px solid #111;
+  border: 1px solid var(--border);
 }
 
 .sidebar :deep(.radius-slider)::-moz-range-track,
 .sidebar :deep(.radius-row input[type='range'])::-moz-range-track {
-  border-radius: 0;
+  border-radius: var(--radius);
   background: #d8d2c6;
-  border: 2px solid #111;
+  border: 1px solid var(--border);
 }
 
 .sidebar :deep(.radius-slider)::-webkit-slider-thumb,
 .sidebar :deep(.radius-row input[type='range'])::-webkit-slider-thumb {
-  border-radius: 0;
-  border: 3px solid #111;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
   background: var(--cta);
   box-shadow: none;
 }
 
 .sidebar :deep(.radius-slider)::-moz-range-thumb,
 .sidebar :deep(.radius-row input[type='range'])::-moz-range-thumb {
-  border-radius: 0;
-  border: 3px solid #111;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
   background: var(--cta);
   box-shadow: none;
 }
 
 .map-layout :deep(.elevation-profile) {
-  border-top: 3px solid #111;
+  border-top: 1px solid var(--border);
   box-shadow: none;
   background: #fff;
 }
@@ -3639,7 +3655,7 @@ function onDocClick(e: MouseEvent) {
   color: #111;
   min-height: 56px;
   padding: 0.75rem 1rem;
-  border-bottom: 2px solid #111;
+  border-bottom: 1px solid var(--border);
 }
 
 .map-layout :deep(.elevation-profile .title) {
@@ -3655,8 +3671,8 @@ function onDocClick(e: MouseEvent) {
 }
 
 .map-layout :deep(.elevation-profile .chevron-wrap) {
-  border-radius: 0;
-  border: 2px solid #111;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
   background: #fff;
   box-shadow: none;
 }
@@ -3664,34 +3680,34 @@ function onDocClick(e: MouseEvent) {
 .mobile-sheet-inner :deep(.tabs button),
 .mobile-sheet-inner :deep(.cat-btn),
 .mobile-sheet-inner :deep(.poi-search input) {
-  border-radius: 0;
-  border-color: #111;
+  border-radius: var(--radius);
+  border-color: var(--border);
 }
 
 .mobile-sheet-inner .sheet-header {
-  border-bottom: 3px solid #111;
+  border-bottom: 1px solid var(--border);
   background: #fff;
 }
 
 .mobile-sheet-inner .sheet-header h2 {
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
+  font-weight: 750;
+  text-transform: none;
+  letter-spacing: -0.01em;
 }
 
 .mobile-sheet-inner :deep(.btn-primary) {
-  border: 3px solid #111;
-  border-radius: 0;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
   background: var(--cta);
-  color: #111;
-  box-shadow: 4px 4px 0 #111;
-  font-weight: 800;
-  text-transform: uppercase;
+  color: var(--cta-text);
+  box-shadow: var(--shadow);
+  font-weight: 700;
+  text-transform: none;
 }
 
 .mobile-sheet-inner :deep(.cat-chip) {
-  border: 2px solid #111;
-  border-radius: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
   background: #fff;
   color: #111;
 }
@@ -3707,14 +3723,14 @@ function onDocClick(e: MouseEvent) {
 .mobile-sheet-inner :deep(.time-select),
 .mobile-sheet-inner :deep(.time-step),
 .mobile-sheet-inner :deep(.time-group) {
-  border-radius: 0;
-  border-color: #111;
+  border-radius: var(--radius);
+  border-color: var(--border);
 }
 
 .mobile-sheet-inner :deep(.radius-slider)::-webkit-slider-thumb,
 .mobile-sheet-inner :deep(.radius-row input[type='range'])::-webkit-slider-thumb {
-  border-radius: 0;
-  border: 3px solid #111;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
   background: var(--cta);
   box-shadow: none;
 }

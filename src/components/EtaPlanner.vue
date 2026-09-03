@@ -317,7 +317,7 @@ function nudgeMinute(delta: number) {
   width: 2.75rem;
   padding: 0;
   border: none;
-  border-radius: 0;
+  border-radius: var(--radius);
   background: transparent;
   font-size: 1rem;
   font-weight: 800;
@@ -350,16 +350,16 @@ function nudgeMinute(delta: number) {
 .time-group {
   display: inline-flex;
   align-items: stretch;
-  border: 2px solid #111;
+  border: 1px solid var(--border);
   background: #fff;
-  box-shadow: 3px 3px 0 #111;
+  box-shadow: var(--shadow);
 }
 
 .time-step {
   width: 2.75rem;
   min-height: 52px;
   border: none;
-  border-radius: 0;
+  border-radius: var(--radius);
   background: #f3efe6;
   color: #111;
   font: inherit;
@@ -370,13 +370,16 @@ function nudgeMinute(delta: number) {
   -webkit-tap-highlight-color: transparent;
 }
 
-.time-step:hover {
-  background: var(--cta);
+@media (hover: hover) {
+  .time-step:hover {
+    background: var(--cta);
+    color: var(--cta-text);
+  }
 }
 
 .time-step:active {
-  background: #111;
-  color: #fff;
+  background: var(--cta-hover);
+  color: var(--cta-text);
 }
 
 .time-select {
@@ -384,9 +387,9 @@ function nudgeMinute(delta: number) {
   min-height: 52px;
   padding: 0.35rem 0.2rem;
   border: none;
-  border-left: 2px solid #111;
-  border-right: 2px solid #111;
-  border-radius: 0;
+  border-left: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+  border-radius: var(--radius);
   background: #fff;
   color: #111;
   font-size: 1.25rem;
@@ -455,13 +458,13 @@ function nudgeMinute(delta: number) {
 .buffer-select {
   padding: 0.55rem 0.65rem;
   min-height: 48px;
-  border: 2px solid #111;
-  border-radius: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
   background: #fff;
   font-size: 0.9rem;
   font-weight: 700;
   cursor: pointer;
-  box-shadow: 3px 3px 0 #111;
+  box-shadow: var(--shadow);
 }
 
 .eta-filter-hint {

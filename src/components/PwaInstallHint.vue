@@ -82,7 +82,7 @@ function onMenuClick() {
 .pwa-install-btn {
   width: 100%;
   border: 1px solid var(--border, #e5e7eb);
-  border-radius: 8px;
+  border-radius: var(--radius);
   padding: 0.55rem 0.75rem;
   background: var(--surface-2, #f3f4f6);
   color: var(--text, #111);
@@ -117,7 +117,7 @@ function onMenuClick() {
 
 .pwa-guide {
   width: min(100%, 26rem);
-  border-radius: 14px;
+  border-radius: var(--radius);
   background: var(--surface, #fff);
   color: var(--text, #111);
   box-shadow: 0 16px 40px rgba(0, 0, 0, 0.2);
@@ -162,7 +162,7 @@ function onMenuClick() {
 .pwa-guide-cta,
 .pwa-guide-done {
   width: 100%;
-  border-radius: 10px;
+  border-radius: var(--radius);
   padding: 0.7rem 0.85rem;
   font: inherit;
   font-size: 0.9rem;

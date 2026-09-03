@@ -301,7 +301,7 @@ defineExpose({ refresh, meta })
   flex-direction: column;
   gap: 0.15rem;
   padding: 0.55rem 0.65rem;
-  border-radius: 8px;
+  border-radius: var(--radius);
   background: color-mix(in srgb, var(--primary, #2d6a4f) 10%, transparent);
   border: 1px solid color-mix(in srgb, var(--primary, #2d6a4f) 28%, transparent);
   font-size: 0.75rem;
@@ -334,7 +334,7 @@ defineExpose({ refresh, meta })
 
 .pack-progress-bar {
   height: 6px;
-  border-radius: 999px;
+  border-radius: var(--radius);
   background: var(--primary, #2d6a4f);
   max-width: 100%;
 }
@@ -347,7 +347,7 @@ defineExpose({ refresh, meta })
 
 .pack-btn {
   border: 1px solid var(--border);
-  border-radius: 10px;
+  border-radius: var(--radius);
   padding: 0.65rem 0.9rem;
   min-height: 48px;
   font: inherit;

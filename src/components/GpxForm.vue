@@ -229,19 +229,21 @@ async function createMap() {
   min-height: 10.5rem;
   padding: 1.45rem 1.1rem;
   background: #f3efe6;
-  border: 3px dashed #111;
-  border-radius: 0;
+  border: 2px dashed var(--border);
+  border-radius: var(--radius);
   cursor: pointer;
   text-align: center;
   color: #111;
 }
 
-.drop-zone:hover {
-  background: #fff;
+@media (hover: hover) {
+  .drop-zone:hover {
+    background: #fff;
+  }
 }
 
 .drop-zone:focus-visible {
-  outline: 3px solid #111;
+  outline: 2px solid var(--primary);
   outline-offset: 3px;
 }
 
@@ -294,8 +296,8 @@ async function createMap() {
   width: 2.15rem;
   height: 2.15rem;
   margin-bottom: 0.4rem;
-  border-radius: 0;
-  border: 3px solid #111;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
   background: var(--cta);
   color: #111;
   font-size: 1.1rem;
@@ -340,30 +342,32 @@ async function createMap() {
 
 .drop-change {
   font-size: 0.78rem;
-  font-weight: 800;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: #111;
+  font-weight: 650;
+  letter-spacing: normal;
+  text-transform: none;
+  color: var(--text);
   text-decoration: underline;
   text-underline-offset: 3px;
 }
 
 .drop-clear {
-  border: 2px solid #111;
-  border-radius: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
   background: #fff;
   padding: 0.35rem 0.65rem;
-  font-size: 0.75rem;
-  font-weight: 800;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: #111;
+  font-size: 0.78rem;
+  font-weight: 650;
+  letter-spacing: normal;
+  text-transform: none;
+  color: var(--text);
   cursor: pointer;
 }
 
-.drop-clear:hover {
-  background: #111;
-  color: #fff;
+@media (hover: hover) {
+  .drop-clear:hover {
+    background: var(--cream);
+    color: var(--text);
+  }
 }
 
 .radius-row {
@@ -377,24 +381,24 @@ async function createMap() {
 
 .radius-row input[type='range'] {
   flex: 1;
-  accent-color: #111;
+  accent-color: var(--cta);
 }
 
 .radius-slider::-webkit-slider-runnable-track,
 .radius-row input[type='range']::-webkit-slider-runnable-track {
   height: 10px;
-  border-radius: 0;
+  border-radius: var(--radius);
   background: #d8d2c6;
-  border: 2px solid #111;
+  border: 1px solid var(--border);
   box-sizing: border-box;
 }
 
 .radius-slider::-moz-range-track,
 .radius-row input[type='range']::-moz-range-track {
   height: 10px;
-  border-radius: 0;
+  border-radius: var(--radius);
   background: #d8d2c6;
-  border: 2px solid #111;
+  border: 1px solid var(--border);
   box-sizing: border-box;
 }
 
@@ -403,8 +407,8 @@ async function createMap() {
   width: 36px;
   height: 36px;
   margin-top: -15px;
-  border-radius: 0;
-  border: 3px solid #111;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
   background: var(--cta);
   box-shadow: none;
 }
@@ -413,8 +417,8 @@ async function createMap() {
 .radius-row input[type='range']::-moz-range-thumb {
   width: 36px;
   height: 36px;
-  border-radius: 0;
-  border: 3px solid #111;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
   background: var(--cta);
   box-shadow: none;
 }
@@ -424,8 +428,8 @@ async function createMap() {
   width: 7.25rem;
   box-sizing: border-box;
   min-height: 2.75rem;
-  border-radius: 0;
-  border: 2px solid #111;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
   background: #fff;
   color: #111;
   box-shadow: none;
@@ -450,8 +454,8 @@ async function createMap() {
   gap: 0.4rem;
   padding: 0.5rem 0.8rem;
   min-height: 44px;
-  border-radius: 0;
-  border: 2px solid #111;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
   background: #fff;
   color: #111;
   cursor: pointer;
@@ -460,19 +464,21 @@ async function createMap() {
   -webkit-tap-highlight-color: transparent;
 }
 
-.cat-chip:hover {
-  background: #f3efe6;
+@media (hover: hover) {
+  .cat-chip:hover {
+    background: var(--cream);
+  }
 }
 
 .cat-chip:focus-visible {
-  outline: 3px solid #111;
+  outline: 2px solid var(--primary);
   outline-offset: 2px;
 }
 
 .cat-chip.active {
   background: var(--cta);
   color: #111;
-  border-color: #111;
+  border-color: var(--border);
   font-weight: 800;
 }
 
@@ -507,7 +513,7 @@ async function createMap() {
 .error {
   margin: 0;
   padding: 0.55rem 0.7rem;
-  border: 2px solid #111;
+  border: 1px solid var(--border);
   background: #fff;
   color: #9f1239;
   font-size: 0.9rem;
@@ -517,25 +523,26 @@ async function createMap() {
 .btn-primary {
   padding: 0.9rem 1.35rem;
   background: var(--cta);
-  color: #111;
-  border: 3px solid #111;
-  border-radius: 0;
-  box-shadow: 5px 5px 0 #111;
-  font-weight: 800;
+  color: var(--cta-text);
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  font-weight: 700;
   font-size: 0.92rem;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
+  letter-spacing: normal;
+  text-transform: none;
   cursor: pointer;
-  transition: transform 0.08s ease, box-shadow 0.08s ease;
+  transition: background 0.15s ease;
 }
 
-.btn-primary:hover:not(:disabled) {
-  transform: translate(3px, 3px);
-  box-shadow: 2px 2px 0 #111;
+@media (hover: hover) {
+  .btn-primary:hover:not(:disabled) {
+    background: var(--cta-hover);
+  }
 }
 
 .btn-primary:focus-visible {
-  outline: 3px solid #111;
+  outline: 2px solid var(--primary);
   outline-offset: 3px;
 }
 
