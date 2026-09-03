@@ -261,7 +261,6 @@ const garminFitGuidePath = () => garminFitPath(locale.value as AppLocale)
               </div>
             </div>
           </div>
-          <p v-else class="app-chrome-sub">{{ t('landing.appIntro') }}</p>
         </header>
       </div>
 
@@ -286,7 +285,7 @@ const garminFitGuidePath = () => garminFitPath(locale.value as AppLocale)
         <section id="app-start" ref="appRef" class="app-section" tabindex="-1">
           <div class="section-head">
             <h2>{{ t('landing.appTitle') }}</h2>
-            <p v-if="nativeApp" class="app-privacy">{{ t('landing.appPrivacy') }}</p>
+            <p v-if="nativeApp && tab === 'nearby'" class="app-privacy">{{ t('landing.appPrivacy') }}</p>
           </div>
 
           <div class="mode-tabs" role="tablist" aria-label="App-Modus">
@@ -522,20 +521,12 @@ const garminFitGuidePath = () => garminFitPath(locale.value as AppLocale)
   flex: 0 0 auto;
 }
 
-.app-chrome-sub {
-  margin: 0;
-  padding: 0.15rem 1.1rem 0.85rem;
-  font-size: 0.95rem;
-  font-weight: 700;
-  color: #111;
-}
-
 .app-privacy {
-  margin: 0.4rem 0 0;
-  font-size: 0.88rem;
-  font-weight: 650;
-  line-height: 1.35;
-  color: #111;
+  margin: 0.65rem 0 0;
+  font-size: 0.8rem;
+  font-weight: 500;
+  line-height: 1.4;
+  color: #5c564c;
   max-width: 36rem;
 }
 
@@ -1433,15 +1424,27 @@ const garminFitGuidePath = () => garminFitPath(locale.value as AppLocale)
 }
 
 .landing--native .page-wrap {
-  padding-top: 0.35rem;
+  padding-top: 0.5rem;
 }
 
 .landing--native .stats-bar {
   display: none;
 }
 
+.landing--native .hero-top {
+  padding-bottom: 0.35rem;
+}
+
 .landing--native .app-section {
-  padding-top: 1.15rem;
+  padding-top: 1.75rem;
+}
+
+.landing--native .section-head {
+  margin-bottom: 1.5rem;
+}
+
+.landing--native .mode-tabs {
+  margin-bottom: 1rem;
 }
 
 .back-btn {
