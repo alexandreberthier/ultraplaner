@@ -8,7 +8,6 @@ import {
   isLocaleHomePath,
   localeHomePath,
   poisAlongRoutePath,
-  racaVersorgungPath,
   setAppLocale,
   type AppLocale,
 } from '../i18n'
@@ -44,16 +43,6 @@ function isPoisGuidePath(path: string): boolean {
   )
 }
 
-function isRacaGuidePath(path: string): boolean {
-  const clean = cleanPath(path)
-  return (
-    clean === '/raca-versorgung' ||
-    clean === '/en/raca-supply' ||
-    clean === '/es/raca-avituallamiento' ||
-    clean === '/fr/raca-ravitaillement'
-  )
-}
-
 function isGarminFitGuidePath(path: string): boolean {
   const clean = cleanPath(path)
   return (
@@ -73,9 +62,6 @@ function pick(code: AppLocale) {
     }
   } else if (isPoisGuidePath(route.path)) {
     const next = poisAlongRoutePath(code)
-    if (cleanPath(route.path) !== cleanPath(next)) void router.replace(next)
-  } else if (isRacaGuidePath(route.path)) {
-    const next = racaVersorgungPath(code)
     if (cleanPath(route.path) !== cleanPath(next)) void router.replace(next)
   } else if (isGarminFitGuidePath(route.path)) {
     const next = garminFitPath(code)

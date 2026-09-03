@@ -3,7 +3,6 @@ import {
   garminFitPath,
   localeHomePath,
   poisAlongRoutePath,
-  racaVersorgungPath,
   seoGuidePath,
   tGlobal,
 } from '../i18n'
@@ -138,13 +137,12 @@ export function applyGuideSeo(locale: AppLocale) {
   setHreflang(guideHreflang(poisAlongRoutePath))
 }
 
-/** Race / intent SEO guides (RACA, Garmin FIT). */
+/** Intent SEO guides (Garmin FIT course points). */
 export function applyTopicGuideSeo(locale: AppLocale, kind: SeoGuideKind) {
   const title = String(tGlobal(`landing.${kind}.seoTitle`))
   const description = String(tGlobal(`landing.${kind}.seoDescription`))
   const path = seoGuidePath(kind, locale)
   const canonicalUrl = `${SITE}${path}`
-  const pathFor = kind === 'racaGuide' ? racaVersorgungPath : garminFitPath
 
   document.title = title
   document.documentElement.lang = locale
@@ -156,7 +154,7 @@ export function applyTopicGuideSeo(locale: AppLocale, kind: SeoGuideKind) {
   ensureMeta('property', 'og:locale').content = OG_LOCALES[locale]
 
   setCanonical(canonicalUrl)
-  setHreflang(guideHreflang(pathFor))
+  setHreflang(guideHreflang(garminFitPath))
 }
 
 /** Legal pages (DE only): self-canonical, no landing hreflang/FAQ schema responsibility. */

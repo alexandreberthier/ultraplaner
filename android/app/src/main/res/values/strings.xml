@@ -4,4 +4,6 @@
     <string name="title_activity_main">UltraPlaner</string>
     <string name="package_name">com.ultraplaner.app</string>
     <string name="custom_url_scheme">com.ultraplaner.app</string>
+    <!-- Shown in the system location permission dialog (nearby / ride mode). -->
+    <string name="geolocation_permission_rationale">UltraPlaner braucht den Standort, um Versorgungspunkte in der Nähe und den Fahrtmodus anzuzeigen. Der Standort wird nicht im Hintergrund erfasst.</string>
 </resources>

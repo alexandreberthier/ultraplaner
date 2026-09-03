@@ -90,50 +90,6 @@
     <xhtml:link rel="alternate" hreflang="x-default" href="https://ultraplaner.com/versorgung-ultracycling/" />
   </url>
   <url>
-    <loc>https://ultraplaner.com/raca-versorgung/</loc>
-    <lastmod>2026-09-03</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-    <xhtml:link rel="alternate" hreflang="de" href="https://ultraplaner.com/raca-versorgung/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://ultraplaner.com/en/raca-supply/" />
-    <xhtml:link rel="alternate" hreflang="es" href="https://ultraplaner.com/es/raca-avituallamiento/" />
-    <xhtml:link rel="alternate" hreflang="fr" href="https://ultraplaner.com/fr/raca-ravitaillement/" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://ultraplaner.com/raca-versorgung/" />
-  </url>
-  <url>
-    <loc>https://ultraplaner.com/en/raca-supply/</loc>
-    <lastmod>2026-09-03</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.75</priority>
-    <xhtml:link rel="alternate" hreflang="de" href="https://ultraplaner.com/raca-versorgung/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://ultraplaner.com/en/raca-supply/" />
-    <xhtml:link rel="alternate" hreflang="es" href="https://ultraplaner.com/es/raca-avituallamiento/" />
-    <xhtml:link rel="alternate" hreflang="fr" href="https://ultraplaner.com/fr/raca-ravitaillement/" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://ultraplaner.com/raca-versorgung/" />
-  </url>
-  <url>
-    <loc>https://ultraplaner.com/es/raca-avituallamiento/</loc>
-    <lastmod>2026-09-03</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="de" href="https://ultraplaner.com/raca-versorgung/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://ultraplaner.com/en/raca-supply/" />
-    <xhtml:link rel="alternate" hreflang="es" href="https://ultraplaner.com/es/raca-avituallamiento/" />
-    <xhtml:link rel="alternate" hreflang="fr" href="https://ultraplaner.com/fr/raca-ravitaillement/" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://ultraplaner.com/raca-versorgung/" />
-  </url>
-  <url>
-    <loc>https://ultraplaner.com/fr/raca-ravitaillement/</loc>
-    <lastmod>2026-09-03</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-    <xhtml:link rel="alternate" hreflang="de" href="https://ultraplaner.com/raca-versorgung/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://ultraplaner.com/en/raca-supply/" />
-    <xhtml:link rel="alternate" hreflang="es" href="https://ultraplaner.com/es/raca-avituallamiento/" />
-    <xhtml:link rel="alternate" hreflang="fr" href="https://ultraplaner.com/fr/raca-ravitaillement/" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://ultraplaner.com/raca-versorgung/" />
-  </url>
-  <url>
     <loc>https://ultraplaner.com/garmin-course-points-fit/</loc>
     <lastmod>2026-09-03</lastmod>
     <changefreq>monthly</changefreq>

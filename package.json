@@ -16,7 +16,9 @@
     "setup-credentials": "tsx scripts/setup-credentials.ts",
     "deploy": "npm run build && npm run prerender && firebase deploy --only hosting,firestore:rules --project ultracycling-8bd56",
     "android:sync": "npm run build && npx cap sync android",
-    "android:open": "npx cap open android"
+    "android:open": "npx cap open android",
+    "android": "npm run android:sync && npx cap open android",
+    "cap:sync": "npx cap sync android"
   },
   "dependencies": {
     "@capacitor/android": "^8.5.0",

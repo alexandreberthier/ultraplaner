@@ -5,7 +5,7 @@ import GpxForm from '../components/GpxForm.vue'
 import TopbarSettings from '../components/TopbarSettings.vue'
 import RecentRoutesMenu from '../components/RecentRoutesMenu.vue'
 import FeedbackForm from '../components/FeedbackForm.vue'
-import { localeHomePath, poisAlongRoutePath, racaVersorgungPath, garminFitPath, type AppLocale } from '../i18n'
+import { localeHomePath, poisAlongRoutePath, garminFitPath, type AppLocale } from '../i18n'
 import { useRouter } from 'vue-router'
 import { useMapStore } from '../stores/mapStore'
 import {
@@ -148,7 +148,6 @@ function toggleFaq(key: string) {
 }
 
 const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
-const racaGuidePath = () => racaVersorgungPath(locale.value as AppLocale)
 const garminFitGuidePath = () => garminFitPath(locale.value as AppLocale)
 </script>
 
@@ -361,8 +360,6 @@ const garminFitGuidePath = () => garminFitPath(locale.value as AppLocale)
             {{ t('landing.guideTeaser.link') }}
           </router-link>
           <p class="guide-teaser-more">
-            <router-link :to="racaGuidePath()">{{ t('landing.guideTeaser.racaLink') }}</router-link>
-            ·
             <router-link :to="garminFitGuidePath()">{{ t('landing.guideTeaser.garminLink') }}</router-link>
           </p>
         </section>

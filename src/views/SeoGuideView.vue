@@ -3,10 +3,8 @@ import { computed, onMounted, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import {
-  garminFitPath,
   localeHomePath,
   poisAlongRoutePath,
-  racaVersorgungPath,
   type AppLocale,
   type SeoGuideKind,
 } from '../i18n'
@@ -25,25 +23,13 @@ const router = useRouter()
 const guideKind = computed(() => route.meta.guideKind as SeoGuideKind)
 const i18nKey = computed(() => `landing.${guideKind.value}`)
 
-const sections = computed((): Section[] => {
-  if (guideKind.value === 'racaGuide') {
-    return [
-      { kind: 'p', id: 'honest' },
-      { kind: 'p', id: 'course' },
-      { kind: 'ol', id: 'plan', count: 4 },
-      { kind: 'p', id: 'gaps' },
-      { kind: 'p', id: 'export' },
-      { kind: 'p', id: 'device' },
-    ]
-  }
-  return [
-    { kind: 'p', id: 'why' },
-    { kind: 'p', id: 'connect' },
-    { kind: 'ol', id: 'usb', count: 4 },
-    { kind: 'p', id: 'limit' },
-    { kind: 'p', id: 'build' },
-  ]
-})
+const sections = computed((): Section[] => [
+  { kind: 'p', id: 'why' },
+  { kind: 'p', id: 'connect' },
+  { kind: 'ol', id: 'usb', count: 4 },
+  { kind: 'p', id: 'limit' },
+  { kind: 'p', id: 'build' },
+])
 
 function applySeo() {
   applyTopicGuideSeo(locale.value as AppLocale, guideKind.value)
@@ -62,16 +48,7 @@ function goStartApp() {
 
 const related = computed(() => {
   const loc = locale.value as AppLocale
-  if (guideKind.value === 'racaGuide') {
-    return [
-      { to: poisAlongRoutePath(loc), label: t('landing.racaGuide.relatedSupply') },
-      { to: garminFitPath(loc), label: t('landing.racaGuide.relatedGarmin') },
-    ]
-  }
-  return [
-    { to: poisAlongRoutePath(loc), label: t('landing.garminFitGuide.relatedSupply') },
-    { to: racaVersorgungPath(loc), label: t('landing.garminFitGuide.relatedRaca') },
-  ]
+  return [{ to: poisAlongRoutePath(loc), label: t('landing.garminFitGuide.relatedSupply') }]
 })
 </script>
 

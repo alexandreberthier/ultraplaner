@@ -36,30 +36,6 @@ const router = createRouter({
       component: PoisAlongRouteView,
     },
     {
-      path: '/raca-versorgung',
-      name: 'raca-guide-de',
-      component: SeoGuideView,
-      meta: { guideKind: 'racaGuide' },
-    },
-    {
-      path: '/en/raca-supply',
-      name: 'raca-guide-en',
-      component: SeoGuideView,
-      meta: { guideKind: 'racaGuide' },
-    },
-    {
-      path: '/es/raca-avituallamiento',
-      name: 'raca-guide-es',
-      component: SeoGuideView,
-      meta: { guideKind: 'racaGuide' },
-    },
-    {
-      path: '/fr/raca-ravitaillement',
-      name: 'raca-guide-fr',
-      component: SeoGuideView,
-      meta: { guideKind: 'racaGuide' },
-    },
-    {
       path: '/garmin-course-points-fit',
       name: 'garmin-fit-guide-de',
       component: SeoGuideView,
@@ -98,6 +74,22 @@ const router = createRouter({
     },
     {
       path: '/fr/pois-sur-la-route',
+      redirect: '/fr/ravitaillement-ultracycling/',
+    },
+    {
+      path: '/raca-versorgung',
+      redirect: '/versorgung-ultracycling/',
+    },
+    {
+      path: '/en/raca-supply',
+      redirect: '/en/ultracycling-supply/',
+    },
+    {
+      path: '/es/raca-avituallamiento',
+      redirect: '/es/avituallamiento-ultracycling/',
+    },
+    {
+      path: '/fr/raca-ravitaillement',
       redirect: '/fr/ravitaillement-ultracycling/',
     },
     {

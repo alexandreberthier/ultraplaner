@@ -37,20 +37,6 @@ export function poisAlongRoutePath(locale: AppLocale): string {
   }
 }
 
-/** Race Around Austria supply-planning guide (localized slugs). */
-export function racaVersorgungPath(locale: AppLocale): string {
-  switch (locale) {
-    case 'en':
-      return '/en/raca-supply/'
-    case 'es':
-      return '/es/raca-avituallamiento/'
-    case 'fr':
-      return '/fr/raca-ravitaillement/'
-    default:
-      return '/raca-versorgung/'
-  }
-}
-
 /** Garmin FIT / Course Points guide (localized slugs). */
 export function garminFitPath(locale: AppLocale): string {
   switch (locale) {
@@ -65,10 +51,11 @@ export function garminFitPath(locale: AppLocale): string {
   }
 }
 
-export type SeoGuideKind = 'racaGuide' | 'garminFitGuide'
+export type SeoGuideKind = 'garminFitGuide'
 
 export function seoGuidePath(kind: SeoGuideKind, locale: AppLocale): string {
-  return kind === 'racaGuide' ? racaVersorgungPath(locale) : garminFitPath(locale)
+  void kind
+  return garminFitPath(locale)
 }
 
 const DE_CONTENT_SEGMENTS = [
@@ -76,7 +63,6 @@ const DE_CONTENT_SEGMENTS = [
   'impressum',
   'versorgung-ultracycling',
   'pois-entlang-der-route',
-  'raca-versorgung',
   'garmin-course-points-fit',
 ] as const
 

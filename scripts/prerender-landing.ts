@@ -32,13 +32,6 @@ const SUPPLY_HREFLANG: Record<string, string> = {
   fr: `${SITE}/fr/ravitaillement-ultracycling/`,
 }
 
-const RACA_HREFLANG: Record<string, string> = {
-  de: `${SITE}/raca-versorgung/`,
-  en: `${SITE}/en/raca-supply/`,
-  es: `${SITE}/es/raca-avituallamiento/`,
-  fr: `${SITE}/fr/raca-ravitaillement/`,
-}
-
 const GARMIN_HREFLANG: Record<string, string> = {
   de: `${SITE}/garmin-course-points-fit/`,
   en: `${SITE}/en/garmin-course-points-fit/`,
@@ -78,34 +71,6 @@ const PAGES: PageEntry[] = [
     lang: 'fr',
     kind: 'guide',
     hreflang: SUPPLY_HREFLANG,
-  },
-  {
-    path: '/raca-versorgung/',
-    out: 'raca-versorgung/index.html',
-    lang: 'de',
-    kind: 'guide',
-    hreflang: RACA_HREFLANG,
-  },
-  {
-    path: '/en/raca-supply/',
-    out: 'en/raca-supply/index.html',
-    lang: 'en',
-    kind: 'guide',
-    hreflang: RACA_HREFLANG,
-  },
-  {
-    path: '/es/raca-avituallamiento/',
-    out: 'es/raca-avituallamiento/index.html',
-    lang: 'es',
-    kind: 'guide',
-    hreflang: RACA_HREFLANG,
-  },
-  {
-    path: '/fr/raca-ravitaillement/',
-    out: 'fr/raca-ravitaillement/index.html',
-    lang: 'fr',
-    kind: 'guide',
-    hreflang: RACA_HREFLANG,
   },
   {
     path: '/garmin-course-points-fit/',

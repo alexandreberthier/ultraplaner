@@ -22,6 +22,46 @@
         "source": "/fr/pois-sur-la-route",
         "destination": "/fr/ravitaillement-ultracycling/",
         "type": 301
+      },
+      {
+        "source": "/raca-versorgung",
+        "destination": "/versorgung-ultracycling/",
+        "type": 301
+      },
+      {
+        "source": "/raca-versorgung/",
+        "destination": "/versorgung-ultracycling/",
+        "type": 301
+      },
+      {
+        "source": "/en/raca-supply",
+        "destination": "/en/ultracycling-supply/",
+        "type": 301
+      },
+      {
+        "source": "/en/raca-supply/",
+        "destination": "/en/ultracycling-supply/",
+        "type": 301
+      },
+      {
+        "source": "/es/raca-avituallamiento",
+        "destination": "/es/avituallamiento-ultracycling/",
+        "type": 301
+      },
+      {
+        "source": "/es/raca-avituallamiento/",
+        "destination": "/es/avituallamiento-ultracycling/",
+        "type": 301
+      },
+      {
+        "source": "/fr/raca-ravitaillement",
+        "destination": "/fr/ravitaillement-ultracycling/",
+        "type": 301
+      },
+      {
+        "source": "/fr/raca-ravitaillement/",
+        "destination": "/fr/ravitaillement-ultracycling/",
+        "type": 301
       }
     ],
     "headers": [
