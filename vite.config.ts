@@ -120,6 +120,9 @@ export default defineConfig(({ mode }) => {
         '@': resolve(__dirname, 'src'),
       },
     },
+    optimizeDeps: {
+      include: ['@capacitor/core', '@capacitor/app', '@capacitor/geolocation'],
+    },
     build: {
       rolldownOptions: {
         output: {

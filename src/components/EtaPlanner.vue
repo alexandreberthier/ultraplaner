@@ -441,7 +441,7 @@ function nudgeMinute(delta: number) {
   flex-shrink: 0;
   width: 1.25rem;
   height: 1.25rem;
-  accent-color: #111;
+  accent-color: var(--cta);
 }
 
 .filter-meta {

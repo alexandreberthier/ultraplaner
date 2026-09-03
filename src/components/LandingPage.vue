@@ -450,7 +450,7 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
 
 .landing {
   min-height: 100%;
-  background: #f3efe6;
+  background: var(--cream);
   color: #111;
   --display: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
@@ -496,7 +496,7 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
 .hero-band--app {
   min-height: 0;
   overflow: visible;
-  background: #f3efe6;
+  background: var(--cream);
 }
 
 .hero-band--app .hero {
@@ -732,6 +732,8 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
   border-radius: var(--radius);
   padding: 0;
   box-shadow: var(--shadow);
+  overflow: hidden;
+  isolation: isolate;
 }
 
 .stat {
@@ -746,11 +748,13 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
 
 .stat:last-child {
   border-right: none;
+  border-radius: 0 var(--radius) var(--radius) 0;
 }
 
 .stat:first-child {
   background: var(--cta);
   color: var(--cta-text);
+  border-radius: var(--radius) 0 0 var(--radius);
 }
 
 .stat:first-child span {
@@ -809,36 +813,47 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
 
 .mode-tabs {
   display: flex;
-  gap: 0.35rem;
+  gap: 0.4rem;
   margin-bottom: 0.75rem;
   border: none;
-  padding: 0.3rem;
-  background: var(--cream);
-  border-radius: var(--radius);
+  padding: 0;
+  background: transparent;
 }
 
 .mode-tabs button {
   flex: 1;
-  padding: 0.7rem 0.7rem;
-  border: none;
+  padding: 0.7rem 0.75rem;
+  min-height: 2.75rem;
+  border: 1px solid var(--border);
   border-radius: var(--radius);
-  background: transparent;
+  background: var(--surface-2);
   font-weight: 650;
   font-size: 0.88rem;
   letter-spacing: normal;
   text-transform: none;
   cursor: pointer;
   color: var(--text);
+  box-shadow: none;
+  transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .mode-tabs button:last-child {
-  border-right: none;
+  border-right: 1px solid var(--border);
 }
 
 .mode-tabs button.active {
   background: var(--surface);
   color: var(--text);
+  border-color: var(--border);
   box-shadow: var(--shadow);
+  font-weight: 700;
+}
+
+@media (hover: hover) {
+  .mode-tabs button:hover:not(.active) {
+    background: var(--cream);
+    border-color: color-mix(in srgb, var(--cta) 40%, var(--border));
+  }
 }
 
 .hero-card {
@@ -1468,6 +1483,11 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
     grid-template-columns: 1fr 1fr;
   }
 
+  .stats-bar .stat:first-child,
+  .stats-bar .stat:last-child {
+    border-radius: 0;
+  }
+
   .feature-card:first-child {
     grid-column: 1 / -1;
     grid-row: auto;
@@ -1539,15 +1559,21 @@ const supplyGuidePath = () => poisAlongRoutePath(locale.value as AppLocale)
   .stat {
     border-right: none;
     border-bottom: 1px solid var(--border);
+    border-radius: 0;
+  }
+
+  .stat:first-child {
+    border-radius: var(--radius) var(--radius) 0 0;
   }
 
   .stat:last-child {
     border-bottom: none;
+    border-radius: 0 0 var(--radius) var(--radius);
   }
 
   .mode-tabs button {
-    font-size: 0.68rem;
-    padding: 0.8rem 0.35rem;
+    font-size: 0.78rem;
+    padding: 0.7rem 0.4rem;
   }
 
   .hero-card {
