@@ -15,10 +15,10 @@
     "verify-austria": "tsx scripts/verify-austria.ts",
     "setup-credentials": "tsx scripts/setup-credentials.ts",
     "deploy": "npm run build && npm run prerender && firebase deploy --only hosting,firestore:rules --project ultracycling-8bd56",
-    "android:sync": "npm run build && npx cap sync android",
+    "android:sync": "npm run build && npx cap sync android && node scripts/patch-android-after-sync.mjs",
     "android:open": "npx cap open android",
     "android": "npm run android:sync && npx cap open android",
-    "cap:sync": "npx cap sync android"
+    "cap:sync": "npx cap sync android && node scripts/patch-android-after-sync.mjs"
   },
   "dependencies": {
     "@capacitor/android": "^8.5.0",
