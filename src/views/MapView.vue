@@ -1665,8 +1665,7 @@ function onDocClick(e: MouseEvent) {
   justify-content: space-between;
   flex-wrap: nowrap;
   gap: 0.5rem;
-  min-height: 46px;
-  font-variant-numeric: tabular-nums;
+  min-height: 48px;
   padding: max(0.4rem, env(safe-area-inset-top, 0px))
     max(0.75rem, env(safe-area-inset-right, 0px))
     0.4rem

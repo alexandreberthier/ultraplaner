@@ -26,8 +26,6 @@
     "@capacitor/app": "^8.1.1",
     "@capacitor/core": "^8.5.0",
     "@capacitor/geolocation": "^8.2.2",
-    "@fontsource-variable/fraunces": "^5.3.0",
-    "@fontsource-variable/source-sans-3": "^5.3.0",
     "@garmin/fitsdk": "^21.208.0",
     "@supabase/supabase-js": "^2.110.7",
     "@tmcw/togeojson": "^7.1.2",

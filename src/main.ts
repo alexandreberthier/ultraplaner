@@ -14,8 +14,6 @@ import {
 } from './utils/chunkLoadRecovery'
 import { initPwaUpdates } from './utils/pwaUpdate'
 import { initNativeShell, isNativeApp } from './utils/nativeApp'
-import '@fontsource-variable/source-sans-3/wght.css'
-import '@fontsource-variable/fraunces/standard.css'
 import './style.css'
 
 enforcePreferredHostSeo()
