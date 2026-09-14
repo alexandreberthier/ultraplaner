@@ -153,7 +153,7 @@ async function downloadOrShare() {
   font-weight: 800;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: #0f766e;
+  color: var(--cta);
 }
 
 h1 {
@@ -209,9 +209,9 @@ h1 {
 }
 
 .btn.primary {
-  border-color: #0f766e;
-  background: #0f766e;
-  color: #fff;
+  border-color: var(--cta);
+  background: var(--cta);
+  color: var(--cta-text);
 }
 
 .btn.secondary {

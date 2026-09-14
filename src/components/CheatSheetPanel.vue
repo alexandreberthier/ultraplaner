@@ -148,7 +148,7 @@ function onPrint() {
   z-index: 80;
   display: flex;
   flex-direction: column;
-  background: #f8faf8;
+  background: var(--bg);
   color: #111;
   padding: max(0.75rem, env(safe-area-inset-top)) max(0.75rem, env(safe-area-inset-right))
     max(0.75rem, env(safe-area-inset-bottom)) max(0.75rem, env(safe-area-inset-left));

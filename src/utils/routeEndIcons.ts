@@ -106,7 +106,7 @@ function addOrReplaceImage(map: MaplibreMap, id: string, canvas: HTMLCanvasEleme
   map.addImage(id, data, { pixelRatio: 2 })
 }
 
-/** Register / refresh start·end·both discs (colors follow colorblind mode). */
+/** Register / refresh start·end·both discs. */
 export function ensureRouteEndImages(map: MaplibreMap) {
   const start = routeStartColor()
   const end = routeEndColor()

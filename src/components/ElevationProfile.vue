@@ -11,7 +11,7 @@ import {
 } from '../utils/route'
 import { formatDuration, hoursForDistanceKm } from '../utils/eta'
 import { formatElevM, formatKmInt } from '../services/geo'
-import { gradeToColor, colorblindMode } from '../config/mapStyle'
+import { gradeToColor } from '../config/mapStyle'
 import type { RouteSurfaceBucketId } from '../../shared/types'
 import {
   SURFACE_COLORS,
@@ -266,7 +266,6 @@ const hoverPoint = computed(() => {
 
 const hoverLabel = computed(() => {
   if (!hoverPoint.value) return null
-  void colorblindMode.value
   const km = hoverPoint.value.distanceFromStart ?? hoverKm.value ?? 0
   const elev = hoverPoint.value.elevation
   const eta = store.etaAtRouteKm(km)
@@ -286,7 +285,6 @@ const hoverLabel = computed(() => {
 
 const segmentGradeColor = computed(() => {
   if (!segmentStats.value) return undefined
-  void colorblindMode.value
   return gradeToColor(segmentStats.value.avgGradePct)
 })
 

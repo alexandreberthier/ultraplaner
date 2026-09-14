@@ -360,7 +360,7 @@ function nudgeMinute(delta: number) {
   min-height: 52px;
   border: none;
   border-radius: var(--radius);
-  background: #f3efe6;
+  background: var(--cream);
   color: #111;
   font: inherit;
   font-size: 1.35rem;

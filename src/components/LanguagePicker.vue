@@ -17,8 +17,10 @@ withDefaults(
   defineProps<{
     /** Kleinere Darstellung (nur Fahnen, z. B. in der Sidebar) */
     compact?: boolean
+    /** Volle Breite, eine Sprache je Zeile — für das enge Settings-Menü. */
+    fill?: boolean
   }>(),
-  { compact: false }
+  { compact: false, fill: false }
 )
 
 const { locale, t } = useI18n()
@@ -73,7 +75,7 @@ function pick(code: AppLocale) {
 <template>
   <div
     class="lang-picker"
-    :class="{ compact }"
+    :class="{ compact, fill }"
     role="group"
     :aria-label="t('lang.label')"
   >
@@ -89,7 +91,8 @@ function pick(code: AppLocale) {
       @click="pick(code)"
     >
       <LocaleFlag :locale="code" />
-      <span v-if="!compact" class="lang-code">{{ code.toUpperCase() }}</span>
+      <span v-if="fill" class="lang-name">{{ LOCALE_LABELS[code] }}</span>
+      <span v-else-if="!compact" class="lang-code">{{ code.toUpperCase() }}</span>
     </button>
   </div>
 </template>
@@ -162,7 +165,30 @@ function pick(code: AppLocale) {
   height: 0.95rem;
 }
 
-.lang-code {
+.lang-picker.fill {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  gap: 0.25rem;
+}
+
+.lang-picker.fill .lang-btn {
+  width: 100%;
+  min-width: 0;
+  justify-content: flex-start;
+  padding: 0.5rem 0.65rem;
+}
+
+.lang-code,
+.lang-name {
   line-height: 1;
+}
+
+.lang-name {
+  font-size: 0.88rem;
+  letter-spacing: 0;
 }
 </style>

@@ -101,7 +101,7 @@ function cancel() {
 .progress {
   height: 0.85rem;
   border-radius: var(--radius);
-  background: #f3efe6;
+  background: var(--cream);
   border: 1px solid var(--border);
   overflow: hidden;
 }

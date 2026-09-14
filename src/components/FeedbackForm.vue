@@ -221,8 +221,8 @@ async function submit() {
 
 .feedback-submit:disabled {
   opacity: 1;
-  background: #e8e4dc;
-  color: #111;
+  background: var(--surface-2);
+  color: var(--text-muted);
   box-shadow: none;
   cursor: default;
 }

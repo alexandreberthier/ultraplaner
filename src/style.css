@@ -7,41 +7,23 @@
 :root {
   --primary: #2d6a4f;
   --primary-dark: #1b4332;
-  --bg: #f8faf8;
-  --cream: #f3efe6;
+  --bg: #ffffff;
+  --cream: #f2f2f2;
   --surface: #ffffff;
-  --surface-2: #f0f4f1;
+  --surface-2: #ebebeb;
   --text: #1a1a1a;
-  --text-muted: #5c6b63;
-  --border: #d8e2dc;
+  --text-muted: #5c5c5c;
+  --border: #e2e2e2;
   --danger: #bc4749;
-  /* Softened CTA: still orange, less loud than #ea580c */
-  --cta: #f97316;
-  --cta-hover: #ea580c;
+  --cta: #2d6a4f;
+  --cta-hover: #1b4332;
   --cta-text: #fff;
-  /* Calm wash for large featured surfaces (not action buttons) */
-  --cta-soft: #fff4ed;
-  --cta-soft-hover: #ffedd5;
-  --cta-soft-border: #fdba74;
+  --cta-soft: #eef4f0;
+  --cta-soft-hover: #e4eee8;
+  --cta-soft-border: #c5d6cc;
   --cta-soft-text: #1a1a1a;
-  --radius: 12px;
-  --shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-}
-
-:root[data-colorblind] {
-  --primary: #0072b2;
-  --primary-dark: #004c7f;
-  --bg: #f7f9fc;
-  --surface-2: #eef3f8;
-  --border: #c8d6e5;
-  --danger: #d55e00;
-  --cta: #e69f00;
-  --cta-hover: #c68900;
-  --cta-text: #1a1408;
-  --cta-soft: #fff8e8;
-  --cta-soft-hover: #fff1cc;
-  --cta-soft-border: #e6c35c;
-  --cta-soft-text: #1a1408;
+  --radius: 8px;
+  --shadow: none;
 }
 
 html,

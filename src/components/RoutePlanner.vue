@@ -1980,7 +1980,7 @@ onUnmounted(() => {
 }
 
 .route-planner > :deep(.planner-elev .profile-toggle) {
-  background: #f3efe6;
+  background: var(--cream);
   color: #111;
 }
 
@@ -2197,7 +2197,7 @@ onUnmounted(() => {
 }
 
 .export-item:not(:disabled):hover {
-  background: #f3efe6;
+  background: var(--cream);
 }
 
 .export-icon {
@@ -2364,7 +2364,7 @@ onUnmounted(() => {
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
   padding: 1rem 1.1rem 1.25rem;
-  background: #f3efe6;
+  background: var(--cream);
   border-right: 1px solid var(--border);
   box-shadow: none;
   color: #111;
@@ -2497,7 +2497,7 @@ onUnmounted(() => {
 }
 
 .btn-ghost:hover:not(:disabled) {
-  background: #f3efe6;
+  background: var(--cream);
 }
 
 .btn-ghost:disabled {

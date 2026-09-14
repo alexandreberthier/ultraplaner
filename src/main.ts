@@ -3,7 +3,6 @@ import { createPinia } from 'pinia'
 import App from './App.vue'
 import router from './router'
 import { getDb, isFirebaseConfigured } from './firebase'
-import { initColorblindMode } from './composables/useColorblindMode'
 import { initPwaInstallListener } from './composables/usePwaInstall'
 import { applyDocumentSeo, enforcePreferredHostSeo } from './composables/useDocumentSeo'
 import { i18n, localeFromPath, setAppLocale, isLocaleHomePath, type AppLocale } from './i18n'
@@ -17,7 +16,12 @@ import { initNativeShell, isNativeApp } from './utils/nativeApp'
 import './style.css'
 
 enforcePreferredHostSeo()
-initColorblindMode()
+document.documentElement.removeAttribute('data-colorblind')
+try {
+  localStorage.removeItem('onroute-colorblind')
+} catch {
+  /* ignore */
+}
 if (!isNativeApp()) {
   initPwaInstallListener()
   initPwaUpdates()

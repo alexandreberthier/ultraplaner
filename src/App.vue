@@ -46,7 +46,7 @@ const { t } = useI18n()
   max-width: min(420px, calc(100vw - 2rem));
   padding: 0.65rem 1rem;
   background: #1b4332;
-  color: #f8faf9;
+  color: #fff;
   border-radius: var(--radius);
   font-size: 0.875rem;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.18);

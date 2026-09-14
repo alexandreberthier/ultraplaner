@@ -3,7 +3,7 @@ import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type { PoiCategory } from '../../shared/types'
 import { POI_CATEGORY_DEFS } from '../config/poiCategories'
-import { colorblindMode, poiColors } from '../config/mapStyle'
+import { poiColors } from '../config/mapStyle'
 import { useMapStore } from '../stores/mapStore'
 import { useSidebarSection } from '../composables/useSidebarSection'
 
@@ -21,10 +21,7 @@ const loadedCategories = computed(() =>
   POI_CATEGORY_DEFS.filter((c) => (store.categoryCounts.get(c.id) ?? 0) > 0)
 )
 
-const categoryColors = computed(() => {
-  void colorblindMode.value
-  return poiColors()
-})
+const categoryColors = computed(() => poiColors())
 
 const hiddenCount = computed(
   () => loadedCategories.value.filter((c) => !store.visibleCategories.includes(c.id)).length

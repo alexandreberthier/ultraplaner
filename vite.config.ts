@@ -45,7 +45,7 @@ export default defineConfig(({ mode }) => {
           short_name: 'UltraPlaner',
           description: 'Ultracycling-Routenplanung mit Versorgungspunkten — Ultra Planer',
           theme_color: '#2d6a4f',
-          background_color: '#f8faf9',
+          background_color: '#ffffff',
           display: 'standalone',
           lang: 'de',
           start_url: '/',

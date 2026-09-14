@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import ColorModeToggle from './ColorModeToggle.vue'
 import LanguagePicker from './LanguagePicker.vue'
 import PwaInstallHint from './PwaInstallHint.vue'
 import { usePwaInstall } from '../composables/usePwaInstall'
@@ -97,7 +96,6 @@ onUnmounted(() => {
 <template>
   <div ref="root" class="topbar-settings" :class="{ 'force-menu': forceMenu, brutal, compact }">
     <div class="settings-inline" aria-hidden="false">
-      <ColorModeToggle compact />
       <LanguagePicker compact />
     </div>
 
@@ -126,12 +124,8 @@ onUnmounted(() => {
         >
           <p class="menu-title">{{ t('landing.settingsMenu') }}</p>
           <div class="menu-row">
-            <span class="menu-label">{{ t('mapCanvas.colorsShort') }}</span>
-            <ColorModeToggle />
-          </div>
-          <div class="menu-row">
             <span class="menu-label">{{ t('lang.label') }}</span>
-            <LanguagePicker />
+            <LanguagePicker fill />
           </div>
           <div v-if="showInstallEntry" class="menu-install">
             <button
@@ -234,33 +228,11 @@ onUnmounted(() => {
   gap: 0.7rem;
 }
 
-.brutal :deep(.color-toggle),
 .brutal :deep(.lang-picker) {
   border: 1px solid var(--border);
   border-radius: var(--radius);
   background: #fff;
   color: var(--text);
-  box-shadow: var(--shadow);
-}
-
-.brutal :deep(.color-toggle) {
-  font-weight: 650;
-  letter-spacing: normal;
-  text-transform: none;
-}
-
-@media (hover: hover) {
-  .brutal :deep(.color-toggle:hover) {
-    background: var(--cream);
-    border-color: var(--border);
-    color: var(--text);
-  }
-}
-
-.brutal :deep(.color-toggle.active) {
-  background: var(--cta);
-  border-color: transparent;
-  color: var(--cta-text);
   box-shadow: var(--shadow);
 }
 
@@ -372,7 +344,9 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   gap: 0.4rem;
-  align-items: flex-start;
+  align-items: stretch;
+  width: 100%;
+  min-width: 0;
 }
 
 .topbar-settings-menu-panel .menu-label {
@@ -425,7 +399,6 @@ onUnmounted(() => {
   color: var(--text-muted);
 }
 
-.topbar-settings-menu-panel.brutal-panel .color-toggle,
 .topbar-settings-menu-panel.brutal-panel .lang-picker {
   border: 1px solid var(--border);
   border-radius: var(--radius);
@@ -434,17 +407,7 @@ onUnmounted(() => {
   box-shadow: none;
 }
 
-.topbar-settings-menu-panel.brutal-panel .color-toggle {
-  font-weight: 650;
-  letter-spacing: normal;
-  text-transform: none;
-}
-
 @media (hover: hover) {
-  .topbar-settings-menu-panel.brutal-panel .color-toggle:hover {
-    background: var(--cream);
-  }
-
   .topbar-settings-menu-panel.brutal-panel .lang-btn:hover:not(.active) {
     background: var(--cream);
     color: var(--text);
@@ -456,7 +419,6 @@ onUnmounted(() => {
   }
 }
 
-.topbar-settings-menu-panel.brutal-panel .color-toggle.active,
 .topbar-settings-menu-panel.brutal-panel .lang-btn.active {
   background: var(--cta);
   border-color: transparent;

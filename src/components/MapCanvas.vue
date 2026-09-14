@@ -24,7 +24,6 @@ import {
   whenStyleReady,
   type BasemapId,
 } from '../config/mapStyle'
-import { useColorblindMode } from '../composables/useColorblindMode'
 import { useRidePosition } from '../composables/useRidePosition'
 import { useRouteColorMode } from '../composables/useRouteColorMode'
 import { distanceAlongRouteKm } from '../services/poiFilter'
@@ -58,7 +57,6 @@ import {
 
 const store = useMapStore()
 const { t } = useI18n()
-const { colorblindMode, toggleColorblindMode } = useColorblindMode()
 const { setRideKmAlong, setRideLatLng } = useRidePosition()
 
 const {
@@ -1270,10 +1268,6 @@ watch(() => store.favorites, () => updateSources(), { deep: true })
 watch(() => store.controlPoints, () => updateSources(), { deep: true })
 watch(() => store.controlPointPlaceKind, () => updateSources())
 watch(() => store.visibleCategories, () => updateSources(), { deep: true })
-watch(colorblindMode, () => {
-  updateThemePaint()
-  updateSources()
-})
 
 watch(routeColorMode, () => {
   updateSources()
@@ -1406,18 +1400,6 @@ function updateSources() {
 
   applyPoiMarkerSizes()
   updateBikeCursorMarker()
-}
-
-function updateThemePaint() {
-  if (!map?.isStyleLoaded()) return
-  ensureRouteEndImages(map)
-  const climbColor = climbMarkerColor()
-  if (map.getLayer('climbs-dot')) {
-    map.setPaintProperty('climbs-dot', 'circle-color', climbColor)
-  }
-  if (map.getLayer('climbs-label')) {
-    map.setPaintProperty('climbs-label', 'text-color', climbColor)
-  }
 }
 
 function addLayers() {
@@ -2001,16 +1983,6 @@ onUnmounted(() => {
         >
           {{ t('mapCanvas.cycling') }}
         </button>
-        <button
-          type="button"
-          class="colorblind-btn"
-          :class="{ active: colorblindMode }"
-          :aria-pressed="colorblindMode"
-          :title="t('mapCanvas.colorblind')"
-          @click="toggleColorblindMode()"
-        >
-          {{ t('mapCanvas.colorblind') }}
-        </button>
       </div>
 
       <div
@@ -2259,11 +2231,6 @@ onUnmounted(() => {
   color: var(--cta-text);
 }
 
-.basemap-toggle .colorblind-btn.active {
-  background: var(--primary);
-  color: #fff;
-}
-
 .basemap-fallback {
   margin: 0;
   padding: 0.55rem 0.7rem;
@@ -2342,7 +2309,7 @@ onUnmounted(() => {
 
 .location-btn.following,
 .location-btn.heading-up {
-  background: var(--cta, #ea580c);
+  background: var(--cta, #2d6a4f);
   color: var(--cta-text, #fff);
 }
 

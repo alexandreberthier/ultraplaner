@@ -1585,7 +1585,7 @@ function onDocClick(e: MouseEvent) {
   display: flex;
   flex-direction: column;
   border-right: 1px solid var(--border);
-  background: #f3efe6;
+  background: var(--cream);
   overflow: hidden;
   min-width: 0;
   min-height: 0;
@@ -2223,7 +2223,7 @@ function onDocClick(e: MouseEvent) {
   align-items: center;
   justify-content: center;
   padding: 1.25rem;
-  background: #f3efe6;
+  background: var(--cream);
 }
 
 .empty-map-card {
@@ -2786,7 +2786,7 @@ function onDocClick(e: MouseEvent) {
   }
 
   .mobile-sheet-inner {
-    background: #f3efe6;
+    background: var(--cream);
     width: 100%;
     max-width: 520px;
     max-height: min(88dvh, 760px);
@@ -3075,7 +3075,7 @@ function onDocClick(e: MouseEvent) {
   padding: 0.55rem 0.65rem;
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  background: #f3efe6;
+  background: var(--cream);
   color: #111;
   font-size: 0.9rem;
 }
@@ -3238,7 +3238,7 @@ function onDocClick(e: MouseEvent) {
 }
 
 .export-item:hover {
-  background: #f3efe6;
+  background: var(--cream);
 }
 
 .export-item.featured {
@@ -3355,7 +3355,7 @@ function onDocClick(e: MouseEvent) {
 }
 
 .export-sheet-btn:hover {
-  background: #f3efe6;
+  background: var(--cream);
 }
 
 .export-sheet-btn.featured:hover {
@@ -3484,7 +3484,7 @@ function onDocClick(e: MouseEvent) {
 
 .sidebar :deep(.cat-btn.off) {
   opacity: 0.42;
-  background: #e8e4dc;
+  background: var(--surface-2);
 }
 
 .sidebar :deep(.map-poi-bar) {
@@ -3547,7 +3547,7 @@ function onDocClick(e: MouseEvent) {
 }
 
 .sidebar :deep(.time-step) {
-  background: #f3efe6;
+  background: var(--cream);
   box-shadow: none;
   border: none;
 }
@@ -3667,7 +3667,7 @@ function onDocClick(e: MouseEvent) {
 }
 
 .map-layout :deep(.elevation-profile .profile-toggle) {
-  background: #f3efe6;
+  background: var(--cream);
   color: #111;
   min-height: 56px;
   padding: 0.75rem 1rem;

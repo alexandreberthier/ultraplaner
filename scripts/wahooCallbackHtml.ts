@@ -13,7 +13,7 @@ export function buildWahooCallbackHtml(clientId: string): string {
   <title>Wahoo verbinden…</title>
   <style>
     body { margin: 0; min-height: 100vh; display: grid; place-items: center;
-      font-family: system-ui, sans-serif; background: #f8faf9; color: #111; text-align: center; padding: 2rem; }
+      font-family: system-ui, sans-serif; background: #ffffff; color: #111; text-align: center; padding: 2rem; }
     .box { max-width: 24rem; }
     .err { color: #b91c1c; font-size: 0.9rem; word-break: break-word; }
     a { color: #2d6a4f; font-weight: 700; }

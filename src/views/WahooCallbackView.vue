@@ -62,7 +62,7 @@ onMounted(async () => {
   text-align: center;
   font: inherit;
   color: var(--text, #111);
-  background: var(--bg, #f8faf9);
+  background: var(--bg, #ffffff);
 }
 
 .wahoo-cb-error {

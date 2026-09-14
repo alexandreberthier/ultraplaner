@@ -194,7 +194,7 @@ async function copyLink() {
 
 .qr-format-btn.active {
   background: #fff;
-  color: #0f766e;
+  color: var(--cta);
   box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
 }
 
@@ -255,7 +255,7 @@ async function copyLink() {
   margin-top: 0.15rem;
   border: none;
   background: transparent;
-  color: #0f766e;
+  color: var(--cta);
   font: inherit;
   font-size: 0.8rem;
   font-weight: 600;
@@ -281,9 +281,9 @@ async function copyLink() {
 }
 
 .qr-primary {
-  border: 1px solid #0f766e;
-  background: #0f766e;
-  color: #fff;
+  border: 1px solid var(--cta);
+  background: var(--cta);
+  color: var(--cta-text);
 }
 
 .qr-primary:disabled {

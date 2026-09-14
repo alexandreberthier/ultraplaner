@@ -466,7 +466,7 @@ const garminFitGuidePath = () => garminFitPath(locale.value as AppLocale)
 
 .landing {
   min-height: 100%;
-  background: var(--cream);
+  background: var(--bg);
   color: #111;
   --display: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
@@ -512,7 +512,7 @@ const garminFitGuidePath = () => garminFitPath(locale.value as AppLocale)
 .hero-band--app {
   min-height: 0;
   overflow: visible;
-  background: var(--cream);
+  background: var(--bg);
 }
 
 .hero-band--app .hero {
@@ -526,7 +526,7 @@ const garminFitGuidePath = () => garminFitPath(locale.value as AppLocale)
   font-size: 0.8rem;
   font-weight: 500;
   line-height: 1.4;
-  color: #5c564c;
+  color: var(--text-muted);
   max-width: 36rem;
 }
 
@@ -728,18 +728,17 @@ const garminFitGuidePath = () => garminFitPath(locale.value as AppLocale)
 
 .stats-bar {
   display: grid;
-  grid-template-columns: 1.35fr 1fr 1fr;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   align-items: stretch;
-  gap: 0;
+  gap: 1px;
   margin-top: -2.75rem;
   margin-bottom: 4.25rem;
   position: relative;
   z-index: 3;
-  background: #fff;
+  background: var(--border);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 0;
-  box-shadow: var(--shadow);
   overflow: hidden;
   isolation: isolate;
 }
@@ -747,44 +746,34 @@ const garminFitGuidePath = () => garminFitPath(locale.value as AppLocale)
 .stat {
   display: flex;
   flex-direction: column;
+  justify-content: center;
   align-items: flex-start;
   gap: 0.25rem;
-  padding: 1.15rem 1.25rem 1.25rem;
-  border-right: 1px solid var(--border);
+  min-width: 0;
+  min-height: 5.25rem;
+  padding: 1.15rem 1.1rem 1.2rem;
+  background: #fff;
+  border: none;
+  border-radius: 0;
   text-align: left;
-}
-
-.stat:last-child {
-  border-right: none;
-  border-radius: 0 var(--radius) var(--radius) 0;
-}
-
-.stat:first-child {
-  background: var(--cta-soft);
-  color: var(--cta-soft-text);
-  border-radius: var(--radius) 0 0 var(--radius);
-}
-
-.stat:first-child span {
-  color: var(--cta-soft-text);
-  opacity: 0.72;
 }
 
 .stat strong {
   font-family: var(--display);
-  font-size: clamp(1.2rem, 2.4vw, 1.75rem);
+  font-size: clamp(1.05rem, 2vw, 1.4rem);
   font-weight: 750;
   letter-spacing: -0.02em;
-  line-height: 1.1;
+  line-height: 1.15;
   color: inherit;
   text-transform: none;
 }
 
 .stat span {
   font-size: 0.78rem;
-  font-weight: 700;
+  font-weight: 650;
   color: #111;
   opacity: 0.7;
+  line-height: 1.3;
 }
 
 .stat-sep {
@@ -927,8 +916,8 @@ const garminFitGuidePath = () => garminFitPath(locale.value as AppLocale)
 }
 
 .landing :deep(.hero-card .btn-primary:disabled) {
-  background: #e8e4dc;
-  color: #111;
+  background: var(--surface-2);
+  color: var(--text-muted);
   box-shadow: none;
   opacity: 1;
 }
@@ -975,7 +964,7 @@ const garminFitGuidePath = () => garminFitPath(locale.value as AppLocale)
 .landing :deep(.hero-card .ios-geo-hint) {
   border-radius: var(--radius);
   border: 1px solid var(--border);
-  background: #f3efe6;
+  background: var(--cream);
   color: #111;
 }
 
@@ -1000,7 +989,7 @@ const garminFitGuidePath = () => garminFitPath(locale.value as AppLocale)
 .landing :deep(.field textarea) {
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  background: #f3efe6;
+  background: var(--cream);
 }
 
 /* ── Sections ── */
@@ -1149,7 +1138,7 @@ const garminFitGuidePath = () => garminFitPath(locale.value as AppLocale)
 }
 
 .features-grid {
-  grid-template-columns: 1.55fr 1fr 1fr;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   grid-template-rows: 1fr 1fr;
 }
 
@@ -1196,26 +1185,8 @@ const garminFitGuidePath = () => garminFitPath(locale.value as AppLocale)
   grid-row: 2;
 }
 
-.feature-card:first-child {
-  background: var(--cta-soft);
-  color: var(--cta-soft-text);
-  justify-content: flex-end;
-  min-height: 0;
-  border: 1px solid var(--cta-soft-border);
-  border-radius: var(--radius);
-}
-
-.feature-card:first-child p,
-.feature-card:first-child strong {
-  color: var(--cta-soft-text);
-}
-
 .feature-card:hover {
-  background: #fffaf5;
-}
-
-.feature-card:first-child:hover {
-  background: var(--cta-soft-hover);
+  background: var(--surface-2);
 }
 
 .feature-card strong {
@@ -1229,13 +1200,6 @@ const garminFitGuidePath = () => garminFitPath(locale.value as AppLocale)
   color: #111;
 }
 
-.feature-card:first-child strong {
-  font-family: var(--display);
-  font-size: clamp(1.25rem, 2.2vw, 1.75rem);
-  font-weight: 800;
-  line-height: 1.12;
-}
-
 .feature-card p {
   margin: 0;
   font-size: 0.88rem;
@@ -1244,7 +1208,7 @@ const garminFitGuidePath = () => garminFitPath(locale.value as AppLocale)
 }
 
 .steps {
-  grid-template-columns: 1.4fr 1fr 1fr;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .step {
@@ -1256,18 +1220,6 @@ const garminFitGuidePath = () => garminFitPath(locale.value as AppLocale)
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 1.2rem 1.15rem 1.4rem;
-}
-
-.step:first-child {
-  background: var(--cta-soft);
-  color: var(--cta-soft-text);
-  border-color: var(--cta-soft-border);
-}
-
-.step:first-child .step-num,
-.step:first-child strong,
-.step:first-child p {
-  color: var(--cta-soft-text);
 }
 
 .step-num {
@@ -1322,7 +1274,7 @@ const garminFitGuidePath = () => garminFitPath(locale.value as AppLocale)
 .faq-item:focus-within {
   border-color: inherit;
   box-shadow: none;
-  background: #fff8f0;
+  background: var(--surface-2);
 }
 
 .faq-q {
@@ -1573,32 +1525,18 @@ const garminFitGuidePath = () => garminFitPath(locale.value as AppLocale)
     white-space: normal;
   }
 
-  .features-grid,
-  .steps,
-  .stats-bar {
+  .features-grid {
     grid-template-columns: 1fr 1fr;
     grid-template-rows: none;
   }
 
-  .stats-bar .stat:first-child,
-  .stats-bar .stat:last-child {
-    border-radius: 0;
+  .steps {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .feature-card:nth-child(n) {
     grid-column: auto;
     grid-row: auto;
-  }
-
-  .feature-card:first-child {
-    grid-column: 1 / -1;
-    grid-row: auto;
-    min-height: 0;
-    border-radius: var(--radius);
-  }
-
-  .step:first-child {
-    grid-column: 1 / -1;
   }
 }
 
@@ -1647,31 +1585,15 @@ const garminFitGuidePath = () => garminFitPath(locale.value as AppLocale)
     width: 2.25rem;
   }
 
-  .stats-bar,
   .features-grid,
   .steps {
     grid-template-columns: 1fr;
   }
 
   .stats-bar {
+    grid-template-columns: 1fr;
     margin-top: -1.75rem;
     margin-bottom: 3.25rem;
-    box-shadow: var(--shadow);
-  }
-
-  .stat {
-    border-right: none;
-    border-bottom: 1px solid var(--border);
-    border-radius: 0;
-  }
-
-  .stat:first-child {
-    border-radius: var(--radius) var(--radius) 0 0;
-  }
-
-  .stat:last-child {
-    border-bottom: none;
-    border-radius: 0 0 var(--radius) var(--radius);
   }
 
   .mode-tabs button {

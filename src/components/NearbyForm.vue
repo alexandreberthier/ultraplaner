@@ -397,7 +397,7 @@ defineExpose({ openMapFirst, searchNearby })
 
 .in-map .btn-primary:disabled {
   opacity: 1;
-  background: #e8e4dc;
+  background: var(--surface-2);
   box-shadow: none;
   transform: none;
 }
@@ -682,8 +682,8 @@ defineExpose({ openMapFirst, searchNearby })
 
 .btn-primary:disabled {
   opacity: 1;
-  background: #e8e4dc;
-  color: #111;
+  background: var(--surface-2);
+  color: var(--text-muted);
   box-shadow: none;
   cursor: not-allowed;
 }

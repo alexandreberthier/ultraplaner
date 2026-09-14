@@ -228,7 +228,7 @@ async function createMap() {
   gap: 0.2rem;
   min-height: 10.5rem;
   padding: 1.45rem 1.1rem;
-  background: #f3efe6;
+  background: var(--cream);
   border: 2px dashed var(--border);
   border-radius: var(--radius);
   cursor: pointer;
@@ -548,8 +548,8 @@ async function createMap() {
 
 .btn-primary:disabled {
   opacity: 1;
-  background: #e8e4dc;
-  color: #111;
+  background: var(--surface-2);
+  color: var(--text-muted);
   box-shadow: none;
   cursor: not-allowed;
 }

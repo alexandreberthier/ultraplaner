@@ -32,7 +32,7 @@ onMounted(() => {
     <article class="privacy-policy legal-body">
       <h1>Datenschutzerklärung</h1>
 
-      <p class="stand">Stand: 17. August 2026</p>
+      <p class="stand">Stand: 14. September 2026</p>
 
       <h2>1. Verantwortlicher</h2>
 
@@ -507,8 +507,8 @@ onMounted(() => {
 
       <ul>
         <li>Ihre Sprachauswahl,</li>
-        <li>Ihre Darstellungseinstellungen (z. B. Farbenfehlsicht-Modus),</li>
-        <li>lokale App-Einstellungen und Offline-Cache für Routen und POIs.</li>
+        <li>Kartenstil und lokale App-Einstellungen,</li>
+        <li>Offline-Cache für Routen und POIs.</li>
       </ul>
 
       <p>

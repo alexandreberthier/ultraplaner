@@ -1,6 +1,6 @@
 .guide-page {
   min-height: 100%;
-  background: #f3efe6;
+  background: var(--bg);
 }
 
 .guide-top {

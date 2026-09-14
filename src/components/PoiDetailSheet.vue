@@ -340,7 +340,7 @@ function onNavigate() {
   gap: 0.35rem;
   padding: 0.85rem 1rem 0.65rem 1.25rem;
   border-bottom: 1px solid var(--border);
-  background: #f3efe6;
+  background: var(--cream);
   z-index: 2;
 }
 
@@ -391,7 +391,7 @@ function onNavigate() {
 
 .icon-btn:hover,
 .close:hover {
-  background: #f3efe6;
+  background: var(--cream);
 }
 
 .sheet-scroll {
@@ -647,7 +647,7 @@ dd {
 }
 
 .ride-open--unknown {
-  background: #f3efe6;
+  background: var(--cream);
 }
 
 .ride-peek-close {
@@ -694,7 +694,7 @@ dd {
   width: 44px;
   min-height: 44px;
   border: 1px solid transparent;
-  background: var(--cta, #ea580c);
+  background: var(--cta, #2d6a4f);
   color: var(--cta-text, #fff);
   font-size: 1.25rem;
   cursor: pointer;

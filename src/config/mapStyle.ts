@@ -1,4 +1,3 @@
-import { ref } from 'vue'
 import type { PoiCategory } from '../../shared/types'
 import type { Map as MaplibreMap, StyleSpecification } from 'maplibre-gl'
 
@@ -221,7 +220,6 @@ export function whenStyleReady(map: MaplibreMap, onReady: () => void, safetyMs =
 }
 
 const BASEMAP_STORAGE_KEY = 'onroute-basemap'
-const COLORBLIND_STORAGE_KEY = 'onroute-colorblind'
 
 export function loadBasemapPreference(): BasemapId {
   try {
@@ -241,51 +239,24 @@ export function saveBasemapPreference(id: BasemapId) {
   }
 }
 
-export function loadColorblindPreference(): boolean {
-  try {
-    return localStorage.getItem(COLORBLIND_STORAGE_KEY) === '1'
-  } catch {
-    return false
-  }
-}
-
-export function saveColorblindPreference(enabled: boolean) {
-  try {
-    localStorage.setItem(COLORBLIND_STORAGE_KEY, enabled ? '1' : '0')
-  } catch {
-    /* ignore */
-  }
-}
-
-/** Shared reactive flag — toggled via useColorblindMode(). */
-export const colorblindMode = ref(loadColorblindPreference())
-
 export const ROUTE_COLOR = '#111111'
 export const ROUTE_CASING = '#ffffff'
 
-const ROUTE_START_STD = '#16a34a'
-const ROUTE_END_STD = '#dc2626'
-const ROUTE_START_CB = '#0072B2'
-const ROUTE_END_CB = '#D55E00'
-
-/** @deprecated Use routeStartColor() */
-export const ROUTE_START_COLOR = ROUTE_START_STD
-/** @deprecated Use routeEndColor() */
-export const ROUTE_END_COLOR = ROUTE_END_STD
+export const ROUTE_START_COLOR = '#16a34a'
+export const ROUTE_END_COLOR = '#dc2626'
 
 export function routeStartColor(): string {
-  return colorblindMode.value ? ROUTE_START_CB : ROUTE_START_STD
+  return ROUTE_START_COLOR
 }
 
 export function routeEndColor(): string {
-  return colorblindMode.value ? ROUTE_END_CB : ROUTE_END_STD
+  return ROUTE_END_COLOR
 }
 
-const CLIMB_MARKER_STD = '#7c2d12'
-const CLIMB_MARKER_CB = '#7B3294'
+const CLIMB_MARKER = '#7c2d12'
 
 export function climbMarkerColor(): string {
-  return colorblindMode.value ? CLIMB_MARKER_CB : CLIMB_MARKER_STD
+  return CLIMB_MARKER
 }
 
 const POI_COLORS_STD: Record<PoiCategory, string> = {
@@ -302,26 +273,10 @@ const POI_COLORS_STD: Record<PoiCategory, string> = {
   border: '#0f766e',
 }
 
-/** Okabe-Ito–inspired palette — avoids red/green pairs. */
-const POI_COLORS_CB: Record<PoiCategory, string> = {
-  fuel: '#E69F00',
-  supermarket: '#0072B2',
-  gastronomy: '#D55E00',
-  water: '#56B4E9',
-  beverages: '#332288',
-  hotel: '#882255',
-  campsite: '#F0E442',
-  bike: '#CC6677',
-  checkpoint: '#CC6677',
-  sleep: '#882255',
-  border: '#009E73',
-}
-
-/** @deprecated Use poiColors() */
 export const POI_COLORS = POI_COLORS_STD
 
 export function poiColors(): Record<PoiCategory, string> {
-  return colorblindMode.value ? POI_COLORS_CB : POI_COLORS_STD
+  return POI_COLORS_STD
 }
 
 /** Flat dark → yellow → purple → fuchsia → rose (no orange→red adjacent steps). */
@@ -334,27 +289,14 @@ const GRADE_COLORS_STD = [
   '#881337',
 ]
 
-/** Blue → yellow → orange → purple (Okabe-Ito style; no green/red slope scale). */
-const GRADE_COLORS_CB = [
-  '#BABABA',
-  '#F0E442',
-  '#E69F00',
-  '#D55E00',
-  '#7B3294',
-  '#40004B',
-]
+const GRADE_DESCENT = { steep: '#1d4ed8', mild: '#2563eb' }
 
-const GRADE_DESCENT_STD = { steep: '#1d4ed8', mild: '#2563eb' }
-const GRADE_DESCENT_CB = { steep: '#2166AC', mild: '#4393C3' }
-
-/** Steigung in % → Farbe (Standard: dunkel→gelb→lila→rosa; Farbblind: grau→lila). */
+/** Steigung in % → Farbe (dunkel→gelb→lila→rosa). */
 export function gradeToColor(gradePercent: number): string {
-  const cb = colorblindMode.value
-  const descent = cb ? GRADE_DESCENT_CB : GRADE_DESCENT_STD
-  const colors = cb ? GRADE_COLORS_CB : GRADE_COLORS_STD
+  const colors = GRADE_COLORS_STD
 
-  if (gradePercent <= -8) return descent.steep
-  if (gradePercent <= -3) return descent.mild
+  if (gradePercent <= -8) return GRADE_DESCENT.steep
+  if (gradePercent <= -3) return GRADE_DESCENT.mild
   if (gradePercent < 2) return colors[0]!
   if (gradePercent < 5) return colors[1]!
   if (gradePercent < 8) return colors[2]!
@@ -374,20 +316,10 @@ const GRADE_LEGEND_STD = [
   { label: '> 12 %', color: '#e11d48' },
 ] as const
 
-const GRADE_LEGEND_CB = [
-  { label: 'Abfahrt', color: '#2166AC' },
-  { label: '< 2 %', color: '#BABABA' },
-  { label: '2–5 %', color: '#F0E442' },
-  { label: '5–8 %', color: '#E69F00' },
-  { label: '8–12 %', color: '#D55E00' },
-  { label: '> 12 %', color: '#7B3294' },
-] as const
-
-/** @deprecated Use gradeLegend() */
 export const GRADE_LEGEND = GRADE_LEGEND_STD
 
 export function gradeLegend() {
-  return colorblindMode.value ? GRADE_LEGEND_CB : GRADE_LEGEND_STD
+  return GRADE_LEGEND_STD
 }
 
 export const KM_MARKER_INTERVAL_KM = 25
