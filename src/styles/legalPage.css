@@ -1,7 +1,7 @@
 .legal-page {
   min-height: 100%;
-  background: #f3efe6;
-  color: #111;
+  background: var(--cream);
+  color: var(--ink);
 }
 
 .legal-top {
@@ -20,20 +20,19 @@
 
 .legal-page .back-btn {
   display: inline-block;
-  border: 1px solid transparent;
-  background: var(--cta);
+  border: 1px solid var(--border);
+  background: var(--surface);
   border-radius: var(--radius);
   padding: 0.55rem 0.85rem;
   cursor: pointer;
-  font-weight: 700;
-  color: var(--cta-text);
+  font-weight: 650;
+  color: var(--ink);
   text-decoration: none;
-  box-shadow: var(--shadow);
 }
 
 @media (hover: hover) {
   .legal-page .back-btn:hover {
-    background: var(--cta-hover);
+    background: var(--cream);
   }
 }
 
@@ -45,23 +44,25 @@
 .legal-body {
   max-width: 46rem;
   margin: 1.35rem auto 3rem;
-  padding: 1.6rem 1.35rem 2.25rem;
-  background: #fff;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  color: #111;
+  padding: 1.6rem 1.15rem 2.25rem;
+  background: transparent;
+  border: none;
+  border-top: 1px solid var(--border);
+  border-radius: 0;
+  box-shadow: none;
+  color: var(--ink);
   line-height: 1.65;
 }
 
 .legal-body h1 {
   margin: 0 0 0.7rem;
-  font-size: clamp(1.65rem, 4vw, 2.15rem);
-  font-weight: 750;
-  letter-spacing: -0.02em;
+  font-family: var(--display);
+  font-size: clamp(1.85rem, 4vw, 2.45rem);
+  font-weight: 540;
+  letter-spacing: -0.03em;
   text-transform: none;
-  color: #111;
-  line-height: 1.15;
+  color: var(--ink);
+  line-height: 1.1;
 }
 
 .legal-body .stand {
@@ -166,7 +167,7 @@
   }
 
   .legal-body {
-    margin: 1rem 0.85rem 2.5rem;
-    padding: 1.25rem 1rem 1.75rem;
+    margin: 1rem 1rem 2.5rem;
+    padding: 1.25rem 0 1.75rem;
   }
 }

@@ -228,12 +228,12 @@ async function createMap() {
   gap: 0.2rem;
   min-height: 10.5rem;
   padding: 1.45rem 1.1rem;
-  background: #f3efe6;
-  border: 2px dashed var(--border);
+  background: var(--cream);
+  border: 1px dashed var(--cta);
   border-radius: var(--radius);
   cursor: pointer;
   text-align: center;
-  color: #111;
+  color: var(--ink);
 }
 
 @media (hover: hover) {
@@ -275,10 +275,12 @@ async function createMap() {
 
 .drop-title {
   margin: 0;
-  font-size: 1.05rem;
-  font-weight: 800;
-  color: #111;
+  font-family: var(--display);
+  font-size: 1.2rem;
+  font-weight: 540;
+  color: var(--ink);
   line-height: 1.3;
+  letter-spacing: -0.02em;
 }
 
 .drop-limit {

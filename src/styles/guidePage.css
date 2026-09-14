@@ -1,6 +1,6 @@
 .guide-page {
   min-height: 100%;
-  background: #f3efe6;
+  background: var(--cream);
 }
 
 .guide-top {
@@ -18,19 +18,18 @@
 }
 
 .guide-page .back-btn {
-  border: 1px solid transparent;
-  background: var(--cta);
+  border: 1px solid var(--border);
+  background: var(--surface);
   border-radius: var(--radius);
   padding: 0.55rem 0.85rem;
   cursor: pointer;
-  font-weight: 700;
-  color: var(--cta-text);
-  box-shadow: var(--shadow);
+  font-weight: 650;
+  color: var(--ink);
 }
 
 @media (hover: hover) {
   .guide-page .back-btn:hover {
-    background: var(--cta-hover);
+    background: var(--cream);
   }
 }
 
@@ -49,10 +48,12 @@
 
 .guide-body h1 {
   margin: 0 0 0.75rem;
-  font-size: 1.85rem;
-  color: #111;
-  letter-spacing: -0.02em;
-  font-weight: 800;
+  font-family: var(--display);
+  font-size: clamp(1.85rem, 4vw, 2.45rem);
+  color: var(--ink);
+  letter-spacing: -0.03em;
+  font-weight: 540;
+  line-height: 1.1;
 }
 
 .guide-body .lead {

@@ -200,26 +200,6 @@ const garminFitGuidePath = () => garminFitPath(locale.value as AppLocale)
 
     <template v-else>
       <div class="hero-band" :class="{ 'hero-band--app': nativeApp }">
-        <div v-if="!nativeApp" class="hero-media">
-          <picture>
-            <source
-              media="(min-width: 641px)"
-              type="image/webp"
-              srcset="/hero-mountains-800.webp 800w, /hero-mountains-1100.webp 1100w, /hero-mountains.webp 1536w"
-              sizes="100vw"
-            />
-            <img
-              class="hero-photo"
-              src="/hero-mountains-480.webp"
-              :alt="t('seo.heroImageAlt')"
-              width="480"
-              height="320"
-              fetchpriority="high"
-            />
-          </picture>
-          <div class="hero-scrim" aria-hidden="true" />
-        </div>
-
         <header class="hero">
           <div class="hero-top">
             <button type="button" class="brand-lockup" aria-label="UltraPlaner" @click="goStart">
@@ -247,8 +227,13 @@ const garminFitGuidePath = () => garminFitPath(locale.value as AppLocale)
             </div>
           </div>
 
-          <div v-if="!nativeApp" class="page-wrap hero-wrap">
-            <div class="hero-center">
+          <div v-if="!nativeApp" class="page-wrap hero-split">
+            <div class="hero-copy">
+              <p class="hero-kicker">
+                {{ t('landing.stats.regions') }}
+                <span class="hero-kicker-dot" aria-hidden="true">·</span>
+                {{ t('landing.stats.pois') }}
+              </p>
               <h1 class="hero-title">
                 <span class="hero-title-lead">{{ t('landing.heroLine1') }}</span>
                 <span class="hero-title-route">{{ t('landing.heroLine2') }}</span>
@@ -260,6 +245,25 @@ const garminFitGuidePath = () => garminFitPath(locale.value as AppLocale)
                 </button>
               </div>
             </div>
+            <figure class="hero-media">
+              <picture>
+                <source
+                  media="(min-width: 641px)"
+                  type="image/webp"
+                  srcset="/hero-mountains-800.webp 800w, /hero-mountains-1100.webp 1100w, /hero-mountains.webp 1536w"
+                  sizes="(min-width: 960px) 42vw, 100vw"
+                />
+                <img
+                  class="hero-photo"
+                  src="/hero-mountains-480.webp"
+                  :alt="t('seo.heroImageAlt')"
+                  width="480"
+                  height="320"
+                  fetchpriority="high"
+                />
+              </picture>
+              <figcaption class="hero-media-mark" aria-hidden="true">01</figcaption>
+            </figure>
           </div>
         </header>
       </div>
@@ -467,8 +471,7 @@ const garminFitGuidePath = () => garminFitPath(locale.value as AppLocale)
 .landing {
   min-height: 100%;
   background: var(--cream);
-  color: #111;
-  --display: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  color: var(--ink);
 }
 
 .landing.plan-fullscreen {
@@ -502,17 +505,15 @@ const garminFitGuidePath = () => garminFitPath(locale.value as AppLocale)
 .hero-band {
   position: relative;
   isolation: isolate;
-  min-height: min(48vh, 520px);
   display: flex;
   align-items: stretch;
   border-bottom: 1px solid var(--border);
-  overflow: hidden;
+  background: var(--cream);
 }
 
 .hero-band--app {
   min-height: 0;
   overflow: visible;
-  background: var(--cream);
 }
 
 .hero-band--app .hero {
@@ -526,56 +527,8 @@ const garminFitGuidePath = () => garminFitPath(locale.value as AppLocale)
   font-size: 0.8rem;
   font-weight: 500;
   line-height: 1.4;
-  color: #5c564c;
+  color: var(--text-muted);
   max-width: 36rem;
-}
-
-.hero-media {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-}
-
-.hero-photo {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center 40%;
-  display: block;
-  filter: saturate(1.05) contrast(1.08);
-}
-
-.hero-scrim {
-  position: absolute;
-  inset: 0;
-  background:
-    linear-gradient(
-      90deg,
-      rgba(0, 0, 0, 0.62) 0%,
-      rgba(0, 0, 0, 0.28) 42%,
-      rgba(0, 0, 0, 0.08) 100%
-    ),
-    linear-gradient(
-      180deg,
-      rgba(0, 0, 0, 0.4) 0%,
-      rgba(0, 0, 0, 0.18) 36%,
-      rgba(0, 0, 0, 0.82) 100%
-    );
-}
-
-.hero-wrap {
-  position: relative;
-  z-index: 1;
-  width: 100%;
-  max-width: 1180px;
-  margin: 0 auto;
-  padding-inline: max(1.25rem, env(safe-area-inset-left, 0px));
-  padding-inline-end: max(1.25rem, env(safe-area-inset-right, 0px));
-  box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  justify-content: flex-end;
 }
 
 .hero {
@@ -585,8 +538,7 @@ const garminFitGuidePath = () => garminFitPath(locale.value as AppLocale)
   display: flex;
   flex-direction: column;
   width: 100%;
-  min-height: min(48vh, 520px);
-  padding: 0 0 4.25rem;
+  padding: 0 0 2.5rem;
 }
 
 .hero-top {
@@ -598,9 +550,9 @@ const garminFitGuidePath = () => garminFitPath(locale.value as AppLocale)
   gap: 0.5rem;
   width: 100%;
   box-sizing: border-box;
-  padding: max(0.45rem, env(safe-area-inset-top, 0px))
+  padding: max(0.55rem, env(safe-area-inset-top, 0px))
     max(0.75rem, env(safe-area-inset-right, 0px))
-    0.15rem
+    0.25rem
     max(0.75rem, env(safe-area-inset-left, 0px));
   min-width: 0;
 }
@@ -617,11 +569,10 @@ const garminFitGuidePath = () => garminFitPath(locale.value as AppLocale)
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  padding: 0.32rem;
+  padding: 0.2rem;
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  background: var(--cream);
-  box-shadow: var(--shadow);
+  background: var(--surface);
   cursor: pointer;
   font: inherit;
   line-height: 0;
@@ -642,73 +593,114 @@ const garminFitGuidePath = () => garminFitPath(locale.value as AppLocale)
   object-position: center;
 }
 
-.hero-center {
-  margin: 0;
-  text-align: left;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  max-width: min(100%, 58rem);
-  width: 100%;
-  align-self: flex-start;
-  padding: 0.85rem 0 0;
+.hero-split {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+  gap: 3.25rem;
+  align-items: end;
+  padding-top: 2.25rem;
+  padding-bottom: 0.25rem;
+}
+
+.hero-copy {
+  min-width: 0;
+  padding-bottom: 0.35rem;
+}
+
+.hero-kicker {
+  margin: 0 0 1.1rem;
+  font-size: 0.78rem;
+  font-weight: 650;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--cta);
+}
+
+.hero-kicker-dot {
+  margin: 0 0.35rem;
+  letter-spacing: 0;
 }
 
 .hero-title {
   font-family: var(--display);
-  font-size: clamp(2rem, 5.4vw, 3.6rem);
-  font-weight: 750;
-  color: #fff;
-  margin: 0 0 0.7rem;
-  line-height: 1.02;
-  letter-spacing: -0.02em;
+  font-size: clamp(2.35rem, 5.6vw, 4.6rem);
+  font-weight: 560;
+  font-optical-sizing: auto;
+  color: var(--ink);
+  margin: 0 0 1.1rem;
+  line-height: 1.04;
+  letter-spacing: -0.028em;
   text-transform: none;
-  text-shadow: 0 1px 12px rgba(0, 0, 0, 0.35);
   display: flex;
   flex-direction: column;
   align-items: flex-start;
 }
 
 .hero-title-lead {
-  font-size: 0.42em;
-  font-weight: 650;
-  letter-spacing: 0.02em;
-  line-height: 1.15;
-  margin-bottom: 0.22em;
-  opacity: 0.92;
-  text-shadow: none;
+  font-size: 0.4em;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  margin-bottom: 0.32em;
+  color: var(--ink);
+  white-space: nowrap;
 }
 
 .hero-title-route {
   white-space: normal;
-  letter-spacing: 0.012em;
+  line-height: 1.05;
+  text-wrap: balance;
 }
 
 .hero-sub {
-  display: inline-block;
-  font-size: clamp(0.95rem, 1.55vw, 1.08rem);
-  color: #fff;
-  margin: 0 0 1.15rem;
+  margin: 0 0 1.45rem;
+  font-size: clamp(1.02rem, 1.5vw, 1.18rem);
+  color: var(--text-muted);
   line-height: 1.45;
-  max-width: 28rem;
-  font-weight: 500;
-  background: rgba(17, 17, 17, 0.42);
-  border-radius: var(--radius);
-  padding: 0.5rem 0.75rem;
+  max-width: 26rem;
+  font-weight: 450;
+}
+
+.hero-media {
+  position: relative;
+  margin: 0;
+  min-height: min(52vh, 560px);
+  border-left: 3px solid var(--cta);
+}
+
+.hero-photo {
+  width: 100%;
+  height: 100%;
+  min-height: min(52vh, 560px);
+  object-fit: cover;
+  object-position: center 42%;
+  display: block;
+  filter: saturate(0.78) contrast(1.06);
+}
+
+.hero-media-mark {
+  position: absolute;
+  left: 0.85rem;
+  bottom: 0.75rem;
+  margin: 0;
+  font-family: var(--display);
+  font-size: 0.85rem;
+  font-weight: 560;
+  letter-spacing: 0.08em;
+  color: #fffaf5;
 }
 
 .cta-primary {
   border-radius: var(--radius);
-  padding: 0.8rem 1.25rem;
+  padding: 0.78rem 1.2rem;
   font-size: 0.95rem;
-  font-weight: 700;
-  letter-spacing: normal;
+  font-weight: 650;
+  letter-spacing: 0.01em;
   text-transform: none;
   cursor: pointer;
   background: var(--cta);
   color: var(--cta-text);
   border: 1px solid transparent;
-  box-shadow: var(--shadow);
   transition: background 0.15s ease;
 }
 
@@ -728,63 +720,63 @@ const garminFitGuidePath = () => garminFitPath(locale.value as AppLocale)
 
 .stats-bar {
   display: grid;
-  grid-template-columns: 1.35fr 1fr 1fr;
+  grid-template-columns: 1fr 1fr 1fr;
   align-items: stretch;
   gap: 0;
-  margin-top: -2.75rem;
-  margin-bottom: 4.25rem;
+  margin-top: 0;
+  margin-bottom: 4.5rem;
   position: relative;
   z-index: 3;
-  background: #fff;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
+  background: transparent;
+  border: none;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  border-radius: 0;
   padding: 0;
-  box-shadow: var(--shadow);
-  overflow: hidden;
-  isolation: isolate;
+  overflow: visible;
 }
 
 .stat {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 0.25rem;
-  padding: 1.15rem 1.25rem 1.25rem;
+  gap: 0.2rem;
+  padding: 1.15rem 0 1.2rem;
+  padding-right: 1.25rem;
   border-right: 1px solid var(--border);
   text-align: left;
 }
 
 .stat:last-child {
   border-right: none;
-  border-radius: 0 var(--radius) var(--radius) 0;
+  padding-right: 0;
 }
 
 .stat:first-child {
-  background: var(--cta-soft);
-  color: var(--cta-soft-text);
-  border-radius: var(--radius) 0 0 var(--radius);
+  background: none;
+  color: inherit;
 }
 
 .stat:first-child span {
-  color: var(--cta-soft-text);
-  opacity: 0.72;
+  color: var(--text-muted);
+  opacity: 1;
 }
 
 .stat strong {
   font-family: var(--display);
-  font-size: clamp(1.2rem, 2.4vw, 1.75rem);
-  font-weight: 750;
-  letter-spacing: -0.02em;
+  font-size: clamp(1.35rem, 2.4vw, 1.85rem);
+  font-weight: 560;
+  letter-spacing: -0.03em;
   line-height: 1.1;
-  color: inherit;
-  text-transform: none;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
 }
 
 .stat span {
   font-size: 0.78rem;
-  font-weight: 700;
-  color: #111;
-  opacity: 0.7;
+  font-weight: 500;
+  color: var(--text-muted);
+  opacity: 1;
 }
 
 .stat-sep {
@@ -804,12 +796,12 @@ const garminFitGuidePath = () => garminFitPath(locale.value as AppLocale)
 .section-head h2 {
   margin: 0;
   font-family: var(--display);
-  font-size: clamp(1.55rem, 2.8vw, 2.35rem);
-  font-weight: 750;
-  letter-spacing: -0.02em;
+  font-size: clamp(1.85rem, 3.2vw, 2.7rem);
+  font-weight: 520;
+  letter-spacing: -0.03em;
   line-height: 1.05;
   text-transform: none;
-  color: #111;
+  color: var(--ink);
   white-space: nowrap;
 }
 
@@ -821,55 +813,60 @@ const garminFitGuidePath = () => garminFitPath(locale.value as AppLocale)
 
 .mode-tabs {
   display: flex;
-  gap: 0.4rem;
-  margin-bottom: 0.75rem;
+  gap: 0;
+  margin-bottom: 0;
   border: none;
+  border-bottom: 1px solid var(--border);
   padding: 0;
   background: transparent;
 }
 
 .mode-tabs button {
   flex: 1;
-  padding: 0.7rem 0.75rem;
+  padding: 0.85rem 0.75rem 0.75rem;
   min-height: 2.75rem;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  background: var(--surface-2);
-  font-weight: 650;
-  font-size: 0.88rem;
-  letter-spacing: normal;
+  border: none;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  background: transparent;
+  font-weight: 600;
+  font-size: 0.92rem;
+  letter-spacing: 0.01em;
   text-transform: none;
   cursor: pointer;
-  color: var(--text);
+  color: var(--text-muted);
   box-shadow: none;
-  transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+  margin-bottom: -1px;
+  transition: color 0.15s ease, border-color 0.15s ease;
 }
 
 .mode-tabs button:last-child {
-  border-right: 1px solid var(--border);
+  border-right: none;
 }
 
 .mode-tabs button.active {
-  background: var(--surface);
-  color: var(--text);
-  border-color: var(--border);
-  box-shadow: var(--shadow);
+  background: transparent;
+  color: var(--ink);
+  border-bottom-color: var(--cta);
+  box-shadow: none;
   font-weight: 700;
 }
 
 @media (hover: hover) {
   .mode-tabs button:hover:not(.active) {
-    background: var(--cream);
-    border-color: color-mix(in srgb, var(--cta) 40%, var(--border));
+    background: transparent;
+    color: var(--ink);
+    border-color: transparent;
+    border-bottom-color: color-mix(in srgb, var(--cta) 45%, var(--border));
   }
 }
 
 .hero-card {
-  background: #fff;
+  background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: var(--radius);
+  border-top: none;
+  border-radius: 0 0 var(--radius) var(--radius);
   padding: 1.35rem 1.4rem 1.5rem;
-  box-shadow: var(--shadow);
 }
 
 .hero-card[hidden] {
@@ -887,8 +884,23 @@ const garminFitGuidePath = () => garminFitPath(locale.value as AppLocale)
 .landing :deep(.menu-btn) {
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  background: #fff;
-  box-shadow: var(--shadow);
+  background: var(--surface);
+  box-shadow: none;
+}
+
+.landing :deep(.brutal:not(.tool-style) .recent-btn) {
+  background: var(--surface);
+  color: var(--ink);
+  border: 1px solid var(--border);
+  box-shadow: none;
+}
+
+@media (hover: hover) {
+  .landing :deep(.brutal:not(.tool-style) .recent-btn:hover),
+  .landing :deep(.brutal:not(.tool-style) .recent-btn.active) {
+    background: var(--cream);
+    color: var(--ink);
+  }
 }
 
 .landing :deep(.hero-card .field-label),
@@ -981,18 +993,20 @@ const garminFitGuidePath = () => garminFitPath(locale.value as AppLocale)
 
 .landing :deep(.feedback) {
   margin-top: 6.5rem;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  background: #fff;
-  box-shadow: var(--shadow);
+  border: none;
+  border-top: 1px solid var(--border);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  padding-top: 1.75rem;
 }
 
 .landing :deep(.feedback h2) {
   font-family: var(--display);
-  font-weight: 750;
+  font-weight: 520;
   text-transform: none;
-  letter-spacing: -0.02em;
-  color: #111;
+  letter-spacing: -0.03em;
+  color: var(--ink);
   white-space: nowrap;
 }
 
@@ -1022,11 +1036,11 @@ const garminFitGuidePath = () => garminFitPath(locale.value as AppLocale)
 .updates-section h2,
 .faq-section h2 {
   font-family: var(--display);
-  font-size: clamp(1.55rem, 2.8vw, 2.35rem);
-  font-weight: 750;
-  color: #111;
-  margin: 0 0 1.5rem;
-  letter-spacing: -0.02em;
+  font-size: clamp(1.85rem, 3.2vw, 2.7rem);
+  font-weight: 520;
+  color: var(--ink);
+  margin: 0 0 1.75rem;
+  letter-spacing: -0.03em;
   line-height: 1.05;
   text-transform: none;
   white-space: nowrap;
@@ -1042,16 +1056,15 @@ const garminFitGuidePath = () => garminFitPath(locale.value as AppLocale)
 
 .guide-teaser-link {
   display: inline-block;
-  font-weight: 700;
+  font-weight: 650;
   color: var(--cta-text);
   text-transform: none;
-  letter-spacing: normal;
+  letter-spacing: 0.01em;
   text-decoration: none;
   border: 1px solid transparent;
   border-radius: var(--radius);
   padding: 0.55rem 0.9rem;
   background: var(--cta);
-  box-shadow: var(--shadow);
 }
 
 .guide-teaser-more {
@@ -1088,38 +1101,38 @@ const garminFitGuidePath = () => garminFitPath(locale.value as AppLocale)
   list-style: none;
   margin: 0;
   padding: 0;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  background: #fff;
-  overflow: hidden;
-  box-shadow: var(--shadow);
+  border: none;
+  border-top: 1px solid var(--border);
+  border-radius: 0;
+  background: transparent;
 }
 
 .updates-row {
   display: flex;
-  gap: 0.75rem;
+  gap: 0.85rem;
   align-items: baseline;
-  padding: 0.85rem 1rem;
+  padding: 0.95rem 0;
   border-bottom: 1px solid var(--border);
-  font-size: 0.95rem;
+  font-size: 0.98rem;
   line-height: 1.4;
-  font-weight: 650;
+  font-weight: 550;
 }
 
 .updates-row:last-child {
-  border-bottom: none;
+  border-bottom: 1px solid var(--border);
 }
 
 .updates-tag {
   flex: 0 0 auto;
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   font-weight: 700;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--cta-text);
-  background: var(--cta);
-  border-radius: var(--radius);
-  padding: 0.15rem 0.5rem;
+  color: var(--cta);
+  background: transparent;
+  border: 1px solid var(--cta);
+  border-radius: 999px;
+  padding: 0.12rem 0.5rem;
 }
 
 .updates-tag[data-kind='fix'] {
@@ -1149,154 +1162,146 @@ const garminFitGuidePath = () => garminFitPath(locale.value as AppLocale)
 }
 
 .features-grid {
-  grid-template-columns: 1.55fr 1fr 1fr;
-  grid-template-rows: 1fr 1fr;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: none;
+  column-gap: 2.75rem;
+  row-gap: 0;
 }
 
 .feature-card {
   display: flex;
   flex-direction: column;
-  gap: 0.45rem;
+  gap: 0.35rem;
   align-items: flex-start;
-  height: 100%;
-  background: #fff;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 1.25rem 1.2rem 1.4rem;
+  height: auto;
+  background: transparent;
+  border: none;
+  border-top: 1px solid var(--border);
+  border-radius: 0;
+  padding: 1.15rem 0 1.25rem;
   box-sizing: border-box;
 }
 
-.feature-card:nth-child(1) {
-  grid-column: 1;
-  grid-row: 1;
-}
-
-.feature-card:nth-child(2) {
-  grid-column: 2;
-  grid-row: 1;
-}
-
-.feature-card:nth-child(3) {
-  grid-column: 3;
-  grid-row: 1;
-}
-
-.feature-card:nth-child(4) {
-  grid-column: 2;
-  grid-row: 2;
-}
-
-.feature-card:nth-child(5) {
-  grid-column: 3;
-  grid-row: 2;
-}
-
-.feature-card:nth-child(6) {
-  grid-column: 1;
-  grid-row: 2;
+.feature-card:nth-child(n) {
+  grid-column: auto;
+  grid-row: auto;
 }
 
 .feature-card:first-child {
-  background: var(--cta-soft);
-  color: var(--cta-soft-text);
-  justify-content: flex-end;
+  background: none;
+  color: inherit;
+  justify-content: flex-start;
   min-height: 0;
-  border: 1px solid var(--cta-soft-border);
-  border-radius: var(--radius);
+  border: none;
+  border-top: 1px solid var(--border);
 }
 
 .feature-card:first-child p,
 .feature-card:first-child strong {
-  color: var(--cta-soft-text);
+  color: inherit;
 }
 
-.feature-card:hover {
-  background: #fffaf5;
-}
-
+.feature-card:hover,
 .feature-card:first-child:hover {
-  background: var(--cta-soft-hover);
+  background: transparent;
 }
 
 .feature-card strong {
   display: block;
-  font-size: 1.05rem;
-  font-weight: 750;
-  letter-spacing: -0.02em;
-  line-height: 1.15;
+  font-family: var(--display);
+  font-size: 1.2rem;
+  font-weight: 540;
+  letter-spacing: -0.025em;
+  line-height: 1.2;
   margin-bottom: 0;
   text-transform: none;
-  color: #111;
+  color: var(--ink);
 }
 
 .feature-card:first-child strong {
-  font-family: var(--display);
-  font-size: clamp(1.25rem, 2.2vw, 1.75rem);
-  font-weight: 800;
-  line-height: 1.12;
+  font-size: 1.2rem;
+  font-weight: 540;
+  line-height: 1.2;
 }
 
 .feature-card p {
   margin: 0;
-  font-size: 0.88rem;
-  color: #2a2a2a;
+  font-size: 0.9rem;
+  color: var(--text-muted);
   line-height: 1.45;
 }
 
 .steps {
-  grid-template-columns: 1.4fr 1fr 1fr;
+  grid-template-columns: 1fr 1fr 1fr;
+  column-gap: 2.5rem;
+  position: relative;
+}
+
+.steps::before {
+  content: '';
+  position: absolute;
+  top: 0.85rem;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--border);
 }
 
 .step {
   display: flex;
   flex-direction: column;
-  gap: 0.65rem;
+  gap: 0.7rem;
   align-items: flex-start;
-  background: #fff;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 1.2rem 1.15rem 1.4rem;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  position: relative;
 }
 
 .step:first-child {
-  background: var(--cta-soft);
-  color: var(--cta-soft-text);
-  border-color: var(--cta-soft-border);
+  background: none;
+  color: inherit;
+  border: none;
 }
 
 .step:first-child .step-num,
 .step:first-child strong,
 .step:first-child p {
-  color: var(--cta-soft-text);
+  color: inherit;
 }
 
 .step-num {
   width: auto;
   height: auto;
-  border-radius: var(--radius);
-  background: none;
-  color: #111;
+  border-radius: 0;
+  background: var(--cream);
+  color: var(--cta);
   font-family: var(--display);
-  font-weight: 800;
-  font-size: clamp(2.1rem, 4vw, 3.2rem);
-  line-height: 0.9;
+  font-weight: 560;
+  font-size: clamp(1.65rem, 2.8vw, 2.1rem);
+  line-height: 1;
   display: block;
   letter-spacing: -0.03em;
+  padding-right: 0.55rem;
+  position: relative;
+  z-index: 1;
 }
 
 .step strong {
   display: block;
-  font-size: 1.05rem;
-  font-weight: 750;
+  font-family: var(--display);
+  font-size: 1.25rem;
+  font-weight: 540;
   text-transform: none;
   margin-bottom: 0.15rem;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.025em;
 }
 
 .step p {
   margin: 0;
-  font-size: 0.88rem;
-  color: #111;
+  font-size: 0.92rem;
+  color: var(--text-muted);
   line-height: 1.45;
 }
 
@@ -1304,15 +1309,16 @@ const garminFitGuidePath = () => garminFitPath(locale.value as AppLocale)
   display: flex;
   flex-direction: column;
   gap: 0;
-  border: 1px solid var(--border);
-  background: #fff;
+  border: none;
+  border-top: 1px solid var(--border);
+  background: transparent;
 }
 
 .faq-item {
   border: none;
   border-bottom: 1px solid var(--border);
-  border-radius: var(--radius);
-  background: #fff;
+  border-radius: 0;
+  background: transparent;
 }
 
 .faq-item:last-child {
@@ -1322,7 +1328,7 @@ const garminFitGuidePath = () => garminFitPath(locale.value as AppLocale)
 .faq-item:focus-within {
   border-color: inherit;
   box-shadow: none;
-  background: #fff8f0;
+  background: transparent;
 }
 
 .faq-q {
@@ -1331,15 +1337,15 @@ const garminFitGuidePath = () => garminFitPath(locale.value as AppLocale)
   justify-content: space-between;
   align-items: center;
   gap: 1rem;
-  padding: 1.05rem 1.15rem;
+  padding: 1.05rem 0;
   background: none;
   border: none;
-  border-radius: var(--radius);
+  border-radius: 0;
   cursor: pointer;
   text-align: left;
-  font-size: 1rem;
-  font-weight: 800;
-  color: #111;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--ink);
 }
 
 .faq-q:focus {
@@ -1348,18 +1354,18 @@ const garminFitGuidePath = () => garminFitPath(locale.value as AppLocale)
 
 .faq-q:focus-visible {
   outline: 2px solid var(--primary);
-  outline-offset: -3px;
-  background: var(--cta);
-  color: var(--cta-text);
+  outline-offset: 2px;
+  background: transparent;
+  color: var(--ink);
 }
 
 .faq-chevron {
-  font-size: 1.4rem;
-  color: #111;
+  font-size: 1.35rem;
+  color: var(--cta);
   transform: rotate(0deg);
   transition: transform 0.15s;
   flex-shrink: 0;
-  font-weight: 800;
+  font-weight: 500;
 }
 
 .faq-chevron.open {
@@ -1367,10 +1373,11 @@ const garminFitGuidePath = () => garminFitPath(locale.value as AppLocale)
 }
 
 .faq-a {
-  padding: 0 1.15rem 1.1rem;
-  font-size: 0.9rem;
-  color: #111;
+  padding: 0 0 1.15rem;
+  font-size: 0.92rem;
+  color: var(--text-muted);
   line-height: 1.55;
+  max-width: 42rem;
 }
 
 .faq-a[hidden] {
@@ -1563,6 +1570,18 @@ const garminFitGuidePath = () => garminFitPath(locale.value as AppLocale)
 
 
 @media (max-width: 960px) {
+  .hero-split {
+    grid-template-columns: 1fr;
+    gap: 1.75rem;
+    align-items: start;
+    padding-top: 1.35rem;
+  }
+
+  .hero-media,
+  .hero-photo {
+    min-height: 220px;
+  }
+
   .section-head h2,
   .features-section h2,
   .how-section h2,
@@ -1591,46 +1610,36 @@ const garminFitGuidePath = () => garminFitPath(locale.value as AppLocale)
   }
 
   .feature-card:first-child {
-    grid-column: 1 / -1;
-    grid-row: auto;
+    grid-column: auto;
     min-height: 0;
-    border-radius: var(--radius);
   }
 
   .step:first-child {
-    grid-column: 1 / -1;
+    grid-column: auto;
+  }
+
+  .steps::before {
+    display: none;
   }
 }
 
 @media (max-width: 640px) {
-  .hero-band,
-  .hero {
-    min-height: min(46vh, 440px);
-  }
-
   .hero-band--app,
   .hero-band--app .hero {
     min-height: 0;
   }
 
   .hero {
-    padding-bottom: 3.5rem;
+    padding-bottom: 1.5rem;
   }
 
   .hero-band--app .hero {
     padding-bottom: 0;
   }
 
-  .hero-center {
-    padding: 0.6rem 0 0;
-    text-align: left;
-    align-items: flex-start;
-    align-self: flex-start;
-  }
-
   .hero-title {
-    font-size: clamp(1.85rem, 10.5vw, 2.85rem);
-    letter-spacing: 0.015em;
+    font-size: clamp(2.05rem, 10.5vw, 2.75rem);
+    letter-spacing: -0.025em;
   }
 
   .cta-row {
@@ -1638,8 +1647,13 @@ const garminFitGuidePath = () => garminFitPath(locale.value as AppLocale)
   }
 
   .hero-sub {
-    font-size: 0.92rem;
+    font-size: 0.98rem;
     max-width: 100%;
+  }
+
+  .hero-media,
+  .hero-photo {
+    min-height: 180px;
   }
 
   .brand-logo {
@@ -1654,34 +1668,32 @@ const garminFitGuidePath = () => garminFitPath(locale.value as AppLocale)
   }
 
   .stats-bar {
-    margin-top: -1.75rem;
+    margin-top: 0;
     margin-bottom: 3.25rem;
-    box-shadow: var(--shadow);
   }
 
   .stat {
     border-right: none;
     border-bottom: 1px solid var(--border);
-    border-radius: 0;
+    padding-right: 0;
   }
 
-  .stat:first-child {
-    border-radius: var(--radius) var(--radius) 0 0;
+  .stat:first-child,
+  .stat:last-child {
+    border-radius: 0;
   }
 
   .stat:last-child {
     border-bottom: none;
-    border-radius: 0 0 var(--radius) var(--radius);
   }
 
   .mode-tabs button {
-    font-size: 0.78rem;
-    padding: 0.7rem 0.4rem;
+    font-size: 0.8rem;
+    padding: 0.75rem 0.35rem 0.7rem;
   }
 
   .hero-card {
     padding: 1.1rem 1rem 1.25rem;
-    box-shadow: var(--shadow);
   }
 
   .features-section,
@@ -1689,7 +1701,7 @@ const garminFitGuidePath = () => garminFitPath(locale.value as AppLocale)
   .guide-teaser,
   .updates-section,
   .faq-section {
-    margin-top: 4.75rem;
+    margin-top: 4.25rem;
   }
 }
 </style>
