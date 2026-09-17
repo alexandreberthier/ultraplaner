@@ -2,9 +2,9 @@
  * Google Maps place / search view (hours, reviews) — no API key required.
  *
  * Pure lat,lng pins often sit beside Google's business centroid (no Place card).
- * "Name @lat,lng" as a query string is treated as a brand search and can jump to
- * distant hits (e.g. Marcher → Fleischwerke Graz). Scope the search to the map
- * viewport via /search/Query/@lat,lng,zoom and enrich short names with category.
+ * Brand-only queries ("Billa Plus Supermärkte") list distant chain stores.
+ * Put coordinates first and only append category for single-token names
+ * ("Marcher" → "Marcher Tankstellen"), then lock the map viewport.
  */
 export function googleMapsPlaceUrl(
   lat: number,
@@ -18,17 +18,18 @@ export function googleMapsPlaceUrl(
   }
 
   const cat = categoryLabel?.trim()
-  let query = label
-  // Short brand-like names need a type hint so Maps stays local
-  if (cat && label.split(/\s+/).length <= 2) {
+  let placeName = label
+  // Only one-word brands need a type hint; "Billa Plus" + "Supermärkte" → nationwide list
+  if (cat && label.split(/\s+/).length === 1) {
     const lower = label.toLowerCase()
     if (!lower.includes(cat.toLowerCase())) {
-      query = `${label} ${cat}`
+      placeName = `${label} ${cat}`
     }
   }
 
-  // Path form pins the search to this map area (unlike query=Name @coords)
-  return `https://www.google.com/maps/search/${encodeURIComponent(query)}/@${lat},${lng},17z`
+  // Coords first biases ranking to this spot; @lat,lng locks the visible area
+  const query = `${lat},${lng} ${placeName}`
+  return `https://www.google.com/maps/search/${encodeURIComponent(query)}/@${lat},${lng},18z`
 }
 
 /** Google Maps turn-by-turn directions — no API key required. */
