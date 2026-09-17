@@ -126,7 +126,7 @@ onUnmounted(() => {
 const googlePlaceHref = computed(() => {
   const poi = store.selectedPoi
   if (!poi) return '#'
-  return googleMapsPlaceUrl(poi.lat, poi.lng)
+  return googleMapsPlaceUrl(poi.lat, poi.lng, displayName.value || poi.name)
 })
 
 const googleNavHref = computed(() => {
