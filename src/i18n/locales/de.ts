@@ -675,7 +675,7 @@ export default {
     favorite: 'Favorit',
     unfavorite: 'Favorit entfernen',
     navigate: 'Navigation starten',
-    openPlace: 'Ort in Google Maps',
+    openPlace: 'In Google Maps ansehen',
     hours: 'Öffnungszeiten',
     hoursLoad: 'Öffnungszeiten laden (Google)',
     hoursLoading: 'Lädt…',

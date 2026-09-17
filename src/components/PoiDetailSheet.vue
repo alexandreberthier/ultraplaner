@@ -488,7 +488,7 @@ dd {
   color: #111;
   font: inherit;
   font-size: 1.02rem;
-  font-weight: 800;
+  font-weight: 600;
   box-shadow: var(--shadow);
 }
 
@@ -501,6 +501,7 @@ dd {
   background: var(--cta);
   color: var(--cta-text);
   font-size: 1.08rem;
+  font-weight: 700;
 }
 
 .fav-star {
@@ -527,10 +528,9 @@ dd {
 }
 
 .nav-btn-secondary {
-  font-weight: 700;
+  font-weight: 600;
   font-size: 0.95rem;
   min-height: 42px;
-  opacity: 0.95;
 }
 
 @media (max-width: 768px) {
@@ -713,7 +713,7 @@ dd {
   color: #111;
   font: inherit;
   font-size: 0.78rem;
-  font-weight: 800;
+  font-weight: 600;
   text-decoration: none;
   text-align: center;
   box-shadow: var(--shadow);

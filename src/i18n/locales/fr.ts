@@ -673,7 +673,7 @@
     favorite: 'Favori',
     unfavorite: 'Retirer favori',
     navigate: 'Lancer la navigation',
-    openPlace: 'Lieu sur Google Maps',
+    openPlace: 'Voir sur Google Maps',
     hours: 'Horaires',
     hoursLoad: 'Charger horaires (Google)',
     hoursLoading: 'Chargement…',
