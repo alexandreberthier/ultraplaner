@@ -145,17 +145,18 @@ function isMobileMapLayout() {
   return typeof window !== 'undefined' && window.matchMedia(MOBILE_MAP_MQ).matches
 }
 
-/** Larger POI hit targets on phone / Nearby (integer icon-size keeps sprites crisp). */
+/** Slightly larger POI hit targets on phone / Nearby (keep icon-size integer for crisp sprites). */
 function preferLargePoiMarkers() {
   return isMobileMapLayout() || store.isNearbyMap
 }
 
+/** 48px sprite @ PR3 → 16 CSS px at size 1 (same on mobile so overview zooms stay readable). */
 function poiIconSize() {
-  return preferLargePoiMarkers() ? 2 : 1
+  return 1
 }
 
 function scalePoiRadius(base: number) {
-  return preferLargePoiMarkers() ? Math.round(base * 1.55) : base
+  return preferLargePoiMarkers() ? Math.round(base * 1.2) : base
 }
 
 function applyPoiMarkerSizes() {
@@ -166,10 +167,10 @@ function applyPoiMarkerSizes() {
     map.setLayoutProperty('poi-unclustered-icons', 'icon-size', iconSize)
   }
   if (map.getLayer('poi-unclustered-halo')) {
-    map.setPaintProperty('poi-unclustered-halo', 'circle-radius', scalePoiRadius(18))
+    map.setPaintProperty('poi-unclustered-halo', 'circle-radius', scalePoiRadius(14))
   }
   if (map.getLayer('poi-unclustered-point')) {
-    map.setPaintProperty('poi-unclustered-point', 'circle-radius', scalePoiRadius(14))
+    map.setPaintProperty('poi-unclustered-point', 'circle-radius', scalePoiRadius(10))
   }
   if (map.getLayer('poi-clusters')) {
     map.setPaintProperty(
@@ -179,29 +180,29 @@ function applyPoiMarkerSizes() {
         ? [
             'step',
             ['get', 'point_count'],
-            scalePoiRadius(14),
+            scalePoiRadius(11),
             10,
-            scalePoiRadius(18),
+            scalePoiRadius(14),
             30,
-            scalePoiRadius(22),
+            scalePoiRadius(17),
           ]
-        : ['step', ['get', 'point_count'], 14, 10, 18, 30, 22]
+        : ['step', ['get', 'point_count'], 11, 10, 14, 30, 17]
     )
   }
   if (map.getLayer('poi-cluster-count')) {
-    map.setLayoutProperty('poi-cluster-count', 'text-size', large ? 14 : 12)
+    map.setLayoutProperty('poi-cluster-count', 'text-size', large ? 12 : 11)
   }
   if (map.getLayer('control-points-icon')) {
-    map.setLayoutProperty('control-points-icon', 'icon-size', large ? 0.9 : 0.55)
+    map.setLayoutProperty('control-points-icon', 'icon-size', large ? 0.75 : 0.5)
   }
   if (map.getLayer('favorites-halo')) {
-    map.setPaintProperty('favorites-halo', 'circle-radius', scalePoiRadius(20))
+    map.setPaintProperty('favorites-halo', 'circle-radius', scalePoiRadius(16))
   }
   if (map.getLayer('favorites-ring')) {
-    map.setPaintProperty('favorites-ring', 'circle-radius', scalePoiRadius(15))
+    map.setPaintProperty('favorites-ring', 'circle-radius', scalePoiRadius(12))
   }
   if (map.getLayer('favorites-star')) {
-    map.setLayoutProperty('favorites-star', 'text-size', large ? 18 : 14)
+    map.setLayoutProperty('favorites-star', 'text-size', large ? 15 : 12)
   }
 }
 
@@ -1635,11 +1636,11 @@ function addLayers() {
       'circle-radius': [
         'step',
         ['get', 'point_count'],
-        scalePoiRadius(14),
+        scalePoiRadius(11),
         10,
-        scalePoiRadius(18),
+        scalePoiRadius(14),
         30,
-        scalePoiRadius(22),
+        scalePoiRadius(17),
       ],
       'circle-stroke-width': 2,
       'circle-stroke-color': '#fff',
@@ -1653,7 +1654,7 @@ function addLayers() {
     filter: ['has', 'point_count'],
     layout: {
       'text-field': '{point_count_abbreviated}',
-      'text-size': preferLargePoiMarkers() ? 14 : 12,
+      'text-size': preferLargePoiMarkers() ? 12 : 11,
       'text-font': [...MAP_LABEL_FONT],
     },
     paint: { 'text-color': '#fff' },
@@ -1665,9 +1666,9 @@ function addLayers() {
     source: 'pois',
     filter: ['!', ['has', 'point_count']],
     paint: {
-      'circle-radius': scalePoiRadius(18),
+      'circle-radius': scalePoiRadius(14),
       'circle-color': ['coalesce', ['get', 'color'], '#6b7280'],
-      'circle-opacity': 0.3,
+      'circle-opacity': 0.28,
     },
   })
 
@@ -1677,9 +1678,9 @@ function addLayers() {
     source: 'pois',
     filter: ['!', ['has', 'point_count']],
     paint: {
-      'circle-radius': scalePoiRadius(14),
+      'circle-radius': scalePoiRadius(10),
       'circle-color': ['coalesce', ['get', 'color'], '#6b7280'],
-      'circle-stroke-width': 2.5,
+      'circle-stroke-width': 2,
       'circle-stroke-color': '#fff',
     },
   })
@@ -1691,7 +1692,7 @@ function addLayers() {
     filter: ['!', ['has', 'point_count']],
     layout: {
       'icon-image': ['get', 'icon'],
-      // 48px @ pixelRatio 3 → 16 CSS px at size 1; mobile/Nearby uses 2 (32 CSS px, integer = crisp)
+      // 48px @ pixelRatio 3 → 16 CSS px at size 1
       'icon-size': poiIconSize(),
       'icon-allow-overlap': true,
       'icon-ignore-placement': true,
@@ -1706,7 +1707,7 @@ function addLayers() {
     type: 'circle',
     source: 'favorites',
     paint: {
-      'circle-radius': scalePoiRadius(20),
+      'circle-radius': scalePoiRadius(16),
       'circle-color': '#f59e0b',
       'circle-opacity': 0.25,
     },
@@ -1717,9 +1718,9 @@ function addLayers() {
     type: 'circle',
     source: 'favorites',
     paint: {
-      'circle-radius': scalePoiRadius(15),
+      'circle-radius': scalePoiRadius(12),
       'circle-color': 'transparent',
-      'circle-stroke-width': 3,
+      'circle-stroke-width': 2.5,
       'circle-stroke-color': '#f59e0b',
     },
   })
@@ -1730,7 +1731,7 @@ function addLayers() {
     source: 'favorites',
     layout: {
       'text-field': '★',
-      'text-size': preferLargePoiMarkers() ? 18 : 14,
+      'text-size': preferLargePoiMarkers() ? 15 : 12,
       'text-font': [...MAP_LABEL_FONT],
       'text-offset': [0.9, -0.9],
       'text-allow-overlap': true,
