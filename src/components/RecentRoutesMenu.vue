@@ -1,8 +1,12 @@
 <script setup lang="ts">
-import { nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import { deleteOfflineMap, listOfflineMaps } from '../services/offlineMaps'
+import {
+  deleteOfflineMap,
+  listOfflineMaps,
+  OFFLINE_MAPS_CHANGED,
+} from '../services/offlineMaps'
 import { listUsableOfflinePackMapIds, type PackStatus } from '../services/offlinePacks'
 import { clampFixedPanelStyle } from '../utils/clampFixedPanel'
 
@@ -30,10 +34,26 @@ type RecentItem = {
 const open = ref(false)
 const loading = ref(false)
 const items = ref<RecentItem[]>([])
+const routeCount = ref(0)
 const root = ref<HTMLElement | null>(null)
 const menuBtn = ref<HTMLElement | null>(null)
 const panel = ref<HTMLElement | null>(null)
 const panelStyle = ref<Record<string, string>>({})
+
+const menuAriaLabel = computed(() =>
+  routeCount.value > 0
+    ? t('recent.menuTitleCount', { count: routeCount.value })
+    : t('recent.menuTitle')
+)
+
+async function refreshCount() {
+  try {
+    const maps = await listOfflineMaps()
+    routeCount.value = maps.length
+  } catch {
+    routeCount.value = 0
+  }
+}
 
 async function refresh() {
   loading.value = true
@@ -43,6 +63,7 @@ async function refresh() {
       ...m,
       packStatus: packs.get(m.id) ?? null,
     }))
+    routeCount.value = maps.length
   } finally {
     loading.value = false
   }
@@ -84,6 +105,7 @@ async function removeMap(id: string, e: Event) {
   e.stopPropagation()
   await deleteOfflineMap(id)
   items.value = items.value.filter((m) => m.id !== id)
+  routeCount.value = items.value.length
 }
 
 function onDocClick(e: MouseEvent) {
@@ -97,6 +119,11 @@ function onKey(e: KeyboardEvent) {
   if (e.key === 'Escape') close()
 }
 
+function onMapsChanged() {
+  void refreshCount()
+  if (open.value) void refresh()
+}
+
 watch(open, async (isOpen) => {
   if (!isOpen) return
   await nextTick()
@@ -104,10 +131,14 @@ watch(open, async (isOpen) => {
 })
 
 onMounted(() => {
+  void refreshCount()
   document.addEventListener('click', onDocClick)
   document.addEventListener('keydown', onKey)
   window.addEventListener('resize', repositionPanel)
   window.addEventListener('scroll', repositionPanel, true)
+  window.addEventListener(OFFLINE_MAPS_CHANGED, onMapsChanged)
+  window.addEventListener('pageshow', onMapsChanged)
+  document.addEventListener('visibilitychange', onMapsChanged)
   window.visualViewport?.addEventListener('resize', repositionPanel)
   window.visualViewport?.addEventListener('scroll', repositionPanel)
 })
@@ -117,6 +148,9 @@ onUnmounted(() => {
   document.removeEventListener('keydown', onKey)
   window.removeEventListener('resize', repositionPanel)
   window.removeEventListener('scroll', repositionPanel, true)
+  window.removeEventListener(OFFLINE_MAPS_CHANGED, onMapsChanged)
+  window.removeEventListener('pageshow', onMapsChanged)
+  document.removeEventListener('visibilitychange', onMapsChanged)
   window.visualViewport?.removeEventListener('resize', repositionPanel)
   window.visualViewport?.removeEventListener('scroll', repositionPanel)
 })
@@ -130,11 +164,13 @@ onUnmounted(() => {
       class="recent-btn"
       :class="{ active: open }"
       :aria-expanded="open"
-      :aria-label="t('recent.menuTitle')"
-      :title="t('recent.menuTitle')"
+      :aria-label="menuAriaLabel"
+      :title="menuAriaLabel"
       @click.stop="toggle"
     >
-      {{ t('recent.menuShort') }} ▾
+      <span>{{ t('recent.menuShort') }}</span>
+      <span v-if="routeCount > 0" class="recent-count" aria-hidden="true">{{ routeCount }}</span>
+      <span class="recent-chevron" aria-hidden="true">▾</span>
     </button>
 
     <Teleport to="body">
@@ -207,6 +243,9 @@ onUnmounted(() => {
 }
 
 .recent-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
   padding: 0.45rem 0.7rem;
   border: 1px solid var(--border);
   border-radius: var(--radius);
@@ -219,6 +258,26 @@ onUnmounted(() => {
   line-height: 1.15;
   white-space: nowrap;
   box-shadow: var(--shadow);
+}
+
+.recent-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.35rem;
+  height: 1.35rem;
+  padding: 0 0.35rem;
+  border-radius: 999px;
+  background: var(--cta);
+  color: var(--cta-text);
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.recent-chevron {
+  opacity: 0.75;
+  font-size: 0.85em;
 }
 
 @media (hover: hover) {
@@ -238,6 +297,11 @@ onUnmounted(() => {
   color: var(--cta-text);
   letter-spacing: normal;
   text-transform: none;
+}
+
+.brutal:not(.tool-style) .recent-count {
+  background: #fff;
+  color: var(--cta);
 }
 
 @media (hover: hover) {
@@ -263,6 +327,11 @@ onUnmounted(() => {
 .tool-style .recent-btn.active {
   background: var(--cta);
   color: var(--cta-text);
+}
+
+.tool-style .recent-btn.active .recent-count {
+  background: #fff;
+  color: var(--cta);
 }
 </style>
 

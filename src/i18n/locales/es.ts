@@ -290,6 +290,7 @@ export default {
     title: 'Rutas',
     hint: 'En la navegación bajo « Rutas »: rutas GPX y planificadas en este dispositivo. En ruta no aparece. Mapa offline solo tras « Llevar ruta offline ».',
     menuTitle: 'Rutas',
+    menuTitleCount: 'Rutas ({count})',
     menuShort: 'Rutas',
     menuHint:
       'Rutas GPX y planificadas en este dispositivo. Badge « Offline » = mapa + POIs sin internet (tras « Llevar ruta offline »).',

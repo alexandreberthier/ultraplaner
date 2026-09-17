@@ -290,6 +290,7 @@ export default {
     title: 'Routes',
     hint: 'In the top navigation under “Routes”: GPX and planned routes on this device. Ride scans are not listed. Offline map only after “Take route offline”.',
     menuTitle: 'Routes',
+    menuTitleCount: 'Routes ({count})',
     menuShort: 'Routes',
     menuHint:
       'GPX and planned routes on this device. “Offline” badge = map + POIs without internet (after “Take route offline”).',

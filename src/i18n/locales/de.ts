@@ -290,6 +290,7 @@ export default {
     title: 'Routen',
     hint: 'In der Navigation unter „Routen“: GPX- und Planungs-Routen auf diesem Gerät. Fahrt-Scans erscheinen nicht. Offline-Karte nur nach „Route offline mitnehmen“.',
     menuTitle: 'Routen',
+    menuTitleCount: 'Routen ({count})',
     menuShort: 'Routen',
     menuHint:
       'GPX- und Planungs-Routen auf diesem Gerät. Badge „Offline“ = Karte + POIs ohne Netz (nach „Route offline mitnehmen“).',

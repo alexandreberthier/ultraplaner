@@ -289,6 +289,7 @@
     title: 'Routes',
     hint: 'Dans la navigation sous « Routes » : routes GPX et planifiées sur cet appareil. Trajet n’apparaît pas. Carte hors ligne seulement après « Emporter la route offline ».',
     menuTitle: 'Routes',
+    menuTitleCount: 'Routes ({count})',
     menuShort: 'Routes',
     menuHint:
       'Routes GPX et planifiées sur cet appareil. Badge « Offline » = carte + POIs sans internet (après « Emporter la route offline »).',

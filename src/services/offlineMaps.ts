@@ -99,6 +99,7 @@ export async function putOfflineMap(record: SavedMapRecord): Promise<void> {
       await idbReq(store.put(entry))
       await trimToMax(store)
     })
+    notifyOfflineMapsChanged()
   } catch (err) {
     console.warn('[offline] Cache schreiben fehlgeschlagen:', err)
   }
@@ -157,7 +158,16 @@ export async function deleteOfflineMap(id: string): Promise<void> {
     })
     const { deleteOfflinePack } = await import('./offlinePacks')
     await deleteOfflinePack(id)
+    notifyOfflineMapsChanged()
   } catch (err) {
     console.warn('[offline] Cache löschen fehlgeschlagen:', err)
   }
+}
+
+/** Fired after local saved-route list changes (put/delete). */
+export const OFFLINE_MAPS_CHANGED = 'ultraplaner:offline-maps-changed'
+
+function notifyOfflineMapsChanged() {
+  if (typeof window === 'undefined') return
+  window.dispatchEvent(new Event(OFFLINE_MAPS_CHANGED))
 }
