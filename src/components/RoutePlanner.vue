@@ -1547,7 +1547,6 @@ onUnmounted(() => {
     :class="{
       'controls-expanded': controlsOpen,
       'elev-expanded': elevOpen,
-      'has-poi-cta': routeReadyForPois,
     }"
     @keydown.escape="closeExportMenu"
   >
@@ -1922,23 +1921,23 @@ onUnmounted(() => {
         </button>
       </template>
       </div>
-    </div>
 
-    <div v-if="routeReadyForPois" class="poi-next-step">
-      <p v-if="previewingPois" class="poi-next-hint">
-        {{ t('planner.previewingPois') }}
-      </p>
-      <button
-        type="button"
-        class="btn-primary btn-cta btn-full"
-        :disabled="!canCreate"
-        @click="createMap"
-      >
-        {{ createMapLabel }}
-      </button>
-      <p v-if="formError || store.error" class="error poi-next-error">
-        {{ formError || store.error }}
-      </p>
+      <div v-if="routeReadyForPois" class="poi-next-step">
+        <p class="poi-next-hint">
+          {{ previewingPois ? t('planner.previewingPois') : t('planner.nextStepPois') }}
+        </p>
+        <button
+          type="button"
+          class="btn-primary btn-cta btn-full poi-next-btn"
+          :disabled="!canCreate"
+          @click="createMap"
+        >
+          {{ createMapLabel }}
+        </button>
+        <p v-if="formError || store.error" class="error poi-next-error">
+          {{ formError || store.error }}
+        </p>
+      </div>
     </div>
   </div>
 </template>
@@ -1949,20 +1948,12 @@ onUnmounted(() => {
   min-height: 0;
   height: 100%;
   display: grid;
-  grid-template-columns: 320px minmax(0, 1fr);
+  grid-template-columns: minmax(360px, 400px) minmax(0, 1fr);
   grid-template-rows: minmax(0, 1fr) auto;
   grid-template-areas:
     'controls map'
     'controls elev';
   background: var(--bg);
-}
-
-.route-planner.has-poi-cta {
-  grid-template-rows: max-content minmax(0, 1fr) auto;
-  grid-template-areas:
-    'cta map'
-    'controls map'
-    'controls elev';
 }
 
 .planner-map-wrap {
@@ -2356,14 +2347,11 @@ onUnmounted(() => {
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
-  gap: 0.85rem;
+  gap: 0;
   min-width: 0;
   min-height: 0;
   height: 100%;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior: contain;
-  padding: 1rem 1.1rem 1.25rem;
+  overflow: hidden;
   background: var(--cream);
   border-right: 1px solid var(--border);
   box-shadow: none;
@@ -2379,28 +2367,39 @@ onUnmounted(() => {
   flex-direction: column;
   gap: 0.85rem;
   min-height: 0;
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  padding: 1rem 1.15rem 1.1rem;
 }
 
 .poi-next-step {
-  grid-area: cta;
   display: flex;
   flex-direction: column;
-  gap: 0.45rem;
+  gap: 0.55rem;
   flex-shrink: 0;
-  padding: 0.75rem 1.1rem 0.85rem;
+  padding: 0.95rem 1.15rem calc(1.35rem + env(safe-area-inset-bottom, 0px));
   margin: 0;
   background: #fff;
-  border-bottom: 1px solid var(--border);
-  border-right: 1px solid var(--border);
+  border-top: 1px solid var(--border);
+  box-shadow: 0 -6px 18px rgba(0, 0, 0, 0.07);
   z-index: 4;
 }
 
 .poi-next-hint {
   margin: 0;
-  font-size: 0.82rem;
+  font-size: 0.86rem;
   font-weight: 700;
   color: #111;
-  line-height: 1.35;
+  line-height: 1.4;
+}
+
+.poi-next-btn {
+  min-height: 54px;
+  font-size: 1.08rem;
+  font-weight: 800;
+  padding: 1.05rem 1.25rem;
 }
 
 .poi-next-error {
@@ -2821,15 +2820,6 @@ onUnmounted(() => {
       'controls';
   }
 
-  .route-planner.has-poi-cta {
-    grid-template-rows: minmax(0, 1fr) auto auto auto;
-    grid-template-areas:
-      'map'
-      'elev'
-      'controls'
-      'cta';
-  }
-
   .planner-map-wrap {
     min-height: 18vh;
   }
@@ -2839,20 +2829,12 @@ onUnmounted(() => {
     grid-template-rows: minmax(18vh, 0.32fr) auto minmax(0, 1fr);
   }
 
-  .route-planner.controls-expanded.has-poi-cta {
-    grid-template-rows: minmax(18vh, 0.32fr) auto minmax(0, 1fr) auto;
-  }
-
   .route-planner.controls-expanded .planner-map-wrap {
     min-height: 18vh;
   }
 
   .route-planner.elev-expanded {
     grid-template-rows: minmax(18vh, 1fr) auto auto;
-  }
-
-  .route-planner.elev-expanded.has-poi-cta {
-    grid-template-rows: minmax(18vh, 1fr) auto auto auto;
   }
 
   .route-planner.elev-expanded .planner-map-wrap {
@@ -2927,14 +2909,18 @@ onUnmounted(() => {
     border-right: none;
     border-bottom: none;
     border-top: 1px solid var(--border);
-    padding: 0.7rem max(1rem, env(safe-area-inset-right, 0px))
-      calc(0.75rem + env(safe-area-inset-bottom, 0px)) max(1rem, env(safe-area-inset-left, 0px));
+    padding: 0.85rem max(1rem, env(safe-area-inset-right, 0px))
+      calc(1rem + env(safe-area-inset-bottom, 0px)) max(1rem, env(safe-area-inset-left, 0px));
     background: #fff;
-    box-shadow: none;
+    box-shadow: 0 -4px 14px rgba(0, 0, 0, 0.06);
   }
 
   .planner-controls.sheet-collapsed.has-poi-next {
     padding-bottom: 0;
+  }
+
+  .planner-controls.sheet-collapsed.has-poi-next .controls-sheet-toggle {
+    padding-bottom: 0.85rem;
   }
 
   .controls-sheet-toggle {
@@ -3014,8 +3000,8 @@ onUnmounted(() => {
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: contain;
-    padding: 0.75rem max(1rem, env(safe-area-inset-right, 0px))
-      calc(1rem + env(safe-area-inset-bottom, 0px)) max(1rem, env(safe-area-inset-left, 0px));
+    padding: 0.75rem max(1rem, env(safe-area-inset-right, 0px)) 1rem
+      max(1rem, env(safe-area-inset-left, 0px));
     max-height: none;
   }
 

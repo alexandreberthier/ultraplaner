@@ -6,7 +6,7 @@ import { useRideMode } from '../composables/useRideMode'
 import { useRidePosition } from '../composables/useRidePosition'
 import { formatDistance, formatKm, haversineM } from '../services/geo'
 import { poiCategoryEmoji, poiCategoryLabel } from '../utils/poiLabels'
-import { googleMapsDirectionsUrl } from '../services/navigation'
+import { googleMapsDirectionsUrl, googleMapsPlaceUrl } from '../services/navigation'
 import { hasOsmOpeningHours, openStatusAtEta } from '../utils/openingHours'
 
 const store = useMapStore()
@@ -123,6 +123,12 @@ onUnmounted(() => {
   document.removeEventListener('keydown', onSheetKeydown)
 })
 
+const googlePlaceHref = computed(() => {
+  const poi = store.selectedPoi
+  if (!poi) return '#'
+  return googleMapsPlaceUrl(poi.lat, poi.lng)
+})
+
 const googleNavHref = computed(() => {
   const poi = store.selectedPoi
   if (!poi) return '#'
@@ -191,13 +197,21 @@ function onNavigate() {
       </div>
       <div class="ride-peek-actions">
         <a
-          class="ride-peek-maps"
+          class="ride-peek-maps ride-peek-nav"
           :href="googleNavHref"
           target="_blank"
           rel="noopener noreferrer"
           @click="onNavigate"
         >
           {{ t('detail.navigate') }}
+        </a>
+        <a
+          class="ride-peek-maps"
+          :href="googlePlaceHref"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          {{ t('detail.openPlace') }}
         </a>
         <button
           type="button"
@@ -267,6 +281,14 @@ function onNavigate() {
 
         <a
           class="nav-btn"
+          :href="googlePlaceHref"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          {{ t('detail.openPlace') }}
+        </a>
+        <a
+          class="nav-btn nav-btn-secondary"
           :href="googleNavHref"
           target="_blank"
           rel="noopener noreferrer"
@@ -504,6 +526,13 @@ dd {
   color: #111;
 }
 
+.nav-btn-secondary {
+  font-weight: 700;
+  font-size: 0.95rem;
+  min-height: 42px;
+  opacity: 0.95;
+}
+
 @media (max-width: 768px) {
   .sheet-backdrop {
     padding: max(0.4rem, env(safe-area-inset-top, 0px)) 0.5rem
@@ -667,26 +696,31 @@ dd {
 
 .ride-peek-actions {
   display: flex;
+  flex-wrap: wrap;
   gap: 0.4rem;
   margin-top: 0.5rem;
 }
 
 .ride-peek-maps {
-  flex: 1;
+  flex: 1 1 calc(50% - 1.6rem);
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 44px;
-  padding: 0.35rem 0.55rem;
+  min-height: 40px;
+  padding: 0.35rem 0.45rem;
   border: 1px solid var(--border);
   background: #fff;
   color: #111;
   font: inherit;
-  font-size: 0.88rem;
+  font-size: 0.78rem;
   font-weight: 800;
   text-decoration: none;
   text-align: center;
   box-shadow: var(--shadow);
+}
+
+.ride-peek-nav {
+  background: var(--cream, #f7f3eb);
 }
 
 .ride-peek-fav {
