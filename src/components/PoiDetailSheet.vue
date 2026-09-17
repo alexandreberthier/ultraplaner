@@ -535,64 +535,87 @@ dd {
 
 @media (max-width: 768px) {
   .sheet-backdrop {
-    padding: max(0.4rem, env(safe-area-inset-top, 0px)) 0.5rem
-      max(0.4rem, env(safe-area-inset-bottom, 0px));
+    padding: max(0.35rem, env(safe-area-inset-top, 0px)) 0.55rem
+      max(0.35rem, env(safe-area-inset-bottom, 0px));
+    align-items: flex-end;
   }
 
   .sheet {
     max-width: none;
-    max-height: min(92dvh, 92vh);
+    max-height: min(72dvh, 72vh);
+    border-radius: var(--radius) var(--radius) 0 0;
   }
 
   .sheet-top {
-    padding: 1rem 1rem 0.8rem 1.2rem;
+    padding: 0.65rem 0.75rem 0.5rem 0.9rem;
+    gap: 0.25rem;
   }
 
   .sheet-top h3,
   .rename-input {
-    font-size: 1.5rem;
+    font-size: 1.05rem;
+    line-height: 1.25;
   }
 
   .icon-btn,
   .close {
-    width: 52px;
-    height: 52px;
+    width: 40px;
+    height: 40px;
+    margin: -0.15rem 0 0;
   }
 
   .close {
-    font-size: 2rem;
+    font-size: 1.45rem;
+    margin-right: -0.1rem;
   }
 
   .icon-btn {
-    font-size: 1.45rem;
+    font-size: 1.1rem;
   }
 
   .actions {
-    padding: 1rem 1.2rem 0.9rem;
-    gap: 0.75rem;
-  }
-
-  .sheet-scroll {
-    font-size: 1.22rem;
-    padding: 1rem 1.2rem 1.5rem;
-  }
-
-  dt {
-    font-size: 0.95rem;
-  }
-
-  dd {
-    font-size: 1.28rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    padding: 0.55rem 0.85rem 0.5rem;
+    gap: 0.4rem;
   }
 
   .fav-btn {
-    min-height: 64px;
-    font-size: 1.28rem;
+    grid-column: 1 / -1;
+    min-height: 44px;
+    font-size: 0.95rem;
+    padding: 0.55rem 0.7rem;
+  }
+
+  .fav-star {
+    font-size: 1.15em;
   }
 
   .nav-btn {
-    min-height: 56px;
-    font-size: 1.18rem;
+    min-height: 40px;
+    font-size: 0.82rem;
+    padding: 0.45rem 0.4rem;
+    font-weight: 600;
+  }
+
+  .nav-btn-secondary {
+    min-height: 40px;
+    font-size: 0.82rem;
+  }
+
+  .sheet-scroll {
+    font-size: 0.95rem;
+    padding: 0.55rem 0.9rem calc(0.85rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  dt {
+    margin-top: 0.45rem;
+    font-size: 0.7rem;
+  }
+
+  dd {
+    font-size: 0.95rem;
+    font-weight: 650;
   }
 }
 
