@@ -67,8 +67,10 @@ export function elementToPoi(el: OsmElement): Poi | null {
   const lng = el.lon ?? el.center?.lon
   if (lat == null || lng == null) return null
 
-  const addr = [tags['addr:street'], tags['addr:city']].filter(Boolean).join(', ')
-  const name = tags.name ?? tags.brand ?? tags.operator ?? (addr || match.subType)
+  const street = [tags['addr:street'], tags['addr:housenumber']].filter(Boolean).join(' ')
+  const place = [tags['addr:postcode'], tags['addr:city'] || tags['addr:place']].filter(Boolean).join(' ')
+  const address = [street, place].filter(Boolean).join(', ') || undefined
+  const name = tags.name ?? tags.brand ?? tags.operator ?? (address || match.subType)
   const openingHours = tags.opening_hours?.trim() || undefined
 
   return {
@@ -78,6 +80,7 @@ export function elementToPoi(el: OsmElement): Poi | null {
     lat,
     lng,
     subType: match.subType,
+    ...(address ? { address } : {}),
     ...(openingHours ? { openingHours } : {}),
   }
 }

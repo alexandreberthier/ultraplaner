@@ -6,7 +6,7 @@ import { useRideMode } from '../composables/useRideMode'
 import { useRidePosition } from '../composables/useRidePosition'
 import { formatDistance, formatKm, haversineM } from '../services/geo'
 import { poiCategoryEmoji, poiCategoryLabel } from '../utils/poiLabels'
-import { googleMapsDirectionsUrl, googleMapsPlaceUrl } from '../services/navigation'
+import { googleMapsDirectionsUrl, googleMapsPlaceUrl, reverseGeocodeAddress } from '../services/navigation'
 import { hasOsmOpeningHours, openStatusAtEta } from '../utils/openingHours'
 
 const store = useMapStore()
@@ -126,12 +126,10 @@ onUnmounted(() => {
 const googlePlaceHref = computed(() => {
   const poi = store.selectedPoi
   if (!poi) return '#'
-  return googleMapsPlaceUrl(
-    poi.lat,
-    poi.lng,
-    displayName.value || poi.name,
-    poiCategoryLabel(poi.category)
-  )
+  return googleMapsPlaceUrl(poi.lat, poi.lng, displayName.value || poi.name, {
+    categoryLabel: poiCategoryLabel(poi.category),
+    address: poi.address,
+  })
 })
 
 const googleNavHref = computed(() => {
@@ -139,6 +137,30 @@ const googleNavHref = computed(() => {
   if (!poi) return '#'
   return googleMapsDirectionsUrl(poi.lat, poi.lng)
 })
+
+const placeLinkBusy = ref(false)
+
+async function onOpenPlace(e: Event) {
+  const poi = store.selectedPoi
+  if (!poi) return
+  // Already have OSM address → sync href is enough
+  if (poi.address?.trim()) return
+  e.preventDefault()
+  if (placeLinkBusy.value) return
+  placeLinkBusy.value = true
+  try {
+    const resolved = await reverseGeocodeAddress(poi.lat, poi.lng)
+    const href = googleMapsPlaceUrl(poi.lat, poi.lng, displayName.value || poi.name, {
+      categoryLabel: poiCategoryLabel(poi.category),
+      address: resolved,
+    })
+    window.open(href, '_blank', 'noopener,noreferrer')
+  } catch {
+    window.open(googlePlaceHref.value, '_blank', 'noopener,noreferrer')
+  } finally {
+    placeLinkBusy.value = false
+  }
+}
 
 const rideDistanceKm = computed(() => {
   const poi = store.selectedPoi
@@ -215,6 +237,7 @@ function onNavigate() {
           :href="googlePlaceHref"
           target="_blank"
           rel="noopener noreferrer"
+          @click="onOpenPlace"
         >
           {{ t('detail.openPlace') }}
         </a>
@@ -289,6 +312,7 @@ function onNavigate() {
           :href="googlePlaceHref"
           target="_blank"
           rel="noopener noreferrer"
+          @click="onOpenPlace"
         >
           {{ t('detail.openPlace') }}
         </a>

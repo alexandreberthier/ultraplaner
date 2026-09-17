@@ -83,6 +83,8 @@ export interface Poi {
   lat: number
   lng: number
   subType?: string
+  /** OSM addr:* summary, e.g. "Passhöhe 1, Semmering" — for Maps matching */
+  address?: string
   /** OSM opening_hours tag, e.g. "Mo-Fr 07:00-18:00; Sa 08:00-12:00" */
   openingHours?: string
   distanceToRouteM?: number
