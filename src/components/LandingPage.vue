@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { defineAsyncComponent, onMounted, onUnmounted, ref } from 'vue'
+import { defineAsyncComponent, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import GpxForm from '../components/GpxForm.vue'
 import TopbarSettings from '../components/TopbarSettings.vue'
@@ -38,18 +38,47 @@ const plannerCanExport = ref(false)
 const nearbyPending = ref(false)
 const nativeApp = isNativeApp()
 const isNarrowPlanBar = ref(false)
+const stickyNavVisible = ref(false)
+const heroStickySentinel = ref<HTMLElement | null>(null)
+let stickyObserver: IntersectionObserver | null = null
 
 function syncNarrowPlanBar() {
   isNarrowPlanBar.value =
     typeof window !== 'undefined' && window.matchMedia('(max-width: 640px)').matches
 }
 
+function bindStickyNavObserver() {
+  stickyObserver?.disconnect()
+  stickyObserver = null
+  if (tab.value === 'plan' || !heroStickySentinel.value) {
+    stickyNavVisible.value = false
+    return
+  }
+  stickyObserver = new IntersectionObserver(
+    ([entry]) => {
+      stickyNavVisible.value = Boolean(entry && !entry.isIntersecting)
+    },
+    { root: null, threshold: 0 }
+  )
+  stickyObserver.observe(heroStickySentinel.value)
+}
+
 onMounted(() => {
   syncNarrowPlanBar()
   window.addEventListener('resize', syncNarrowPlanBar)
+  void nextTick(() => bindStickyNavObserver())
 })
+
 onUnmounted(() => {
   window.removeEventListener('resize', syncNarrowPlanBar)
+  stickyObserver?.disconnect()
+  stickyObserver = null
+})
+
+watch(tab, async () => {
+  stickyNavVisible.value = false
+  await nextTick()
+  bindStickyNavObserver()
 })
 
 function scrollToApp() {
@@ -169,6 +198,35 @@ const garminFitGuidePath = () => garminFitPath(locale.value as AppLocale)
   <div class="landing" :class="{ 'plan-fullscreen': tab === 'plan', 'landing--native': nativeApp }">
     <a href="#app-start" class="skip-link">{{ t('landing.skipToContent') }}</a>
 
+    <header
+      v-if="tab !== 'plan'"
+      class="sticky-nav"
+      :class="{ visible: stickyNavVisible }"
+      :aria-hidden="stickyNavVisible ? undefined : 'true'"
+    >
+      <button type="button" class="brand-lockup sticky-brand" aria-label="UltraPlaner" @click="goStart">
+        <picture>
+          <source
+            srcset="/logo-ultraplaner-64.webp 64w, /logo-ultraplaner-96.webp 96w"
+            sizes="32px"
+            type="image/webp"
+          />
+          <img
+            class="brand-logo sticky-logo"
+            src="/logo-ultraplaner-64.png"
+            alt="UltraPlaner"
+            width="32"
+            height="32"
+            decoding="async"
+          />
+        </picture>
+      </button>
+      <div class="sticky-nav-actions">
+        <RecentRoutesMenu brutal />
+        <TopbarSettings brutal />
+      </div>
+    </header>
+
     <main id="main-content">
     <template v-if="tab === 'plan'">
       <header class="plan-topbar">
@@ -246,6 +304,7 @@ const garminFitGuidePath = () => garminFitPath(locale.value as AppLocale)
               <TopbarSettings brutal />
             </div>
           </div>
+          <div ref="heroStickySentinel" class="hero-sticky-sentinel" aria-hidden="true" />
 
           <div v-if="!nativeApp" class="page-wrap hero-wrap">
             <div class="hero-center">
@@ -295,7 +354,7 @@ const garminFitGuidePath = () => garminFitPath(locale.value as AppLocale)
               role="tab"
               aria-controls="tabpanel-app"
               :aria-selected="tab === 'gpx'"
-              :tabindex="tab === 'gpx' ? 0 : -1"
+              tabindex="0"
               :class="{ active: tab === 'gpx' }"
               @click="tab = 'gpx'"
             >
@@ -308,7 +367,7 @@ const garminFitGuidePath = () => garminFitPath(locale.value as AppLocale)
               class="mode-plan"
               aria-controls="tabpanel-plan"
               aria-selected="false"
-              tabindex="-1"
+              tabindex="0"
               @click="tab = 'plan'"
             >
               {{ t('landing.planRoute') }}
@@ -319,7 +378,7 @@ const garminFitGuidePath = () => garminFitPath(locale.value as AppLocale)
               role="tab"
               aria-controls="tabpanel-app"
               :aria-selected="tab === 'nearby'"
-              :tabindex="tab === 'nearby' ? 0 : -1"
+              tabindex="0"
               :class="{ active: tab === 'nearby' }"
               @click="startNearbyMapFirst"
             >
@@ -610,6 +669,63 @@ const garminFitGuidePath = () => garminFitPath(locale.value as AppLocale)
   align-items: center;
   gap: 0.6rem;
   flex-shrink: 0;
+}
+
+.hero-sticky-sentinel {
+  position: relative;
+  height: 1px;
+  width: 100%;
+  margin: 0;
+  pointer-events: none;
+}
+
+.sticky-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  box-sizing: border-box;
+  min-height: 52px;
+  padding: max(0.4rem, env(safe-area-inset-top, 0px))
+    max(0.75rem, env(safe-area-inset-right, 0px))
+    0.4rem
+    max(0.75rem, env(safe-area-inset-left, 0px));
+  background: #fff;
+  border-bottom: 1px solid var(--border);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+  transform: translateY(-110%);
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    transform 0.22s ease,
+    opacity 0.18s ease;
+}
+
+.sticky-nav.visible {
+  transform: translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.sticky-nav-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.sticky-brand {
+  padding: 0.22rem;
+}
+
+.sticky-logo {
+  height: 2rem;
+  width: 2rem;
 }
 
 .brand-lockup {

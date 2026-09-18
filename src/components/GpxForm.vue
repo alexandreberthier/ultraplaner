@@ -58,19 +58,17 @@ function onDrop(e: DragEvent) {
   const file = e.dataTransfer?.files?.[0]
   if (file?.name.toLowerCase().endsWith('.gpx')) {
     setFile(file)
-    if (fileInput.value) {
-      // Keep native input in sync when possible (not always writable)
-      try {
-        const dt = new DataTransfer()
-        dt.items.add(file)
-        fileInput.value.files = dt.files
-      } catch {
-        /* ignore */
-      }
-    }
+    // Do not assign to input.files — that fires change and double-focuses the overlay input
   } else {
     formError.value = t('gpx.pickGpx')
   }
+}
+
+function onDragLeave(e: DragEvent) {
+  const zone = e.currentTarget as HTMLElement
+  const next = e.relatedTarget as Node | null
+  if (next && zone.contains(next)) return
+  dragOver.value = false
 }
 
 function clearFile() {
@@ -126,8 +124,9 @@ async function createMap() {
       @click="openFilePicker"
       @keydown.enter.prevent="openFilePicker"
       @keydown.space.prevent="openFilePicker"
+      @dragenter.prevent="dragOver = true"
       @dragover.prevent="dragOver = true"
-      @dragleave="dragOver = false"
+      @dragleave="onDragLeave"
       @drop.prevent="onDrop"
     >
       <input
@@ -136,6 +135,7 @@ async function createMap() {
         class="file-input"
         type="file"
         accept=".gpx,application/gpx+xml"
+        tabindex="-1"
         :aria-label="hasFile ? t('gpx.loadedAria', { name: gpxFile?.name }) : t('gpx.pickAria')"
         @change="onPickFile"
         @click.stop
