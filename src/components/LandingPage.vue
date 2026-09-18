@@ -950,6 +950,11 @@ const garminFitGuidePath = () => garminFitPath(locale.value as AppLocale)
   transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
+.mode-tabs button:focus-visible {
+  outline: 2px solid var(--cta);
+  outline-offset: 2px;
+}
+
 .mode-tabs button:last-child {
   border-right: 1px solid var(--border);
 }
