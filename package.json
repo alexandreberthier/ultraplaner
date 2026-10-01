@@ -12,6 +12,7 @@
     "import-dach-pois-pbf": "tsx scripts/import-dach-pois-pbf.ts",
     "import-status": "tsx scripts/import-status.ts",
     "page-stats": "tsx scripts/page-stats.ts",
+    "db:cleanup": "tsx scripts/db-cleanup.ts",
     "verify-austria": "tsx scripts/verify-austria.ts",
     "setup-credentials": "tsx scripts/setup-credentials.ts",
     "deploy": "npm run build && npm run prerender && firebase deploy --only hosting,firestore:rules --project ultracycling-8bd56",

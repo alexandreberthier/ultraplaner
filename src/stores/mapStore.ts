@@ -972,7 +972,7 @@ export const useMapStore = defineStore('map', () => {
         )
       }
 
-      const { record, source } = result
+      const { record, source, needsPoiRefetch } = result
       loadedFromCache.value = source === 'cache'
 
       routeName.value = record.name
@@ -996,11 +996,68 @@ export const useMapStore = defineStore('map', () => {
         poiMap.value.set(p.id, normalizePoiCategory(p))
       }
       syncVisibleCategories()
+      setLoadProgress(80)
+
+      // Slim cloud shares: refill corridor POIs from tiles (IndexedDB keeps full set)
+      if (
+        needsPoiRefetch &&
+        !offline &&
+        !isNearbyMap.value &&
+        routeCoords.value.length >= 2
+      ) {
+        loadStatus.value = tGlobal('store.loadingPois')
+        poisLoading.value = true
+        try {
+          const { pois } = await fetchPoisForRoute(
+            routeCoords.value,
+            routePoints.value,
+            poiRadiusM.value,
+            activeCategories.value,
+            mapFetchProgress,
+            { offlineMapId: id }
+          )
+          if (gen !== loadGeneration) return
+          const next = new Map<string, Poi>()
+          for (const p of pois) {
+            next.set(p.id, normalizePoiCategory(p))
+          }
+          // Keep ★ favorites even if a tile is temporarily missing
+          for (const p of record.pois) {
+            if (favorites.value.has(p.id) && !next.has(p.id)) {
+              next.set(p.id, normalizePoiCategory(p))
+            }
+          }
+          poiMap.value = next
+          syncVisibleCategories()
+          void putOfflineMap({
+            id: record.id,
+            name: routeName.value,
+            createdAt: record.createdAt,
+            expiresAt: record.expiresAt,
+            routeCoords: routeCoords.value,
+            routePoints: routePoints.value,
+            poiRadiusM: poiRadiusM.value,
+            categories: activeCategories.value,
+            pois: Array.from(next.values()),
+            favorites: Array.from(favorites.value),
+            favoriteMeta: favoriteMetaRecord(),
+            controlPoints: controlPoints.value,
+            surfaceSummary: surfaceSummary.value ?? undefined,
+          })
+        } catch (refetchErr) {
+          console.warn('[maps] POI-Refetch nach Share-Load fehlgeschlagen:', refetchErr)
+        } finally {
+          if (gen === loadGeneration) {
+            poisLoading.value = false
+          }
+        }
+      }
+
       setLoadProgress(95)
 
       const loadMs = performance.now() - t0
       console.info(
-        `[perf] share-load=${Math.round(loadMs)}ms pois=${record.pois.length} source=${source}`
+        `[perf] share-load=${Math.round(loadMs)}ms pois=${poiMap.value.size} source=${source} refetch=${needsPoiRefetch}`
       )
 
       setLoadProgress(100)
@@ -1103,7 +1160,7 @@ export const useMapStore = defineStore('map', () => {
       id: savedMapId.value,
       name: routeName.value,
       createdAt: new Date().toISOString(),
-      expiresAt: new Date(Date.now() + 180 * 24 * 60 * 60 * 1000).toISOString(),
+      expiresAt: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(),
       routeCoords: routeCoords.value,
       routePoints: routePoints.value,
       poiRadiusM: poiRadiusM.value,

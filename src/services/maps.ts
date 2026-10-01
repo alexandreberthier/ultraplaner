@@ -28,7 +28,37 @@ export interface PoiFetchResult {
 }
 
 const FETCH_CHUNK = 100
-const MAP_TTL_MS = 180 * 24 * 60 * 60 * 1000
+/** Share links stay online this long (was 180d — shorter frees maps storage sooner). */
+const MAP_TTL_MS = 90 * 24 * 60 * 60 * 1000
+
+/** Cloud payload: only ★ favorites as full POIs (re-fetched from tiles on open). */
+function mapPayload(data: {
+  routeCoords: [number, number][]
+  routePoints: RoutePoint[]
+  poiRadiusM: number
+  categories: PoiCategory[]
+  pois: Poi[]
+  favorites: string[]
+  favoriteMeta?: Record<string, FavoriteMeta>
+  controlPoints?: ControlPoint[]
+  surfaceSummary?: RouteSurfaceSummary | null
+}) {
+  const favIds = new Set(data.favorites)
+  const favoritePois = data.pois.filter((p) => favIds.has(p.id))
+  return {
+    routeCoords: data.routeCoords,
+    routePoints: data.routePoints,
+    poiRadiusM: data.poiRadiusM,
+    categories: data.categories,
+    pois: favoritePois,
+    /** Loader re-fetches corridor POIs from tiles when this is set. */
+    poisCloud: 'favorites' as const,
+    favorites: data.favorites,
+    favoriteMeta: data.favoriteMeta,
+    controlPoints: data.controlPoints ?? [],
+    ...(data.surfaceSummary ? { surfaceSummary: data.surfaceSummary } : {}),
+  }
+}
 
 export async function fetchTilesByIds(
   tileIds: string[],
@@ -160,6 +190,8 @@ interface MapRow {
     poiRadiusM: number
     categories: PoiCategory[]
     pois: Poi[]
+    /** When set, corridor POIs are re-fetched from tiles on open. */
+    poisCloud?: 'favorites'
     favorites: string[]
     favoriteMeta?: Record<string, FavoriteMeta>
     controlPoints?: ControlPoint[]
@@ -182,30 +214,6 @@ function rowToRecord(row: MapRow): SavedMapRecord {
     favoriteMeta: row.payload.favoriteMeta,
     controlPoints: row.payload.controlPoints ?? [],
     surfaceSummary: row.payload.surfaceSummary,
-  }
-}
-
-function mapPayload(data: {
-  routeCoords: [number, number][]
-  routePoints: RoutePoint[]
-  poiRadiusM: number
-  categories: PoiCategory[]
-  pois: Poi[]
-  favorites: string[]
-  favoriteMeta?: Record<string, FavoriteMeta>
-  controlPoints?: ControlPoint[]
-  surfaceSummary?: RouteSurfaceSummary | null
-}) {
-  return {
-    routeCoords: data.routeCoords,
-    routePoints: data.routePoints,
-    poiRadiusM: data.poiRadiusM,
-    categories: data.categories,
-    pois: data.pois,
-    favorites: data.favorites,
-    favoriteMeta: data.favoriteMeta,
-    controlPoints: data.controlPoints ?? [],
-    ...(data.surfaceSummary ? { surfaceSummary: data.surfaceSummary } : {}),
   }
 }
 
@@ -304,6 +312,8 @@ export type LoadMapSource = 'network' | 'cache'
 export interface LoadMapResult {
   record: SavedMapRecord
   source: LoadMapSource
+  /** Cloud payload has favorites only — refetch corridor POIs while online. */
+  needsPoiRefetch: boolean
 }
 
 export async function loadMap(mapId: string): Promise<LoadMapResult | null> {
@@ -312,7 +322,7 @@ export async function loadMap(mapId: string): Promise<LoadMapResult | null> {
   if (offline) {
     const cached = await getOfflineMap(mapId)
     if (!cached) return null
-    return { record: cached, source: 'cache' }
+    return { record: cached, source: 'cache', needsPoiRefetch: false }
   }
 
   try {
@@ -325,21 +335,41 @@ export async function loadMap(mapId: string): Promise<LoadMapResult | null> {
     if (error) throw new Error(`Karte laden: ${error.message}`)
     if (!data) {
       const cached = await getOfflineMap(mapId)
-      return cached ? { record: cached, source: 'cache' } : null
+      return cached ? { record: cached, source: 'cache', needsPoiRefetch: false } : null
     }
 
     const row = data as MapRow
     if (new Date(row.expires_at).getTime() < Date.now()) {
       const cached = await getOfflineMap(mapId)
-      return cached ? { record: cached, source: 'cache' } : null
+      return cached ? { record: cached, source: 'cache', needsPoiRefetch: false } : null
     }
 
     const record = rowToRecord(row)
-    void putOfflineMap(record)
-    return { record, source: 'network' }
+    const needsPoiRefetch = row.payload.poisCloud === 'favorites'
+    // Slim cloud payloads must not overwrite a fuller IndexedDB cache
+    if (!needsPoiRefetch) {
+      void putOfflineMap(record)
+    } else {
+      const cached = await getOfflineMap(mapId)
+      if (cached && cached.pois.length > record.pois.length) {
+        return {
+          record: {
+            ...record,
+            pois: cached.pois,
+            favorites: record.favorites,
+            favoriteMeta: record.favoriteMeta ?? cached.favoriteMeta,
+            controlPoints: record.controlPoints ?? cached.controlPoints,
+            surfaceSummary: record.surfaceSummary ?? cached.surfaceSummary,
+          },
+          source: 'network',
+          needsPoiRefetch: true,
+        }
+      }
+    }
+    return { record, source: 'network', needsPoiRefetch }
   } catch (err) {
     const cached = await getOfflineMap(mapId)
-    if (cached) return { record: cached, source: 'cache' }
+    if (cached) return { record: cached, source: 'cache', needsPoiRefetch: false }
     throw err
   }
 }
