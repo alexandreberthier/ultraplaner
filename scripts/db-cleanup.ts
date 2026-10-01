@@ -100,15 +100,22 @@ async function slimMapPayloads(): Promise<{ scanned: number; slimmed: number; by
 
       scanned++
       const payload = (data.payload ?? {}) as MapPayload
-      if (payload.poisCloud === 'favorites') continue
-
       const favorites = Array.isArray(payload.favorites) ? payload.favorites : []
       const pois = Array.isArray(payload.pois) ? payload.pois : []
       const favSet = new Set(favorites)
-      const slimPois = pois.filter((p) => favSet.has(p.id))
+      const slimPois =
+        payload.poisCloud === 'favorites' ? pois : pois.filter((p) => favSet.has(p.id))
+      const needsSlim =
+        payload.poisCloud !== 'favorites' ||
+        slimPois.length !== pois.length ||
+        'routeCoords' in payload
+      if (!needsSlim) continue
 
       const before = JSON.stringify(payload).length
-      const next = { ...payload, pois: slimPois, poisCloud: 'favorites' as const }
+      const { routeCoords: _drop, ...withoutCoords } = payload as MapPayload & {
+        routeCoords?: unknown
+      }
+      const next = { ...withoutCoords, pois: slimPois, poisCloud: 'favorites' as const }
       const after = JSON.stringify(next).length
       const { error: upErr } = await sb.from('maps').update({ payload: next }).eq('id', id)
       if (upErr) {

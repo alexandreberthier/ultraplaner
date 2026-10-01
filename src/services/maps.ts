@@ -46,7 +46,7 @@ function mapPayload(data: {
   const favIds = new Set(data.favorites)
   const favoritePois = data.pois.filter((p) => favIds.has(p.id))
   return {
-    routeCoords: data.routeCoords,
+    // routeCoords omitted — rebuilt from routePoints on load (~15–20% smaller payloads)
     routePoints: data.routePoints,
     poiRadiusM: data.poiRadiusM,
     categories: data.categories,
@@ -58,6 +58,10 @@ function mapPayload(data: {
     controlPoints: data.controlPoints ?? [],
     ...(data.surfaceSummary ? { surfaceSummary: data.surfaceSummary } : {}),
   }
+}
+
+function routeCoordsFromPoints(points: RoutePoint[]): [number, number][] {
+  return points.map((p) => [p.lng, p.lat] as [number, number])
 }
 
 export async function fetchTilesByIds(
@@ -185,7 +189,7 @@ interface MapRow {
   created_at: string
   expires_at: string
   payload: {
-    routeCoords: [number, number][]
+    routeCoords?: [number, number][]
     routePoints: RoutePoint[]
     poiRadiusM: number
     categories: PoiCategory[]
@@ -200,13 +204,18 @@ interface MapRow {
 }
 
 function rowToRecord(row: MapRow): SavedMapRecord {
+  const routePoints = row.payload.routePoints ?? []
+  const routeCoords =
+    row.payload.routeCoords?.length
+      ? row.payload.routeCoords
+      : routeCoordsFromPoints(routePoints)
   return {
     id: row.id,
     name: row.name,
     createdAt: row.created_at,
     expiresAt: row.expires_at,
-    routeCoords: row.payload.routeCoords,
-    routePoints: row.payload.routePoints,
+    routeCoords,
+    routePoints,
     poiRadiusM: row.payload.poiRadiusM,
     categories: row.payload.categories,
     pois: row.payload.pois,
