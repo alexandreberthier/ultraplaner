@@ -62,20 +62,7 @@
         "source": "/fr/raca-ravitaillement/",
         "destination": "/fr/ravitaillement-ultracycling/",
         "type": 301
-      },
-      { "source": "/en", "destination": "/en/", "type": 301 },
-      { "source": "/es", "destination": "/es/", "type": 301 },
-      { "source": "/fr", "destination": "/fr/", "type": 301 },
-      { "source": "/versorgung-ultracycling", "destination": "/versorgung-ultracycling/", "type": 301 },
-      { "source": "/en/ultracycling-supply", "destination": "/en/ultracycling-supply/", "type": 301 },
-      { "source": "/es/avituallamiento-ultracycling", "destination": "/es/avituallamiento-ultracycling/", "type": 301 },
-      { "source": "/fr/ravitaillement-ultracycling", "destination": "/fr/ravitaillement-ultracycling/", "type": 301 },
-      { "source": "/garmin-course-points-fit", "destination": "/garmin-course-points-fit/", "type": 301 },
-      { "source": "/en/garmin-course-points-fit", "destination": "/en/garmin-course-points-fit/", "type": 301 },
-      { "source": "/es/garmin-course-points-fit", "destination": "/es/garmin-course-points-fit/", "type": 301 },
-      { "source": "/fr/garmin-course-points-fit", "destination": "/fr/garmin-course-points-fit/", "type": 301 },
-      { "source": "/datenschutz", "destination": "/datenschutz/", "type": 301 },
-      { "source": "/impressum", "destination": "/impressum/", "type": 301 }
+      }
     ],
     "headers": [
       {
