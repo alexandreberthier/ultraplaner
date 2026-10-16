@@ -2,8 +2,8 @@
  * Prerender SEO pages after Vite build.
  * Writes fully rendered HTML so crawlers see content without executing JS.
  *
- * Soft by default: failures warn and exit 0 so `npm run deploy` still ships.
- * Set PRERENDER_STRICT=1 to fail the process on errors.
+ * Failures exit 1 so deploy does not ship the empty app shell for every URL.
+ * Set PRERENDER_SOFT=1 to warn and continue.
  */
 import { spawn, type ChildProcess } from 'node:child_process'
 import { mkdirSync, writeFileSync } from 'node:fs'
@@ -13,7 +13,6 @@ const PORT = 4179
 const BASE = `http://127.0.0.1:${PORT}`
 const DIST = resolve('dist')
 const SITE = 'https://ultraplaner.com'
-const STRICT = process.env.PRERENDER_STRICT === '1'
 
 type PageKind = 'landing' | 'guide' | 'legal'
 
@@ -195,13 +194,14 @@ function insertGuideHreflang(html: string, map: Record<string, string>): string 
   return html.replace(/<\/head>/i, `${tags}\n</head>`)
 }
 
-function insertWebPageLd(html: string, opts: { name: string; description: string; url: string }): string {
+function insertWebPageLd(html: string, opts: { name: string; description: string; url: string; lang: string }): string {
   const ld = {
     '@context': 'https://schema.org',
     '@type': 'WebPage',
     name: opts.name,
     description: opts.description,
     url: opts.url,
+    inLanguage: opts.lang,
     isPartOf: { '@type': 'WebSite', name: 'UltraPlaner', url: `${SITE}/` },
   }
   const tag = `<script type="application/ld+json">${JSON.stringify(ld)}</script>`
@@ -242,6 +242,7 @@ function patchHtml(html: string, entry: PageEntry): string {
       name: titleMatch?.[1]?.trim() || 'UltraPlaner',
       description: descMatch?.[1]?.trim() || '',
       url: canonical,
+      lang: entry.lang,
     })
   } else {
     out = stripLandingLdJson(out)
@@ -253,12 +254,14 @@ function patchHtml(html: string, entry: PageEntry): string {
       name: titleMatch?.[1]?.trim() || 'UltraPlaner',
       description: descMatch?.[1]?.trim() || '',
       url: canonical,
+      lang: entry.lang,
     })
   }
 
-  if (!out.includes('data-prerendered')) {
-    out = out.replace('<body', `<body data-prerendered="${entry.kind}"`)
-  }
+  out = out.replace(/<body\b([^>]*)>/i, (_m, attrs: string) => {
+    const cleaned = attrs.replace(/\sdata-prerendered=(["']).*?\1/i, '')
+    return `<body data-prerendered="${entry.kind}"${cleaned}>`
+  })
   return out
 }
 
@@ -309,6 +312,12 @@ async function main() {
       await wait(500)
 
       const html = patchHtml(await page.content(), entry)
+      const canonical = `${SITE}${entry.path === '/' ? '/' : entry.path}`
+      if (!html.includes(`href="${canonical}"`)) {
+        throw new Error(`Canonical fehlt in ${entry.path}`)
+      }
+      if (!/<h1[\s>]/i.test(html)) throw new Error(`H1 fehlt in ${entry.path}`)
+      if (!/<a\s[^>]*href=/i.test(html)) throw new Error(`Keine ausgehenden Links in ${entry.path}`)
       const outPath = resolve(DIST, entry.out)
       mkdirSync(dirname(outPath), { recursive: true })
       writeFileSync(outPath, html, 'utf8')
@@ -323,7 +332,7 @@ async function main() {
     if (preview) stopPreview(preview)
   }
 
-  if (failed && STRICT) process.exit(1)
+  if (failed && process.env.PRERENDER_SOFT !== '1') process.exit(1)
   process.exit(0)
 }
 

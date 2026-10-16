@@ -81,7 +81,13 @@ export default defineConfig(({ mode }) => {
           navigateFallback: '/index.html',
           // Never serve a precached shell for these — always network (Firebase SPA rewrite).
           // Stale shells after deploy caused white screens on /routes/import/:id (QR transfer).
-          navigateFallbackDenylist: [/^\/oauth\//, /^\/routes\/import\//],
+          navigateFallbackDenylist: [
+            /^\/oauth\//,
+            /^\/routes\/import\//,
+            /^\/__\//,
+            /^\/(en|es|fr)(\/|$)/,
+            /^\/(versorgung-ultracycling|datenschutz|impressum|garmin-course-points-fit)(\/|$)/,
+          ],
           runtimeCaching: [
             // Never stick on a precached shell after deploy — network wins for documents
             {

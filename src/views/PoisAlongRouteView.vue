@@ -1,14 +1,13 @@
 <script setup lang="ts">
 import { onMounted, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useRouter } from 'vue-router'
 import { localeHomePath, type AppLocale } from '../i18n'
 import { applyGuideSeo } from '../composables/useDocumentSeo'
 import TopbarSettings from '../components/TopbarSettings.vue'
+import LocaleLinks from '../components/LocaleLinks.vue'
 import '../styles/guidePage.css'
 
 const { t, locale } = useI18n()
-const router = useRouter()
 
 function applySeo() {
   applyGuideSeo(locale.value as AppLocale)
@@ -17,21 +16,14 @@ function applySeo() {
 onMounted(applySeo)
 watch(locale, applySeo)
 
-function goHome() {
-  void router.push(localeHomePath(locale.value as AppLocale))
-}
-
-function goStartApp() {
-  void router.push(`${localeHomePath(locale.value as AppLocale)}#app-start`)
-}
 </script>
 
 <template>
   <div class="guide-page">
     <header class="guide-top">
-      <button type="button" class="back-btn" @click="goHome">
+      <router-link class="back-btn" :to="localeHomePath(locale as AppLocale)">
         {{ t('landing.backHome') }}
-      </button>
+      </router-link>
       <TopbarSettings brutal force-menu />
     </header>
 
@@ -64,9 +56,9 @@ function goStartApp() {
         <p>{{ t('landing.poiGuide.coverBody') }}</p>
 
         <p class="cta-wrap">
-          <button type="button" class="cta-primary" @click="goStartApp">
+          <router-link class="cta-primary" :to="`${localeHomePath(locale as AppLocale)}#app-start`">
             {{ t('landing.poiGuide.cta') }}
-          </button>
+          </router-link>
         </p>
       </article>
 
@@ -78,6 +70,7 @@ function goStartApp() {
         <router-link to="/datenschutz/">{{ t('legal.privacy') }}</router-link>
         ·
         <a href="https://codedbyalex.dev/" target="_blank" rel="noopener noreferrer">{{ t('legal.portfolio') }}</a>
+        <LocaleLinks />
       </footer>
     </main>
   </div>

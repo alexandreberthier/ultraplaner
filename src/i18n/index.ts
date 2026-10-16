@@ -78,10 +78,41 @@ export function localeFromPath(pathname: string): AppLocale | null {
   return null
 }
 
+export function cleanPathname(pathname: string): string {
+  return pathname.replace(/\/+$/, '') || '/'
+}
+
 export function isLocaleHomePath(pathname: string): boolean {
-  const clean = pathname.replace(/\/+$/, '') || '/'
+  const clean = cleanPathname(pathname)
   if (clean === '/') return true
   return (PATH_LOCALES as readonly string[]).some((l) => clean === `/${l}`)
+}
+
+const SUPPLY_CLEAN_PATHS = new Set([
+  '/versorgung-ultracycling',
+  '/en/ultracycling-supply',
+  '/es/avituallamiento-ultracycling',
+  '/fr/ravitaillement-ultracycling',
+  '/pois-entlang-der-route',
+  '/en/pois-along-route',
+  '/es/pois-en-la-ruta',
+  '/fr/pois-sur-la-route',
+])
+
+const GARMIN_CLEAN_PATHS = new Set([
+  '/garmin-course-points-fit',
+  '/en/garmin-course-points-fit',
+  '/es/garmin-course-points-fit',
+  '/fr/garmin-course-points-fit',
+])
+
+/** Same document in another language, or null when the page has no locale variant. */
+export function localeVariantPath(pathname: string, locale: AppLocale): string | null {
+  const clean = cleanPathname(pathname)
+  if (SUPPLY_CLEAN_PATHS.has(clean)) return poisAlongRoutePath(locale)
+  if (GARMIN_CLEAN_PATHS.has(clean)) return garminFitPath(locale)
+  if (isLocaleHomePath(pathname)) return localeHomePath(locale)
+  return null
 }
 
 function detectLocale(): AppLocale {

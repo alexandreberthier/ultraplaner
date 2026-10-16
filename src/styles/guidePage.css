@@ -18,6 +18,8 @@
 }
 
 .guide-page .back-btn {
+  display: inline-block;
+  text-decoration: none;
   border: 1px solid transparent;
   background: var(--cta);
   border-radius: var(--radius);
@@ -87,6 +89,8 @@
 }
 
 .guide-page .cta-primary {
+  display: inline-block;
+  text-decoration: none;
   border-radius: var(--radius);
   padding: 0.85rem 1.4rem;
   font-size: 0.92rem;

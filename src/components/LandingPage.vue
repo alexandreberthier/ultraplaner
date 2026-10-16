@@ -6,6 +6,7 @@ import TopbarSettings from '../components/TopbarSettings.vue'
 import RecentRoutesMenu from '../components/RecentRoutesMenu.vue'
 import FeedbackForm from '../components/FeedbackForm.vue'
 import { localeHomePath, poisAlongRoutePath, garminFitPath, type AppLocale } from '../i18n'
+import LocaleLinks from './LocaleLinks.vue'
 import { useRouter } from 'vue-router'
 import { useMapStore } from '../stores/mapStore'
 import {
@@ -494,6 +495,7 @@ const garminFitGuidePath = () => garminFitPath(locale.value as AppLocale)
             ·
             <a href="https://codedbyalex.dev/" target="_blank" rel="noopener noreferrer">{{ t('legal.portfolio') }}</a>
           </p>
+          <LocaleLinks />
         </footer>
       </div>
     </template>

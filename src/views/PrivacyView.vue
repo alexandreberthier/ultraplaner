@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n'
 import { localeHomePath, type AppLocale } from '../i18n'
 import { applyLegalSeo } from '../composables/useDocumentSeo'
 import TopbarSettings from '../components/TopbarSettings.vue'
+import LocaleLinks from '../components/LocaleLinks.vue'
 import ProtectedEmail from '../components/ProtectedEmail.vue'
 import '../styles/legalPage.css'
 
@@ -654,6 +655,7 @@ onMounted(() => {
         <router-link to="/versorgung-ultracycling/">{{ t('legal.poisGuide') }}</router-link>
         ·
         <a href="https://codedbyalex.dev/" target="_blank" rel="noopener noreferrer">{{ t('legal.portfolio') }}</a>
+        <LocaleLinks />
       </footer>
     </article>
   </div>

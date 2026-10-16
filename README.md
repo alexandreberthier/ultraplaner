@@ -26,7 +26,7 @@ npm run deploy
 ```
 
 Deploy = `build` → **Prerender** (Landing DE/EN/ES/FR) → Firebase Hosting.  
-Prerender ist soft: schlägt es fehl, wird nur gewarnt und trotzdem deployed. Strikt: `PRERENDER_STRICT=1 npm run prerender`.  
+Prerender-Fehler stoppen den Deploy, damit nicht wieder die leere App-Shell für alle URLs ausgeliefert wird. Notfall: `PRERENDER_SOFT=1 npm run prerender`.  
 Einmalig Browser: `npx playwright install chromium`
 
 Nach Schema-Änderungen an Share-Maps einmal `supabase/maps.sql` im Supabase SQL Editor ausführen (Write-Token / Rate-Limits).

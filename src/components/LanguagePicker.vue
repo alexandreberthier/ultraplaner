@@ -1,13 +1,10 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 import {
   LOCALE_LABELS,
   SUPPORTED_LOCALES,
-  garminFitPath,
-  isLocaleHomePath,
-  localeHomePath,
-  poisAlongRoutePath,
+  localeVariantPath,
   setAppLocale,
   type AppLocale,
 } from '../i18n'
@@ -25,50 +22,13 @@ withDefaults(
 
 const { locale, t } = useI18n()
 const route = useRoute()
-const router = useRouter()
 
-function cleanPath(path: string): string {
-  return path.replace(/\/+$/, '') || '/'
-}
-
-function isPoisGuidePath(path: string): boolean {
-  const clean = cleanPath(path)
-  return (
-    clean === '/versorgung-ultracycling' ||
-    clean === '/en/ultracycling-supply' ||
-    clean === '/es/avituallamiento-ultracycling' ||
-    clean === '/fr/ravitaillement-ultracycling' ||
-    clean === '/pois-entlang-der-route' ||
-    clean === '/en/pois-along-route' ||
-    clean === '/es/pois-en-la-ruta' ||
-    clean === '/fr/pois-sur-la-route'
-  )
-}
-
-function isGarminFitGuidePath(path: string): boolean {
-  const clean = cleanPath(path)
-  return (
-    clean === '/garmin-course-points-fit' ||
-    clean === '/en/garmin-course-points-fit' ||
-    clean === '/es/garmin-course-points-fit' ||
-    clean === '/fr/garmin-course-points-fit'
-  )
+function variantPath(code: AppLocale): string | null {
+  return localeVariantPath(route.path, code)
 }
 
 function pick(code: AppLocale) {
   if (locale.value !== code) setAppLocale(code)
-  if (isLocaleHomePath(route.path)) {
-    const next = localeHomePath(code)
-    if (route.path !== next && route.path !== next.replace(/\/$/, '')) {
-      void router.replace(next)
-    }
-  } else if (isPoisGuidePath(route.path)) {
-    const next = poisAlongRoutePath(code)
-    if (cleanPath(route.path) !== cleanPath(next)) void router.replace(next)
-  } else if (isGarminFitGuidePath(route.path)) {
-    const next = garminFitPath(code)
-    if (cleanPath(route.path) !== cleanPath(next)) void router.replace(next)
-  }
 }
 </script>
 
@@ -79,21 +39,36 @@ function pick(code: AppLocale) {
     role="group"
     :aria-label="t('lang.label')"
   >
-    <button
-      v-for="code in SUPPORTED_LOCALES"
-      :key="code"
-      type="button"
-      class="lang-btn"
-      :class="{ active: locale === code }"
-      :aria-label="LOCALE_LABELS[code]"
-      :aria-pressed="locale === code"
-      :title="LOCALE_LABELS[code]"
-      @click="pick(code)"
-    >
-      <LocaleFlag :locale="code" />
-      <span v-if="fill" class="lang-name">{{ LOCALE_LABELS[code] }}</span>
-      <span v-else-if="!compact" class="lang-code">{{ code.toUpperCase() }}</span>
-    </button>
+    <template v-for="code in SUPPORTED_LOCALES" :key="code">
+      <router-link
+        v-if="variantPath(code)"
+        :to="variantPath(code)!"
+        class="lang-btn"
+        :class="{ active: locale === code }"
+        :aria-label="LOCALE_LABELS[code]"
+        :aria-current="locale === code ? 'page' : undefined"
+        :title="LOCALE_LABELS[code]"
+        @click="pick(code)"
+      >
+        <LocaleFlag :locale="code" />
+        <span v-if="fill" class="lang-name">{{ LOCALE_LABELS[code] }}</span>
+        <span v-else-if="!compact" class="lang-code">{{ code.toUpperCase() }}</span>
+      </router-link>
+      <button
+        v-else
+        type="button"
+        class="lang-btn"
+        :class="{ active: locale === code }"
+        :aria-label="LOCALE_LABELS[code]"
+        :aria-pressed="locale === code"
+        :title="LOCALE_LABELS[code]"
+        @click="pick(code)"
+      >
+        <LocaleFlag :locale="code" />
+        <span v-if="fill" class="lang-name">{{ LOCALE_LABELS[code] }}</span>
+        <span v-else-if="!compact" class="lang-code">{{ code.toUpperCase() }}</span>
+      </button>
+    </template>
   </div>
 </template>
 
@@ -118,6 +93,7 @@ function pick(code: AppLocale) {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  text-decoration: none;
   gap: 0.4rem;
   min-width: 2.85rem;
   min-height: 2.5rem;

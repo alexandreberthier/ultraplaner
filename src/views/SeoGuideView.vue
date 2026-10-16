@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 import {
   localeHomePath,
   poisAlongRoutePath,
@@ -10,6 +10,7 @@ import {
 } from '../i18n'
 import { applyTopicGuideSeo } from '../composables/useDocumentSeo'
 import TopbarSettings from '../components/TopbarSettings.vue'
+import LocaleLinks from '../components/LocaleLinks.vue'
 import '../styles/guidePage.css'
 
 type Section =
@@ -18,7 +19,6 @@ type Section =
 
 const { t, locale } = useI18n()
 const route = useRoute()
-const router = useRouter()
 
 const guideKind = computed(() => route.meta.guideKind as SeoGuideKind)
 const i18nKey = computed(() => `landing.${guideKind.value}`)
@@ -38,14 +38,6 @@ function applySeo() {
 onMounted(applySeo)
 watch([locale, guideKind], applySeo)
 
-function goHome() {
-  void router.push(localeHomePath(locale.value as AppLocale))
-}
-
-function goStartApp() {
-  void router.push(`${localeHomePath(locale.value as AppLocale)}#app-start`)
-}
-
 const related = computed(() => {
   const loc = locale.value as AppLocale
   return [{ to: poisAlongRoutePath(loc), label: t('landing.garminFitGuide.relatedSupply') }]
@@ -55,9 +47,9 @@ const related = computed(() => {
 <template>
   <div class="guide-page">
     <header class="guide-top">
-      <button type="button" class="back-btn" @click="goHome">
+      <router-link class="back-btn" :to="localeHomePath(locale as AppLocale)">
         {{ t('landing.backHome') }}
-      </button>
+      </router-link>
       <TopbarSettings brutal force-menu />
     </header>
 
@@ -77,9 +69,9 @@ const related = computed(() => {
         </template>
 
         <p class="cta-wrap">
-          <button type="button" class="cta-primary" @click="goStartApp">
+          <router-link class="cta-primary" :to="`${localeHomePath(locale as AppLocale)}#app-start`">
             {{ t(`${i18nKey}.cta`) }}
-          </button>
+          </router-link>
         </p>
 
         <nav class="guide-related" :aria-label="t(`${i18nKey}.relatedLabel`)">
@@ -99,6 +91,7 @@ const related = computed(() => {
         <a href="https://codedbyalex.dev/" target="_blank" rel="noopener noreferrer">{{
           t('legal.portfolio')
         }}</a>
+        <LocaleLinks />
       </footer>
     </main>
   </div>

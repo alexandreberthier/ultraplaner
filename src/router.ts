@@ -112,6 +112,12 @@ const router = createRouter({
       name: 'route-import',
       component: () => import('./views/RouteImportView.vue'),
     },
+    // Firebase reserved namespace. A client redirect made Google treat /__/ as a redirect page.
+    {
+      path: '/__/:pathMatch(.*)*',
+      name: 'reserved-path',
+      component: () => import('./views/ReservedPathView.vue'),
+    },
     // Avoid blank RouterView if a stale PWA shell hits an unknown path
     {
       path: '/:pathMatch(.*)*',

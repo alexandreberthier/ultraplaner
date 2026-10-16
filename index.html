@@ -117,8 +117,12 @@
             "image": "https://ultraplaner.com/og-image.jpg?v=3",
             "offers": {
               "@type": "Offer",
-              "price": 0,
-              "priceCurrency": "EUR"
+              "price": "0",
+              "priceCurrency": "EUR",
+              "areaServed": {
+                "@type": "Place",
+                "name": "Europe"
+              }
             },
             "featureList": [
               "GPX Import",
@@ -131,10 +135,6 @@
               "GPX und FIT Export",
               "Spickzettel drucken"
             ],
-            "areaServed": {
-              "@type": "Place",
-              "name": "Europe"
-            },
             "isAccessibleForFree": true
           },
           {
@@ -235,8 +235,18 @@
     <div id="app"></div>
     <noscript>
       <main style="max-width:720px;margin:2rem auto;padding:0 1rem;font-family:system-ui,sans-serif;line-height:1.5;color:#1a1a1a">
-        <p style="font-size:1.5rem;font-weight:700;margin:0 0 1rem">
+        <h1 style="font-size:1.5rem;font-weight:700;margin:0 0 1rem">
           UltraPlaner – Ultracycling Routenplanung mit Versorgungspunkten
+        </h1>
+        <p>
+          <a href="/">Deutsch</a>
+          · <a href="/en/">English</a>
+          · <a href="/es/">Español</a>
+          · <a href="/fr/">Français</a>
+          · <a href="/versorgung-ultracycling/">Versorgung</a>
+          · <a href="/garmin-course-points-fit/">Garmin FIT</a>
+          · <a href="/impressum/">Impressum</a>
+          · <a href="/datenschutz/">Datenschutz</a>
         </p>
         <p>
           Plane deine Ultracycling-Route: GPX laden oder Route zeichnen. UltraPlaner zeigt Versorgungspunkte,

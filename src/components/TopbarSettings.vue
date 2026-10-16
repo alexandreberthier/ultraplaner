@@ -54,7 +54,7 @@ function onInstallClick() {
 
 function onPanelInteract(e: MouseEvent) {
   const el = e.target as HTMLElement | null
-  if (el?.closest('button')) close()
+  if (el?.closest('button, a')) close()
 }
 
 function onDocClick(e: MouseEvent) {
