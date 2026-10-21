@@ -15,7 +15,7 @@ onMounted(() => {
   applyLegalSeo({
     title: 'Impressum – UltraPlaner',
     description:
-      'Impressum von UltraPlaner: Medieninhaber Alexandre Berthier (Wien), Kontakt über Formular oder geschützte E-Mail sowie Angaben gemäß österreichischem Mediengesetz.',
+      'Impressum von UltraPlaner: Medieninhaber Alexandre Berthier (Salzburg), Kontakt über Formular oder geschützte E-Mail sowie Angaben gemäß österreichischem Mediengesetz.',
     path: '/impressum/',
   })
 })
@@ -37,7 +37,7 @@ onMounted(() => {
 
       <p>
         Alexandre Berthier<br />
-        Wien, Österreich
+        5162 Salzburg, Österreich
       </p>
 
       <p>
@@ -65,7 +65,7 @@ onMounted(() => {
 
       <p>
         Medieninhaber: Alexandre Berthier<br />
-        Wohnort: Wien, Österreich<br />
+        Wohnort: 5162 Salzburg, Österreich<br />
         Gegenstand des Mediums: Bereitstellung einer kostenlosen Webanwendung zur
         Fahrrad-Routenplanung.
       </p>
@@ -74,7 +74,7 @@ onMounted(() => {
 
       <p>
         Alexandre Berthier<br />
-        Wien, Österreich<br />
+        5162 Salzburg, Österreich<br />
         E-Mail:
         <ProtectedEmail />
       </p>

@@ -33,7 +33,7 @@ onMounted(() => {
     <article class="privacy-policy legal-body">
       <h1>Datenschutzerklärung</h1>
 
-      <p class="stand">Stand: 14. September 2026</p>
+      <p class="stand">Stand: 21. Oktober 2026</p>
 
       <h2>1. Verantwortlicher</h2>
 
@@ -41,8 +41,7 @@ onMounted(() => {
 
       <p>
         Alexandre Berthier<br />
-        Adolf-Czettel-Gasse 9<br />
-        1160 Wien<br />
+        5162 Salzburg<br />
         Österreich
       </p>
 
