@@ -108,6 +108,11 @@ const router = createRouter({
       component: () => import('./views/WahooCallbackView.vue'),
     },
     {
+      path: '/oauth/garmin/callback',
+      name: 'garmin-callback',
+      component: () => import('./views/GarminCallbackView.vue'),
+    },
+    {
       path: '/routes/import/:id',
       name: 'route-import',
       component: () => import('./views/RouteImportView.vue'),

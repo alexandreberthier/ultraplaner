@@ -25,6 +25,7 @@ import { useRidePosition } from '../composables/useRidePosition'
 import { setActiveSidebarSection } from '../composables/useSidebarSection'
 import { useWakeLock } from '../composables/useWakeLock'
 import { useWahoo } from '../composables/useWahoo'
+import { useGarmin } from '../composables/useGarmin'
 import { formatKm, haversineM } from '../services/geo'
 import { formatDuration, formatClock, hoursForDistanceKm } from '../utils/eta'
 import { openStatusAtEta, hasOsmOpeningHours, type OpenStatus } from '../utils/openingHours'
@@ -75,6 +76,14 @@ const {
   disconnect: disconnectWahoo,
   sendRoute: sendToWahoo,
 } = useWahoo()
+const {
+  configured: garminConfigured,
+  connected: garminConnected,
+  busy: garminBusy,
+  connect: connectGarmin,
+  disconnect: disconnectGarmin,
+  sendRoute: sendToGarmin,
+} = useGarmin()
 const mapCanvasRef = ref<{
   startLocation: (opts?: { follow?: boolean; heading?: boolean }) => void
   stopLocation: (opts?: { keepError?: boolean }) => void
@@ -788,6 +797,63 @@ function onDocClick(e: MouseEvent) {
                     <p class="export-howto-warn">{{ t('wahoo.cloudNote') }}</p>
                   </details>
                 </template>
+
+                <!-- 4. Garmin Connect -->
+                <template v-if="!store.isNearbyMap && garminConfigured">
+                  <p class="export-section">{{ t('map.deviceGarminCloud') }}</p>
+                  <button
+                    v-if="!garminConnected"
+                    type="button"
+                    class="export-item featured"
+                    role="menuitem"
+                    :disabled="garminBusy"
+                    @click="runExport(() => connectGarmin())"
+                  >
+                    <span class="export-icon">☁</span>
+                    <span class="export-text">
+                      <strong>{{ t('garmin.connect') }}</strong>
+                      <small>{{ t('garmin.connectHint') }}</small>
+                    </span>
+                  </button>
+                  <button
+                    v-if="garminConnected"
+                    type="button"
+                    class="export-item featured"
+                    role="menuitem"
+                    :disabled="garminBusy"
+                    @click="runExport(() => sendToGarmin())"
+                  >
+                    <span class="export-icon">☁</span>
+                    <span class="export-text">
+                      <strong>{{ garminBusy ? t('garmin.sending') : t('garmin.send') }}</strong>
+                      <small>{{ t('garmin.sendHint', { count: favCount }) }}</small>
+                    </span>
+                  </button>
+                  <button
+                    v-if="garminConnected"
+                    type="button"
+                    class="export-item"
+                    role="menuitem"
+                    :disabled="garminBusy"
+                    @click="disconnectGarmin"
+                  >
+                    <span class="export-icon">✕</span>
+                    <span class="export-text">
+                      <strong>{{ t('garmin.disconnect') }}</strong>
+                      <small>{{ t('garmin.disconnectHint') }}</small>
+                    </span>
+                  </button>
+                  <details class="export-howto-details">
+                    <summary>{{ t('map.howToggle') }}</summary>
+                    <ol class="export-howto">
+                      <li>{{ t('map.howGarminCloud1') }}</li>
+                      <li>{{ t('map.howGarminCloud2') }}</li>
+                      <li>{{ t('map.howGarminCloud3') }}</li>
+                      <li>{{ t('map.howGarminCloud4') }}</li>
+                    </ol>
+                    <p class="export-howto-warn">{{ t('garmin.cloudNote') }}</p>
+                  </details>
+                </template>
               </template>
 
               <!-- Fall B: Ohne Favoriten -->
@@ -892,6 +958,52 @@ function onDocClick(e: MouseEvent) {
                     <span class="export-text">
                       <strong>{{ t('wahoo.disconnect') }}</strong>
                       <small>{{ t('wahoo.disconnectHint') }}</small>
+                    </span>
+                  </button>
+                </template>
+
+                <template v-if="!store.isNearbyMap && garminConfigured">
+                  <p class="export-section">{{ t('map.deviceGarminCloud') }}</p>
+                  <button
+                    v-if="!garminConnected"
+                    type="button"
+                    class="export-item featured"
+                    role="menuitem"
+                    :disabled="garminBusy"
+                    @click="runExport(() => connectGarmin())"
+                  >
+                    <span class="export-icon">☁</span>
+                    <span class="export-text">
+                      <strong>{{ t('garmin.connect') }}</strong>
+                      <small>{{ t('garmin.connectHint') }}</small>
+                    </span>
+                  </button>
+                  <button
+                    v-if="garminConnected"
+                    type="button"
+                    class="export-item featured"
+                    role="menuitem"
+                    :disabled="garminBusy"
+                    @click="runExport(() => sendToGarmin())"
+                  >
+                    <span class="export-icon">☁</span>
+                    <span class="export-text">
+                      <strong>{{ garminBusy ? t('garmin.sending') : t('garmin.send') }}</strong>
+                      <small>{{ t('garmin.sendHint', { count: favCount }) }}</small>
+                    </span>
+                  </button>
+                  <button
+                    v-if="garminConnected"
+                    type="button"
+                    class="export-item"
+                    role="menuitem"
+                    :disabled="garminBusy"
+                    @click="disconnectGarmin"
+                  >
+                    <span class="export-icon">✕</span>
+                    <span class="export-text">
+                      <strong>{{ t('garmin.disconnect') }}</strong>
+                      <small>{{ t('garmin.disconnectHint') }}</small>
                     </span>
                   </button>
                 </template>
@@ -1387,6 +1499,59 @@ function onDocClick(e: MouseEvent) {
                 <p class="export-howto-warn">{{ t('wahoo.cloudNote') }}</p>
               </details>
             </template>
+
+            <template v-if="!store.isNearbyMap && garminConfigured">
+              <p class="export-sheet-section">{{ t('map.deviceGarminCloud') }}</p>
+              <button
+                v-if="!garminConnected"
+                type="button"
+                class="export-sheet-btn featured"
+                :disabled="garminBusy"
+                @click="void connectGarmin()"
+              >
+                <span class="sheet-btn-icon">☁</span>
+                <span>
+                  <strong>{{ t('garmin.connect') }}</strong>
+                  <small>{{ t('garmin.connectHint') }}</small>
+                </span>
+              </button>
+              <button
+                v-if="garminConnected"
+                type="button"
+                class="export-sheet-btn featured"
+                :disabled="garminBusy"
+                @click="void sendToGarmin().then(() => closeMobilePanel())"
+              >
+                <span class="sheet-btn-icon">☁</span>
+                <span>
+                  <strong>{{ garminBusy ? t('garmin.sending') : t('garmin.send') }}</strong>
+                  <small>{{ t('garmin.sendHint', { count: favCount }) }}</small>
+                </span>
+              </button>
+              <button
+                v-if="garminConnected"
+                type="button"
+                class="export-sheet-btn"
+                :disabled="garminBusy"
+                @click="disconnectGarmin"
+              >
+                <span class="sheet-btn-icon">✕</span>
+                <span>
+                  <strong>{{ t('garmin.disconnect') }}</strong>
+                  <small>{{ t('garmin.disconnectHint') }}</small>
+                </span>
+              </button>
+              <details class="export-howto-details">
+                <summary>{{ t('map.howToggle') }}</summary>
+                <ol class="export-howto">
+                  <li>{{ t('map.howGarminCloud1') }}</li>
+                  <li>{{ t('map.howGarminCloud2') }}</li>
+                  <li>{{ t('map.howGarminCloud3') }}</li>
+                  <li>{{ t('map.howGarminCloud4') }}</li>
+                </ol>
+                <p class="export-howto-warn">{{ t('garmin.cloudNote') }}</p>
+              </details>
+            </template>
           </template>
 
           <!-- Fall B: Ohne Favoriten -->
@@ -1484,6 +1649,49 @@ function onDocClick(e: MouseEvent) {
                 <span>
                   <strong>{{ t('wahoo.disconnect') }}</strong>
                   <small>{{ t('wahoo.disconnectHint') }}</small>
+                </span>
+              </button>
+            </template>
+
+            <template v-if="!store.isNearbyMap && garminConfigured">
+              <p class="export-sheet-section">{{ t('map.deviceGarminCloud') }}</p>
+              <button
+                v-if="!garminConnected"
+                type="button"
+                class="export-sheet-btn featured"
+                :disabled="garminBusy"
+                @click="void connectGarmin()"
+              >
+                <span class="sheet-btn-icon">☁</span>
+                <span>
+                  <strong>{{ t('garmin.connect') }}</strong>
+                  <small>{{ t('garmin.connectHint') }}</small>
+                </span>
+              </button>
+              <button
+                v-if="garminConnected"
+                type="button"
+                class="export-sheet-btn featured"
+                :disabled="garminBusy"
+                @click="void sendToGarmin().then(() => closeMobilePanel())"
+              >
+                <span class="sheet-btn-icon">☁</span>
+                <span>
+                  <strong>{{ garminBusy ? t('garmin.sending') : t('garmin.send') }}</strong>
+                  <small>{{ t('garmin.sendHint', { count: favCount }) }}</small>
+                </span>
+              </button>
+              <button
+                v-if="garminConnected"
+                type="button"
+                class="export-sheet-btn"
+                :disabled="garminBusy"
+                @click="disconnectGarmin"
+              >
+                <span class="sheet-btn-icon">✕</span>
+                <span>
+                  <strong>{{ t('garmin.disconnect') }}</strong>
+                  <small>{{ t('garmin.disconnectHint') }}</small>
                 </span>
               </button>
             </template>

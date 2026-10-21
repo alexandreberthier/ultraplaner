@@ -16,6 +16,10 @@ dist-ssr
 .credentials-path
 data/
 
+# Garmin vendor docs (confidential) — keep local only
+docs/garmin/*.pdf
+docs/garmin/*.txt
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

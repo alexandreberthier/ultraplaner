@@ -387,6 +387,40 @@ onMounted(() => {
         Datenschutzbestimmungen von Wahoo.
       </p>
 
+      <h3>Garmin Connect Developer Program (Courses API)</h3>
+
+      <p>
+        Optional können Sie Ihren Garmin-Connect-Account mit UltraPlaner verbinden und einen Kurs
+        (Route inkl. Favoriten/Kontrollpunkten als Course Points) in Garmin Connect veröffentlichen.
+        Die Verbindung erfolgt über OAuth 2.0 (PKCE) bei Garmin. Der Token-Tausch (mit Client Secret)
+        läuft über unseren Server (Supabase Edge Function); Access- und Refresh-Token werden danach
+        nur lokal im Browser dieses Geräts gespeichert — ohne eigenes UltraPlaner-Benutzerkonto.
+        Mit „Garmin trennen“ werden die Tokens gelöscht und die Garmin-Registrierung beendet.
+      </p>
+
+      <p>
+        UltraPlaner ruft keine Aktivitäts-, Gesundheits- oder historischen Garmin-Daten ab und
+        verkauft keine Garmin-Daten. Es findet keine Verarbeitung durch KI-Systeme und keine
+        Weitergabe an Dritte zu Werbezwecken statt.
+      </p>
+
+      <p>Beim Verbinden und Senden können insbesondere folgende Daten verarbeitet werden:</p>
+
+      <ul>
+        <li>OAuth-Zustimmung und Token-Austausch mit Garmin (diauth.garmin.com / apis.garmin.com),</li>
+        <li>
+          Kursname, Track-Koordinaten, Höhenmeter sowie optionale Wegpunkte (Favoriten/Kontrollpunkte),
+        </li>
+        <li>technische Metadaten der Anfrage (Zeitpunkt, Status).</li>
+      </ul>
+
+      <p>
+        Die Verarbeitung erfolgt nur nach Ihrer aktiven Handlung (Verbinden / Senden) auf Grundlage
+        von Art. 6 Abs. 1 lit. b DSGVO beziehungsweise Art. 6 Abs. 1 lit. f DSGVO (berechtigtes
+        Interesse an der Geräte-Integration). Anbieter ist Garmin; es gelten die
+        Datenschutzbestimmungen von Garmin.
+      </p>
+
       <h2>7. Wetterdaten</h2>
 
       <h3>Open-Meteo</h3>
