@@ -65,15 +65,16 @@ export default {
       weather: 'Weather at start, mid, finish',
       weatherDesc: 'Temperature, rain chance and wind — timed to your ETA.',
       export: 'Export, control points & cheat sheet',
-      exportDesc: 'Place CP/Sleep, star favorites — then Wahoo cloud, GPX/FIT and cheat sheet.',
+      exportDesc: 'Place CP/Sleep, star favorites — then Wahoo & Garmin cloud, GPX/FIT and cheat sheet.',
       europe: 'All of Europe covered',
       europeDesc: '61 regions, 1.9M+ POIs — Iceland to Greece.',
     },
     updates: {
       title: 'New & fixes',
-      lead: 'August 2026 — recent changes at a glance.',
+      lead: 'October 2026 — recent changes at a glance.',
       kind: { new: 'New', fix: 'Fix', bug: 'Bug' },
       items: {
+        garmin: 'Garmin Connect: send course straight to the cloud',
         coros: 'QR code: export to your phone',
         mobileUx: 'Mobile: larger controls, clearer sheets, only one section open',
         cemeteries: 'Cemeteries as drinking-water sources',
@@ -87,7 +88,7 @@ export default {
       step2: 'Check POIs & mark stops',
       step2desc: 'Set filters, star favorites ★ and tap control points.',
       step3: 'Export & ride',
-      step3desc: 'Wahoo cloud, FIT/USB for Garmin, GPX for COROS Dura — or cheat sheet.',
+      step3desc: 'Wahoo or Garmin cloud, FIT/USB, GPX for COROS — or cheat sheet.',
     },
     stats: {
       regions: '61 regions',

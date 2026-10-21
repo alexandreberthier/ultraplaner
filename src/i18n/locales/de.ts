@@ -65,15 +65,16 @@ export default {
       weather: 'Wetter an Start, Mitte, Ziel',
       weatherDesc: 'Temperatur, Regenrisiko und Wind — passend zu deiner ETA.',
       export: 'Export, Kontrollpunkte & Spickzettel',
-      exportDesc: 'CP/Sleep setzen, Favoriten ★ — Wahoo-Cloud, GPX/FIT und Spickzettel.',
+      exportDesc: 'CP/Sleep setzen, Favoriten ★ — Wahoo- & Garmin-Cloud, GPX/FIT und Spickzettel.',
       europe: 'Ganz Europa abgedeckt',
       europeDesc: '61 Regionen, über 1,9 Mio. POIs — Island bis Griechenland.',
     },
     updates: {
       title: 'Neu & Fixes',
-      lead: 'August 2026 — kurz die letzten Änderungen.',
+      lead: 'Oktober 2026 — kurz die letzten Änderungen.',
       kind: { new: 'Neu', fix: 'Fix', bug: 'Bug' },
       items: {
+        garmin: 'Garmin Connect: Kurs direkt in die Cloud senden',
         coros: 'QR-Code: Export aufs Handy',
         mobileUx: 'Handy: größere Bedienung, klarere Sheets, nur eine offene Sektion',
         cemeteries: 'Friedhöfe als Trinkwasser-Quellen',
@@ -87,7 +88,7 @@ export default {
       step2: 'POIs prüfen & markieren',
       step2desc: 'Filter setzen, Favoriten ★ und Kontrollpunkte tippen.',
       step3: 'Exportieren & losfahren',
-      step3desc: 'Wahoo-Cloud, FIT/USB für Garmin, GPX für COROS Dura — oder Spickzettel.',
+      step3desc: 'Wahoo- oder Garmin-Cloud, FIT/USB, GPX für COROS — oder Spickzettel.',
     },
     stats: {
       regions: '61 Regionen',

@@ -64,15 +64,16 @@
       weather: 'Météo au départ, milieu, arrivée',
       weatherDesc: 'Température, pluie et vent — calés sur votre ETA.',
       export: 'Export, points de contrôle et aide-mémoire',
-      exportDesc: 'CP/Sleep, favoris ★ — cloud Wahoo, GPX/FIT et aide-mémoire.',
+      exportDesc: 'CP/Sleep, favoris ★ — cloud Wahoo et Garmin, GPX/FIT et aide-mémoire.',
       europe: "Toute l'Europe couverte",
       europeDesc: '61 régions, plus de 1,9 M de POIs — Islande à Grèce.',
     },
     updates: {
       title: 'Nouveautés et correctifs',
-      lead: 'Août 2026 — les derniers changements, en bref.',
+      lead: 'Octobre 2026 — les derniers changements, en bref.',
       kind: { new: 'Nouveau', fix: 'Fix', bug: 'Bug' },
       items: {
+        garmin: 'Garmin Connect : envoyer le parcours vers le cloud',
         coros: 'Code QR : export sur le téléphone',
         mobileUx: 'Mobile : commandes plus grandes, feuilles plus claires, une seule section ouverte',
         cemeteries: 'Cimetières comme sources d’eau potable',
@@ -86,7 +87,7 @@
       step2: 'Vérifier les POIs et marquer les arrêts',
       step2desc: 'Filtres, favoris ★ et points de contrôle sur la carte.',
       step3: 'Exporter et partir',
-      step3desc: 'Cloud Wahoo, FIT/USB pour Garmin, GPX pour COROS Dura — ou aide-mémoire.',
+      step3desc: 'Cloud Wahoo ou Garmin, FIT/USB, GPX pour COROS — ou aide-mémoire.',
     },
     stats: {
       regions: '61 régions',

@@ -65,15 +65,16 @@ export default {
       weather: 'Tiempo en salida, mitad y meta',
       weatherDesc: 'Temperatura, lluvia y viento — según tu ETA.',
       export: 'Exportar, puntos de control y chuleta',
-      exportDesc: 'CP/Sleep, favoritos ★ — nube Wahoo, GPX/FIT y chuleta.',
+      exportDesc: 'CP/Sleep, favoritos ★ — nube Wahoo y Garmin, GPX/FIT y chuleta.',
       europe: 'Toda Europa cubierta',
       europeDesc: '61 regiones, más de 1,9 M de POIs — Islandia a Grecia.',
     },
     updates: {
       title: 'Novedades y correcciones',
-      lead: 'Agosto 2026 — cambios recientes, en breve.',
+      lead: 'Octubre 2026 — cambios recientes, en breve.',
       kind: { new: 'Nuevo', fix: 'Fix', bug: 'Bug' },
       items: {
+        garmin: 'Garmin Connect: enviar el curso a la nube',
         coros: 'Código QR: exportar al móvil',
         mobileUx: 'Móvil: controles más grandes, paneles más claros, solo una sección abierta',
         cemeteries: 'Cementerios como fuentes de agua potable',
@@ -87,7 +88,7 @@ export default {
       step2: 'Revisar POIs y marcar paradas',
       step2desc: 'Filtros, favoritos ★ y puntos de control en el mapa.',
       step3: 'Exportar y salir',
-      step3desc: 'Nube Wahoo, FIT/USB para Garmin, GPX para COROS Dura — o chuleta.',
+      step3desc: 'Nube Wahoo o Garmin, FIT/USB, GPX para COROS — o chuleta.',
     },
     stats: {
       regions: '61 regiones',

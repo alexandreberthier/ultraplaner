@@ -181,6 +181,7 @@ const steps = [
 
 const faqs = ['q1', 'q17', 'q3', 'q6', 'q19', 'q13', 'q14', 'q11'] as const
 const updates = [
+  { key: 'garmin', kind: 'new' },
   { key: 'coros', kind: 'new' },
   { key: 'mobileUx', kind: 'new' },
   { key: 'cemeteries', kind: 'new' },
