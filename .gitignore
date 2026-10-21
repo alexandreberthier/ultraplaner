@@ -20,6 +20,9 @@ data/
 docs/garmin/*.pdf
 docs/garmin/*.txt
 
+# Supabase CLI local state
+supabase/.temp/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
