@@ -388,7 +388,7 @@ async function createMap() {
 .radius-row input[type='range']::-webkit-slider-runnable-track {
   height: 10px;
   border-radius: var(--radius);
-  background: #d8d2c6;
+  background: var(--track);
   border: 1px solid var(--border);
   box-sizing: border-box;
 }
@@ -397,7 +397,7 @@ async function createMap() {
 .radius-row input[type='range']::-moz-range-track {
   height: 10px;
   border-radius: var(--radius);
-  background: #d8d2c6;
+  background: var(--track);
   border: 1px solid var(--border);
   box-sizing: border-box;
 }

@@ -564,7 +564,7 @@ const garminFitGuidePath = () => garminFitPath(locale.value as AppLocale)
 .hero-band {
   position: relative;
   isolation: isolate;
-  min-height: min(48vh, 520px);
+  min-height: min(40vh, 440px);
   display: flex;
   align-items: stretch;
   border-bottom: 1px solid var(--border);
@@ -647,7 +647,7 @@ const garminFitGuidePath = () => garminFitPath(locale.value as AppLocale)
   display: flex;
   flex-direction: column;
   width: 100%;
-  min-height: min(48vh, 520px);
+  min-height: min(40vh, 440px);
   padding: 0 0 4.25rem;
 }
 
@@ -700,7 +700,7 @@ const garminFitGuidePath = () => garminFitPath(locale.value as AppLocale)
     max(0.75rem, env(safe-area-inset-left, 0px));
   background: #fff;
   border-bottom: 1px solid var(--border);
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+  box-shadow: none;
   transform: translateY(-110%);
   opacity: 0;
   pointer-events: none;
@@ -824,16 +824,16 @@ const garminFitGuidePath = () => garminFitPath(locale.value as AppLocale)
   letter-spacing: normal;
   text-transform: none;
   cursor: pointer;
-  background: var(--cta);
-  color: var(--cta-text);
-  border: 1px solid transparent;
+  background: #fff;
+  color: #111;
+  border: 1px solid #fff;
   box-shadow: var(--shadow);
   transition: background 0.15s ease;
 }
 
 @media (hover: hover) {
   .cta-primary:hover {
-    background: var(--cta-hover);
+    background: #f0f0f0;
   }
 }
 
@@ -851,7 +851,7 @@ const garminFitGuidePath = () => garminFitPath(locale.value as AppLocale)
   align-items: stretch;
   gap: 1px;
   margin-top: -2.75rem;
-  margin-bottom: 4.25rem;
+  margin-bottom: 1.75rem;
   position: relative;
   z-index: 3;
   background: var(--border);
@@ -943,7 +943,7 @@ const garminFitGuidePath = () => garminFitPath(locale.value as AppLocale)
   border: 1px solid var(--border);
   border-radius: var(--radius);
   background: var(--surface-2);
-  font-weight: 650;
+  font-weight: 600;
   font-size: 0.88rem;
   letter-spacing: normal;
   text-transform: none;
@@ -963,17 +963,21 @@ const garminFitGuidePath = () => garminFitPath(locale.value as AppLocale)
 }
 
 .mode-tabs button.active {
-  background: var(--surface);
-  color: var(--text);
-  border-color: var(--border);
-  box-shadow: var(--shadow);
-  font-weight: 600;
+  background: var(--cta);
+  color: var(--cta-text);
+  border-color: transparent;
+  box-shadow: none;
+  font-weight: 650;
 }
 
 @media (hover: hover) {
   .mode-tabs button:hover:not(.active) {
     background: var(--cream);
     border-color: color-mix(in srgb, var(--cta) 40%, var(--border));
+  }
+
+  .mode-tabs button.active:hover {
+    background: var(--cta-hover);
   }
 }
 
@@ -1057,14 +1061,14 @@ const garminFitGuidePath = () => garminFitPath(locale.value as AppLocale)
 .landing :deep(.hero-card .radius-slider)::-webkit-slider-runnable-track,
 .landing :deep(.hero-card .radius-row input[type='range'])::-webkit-slider-runnable-track {
   border-radius: var(--radius);
-  background: #d8d2c6;
+  background: var(--track);
   border: 1px solid var(--border);
 }
 
 .landing :deep(.hero-card .radius-slider)::-moz-range-track,
 .landing :deep(.hero-card .radius-row input[type='range'])::-moz-range-track {
   border-radius: var(--radius);
-  background: #d8d2c6;
+  background: var(--track);
   border: 1px solid var(--border);
 }
 
@@ -1093,7 +1097,7 @@ const garminFitGuidePath = () => garminFitPath(locale.value as AppLocale)
 }
 
 .landing :deep(.feedback) {
-  margin-top: 6.5rem;
+  margin-top: 3.5rem;
   border: 1px solid var(--border);
   border-radius: var(--radius);
   background: #fff;
@@ -1122,11 +1126,11 @@ const garminFitGuidePath = () => garminFitPath(locale.value as AppLocale)
 .guide-teaser,
 .updates-section,
 .faq-section {
-  margin-top: 6.5rem;
+  margin-top: 3.5rem;
 }
 
 .how-section {
-  margin-top: 6.25rem;
+  margin-top: 3.5rem;
 }
 
 .features-section h2,
@@ -1138,7 +1142,7 @@ const garminFitGuidePath = () => garminFitPath(locale.value as AppLocale)
   font-size: clamp(1.55rem, 2.8vw, 2.35rem);
   font-weight: 600;
   color: #111;
-  margin: 0 0 1.5rem;
+  margin: 0 0 1rem;
   letter-spacing: -0.02em;
   line-height: 1.05;
   text-transform: none;
@@ -1667,7 +1671,7 @@ const garminFitGuidePath = () => garminFitPath(locale.value as AppLocale)
 @media (max-width: 640px) {
   .hero-band,
   .hero {
-    min-height: min(46vh, 440px);
+    min-height: min(38vh, 380px);
   }
 
   .hero-band--app,
@@ -1717,7 +1721,7 @@ const garminFitGuidePath = () => garminFitPath(locale.value as AppLocale)
   .stats-bar {
     grid-template-columns: 1fr;
     margin-top: -1.75rem;
-    margin-bottom: 3.25rem;
+    margin-bottom: 1.35rem;
   }
 
   .mode-tabs button {
@@ -1735,7 +1739,7 @@ const garminFitGuidePath = () => garminFitPath(locale.value as AppLocale)
   .guide-teaser,
   .updates-section,
   .faq-section {
-    margin-top: 4.75rem;
+    margin-top: 2.75rem;
   }
 }
 </style>

@@ -320,7 +320,7 @@ defineExpose({ openMapFirst, searchNearby })
 .in-map .radius-row input[type='range']::-webkit-slider-runnable-track {
   height: 10px;
   border-radius: var(--radius);
-  background: #d8d2c6;
+  background: var(--track);
   border: 1px solid var(--border);
   box-sizing: border-box;
 }
@@ -329,7 +329,7 @@ defineExpose({ openMapFirst, searchNearby })
 .in-map .radius-row input[type='range']::-moz-range-track {
   height: 10px;
   border-radius: var(--radius);
-  background: #d8d2c6;
+  background: var(--track);
   border: 1px solid var(--border);
 }
 
@@ -482,7 +482,7 @@ defineExpose({ openMapFirst, searchNearby })
 .radius-row input[type='range']::-webkit-slider-runnable-track {
   height: 10px;
   border-radius: var(--radius);
-  background: #d8d2c6;
+  background: var(--track);
   border: 1px solid var(--border);
   box-sizing: border-box;
 }
@@ -491,7 +491,7 @@ defineExpose({ openMapFirst, searchNearby })
 .radius-row input[type='range']::-moz-range-track {
   height: 10px;
   border-radius: var(--radius);
-  background: #d8d2c6;
+  background: var(--track);
   border: 1px solid var(--border);
   box-sizing: border-box;
 }

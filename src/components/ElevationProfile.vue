@@ -829,7 +829,7 @@ onUnmounted(() => {
 }
 
 .gap-summary--ok {
-  color: #166534;
+  color: #111;
 }
 
 .select-hint {

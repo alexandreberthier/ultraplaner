@@ -128,23 +128,20 @@ async function downloadOrShare() {
   display: grid;
   place-items: center;
   padding: 1.5rem;
-  background:
-    radial-gradient(1200px 600px at 10% -10%, #d8f3ef 0%, transparent 55%),
-    radial-gradient(900px 500px at 100% 0%, #e8eef8 0%, transparent 50%),
-    #f6f8f7;
-  color: #0f172a;
+  background: var(--bg, #fff);
+  color: var(--text, #111);
 }
 
 .import-card {
   width: min(100%, 24rem);
-  background: rgba(255, 255, 255, 0.92);
-  border: 1px solid #e2e8f0;
+  background: #fff;
+  border: 1px solid var(--border, #e5e5e5);
   border-radius: var(--radius);
   padding: 1.35rem 1.25rem 1.4rem;
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.08);
+  box-shadow: none;
 }
 
 .brand {
@@ -172,22 +169,22 @@ h1 {
 
 .meta {
   font-size: 0.88rem;
-  color: #475569;
+  color: var(--text-muted, #6b6b6b);
 }
 
 .status {
   font-size: 0.95rem;
-  color: #334155;
+  color: var(--text, #111);
 }
 
 .hint {
   font-size: 0.8rem;
-  color: #64748b;
+  color: var(--text-muted, #6b6b6b);
 }
 
 .detail {
   font-size: 0.75rem;
-  color: #94a3b8;
+  color: var(--text-muted, #6b6b6b);
   word-break: break-word;
 }
 
@@ -198,9 +195,9 @@ h1 {
   font-weight: 700;
   padding: 0.8rem 0.95rem;
   cursor: pointer;
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--border, #e5e5e5);
   background: #fff;
-  color: #0f172a;
+  color: var(--text, #111);
 }
 
 .btn:disabled {
@@ -216,6 +213,6 @@ h1 {
 
 .btn.secondary {
   background: #fff;
-  color: #334155;
+  color: var(--text, #111);
 }
 </style>

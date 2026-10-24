@@ -2742,7 +2742,7 @@ function onDocClick(e: MouseEvent) {
 
   .ride-open--open {
     background: color-mix(in srgb, var(--primary) 18%, #fff);
-    color: var(--primary, #166534);
+    color: var(--primary, #111);
   }
 
   .ride-open--closed {
@@ -3422,7 +3422,7 @@ function onDocClick(e: MouseEvent) {
   margin: 0 0.7rem 0.65rem;
   font-size: 0.75rem;
   line-height: 1.4;
-  color: var(--primary-dark, #1d4ed8);
+  color: var(--primary-dark, #111);
   text-decoration: underline;
   text-underline-offset: 2px;
 }
@@ -3848,14 +3848,14 @@ function onDocClick(e: MouseEvent) {
 .sidebar :deep(.radius-slider)::-webkit-slider-runnable-track,
 .sidebar :deep(.radius-row input[type='range'])::-webkit-slider-runnable-track {
   border-radius: var(--radius);
-  background: #d8d2c6;
+  background: var(--track);
   border: 1px solid var(--border);
 }
 
 .sidebar :deep(.radius-slider)::-moz-range-track,
 .sidebar :deep(.radius-row input[type='range'])::-moz-range-track {
   border-radius: var(--radius);
-  background: #d8d2c6;
+  background: var(--track);
   border: 1px solid var(--border);
 }
 

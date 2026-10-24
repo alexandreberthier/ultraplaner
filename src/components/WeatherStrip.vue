@@ -195,7 +195,7 @@ watch(
 }
 
 .toggle-summary.has-rain {
-  color: #1d4ed8;
+  color: var(--text);
 }
 
 .chevron {
@@ -237,18 +237,18 @@ watch(
 }
 
 .weather-chip.rain-low {
-  border-color: #93c5fd;
-  background: #eff6ff;
+  border-color: var(--border);
+  background: var(--surface);
 }
 
 .weather-chip.rain-mid {
-  border-color: #60a5fa;
-  background: #dbeafe;
+  border-color: var(--track, #d4d4d4);
+  background: var(--surface-2);
 }
 
 .weather-chip.rain-high {
-  border-color: #2563eb;
-  background: #bfdbfe;
+  border-color: var(--danger);
+  background: #fff;
 }
 
 .weather-chip strong {
@@ -269,12 +269,12 @@ watch(
   font-size: 0.68rem;
   font-weight: 700;
   line-height: 1.2;
-  color: #1e40af;
+  color: var(--text);
 }
 
 .weather-rain.rain-high {
   font-size: 0.72rem;
-  color: #1e3a8a;
+  color: var(--danger);
 }
 
 .weather-detail,

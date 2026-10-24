@@ -26,6 +26,7 @@
   --radius: 6px;
   --shadow: none;
   --focus-ring: #111111;
+  --track: #d4d4d4;
 }
 
 html,
@@ -140,7 +141,7 @@ html.map-overlay-open .maplibregl-canvas-container {
 .radius-row input[type='range']::-webkit-slider-runnable-track {
   height: 8px;
   border-radius: var(--radius);
-  background: #d8d2c6;
+  background: var(--track);
   border: 1px solid var(--border);
   box-sizing: border-box;
 }
@@ -149,7 +150,7 @@ html.map-overlay-open .maplibregl-canvas-container {
 .radius-row input[type='range']::-moz-range-track {
   height: 8px;
   border-radius: var(--radius);
-  background: #d8d2c6;
+  background: var(--track);
   border: 1px solid var(--border);
   box-sizing: border-box;
 }
