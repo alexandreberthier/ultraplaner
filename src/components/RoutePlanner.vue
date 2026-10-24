@@ -345,14 +345,12 @@ function waypointDisplay(wp: Waypoint): string {
 function addWaypoint(lat: number, lng: number, label?: string) {
   waypoints.value.push({ id: `wp-${++waypointId}`, lat, lng, label })
   updateMapSources()
-  fitToContent()
   scheduleAutoRoute()
 }
 
 function removeWaypoint(id: string) {
   waypoints.value = waypoints.value.filter((w) => w.id !== id)
   updateMapSources()
-  fitToContent()
   scheduleAutoRoute()
 }
 
@@ -367,7 +365,6 @@ function clearAll() {
 function undoWaypoint() {
   waypoints.value.pop()
   updateMapSources()
-  fitToContent()
   scheduleAutoRoute()
 }
 
@@ -756,23 +753,6 @@ function updateRouteCursorMarker() {
 function onElevationCursor(cursor: RouteCursor | null) {
   routeCursor.value = cursor
   updateRouteCursorMarker()
-}
-
-function fitToContent() {
-  if (!map) return
-  const bounds = new maplibregl.LngLatBounds()
-  let has = false
-  for (const w of waypoints.value) {
-    bounds.extend([w.lng, w.lat])
-    has = true
-  }
-  for (const [lng, lat] of routeCoords.value) {
-    bounds.extend([lng, lat])
-    has = true
-  }
-  if (has) {
-    map.fitBounds(bounds, { padding: 48, maxZoom: 12, duration: 400 })
-  }
 }
 
 function addPlannerLayers() {
