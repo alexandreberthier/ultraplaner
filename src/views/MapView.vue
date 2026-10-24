@@ -1832,7 +1832,7 @@ function onDocClick(e: MouseEvent) {
 .map-header h1 {
   margin: 0;
   font-size: 1.02rem;
-  font-weight: 800;
+  font-weight: 600;
   line-height: 1.3;
   color: #111;
   overflow: hidden;
@@ -1906,7 +1906,7 @@ function onDocClick(e: MouseEvent) {
   color: var(--text);
   cursor: pointer;
   font-size: 0.82rem;
-  font-weight: 650;
+  font-weight: 500;
   line-height: 1.15;
   white-space: nowrap;
 }
@@ -1921,7 +1921,7 @@ function onDocClick(e: MouseEvent) {
   background: var(--cta);
   border-color: transparent;
   color: var(--cta-text);
-  font-weight: 700;
+  font-weight: 600;
   box-shadow: var(--shadow);
 }
 
@@ -1947,14 +1947,14 @@ function onDocClick(e: MouseEvent) {
 .toggle-chevron {
   font-size: 1.1rem;
   line-height: 1;
-  font-weight: 700;
+  font-weight: 600;
 }
 
 .export-toggle {
   background: var(--cta);
   border-color: transparent;
   color: var(--cta-text);
-  font-weight: 700;
+  font-weight: 600;
   box-shadow: var(--shadow);
 }
 
@@ -1966,7 +1966,7 @@ function onDocClick(e: MouseEvent) {
 }
 
 .export-toggle.active {
-  background: var(--primary);
+  background: var(--primary-dark);
   color: #fff;
   border-color: transparent;
 }
@@ -2004,7 +2004,7 @@ function onDocClick(e: MouseEvent) {
 
 .offline-banner.pack-ready-banner .offline-banner-text strong,
 .offline-banner.pack-active-banner .offline-banner-text strong {
-  color: var(--primary, #2d6a4f);
+  color: var(--primary);
 }
 
 .offline-banner-text span {
@@ -2093,7 +2093,7 @@ function onDocClick(e: MouseEvent) {
   border-radius: var(--radius);
   background: var(--cta);
   color: var(--cta-text);
-  font-weight: 700;
+  font-weight: 600;
   font-size: 0.85rem;
   cursor: pointer;
 }
@@ -2121,7 +2121,7 @@ function onDocClick(e: MouseEvent) {
   box-shadow: var(--shadow);
   cursor: pointer;
   font-size: 0.8rem;
-  font-weight: 800;
+  font-weight: 600;
   color: #111;
 }
 
@@ -2173,7 +2173,7 @@ function onDocClick(e: MouseEvent) {
   border: 1px solid var(--border);
   box-shadow: var(--shadow);
   font-size: 0.85rem;
-  font-weight: 700;
+  font-weight: 600;
   color: #111;
   pointer-events: none;
   white-space: nowrap;
@@ -2198,7 +2198,7 @@ function onDocClick(e: MouseEvent) {
   color: #111;
   font: inherit;
   font-size: 0.85rem;
-  font-weight: 800;
+  font-weight: 600;
   box-shadow: var(--shadow);
   cursor: pointer;
 }
@@ -2237,7 +2237,7 @@ function onDocClick(e: MouseEvent) {
   color: #111;
   font: inherit;
   font-size: 1.05rem;
-  font-weight: 700;
+  font-weight: 600;
   text-align: left;
   cursor: pointer;
 }
@@ -2275,7 +2275,7 @@ function onDocClick(e: MouseEvent) {
   color: #fff;
   font: inherit;
   font-size: 0.8rem;
-  font-weight: 700;
+  font-weight: 600;
   padding: 0.25rem 0.65rem;
   cursor: pointer;
   white-space: nowrap;
@@ -2311,17 +2311,17 @@ function onDocClick(e: MouseEvent) {
 }
 
 .tool-btn.ride-enter {
-  background: var(--cta);
-  color: var(--cta-text);
-  border-color: transparent;
-  font-weight: 700;
+  background: #fff;
+  color: var(--text);
+  border-color: var(--border);
+  font-weight: 600;
   box-shadow: var(--shadow);
 }
 
 .tool-btn.ride-enter.is-on {
-  background: var(--primary);
+  background: var(--cta);
   border-color: transparent;
-  color: #fff;
+  color: var(--cta-text);
   box-shadow: var(--shadow);
 }
 
@@ -2345,9 +2345,9 @@ function onDocClick(e: MouseEvent) {
   padding: 0.45rem 0.85rem;
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  background: var(--primary-dark);
-  color: #fff;
-  font-weight: 800;
+  background: var(--cta);
+  color: var(--cta-text);
+  font-weight: 600;
   font-size: 0.88rem;
   box-shadow: var(--shadow);
   cursor: pointer;
@@ -2390,7 +2390,7 @@ function onDocClick(e: MouseEvent) {
 .fav-hud-kind {
   flex-shrink: 0;
   font-size: 0.78rem;
-  font-weight: 800;
+  font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.03em;
   color: #92400e;
@@ -2454,7 +2454,7 @@ function onDocClick(e: MouseEvent) {
 .empty-map-card h1 {
   margin: 0 0 0.55rem;
   font-size: 1.35rem;
-  font-weight: 800;
+  font-weight: 600;
   color: #111;
 }
 
@@ -2476,7 +2476,7 @@ function onDocClick(e: MouseEvent) {
   color: var(--cta-text);
   font: inherit;
   font-size: 0.95rem;
-  font-weight: 700;
+  font-weight: 600;
   letter-spacing: normal;
   text-transform: none;
   cursor: pointer;
@@ -2582,7 +2582,7 @@ function onDocClick(e: MouseEvent) {
     background: var(--primary);
     color: #fff;
     border-color: var(--primary);
-    font-weight: 700;
+    font-weight: 600;
   }
 
   .map-toolbar.is-ride {
@@ -2631,7 +2631,7 @@ function onDocClick(e: MouseEvent) {
     border-radius: var(--radius);
     background: #fff;
     color: #111;
-    font-weight: 800;
+    font-weight: 600;
     font-size: 0.88rem;
     box-shadow: var(--shadow);
     cursor: pointer;
@@ -2655,7 +2655,7 @@ function onDocClick(e: MouseEvent) {
     border-radius: var(--radius);
     background: var(--cta);
     color: var(--cta-text);
-    font-weight: 800;
+    font-weight: 600;
     font-size: 0.88rem;
     box-shadow: var(--shadow);
     cursor: pointer;
@@ -2694,7 +2694,7 @@ function onDocClick(e: MouseEvent) {
     align-items: center;
     gap: 0.2rem;
     font-size: 0.72rem;
-    font-weight: 700;
+    font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.03em;
     color: #4b5563;
@@ -2703,10 +2703,10 @@ function onDocClick(e: MouseEvent) {
 
   .ride-primary-dist {
     font-size: 1.2rem;
-    font-weight: 800;
+    font-weight: 600;
     font-variant-numeric: tabular-nums;
     line-height: 1.1;
-    color: var(--primary, #2d6a4f);
+    color: var(--primary);
   }
 
   .ride-primary-name {
@@ -2726,14 +2726,14 @@ function onDocClick(e: MouseEvent) {
 
   .ride-eta {
     font-size: 0.88rem;
-    font-weight: 700;
+    font-weight: 600;
     font-variant-numeric: tabular-nums;
     color: #1f2937;
   }
 
   .ride-open {
     font-size: 0.72rem;
-    font-weight: 700;
+    font-weight: 600;
     padding: 0.12rem 0.4rem;
     border-radius: var(--radius);
     background: #e5e7eb;
@@ -2741,7 +2741,7 @@ function onDocClick(e: MouseEvent) {
   }
 
   .ride-open--open {
-    background: color-mix(in srgb, var(--primary, #2d6a4f) 18%, #fff);
+    background: color-mix(in srgb, var(--primary) 18%, #fff);
     color: var(--primary, #166534);
   }
 
@@ -2791,7 +2791,7 @@ function onDocClick(e: MouseEvent) {
   .ride-secondary-kind {
     flex-shrink: 0;
     font-size: 0.75rem;
-    font-weight: 800;
+    font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.03em;
     color: #92400e;
@@ -2894,7 +2894,7 @@ function onDocClick(e: MouseEvent) {
 
   .nav-label {
     font-size: 0.68rem;
-    font-weight: 800;
+    font-weight: 600;
     letter-spacing: 0.02em;
     text-transform: uppercase;
     color: #111;
@@ -2929,7 +2929,7 @@ function onDocClick(e: MouseEvent) {
     background: #be123c;
     color: #fff;
     font-size: 0.68rem;
-    font-weight: 800;
+    font-weight: 600;
     line-height: 1.15;
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
   }
@@ -2962,7 +2962,7 @@ function onDocClick(e: MouseEvent) {
     color: #111;
     font: inherit;
     font-size: 1.15rem;
-    font-weight: 700;
+    font-weight: 600;
     text-align: left;
     cursor: pointer;
   }
@@ -3075,7 +3075,7 @@ function onDocClick(e: MouseEvent) {
 
   .sheet-scroll :deep(.chevron) {
     font-size: 1.45rem;
-    font-weight: 800;
+    font-weight: 600;
     line-height: 1;
     color: #111;
     width: 1.75rem;
@@ -3450,20 +3450,25 @@ function onDocClick(e: MouseEvent) {
 }
 
 .export-item.featured {
-  background: var(--cta);
-  color: var(--cta-text);
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-left: 2px solid var(--cta);
+  border-radius: var(--radius);
+  margin: 0 0.15rem;
+  padding-left: calc(0.75rem - 1px);
 }
 
 .export-item.featured:hover {
-  background: var(--cta-hover);
-  color: var(--cta-text);
+  background: var(--cream);
+  color: var(--text);
 }
 
 .export-icon {
   flex-shrink: 0;
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   line-height: 1.4;
-  color: inherit;
+  color: var(--text-muted);
 }
 
 .export-text {
@@ -3476,20 +3481,20 @@ function onDocClick(e: MouseEvent) {
 .export-text strong {
   font-size: 0.88rem;
   color: inherit;
-  font-weight: 800;
+  font-weight: 600;
 }
 
 .export-text small {
-  font-size: 0.78rem;
-  color: #334155;
+  font-size: 0.76rem;
+  color: var(--text-muted);
   line-height: 1.35;
-  font-weight: 650;
+  font-weight: 400;
 }
 
 .export-item.featured .export-text small {
-  color: var(--cta-text);
-  opacity: 0.9;
-  font-weight: 700;
+  color: var(--text-muted);
+  opacity: 1;
+  font-weight: 400;
 }
 
 .export-divider {
@@ -3532,34 +3537,36 @@ function onDocClick(e: MouseEvent) {
 }
 
 .export-sheet-btn.featured {
-  background: var(--cta);
-  border-color: transparent;
-  color: var(--cta-text);
+  background: var(--surface);
+  border-color: var(--border);
+  border-left: 2px solid var(--cta);
+  color: var(--text);
 }
 
 .export-sheet-btn strong {
   display: block;
   color: inherit;
-  font-weight: 800;
+  font-weight: 600;
 }
 
 .export-sheet-btn small {
   display: block;
-  font-size: 0.78rem;
-  color: #334155;
+  font-size: 0.76rem;
+  color: var(--text-muted);
   margin-top: 0.1rem;
-  font-weight: 650;
+  font-weight: 400;
 }
 
 .export-sheet-btn.featured small {
-  color: var(--cta-text);
-  opacity: 0.9;
-  font-weight: 700;
+  color: var(--text-muted);
+  opacity: 1;
+  font-weight: 400;
 }
 
 .sheet-btn-icon {
-  font-size: 1.25rem;
+  font-size: 1.15rem;
   flex-shrink: 0;
+  color: var(--text-muted);
 }
 
 .export-sheet-btn:hover {
@@ -3567,8 +3574,8 @@ function onDocClick(e: MouseEvent) {
 }
 
 .export-sheet-btn.featured:hover {
-  background: var(--cta-hover);
-  color: var(--cta-text);
+  background: var(--cream);
+  color: var(--text);
 }
 
 .export-print-hint {
@@ -3593,14 +3600,14 @@ function onDocClick(e: MouseEvent) {
 
 .sidebar :deep(.toggle-title) {
   color: #111;
-  font-weight: 800;
+  font-weight: 600;
   font-size: 0.78rem;
 }
 
 .sidebar :deep(.toggle-summary),
 .sidebar :deep(.toggle-summary.has-rain) {
   color: #111;
-  font-weight: 700;
+  font-weight: 600;
   font-size: 0.82rem;
 }
 
@@ -3716,7 +3723,7 @@ function onDocClick(e: MouseEvent) {
   padding: 0.05rem 0.28rem;
   border: 1px solid var(--border);
   font-size: 0.65rem;
-  font-weight: 800;
+  font-weight: 600;
   letter-spacing: 0.03em;
   text-transform: uppercase;
   font-style: normal;
@@ -3772,7 +3779,7 @@ function onDocClick(e: MouseEvent) {
   background: var(--cta);
   border-color: transparent;
   color: var(--cta-text);
-  font-weight: 800;
+  font-weight: 600;
 }
 
 .sidebar :deep(.pack-btn.primary),
@@ -3782,7 +3789,7 @@ function onDocClick(e: MouseEvent) {
   background: var(--cta);
   color: var(--cta-text);
   box-shadow: var(--shadow);
-  font-weight: 800;
+  font-weight: 600;
   text-transform: uppercase;
 }
 
@@ -3821,7 +3828,7 @@ function onDocClick(e: MouseEvent) {
   border-radius: var(--radius);
   background: #fff;
   color: #111;
-  font-weight: 700;
+  font-weight: 600;
 }
 
 .sidebar :deep(.cat-chip.active) {
@@ -3885,13 +3892,13 @@ function onDocClick(e: MouseEvent) {
 .map-layout :deep(.elevation-profile .title) {
   color: #111;
   font-size: 1rem;
-  font-weight: 800;
+  font-weight: 600;
 }
 
 .map-layout :deep(.elevation-profile .subtitle) {
   color: #111;
   font-size: 0.9rem;
-  font-weight: 700;
+  font-weight: 600;
 }
 
 .map-layout :deep(.elevation-profile .chevron-wrap) {
@@ -3925,7 +3932,7 @@ function onDocClick(e: MouseEvent) {
   background: var(--cta);
   color: var(--cta-text);
   box-shadow: var(--shadow);
-  font-weight: 700;
+  font-weight: 600;
   text-transform: none;
 }
 

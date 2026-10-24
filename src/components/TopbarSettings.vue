@@ -193,7 +193,7 @@ onUnmounted(() => {
 .menu-icon {
   font-size: 1.4rem;
   line-height: 1;
-  font-weight: 700;
+  font-weight: 600;
 }
 
 @media (max-width: 720px) {
@@ -368,7 +368,7 @@ onUnmounted(() => {
   color: var(--text);
   font: inherit;
   font-size: 0.85rem;
-  font-weight: 700;
+  font-weight: 600;
   text-align: left;
   cursor: pointer;
 }
@@ -436,7 +436,7 @@ onUnmounted(() => {
   border-radius: var(--radius);
   background: var(--cta);
   color: var(--cta-text);
-  font-weight: 700;
+  font-weight: 600;
   text-transform: none;
   letter-spacing: normal;
   box-shadow: var(--shadow);

@@ -211,7 +211,7 @@ async function createMap() {
 .field-label,
 .categories legend {
   display: block;
-  font-weight: 800;
+  font-weight: 600;
   margin-bottom: 0.55rem;
   font-size: 0.78rem;
   letter-spacing: 0.06em;
@@ -267,7 +267,7 @@ async function createMap() {
 
 .drop-icon {
   font-size: 1.7rem;
-  font-weight: 800;
+  font-weight: 600;
   color: #111;
   line-height: 1;
   margin-bottom: 0.35rem;
@@ -276,7 +276,7 @@ async function createMap() {
 .drop-title {
   margin: 0;
   font-size: 1.05rem;
-  font-weight: 800;
+  font-weight: 600;
   color: #111;
   line-height: 1.3;
 }
@@ -301,13 +301,13 @@ async function createMap() {
   background: var(--cta);
   color: var(--cta-text);
   font-size: 1.1rem;
-  font-weight: 800;
+  font-weight: 600;
 }
 
 .drop-status {
   margin: 0;
   font-size: 0.72rem;
-  font-weight: 800;
+  font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: #111;
@@ -317,7 +317,7 @@ async function createMap() {
   margin: 0.25rem 0 0;
   max-width: 100%;
   font-size: 1.08rem;
-  font-weight: 800;
+  font-weight: 600;
   color: #111;
   word-break: break-word;
   line-height: 1.3;
@@ -433,7 +433,7 @@ async function createMap() {
   background: #fff;
   color: #111;
   box-shadow: none;
-  font-weight: 800;
+  font-weight: 600;
 }
 
 .categories {
@@ -460,7 +460,7 @@ async function createMap() {
   color: #111;
   cursor: pointer;
   font-size: 0.88rem;
-  font-weight: 700;
+  font-weight: 600;
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -479,7 +479,7 @@ async function createMap() {
   background: var(--cta);
   color: var(--cta-text);
   border-color: transparent;
-  font-weight: 800;
+  font-weight: 600;
 }
 
 @media (min-width: 769px) {
@@ -517,7 +517,7 @@ async function createMap() {
   background: #fff;
   color: #9f1239;
   font-size: 0.9rem;
-  font-weight: 700;
+  font-weight: 600;
 }
 
 .btn-primary {
@@ -527,7 +527,7 @@ async function createMap() {
   border: 1px solid transparent;
   border-radius: var(--radius);
   box-shadow: var(--shadow);
-  font-weight: 700;
+  font-weight: 600;
   font-size: 0.92rem;
   letter-spacing: normal;
   text-transform: none;

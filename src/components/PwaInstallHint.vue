@@ -94,7 +94,7 @@ function onMenuClick() {
 }
 
 .pwa-install-btn:hover:not(:disabled) {
-  border-color: color-mix(in srgb, var(--primary, #2d6a4f) 45%, var(--border, #e5e7eb));
+  border-color: color-mix(in srgb, var(--primary) 45%, var(--border, #e5e7eb));
   background: var(--surface, #fff);
 }
 
@@ -172,7 +172,7 @@ function onMenuClick() {
 
 .pwa-guide-cta {
   border: none;
-  background: var(--primary, #2d6a4f);
+  background: var(--primary);
   color: #fff;
   margin-bottom: 0.45rem;
 }

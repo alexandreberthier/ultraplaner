@@ -707,7 +707,7 @@ dd {
   font-size: 1.15rem;
   font-weight: 800;
   font-variant-numeric: tabular-nums;
-  color: var(--primary, #2d6a4f);
+  color: var(--primary);
 }
 
 .ride-open {
@@ -720,7 +720,7 @@ dd {
 }
 
 .ride-open--open {
-  background: color-mix(in srgb, var(--primary, #2d6a4f) 22%, #fff);
+  background: color-mix(in srgb, var(--primary) 22%, #fff);
 }
 
 .ride-open--closed {
@@ -780,7 +780,7 @@ dd {
   width: 44px;
   min-height: 44px;
   border: 1px solid transparent;
-  background: var(--cta, #2d6a4f);
+  background: var(--cta);
   color: var(--cta-text, #fff);
   font-size: 1.25rem;
   cursor: pointer;

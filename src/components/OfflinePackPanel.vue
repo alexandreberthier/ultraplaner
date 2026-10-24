@@ -258,7 +258,7 @@ defineExpose({ refresh, meta })
 }
 
 .toggle-summary.is-ready {
-  color: var(--primary, #2d6a4f);
+  color: var(--primary);
 }
 
 .chevron {
@@ -302,8 +302,8 @@ defineExpose({ refresh, meta })
   gap: 0.15rem;
   padding: 0.55rem 0.65rem;
   border-radius: var(--radius);
-  background: color-mix(in srgb, var(--primary, #2d6a4f) 10%, transparent);
-  border: 1px solid color-mix(in srgb, var(--primary, #2d6a4f) 28%, transparent);
+  background: color-mix(in srgb, var(--primary) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--primary) 28%, transparent);
   font-size: 0.75rem;
   line-height: 1.35;
   color: var(--text, #111);
@@ -311,7 +311,7 @@ defineExpose({ refresh, meta })
 
 .pack-status strong {
   font-size: 0.8rem;
-  color: var(--primary, #2d6a4f);
+  color: var(--primary);
 }
 
 .pack-cap {
@@ -335,7 +335,7 @@ defineExpose({ refresh, meta })
 .pack-progress-bar {
   height: 6px;
   border-radius: var(--radius);
-  background: var(--primary, #2d6a4f);
+  background: var(--primary);
   max-width: 100%;
 }
 
@@ -359,8 +359,8 @@ defineExpose({ refresh, meta })
 }
 
 .pack-btn.primary {
-  background: var(--primary, #2d6a4f);
-  border-color: var(--primary, #2d6a4f);
+  background: var(--primary);
+  border-color: var(--primary);
   color: #fff;
 }
 

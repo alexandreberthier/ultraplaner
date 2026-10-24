@@ -233,7 +233,7 @@ function nudgeMinute(delta: number) {
 
 .toggle-title {
   font-size: 0.72rem;
-  font-weight: 700;
+  font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.04em;
   color: var(--text-muted);
@@ -244,7 +244,7 @@ function nudgeMinute(delta: number) {
   flex: 1;
   min-width: 0;
   font-size: 0.8rem;
-  font-weight: 700;
+  font-weight: 600;
   color: var(--text);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -254,7 +254,7 @@ function nudgeMinute(delta: number) {
 .chevron {
   color: var(--text);
   font-size: 1.15rem;
-  font-weight: 800;
+  font-weight: 600;
   flex-shrink: 0;
   width: 1.5rem;
   text-align: center;
@@ -292,7 +292,7 @@ function nudgeMinute(delta: number) {
 
 .field-label {
   font-size: 0.8rem;
-  font-weight: 800;
+  font-weight: 600;
   color: #111;
   text-transform: uppercase;
   letter-spacing: 0.03em;
@@ -320,7 +320,7 @@ function nudgeMinute(delta: number) {
   border-radius: var(--radius);
   background: transparent;
   font-size: 1rem;
-  font-weight: 800;
+  font-weight: 600;
   color: #111;
   text-align: center;
   font-variant-numeric: tabular-nums;
@@ -336,7 +336,7 @@ function nudgeMinute(delta: number) {
 .unit {
   font-size: 0.78rem;
   color: #111;
-  font-weight: 800;
+  font-weight: 600;
   opacity: 0.7;
 }
 
@@ -364,7 +364,7 @@ function nudgeMinute(delta: number) {
   color: #111;
   font: inherit;
   font-size: 1.35rem;
-  font-weight: 800;
+  font-weight: 600;
   line-height: 1;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
@@ -393,7 +393,7 @@ function nudgeMinute(delta: number) {
   background: #fff;
   color: #111;
   font-size: 1.25rem;
-  font-weight: 800;
+  font-weight: 600;
   font-variant-numeric: tabular-nums;
   text-align: center;
   cursor: pointer;
@@ -402,7 +402,7 @@ function nudgeMinute(delta: number) {
 }
 
 .time-sep {
-  font-weight: 800;
+  font-weight: 600;
   font-size: 1.35rem;
   color: #111;
   padding: 0 0.05rem;
@@ -430,7 +430,7 @@ function nudgeMinute(delta: number) {
   align-items: flex-start;
   gap: 0.55rem;
   font-size: 0.9rem;
-  font-weight: 700;
+  font-weight: 600;
   cursor: pointer;
   line-height: 1.35;
   color: #111;
@@ -462,7 +462,7 @@ function nudgeMinute(delta: number) {
   border-radius: var(--radius);
   background: #fff;
   font-size: 0.9rem;
-  font-weight: 700;
+  font-weight: 600;
   cursor: pointer;
   box-shadow: var(--shadow);
 }

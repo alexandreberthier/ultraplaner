@@ -304,7 +304,7 @@ defineExpose({ openMapFirst, searchNearby })
 .in-map .field-label,
 .in-map .categories legend {
   font-size: 0.75rem;
-  font-weight: 800;
+  font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: #111;
@@ -365,7 +365,7 @@ defineExpose({ openMapFirst, searchNearby })
   background: #fff;
   color: #111;
   box-shadow: none;
-  font-weight: 800;
+  font-weight: 600;
 }
 
 .in-map .cat-chip {
@@ -377,14 +377,14 @@ defineExpose({ openMapFirst, searchNearby })
   border: 1px solid var(--border);
   background: #fff;
   color: #111;
-  font-weight: 700;
+  font-weight: 600;
 }
 
 .in-map .cat-chip.active {
   background: var(--cta);
   color: var(--cta-text);
   border-color: transparent;
-  font-weight: 800;
+  font-weight: 600;
 }
 
 .in-map .btn-primary {
@@ -579,7 +579,7 @@ defineExpose({ openMapFirst, searchNearby })
   justify-content: center;
   text-align: center;
   white-space: nowrap;
-  font-weight: 800;
+  font-weight: 600;
   font-variant-numeric: tabular-nums;
   font-feature-settings: 'tnum' 1;
   font-size: 0.95rem;
@@ -660,7 +660,7 @@ defineExpose({ openMapFirst, searchNearby })
   border: 1px solid transparent;
   border-radius: var(--radius);
   box-shadow: var(--shadow);
-  font-weight: 700;
+  font-weight: 600;
   font-size: 0.92rem;
   letter-spacing: normal;
   text-transform: none;

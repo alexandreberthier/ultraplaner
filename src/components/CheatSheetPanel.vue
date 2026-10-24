@@ -366,8 +366,8 @@ function onPrint() {
 }
 
 .btn-primary {
-  border: 1px solid var(--primary, #2d6a4f);
-  background: var(--primary, #2d6a4f);
+  border: 1px solid var(--primary);
+  background: var(--primary);
   color: #fff;
 }
 

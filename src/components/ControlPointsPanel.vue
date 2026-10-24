@@ -179,8 +179,8 @@ function kindEmoji(kind: ControlPointKind) {
 }
 
 .kind-btn.active {
-  background: var(--primary, #2d6a4f);
-  border-color: var(--primary, #2d6a4f);
+  background: var(--primary);
+  border-color: var(--primary);
   color: #fff;
 }
 
@@ -190,7 +190,7 @@ function kindEmoji(kind: ControlPointKind) {
   gap: 0.35rem;
   align-items: center;
   margin-top: 0.45rem;
-  color: var(--primary, #2d6a4f);
+  color: var(--primary);
   font-weight: 600;
 }
 

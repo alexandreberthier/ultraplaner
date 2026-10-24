@@ -1439,7 +1439,7 @@ function addLayers() {
     source: 'nearby-radius',
     layout: { visibility: nearbyVis },
     paint: {
-      'fill-color': '#2d6a4f',
+      'fill-color': '#111111',
       'fill-opacity': 0.08,
     },
   })
@@ -1450,7 +1450,7 @@ function addLayers() {
     source: 'nearby-radius',
     layout: { visibility: nearbyVis },
     paint: {
-      'line-color': '#2d6a4f',
+      'line-color': '#111111',
       'line-width': 2,
       'line-opacity': 0.55,
       'line-dasharray': [2, 1.5],
@@ -1464,7 +1464,7 @@ function addLayers() {
     layout: { visibility: nearbyVis },
     paint: {
       'circle-radius': 7,
-      'circle-color': '#2d6a4f',
+      'circle-color': '#111111',
       'circle-stroke-width': 2.5,
       'circle-stroke-color': '#fff',
     },
@@ -1784,7 +1784,7 @@ function addLayers() {
     source: 'route-cursor',
     paint: {
       'circle-radius': 14,
-      'circle-color': '#2d6a4f',
+      'circle-color': '#111111',
       'circle-opacity': 0.12,
     },
   })
@@ -1795,7 +1795,7 @@ function addLayers() {
     source: 'route-cursor',
     paint: {
       'circle-radius': 7,
-      'circle-color': '#2d6a4f',
+      'circle-color': '#111111',
       'circle-stroke-width': 1.5,
       'circle-stroke-color': '#fff',
       'circle-opacity': 0.75,
@@ -2193,7 +2193,7 @@ onUnmounted(() => {
   background: transparent;
   padding: 0.4rem 0.65rem;
   font-size: 0.75rem;
-  font-weight: 700;
+  font-weight: 500;
   color: #111;
   cursor: pointer;
 }
@@ -2205,6 +2205,7 @@ onUnmounted(() => {
 .route-color-toggle button.active {
   background: var(--cta);
   color: var(--cta-text);
+  font-weight: 600;
 }
 
 .route-color-toggle button:disabled {
@@ -2218,7 +2219,7 @@ onUnmounted(() => {
   background: transparent;
   padding: 0.45rem 0.7rem;
   font-size: 0.78rem;
-  font-weight: 700;
+  font-weight: 500;
   color: #111;
   cursor: pointer;
 }
@@ -2230,6 +2231,7 @@ onUnmounted(() => {
 .basemap-toggle button.active {
   background: var(--cta);
   color: var(--cta-text);
+  font-weight: 600;
 }
 
 .basemap-fallback {
@@ -2310,7 +2312,7 @@ onUnmounted(() => {
 
 .location-btn.following,
 .location-btn.heading-up {
-  background: var(--cta, #2d6a4f);
+  background: var(--cta);
   color: var(--cta-text, #fff);
 }
 

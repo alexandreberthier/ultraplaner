@@ -514,7 +514,7 @@ const garminFitGuidePath = () => garminFitPath(locale.value as AppLocale)
   border-radius: var(--radius);
   background: var(--primary);
   color: #fff;
-  font-weight: 700;
+  font-weight: 600;
   text-decoration: none;
   transform: translateY(-150%);
   transition: transform 0.15s ease;
@@ -776,7 +776,7 @@ const garminFitGuidePath = () => garminFitPath(locale.value as AppLocale)
 .hero-title {
   font-family: var(--display);
   font-size: clamp(2rem, 5.4vw, 3.6rem);
-  font-weight: 750;
+  font-weight: 600;
   color: #fff;
   margin: 0 0 0.7rem;
   line-height: 1.02;
@@ -820,7 +820,7 @@ const garminFitGuidePath = () => garminFitPath(locale.value as AppLocale)
   border-radius: var(--radius);
   padding: 0.8rem 1.25rem;
   font-size: 0.95rem;
-  font-weight: 700;
+  font-weight: 600;
   letter-spacing: normal;
   text-transform: none;
   cursor: pointer;
@@ -880,7 +880,7 @@ const garminFitGuidePath = () => garminFitPath(locale.value as AppLocale)
 .stat strong {
   font-family: var(--display);
   font-size: clamp(1.05rem, 2vw, 1.4rem);
-  font-weight: 750;
+  font-weight: 600;
   letter-spacing: -0.02em;
   line-height: 1.15;
   color: inherit;
@@ -913,7 +913,7 @@ const garminFitGuidePath = () => garminFitPath(locale.value as AppLocale)
   margin: 0;
   font-family: var(--display);
   font-size: clamp(1.55rem, 2.8vw, 2.35rem);
-  font-weight: 750;
+  font-weight: 600;
   letter-spacing: -0.02em;
   line-height: 1.05;
   text-transform: none;
@@ -967,7 +967,7 @@ const garminFitGuidePath = () => garminFitPath(locale.value as AppLocale)
   color: var(--text);
   border-color: var(--border);
   box-shadow: var(--shadow);
-  font-weight: 700;
+  font-weight: 600;
 }
 
 @media (hover: hover) {
@@ -994,7 +994,7 @@ const garminFitGuidePath = () => garminFitPath(locale.value as AppLocale)
   padding: 0.85rem 0.2rem;
   color: #111;
   font-size: 0.95rem;
-  font-weight: 700;
+  font-weight: 600;
 }
 
 .landing :deep(.menu-btn) {
@@ -1006,7 +1006,7 @@ const garminFitGuidePath = () => garminFitPath(locale.value as AppLocale)
 
 .landing :deep(.hero-card .field-label),
 .landing :deep(.hero-card legend) {
-  font-weight: 800;
+  font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   font-size: 0.78rem;
@@ -1018,7 +1018,7 @@ const garminFitGuidePath = () => garminFitPath(locale.value as AppLocale)
   border-radius: var(--radius);
   background: #fff;
   color: #111;
-  font-weight: 700;
+  font-weight: 600;
 }
 
 .landing :deep(.hero-card .cat-chip.active) {
@@ -1034,7 +1034,7 @@ const garminFitGuidePath = () => garminFitPath(locale.value as AppLocale)
   background: var(--cta);
   color: var(--cta-text);
   box-shadow: var(--shadow);
-  font-weight: 700;
+  font-weight: 600;
   text-transform: none;
   letter-spacing: normal;
 }
@@ -1102,7 +1102,7 @@ const garminFitGuidePath = () => garminFitPath(locale.value as AppLocale)
 
 .landing :deep(.feedback h2) {
   font-family: var(--display);
-  font-weight: 750;
+  font-weight: 600;
   text-transform: none;
   letter-spacing: -0.02em;
   color: #111;
@@ -1136,7 +1136,7 @@ const garminFitGuidePath = () => garminFitPath(locale.value as AppLocale)
 .faq-section h2 {
   font-family: var(--display);
   font-size: clamp(1.55rem, 2.8vw, 2.35rem);
-  font-weight: 750;
+  font-weight: 600;
   color: #111;
   margin: 0 0 1.5rem;
   letter-spacing: -0.02em;
@@ -1155,7 +1155,7 @@ const garminFitGuidePath = () => garminFitPath(locale.value as AppLocale)
 
 .guide-teaser-link {
   display: inline-block;
-  font-weight: 700;
+  font-weight: 600;
   color: var(--cta-text);
   text-transform: none;
   letter-spacing: normal;
@@ -1175,7 +1175,7 @@ const garminFitGuidePath = () => garminFitPath(locale.value as AppLocale)
 
 .guide-teaser-more a {
   color: #111;
-  font-weight: 700;
+  font-weight: 600;
   text-decoration-thickness: 2px;
   text-underline-offset: 2px;
 }
@@ -1226,7 +1226,7 @@ const garminFitGuidePath = () => garminFitPath(locale.value as AppLocale)
 .updates-tag {
   flex: 0 0 auto;
   font-size: 0.7rem;
-  font-weight: 700;
+  font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
   color: var(--cta-text);
@@ -1316,7 +1316,7 @@ const garminFitGuidePath = () => garminFitPath(locale.value as AppLocale)
 .feature-card strong {
   display: block;
   font-size: 1.05rem;
-  font-weight: 750;
+  font-weight: 600;
   letter-spacing: -0.02em;
   line-height: 1.15;
   margin-bottom: 0;
@@ -1353,7 +1353,7 @@ const garminFitGuidePath = () => garminFitPath(locale.value as AppLocale)
   background: none;
   color: #111;
   font-family: var(--display);
-  font-weight: 800;
+  font-weight: 600;
   font-size: clamp(2.1rem, 4vw, 3.2rem);
   line-height: 0.9;
   display: block;
@@ -1363,7 +1363,7 @@ const garminFitGuidePath = () => garminFitPath(locale.value as AppLocale)
 .step strong {
   display: block;
   font-size: 1.05rem;
-  font-weight: 750;
+  font-weight: 600;
   text-transform: none;
   margin-bottom: 0.15rem;
   letter-spacing: -0.02em;
@@ -1414,7 +1414,7 @@ const garminFitGuidePath = () => garminFitPath(locale.value as AppLocale)
   cursor: pointer;
   text-align: left;
   font-size: 1rem;
-  font-weight: 800;
+  font-weight: 600;
   color: #111;
 }
 
@@ -1435,7 +1435,7 @@ const garminFitGuidePath = () => garminFitPath(locale.value as AppLocale)
   transform: rotate(0deg);
   transition: transform 0.15s;
   flex-shrink: 0;
-  font-weight: 800;
+  font-weight: 600;
 }
 
 .faq-chevron.open {
@@ -1529,7 +1529,7 @@ const garminFitGuidePath = () => garminFitPath(locale.value as AppLocale)
   border-radius: var(--radius);
   padding: 0.55rem 0.85rem;
   font-size: 0.88rem;
-  font-weight: 700;
+  font-weight: 600;
   color: var(--cta-text);
   cursor: pointer;
   white-space: nowrap;
@@ -1561,7 +1561,7 @@ const garminFitGuidePath = () => garminFitPath(locale.value as AppLocale)
   border-radius: var(--radius);
   padding: 0.55rem 0.85rem;
   font-size: 0.88rem;
-  font-weight: 700;
+  font-weight: 600;
   color: var(--cta-text);
   cursor: pointer;
   white-space: nowrap;

@@ -915,7 +915,7 @@ function addPlannerLayers() {
     filter: ['==', ['get', 'role'], 'mid'],
     paint: {
       'circle-radius': 7,
-      'circle-color': '#1b4332',
+      'circle-color': '#111111',
       'circle-stroke-width': 2,
       'circle-stroke-color': '#ffffff',
     },
@@ -935,7 +935,7 @@ function addPlannerLayers() {
     },
     paint: {
       'text-color': '#ffffff',
-      'text-halo-color': '#1b4332',
+      'text-halo-color': '#111111',
       'text-halo-width': 0.8,
     },
   })
@@ -2179,7 +2179,7 @@ onUnmounted(() => {
   text-align: left;
   font: inherit;
   color: #111;
-  font-weight: 700;
+  font-weight: 500;
 }
 
 .export-item:disabled {
@@ -2192,8 +2192,9 @@ onUnmounted(() => {
 }
 
 .export-icon {
-  font-weight: 800;
+  font-weight: 500;
   font-size: 1rem;
+  color: var(--text-muted);
 }
 
 .export-text {

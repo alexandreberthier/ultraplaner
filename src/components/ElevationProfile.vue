@@ -578,7 +578,7 @@ onUnmounted(() => {
                 <path :d="plotClip" />
               </clipPath>
               <filter id="cursor-glow" x="-50%" y="-50%" width="200%" height="200%">
-                <feDropShadow dx="0" dy="0" stdDeviation="2" flood-color="#2d6a4f" flood-opacity="0.55" />
+                <feDropShadow dx="0" dy="0" stdDeviation="2" flood-color="#111111" flood-opacity="0.55" />
               </filter>
             </defs>
 

@@ -271,7 +271,7 @@ onUnmounted(() => {
   background: var(--cta);
   color: var(--cta-text);
   font-size: 0.72rem;
-  font-weight: 700;
+  font-weight: 600;
   line-height: 1;
 }
 
@@ -363,7 +363,7 @@ onUnmounted(() => {
 .recent-panel-head strong {
   display: block;
   font-size: 0.92rem;
-  font-weight: 800;
+  font-weight: 600;
   color: #111;
 }
 
@@ -430,7 +430,7 @@ onUnmounted(() => {
   display: block;
   min-width: 0;
   font-size: 0.9rem;
-  font-weight: 800;
+  font-weight: 600;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -444,7 +444,7 @@ onUnmounted(() => {
   background: var(--primary);
   color: #fff;
   font-size: 0.62rem;
-  font-weight: 700;
+  font-weight: 600;
   letter-spacing: 0.02em;
   text-transform: none;
   line-height: 1.2;
@@ -473,7 +473,7 @@ onUnmounted(() => {
   font-size: 1.25rem;
   line-height: 1;
   cursor: pointer;
-  font-weight: 800;
+  font-weight: 600;
 }
 
 .recent-panel-remove:hover {
